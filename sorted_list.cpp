@@ -107,7 +107,7 @@ void linkedList(std::vector<std::vector<std::vector<Cell>>>& cell_grid, const in
                 if (!cell_grid[m][n][p].isParticleListEmpty()){
 
                     // Iteration over all particles inside specific cell
-                    for (size_t i = 0; i < cell_grid[m][n][p].contained_particle.size(); ++i) {
+                    for (unsigned i = 0; i < cell_grid[m][n][p].contained_particle.size(); ++i) {
                         
                         const Particle& particle = cell_grid[m][n][p].contained_particle[i]; // Access the i-th particle
 
