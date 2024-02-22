@@ -62,9 +62,9 @@ void linkedList(vector<vector<vector<double>>> &domain, vector<double> &particle
 
    
     // Find neighbours for each particle
-    for (unsigned x =0; x <= particle_x.size(); x++){
-        for (unsigned y =0; y <= particle_y.size(); y++){
-            for (unsigned z =0; z <= particle_z.size(); z++){
+    for (unsigned x = 0; x <= particle_x.size(); x++){
+        for (unsigned y = 0; y <= particle_y.size(); y++){
+            for (unsigned z = 0; z <= particle_z.size(); z++){
 
                 Triplet triplet(particle_x[x], particle_y[y], particle_z[z]); // triplet index (x,y,z) for a given particle
                 vector<Triplet> associated_list_triplet; // list of neighbours for this given particle in (x,y,z)
@@ -97,12 +97,12 @@ void linkedList(vector<vector<vector<double>>> &domain, vector<double> &particle
                                 }
                             }
 
-                            // Then, one knows the correct neighbours' indices in (i,j,k) cell
+                            // Then, one knows the neighbours' indices in (i,j,k) cell
                             for (unsigned val_i = 0, val_j = 0, val_k = 0; val_i < idx_i.size(), val_j < idx_j.size(), val_k < idx_k.size(); val_i++, val_j++, val_k++){
                                 associated_list_triplet.push_back(Triplet(particle_x[idx_i[val_i]], particle_y[idx_j[val_j]], particle_z[idx_k[val_k]]));
                             }
 
-                            // For a given particle (x,y,z), add a list of triplet cordinates that give the neighbours cordinates
+                            // For a given particle (x,y,z), add a list of triplet cordinates that gives the neighbours cordinates
                             neighbours_list.push_back((make_tuple(triplet, associated_list_triplet)));
 
                             idx_i.clear();
