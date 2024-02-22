@@ -2,6 +2,10 @@
 #include <string.h>
 #include <vector>
 #include "sorted_list.cpp"
+#include <list>
+
+using namespace std;
+
 
 int main() {
 
@@ -33,22 +37,27 @@ int main() {
 
     unsigned seed = 42;
 
-    std::vector<std::vector<std::vector<double>>> domain(elem_x, std::vector<std::vector<double>>(elem_y, std::vector<double>(elem_z))); // Grid initialisation
+    // Grid initialisation
+    vector<vector<vector<double>>> domain(elem_x, vector<vector<double>>(elem_y, vector<double>(elem_z))); 
 
     // Location array for particles
-    std::vector<double> particle_x; // x-location 
-    std::vector<double> particle_y; // y-location
-    std::vector<double> particle_z; // z-location 
+    vector<double> particle_x; // x-direction
+    vector<double> particle_y; // y-direction
+    vector<double> particle_z; // z-direction 
 
-    // List of neighbors for each particle
-    std::vector<std::tuple<double, double, double>> neighbor_list;
+    // cell's index for particles
+    vector<unsigned> particle_i; // x-direction 
+    vector<unsigned> particle_j; // y-direction
+    vector<unsigned> particle_k; // z-direction
 
+    // Location matrix for neighbours
+    vector<tuple<Triplet, vector<Triplet>>> neighbours_list;
 
     // Initialise random particles in the domain
     setRandomParticles(seed, domain, nb_particles, Lx, Ly, Lz, particle_x, particle_y, particle_z);
 
     // Apply the linked-list algorithm
-    linkedList(domain, particle_x, particle_y, particle_z, neighbor_list, Nx, Ny, Nz);
+    linkedList(domain, particle_x, particle_y, particle_z, particle_i, particle_j, particle_k, neighbours_list, Lx, Ly, Lz, Nx, Ny, Nz);
 
 
 }
