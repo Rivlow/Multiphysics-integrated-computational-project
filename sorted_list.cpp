@@ -3,122 +3,118 @@
 #include <vector>
 #include <array>
 #include<cstdlib>
+#include <random>
+#include <list>
+#include <unordered_map>
+
+using namespace std;
 
 
-struct Particle {
-    int x,y,z; // particule location (global)
-    int m,n,p; // cell index (local)
-    double dx, dy, dz;
-    std::vector<Particle> neighbor_list;
-    double val_kernel;
-};
+// Définition de la structure pour représenter un triplet de valeurs doubles
+struct Triplet {
+    double x;
+    double y;
+    double z;
 
-
-
-struct Cell {
-    int m, n, p;
-    double cell_nb_x, cell_nb_y, cell_nb_z;
-    std::vector<Particle> contained_particle;
-
-    bool isParticleListEmpty() const {
-        return contained_particle.empty();
-    }
+    // Constructeur
+    Triplet(double x_val, double y_val, double z_val) : x(x_val), y(y_val), z(z_val) {}
 };
 
 
 // Attention !! s'assurer que rand ne renvoie jamais les mêmes indices !! sinon conflit TO DO !
-void setRandomParticles(std::vector<std::vector<std::vector<Particle>>>& particule_grid, std::vector<std::vector<std::vector<Cell>>>& cell_grid, const int &cell_nb_x, const int &cell_nb_y, const int &cell_nb_z, const int &nb_particles, std::vector<Particle>& particles_array){
+void setRandomParticles(const unsigned &seed, vector<vector<vector<double>>> &particule_grid, const int &nb_particles, const double &Lx, const double &Ly, const double &Lz, vector<double> &particle_x, vector<double> &particle_y, vector<double> &particle_z){
 
-    // For each particle, create an object "Particle" and assign/store a random index x,y,z to it
-    for (int i = 0; i < nb_particles; i++){
+    
+    // Uniform distribution 
+    mt19937 gen(seed);
+    uniform_real_distribution<double> dis_x(0.0, Lx); 
+    uniform_real_distribution<double> dis_y(0.0, Ly); 
+    uniform_real_distribution<double> dis_z(0.0, Lz); 
 
-        Particle particle;
-        particle.x = int(rand() % particule_grid.size());
-        particle.y = int(rand() % particule_grid[0].size());
-        particle.z = int(rand() % particule_grid[0][0].size());
+    for (int i = 0; i < nb_particles; ++i) {
+        
+        double x = dis_x(gen); 
+        double y = dis_y(gen); 
+        double z = dis_z(gen); 
 
-        particule_grid[particle.x][particle.y][particle.z] = particle;
-        cell_grid[particle.x/cell_nb_x][particle.y/cell_nb_y][particle.z/cell_nb_z].contained_particle.push_back(particle);
-
+        particle_x.push_back(x); 
+        particle_y.push_back(y); 
+        particle_z.push_back(z); 
     }
 }
 
-void sliceDomainIntoCells(std::vector<std::vector<std::vector<Particle>>>& particle_grid, const double &k, const double &h, std::vector<Particle>& particles,int &cell_nb_x, int &cell_nb_y, int &cell_nb_z){ // attention !! k,h peut etre changer en int ou float si besoin
 
-    // Set constant "seed" to generate same results at each call (only used during implementation -> will be removed later)
-    std::srand(0);
-
-    int step = k*h; // est ce que k*h peut etre un double ?? a check
-
-    /*---------------------------------------------------------------------------*/
-    /* Determine the number of cells in each dimension and the size of each cell */
-    /*---------------------------------------------------------------------------*/
-
-    int len_x =  particle_grid.size(); // First dimension
-    int len_y =  particle_grid[0].size(); // Second dimension
-    int len_z = particle_grid[0][0].size(); // Third dimension
-
-    int remainder_x = len_x % step;
-    int remainder_y = len_y % step;
-    int remainder_z = len_z % step;
-
-    // Determine the number of cells in each dimension
-    int cell_nb_x = (len_x - remainder_x)/step;
-    int cell_nb_y = (len_y - remainder_y)/step;
-    int cell_nb_z = (len_z - remainder_z)/step;
-
-    // Determine the size of each cell in each dimension
-    double cell_size_x_val = step + remainder_x/cell_nb_x;
-    double cell_size_y_val = step + remainder_y/cell_nb_y;
-    double cell_size_z_val = step + remainder_z/cell_nb_z;
-
-    cell_nb_x = cell_size_x_val;
-    cell_nb_y = cell_size_y_val;
-    cell_nb_z = cell_size_z_val;
-}
-
-/*
-void assignParticleToCell(std::vector<std::vector<std::vector<Cell>>>& cell_grid, const int &cell_nb_x, const int &cell_nb_y, const int &cell_nb_z){
-
-    for (auto& particle : particles){ // "auto" is a c++ type that automatically determine the type (useful for object)
-
-        int cell_index_x = particle.x / cell_size_x_val;
-        int cell_index_y = particle.y / cell_size_y_val;
-        int cell_index_z = particle.z / cell_size_z_val;
-
-        Cell cellule;
-        cellule.m = cell_index_x;
-        cellule.n = cell_index_y;
-        cellule.p = cell_index_z;
-        cellule.contained_particle.push_back(particle);
-
-    }
-
-}
-
-*/
-
-void linkedList(std::vector<std::vector<std::vector<Cell>>>& cell_grid, const int &m, const int &n, const int &p, const int &cell_nb_x, const int &cell_nb_y, const int &cell_nb_z){
-
-    // Iterate over cells ONLY IF it contains at least one particle
-     for (unsigned m = 0; m < cell_nb_x; m++){
-        for (unsigned n = 0; n < cell_nb_y; n++){
-            for (unsigned p = 0; p < cell_nb_z; p++){
-                if (!cell_grid[m][n][p].isParticleListEmpty()){
-
-                    // Iteration over all particles inside specific cell
-                    for (unsigned i = 0; i < cell_grid[m][n][p].contained_particle.size(); ++i) {
-                        
-                        const Particle& particle = cell_grid[m][n][p].contained_particle[i]; // Access the i-th particle
-
-                        /*TO CONTINUE : NOW HAVE TO ASSIGN NEIGHBORS TO "I-TH" PARTICLE */
-
-                } 
+void linkedList(vector<vector<vector<double>>> &domain, vector<double> &particle_x, vector<double> &particle_y, vector<double> &particle_z, vector<unsigned> &particle_i, vector<unsigned> &particle_j, vector<unsigned> &particle_k, 
+                 vector<tuple<Triplet, vector<Triplet>>> &neighbours_list, const double &Lx, const double &Ly, const double &Lz, const int &Nx, const int &Ny, const int &Nz){
 
 
+    // Sort all particles in their corresponding cell
+    for (double x : particle_x){
+        for (double y : particle_y){
+            for (double z : particle_z){
                 
+                particle_i.push_back(x/(Lx/Nx));
+                particle_j.push_back(y/(Ly/Ny));
+                particle_k.push_back(z/(Lz/Nz));
             }
         }
     }
-}
+
+   
+    // Find neighbours for each particle
+    for (unsigned x = 0; x <= particle_x.size(); x++){
+        for (unsigned y = 0; y <= particle_y.size(); y++){
+            for (unsigned z = 0; z <= particle_z.size(); z++){
+
+                Triplet triplet(particle_x[x], particle_y[y], particle_z[z]); // triplet index (x,y,z) for a given particle
+                vector<Triplet> associated_list_triplet; // list of neighbours for this given particle in (x,y,z)
+
+                // Determine in which cell the particle is
+                unsigned i_cell = particle_x[x]/(Lx/Nx);
+                unsigned j_cell = particle_y[y]/(Ly/Ny);
+                unsigned k_cell = particle_z[z]/(Lz/Nz);
+
+                // Iterate over all 26 adjacents cells to find neighbours
+                for (unsigned i = i_cell-1; i <= i_cell + 1; i++){
+                    for (unsigned j = j_cell-1; j <= i_cell + 1; j++){
+                        for (unsigned k = k_cell-1; k <= k_cell + 1; k++){
+
+                            // Arrays of neighbours' index in a given cell
+                            vector<int> idx_i;
+                            vector<int> idx_j;
+                            vector<int> idx_k;
+
+                            // Find the index of (neighboured) particles in the cell (i,j,k)
+                            for (unsigned l = 0, m = 0, n = 0 ; l < particle_i.size() && m < particle_j.size() && n < particle_k.size(); l++, m++, n++){
+                                if (particle_i[l] == i){
+                                    idx_i.push_back(l);
+                                }
+                                if (particle_i[m] == j){
+                                    idx_j.push_back(m);
+                                }
+                                if (particle_i[n] == k){
+                                    idx_k.push_back(n);
+                                }
+                            }
+
+                            // Then, one knows the neighbours' indices in (i,j,k) cell
+                            for (unsigned val_i = 0, val_j = 0, val_k = 0; val_i < idx_i.size(), val_j < idx_j.size(), val_k < idx_k.size(); val_i++, val_j++, val_k++){
+                                associated_list_triplet.push_back(Triplet(particle_x[idx_i[val_i]], particle_y[idx_j[val_j]], particle_z[idx_k[val_k]]));
+                            }
+
+                            // For a given particle (x,y,z), add a list of triplet cordinates that gives the neighbours cordinates
+                            neighbours_list.push_back((make_tuple(triplet, associated_list_triplet)));
+
+                            idx_i.clear();
+                            idx_j.clear();
+                            idx_k.clear();
+
+
+                        }
+                    }
+                }
+            } 
+        }
+    }
+} 
 
