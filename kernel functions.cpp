@@ -125,10 +125,3 @@ double derive_quintic_spline(double r, double h){
     return DW;   
 }
 
-int main(){
- int r = 2;
- int h = 1;
- double W = f_gaussian(r,h);
- double DW = deriv_gaussian(r,h);
- printf("%.7lf\n",W);
- printf("%.7lf\n",DW);
