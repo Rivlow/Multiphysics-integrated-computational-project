@@ -54,7 +54,7 @@ int main() {
     vector<tuple<Triplet, vector<Triplet>>> neighbours_list;
 
     // Initialise random particles in the domain
-    setRandomParticles(seed, domain, nb_particles, Lx, Ly, Lz, particle_x, particle_y, particle_z);
+    setParticles(seed, domain, nb_particles, Lx, Ly, Lz, particle_x, particle_y, particle_z);
 
     // Apply the linked-list algorithm
     linkedList(domain, particle_x, particle_y, particle_z, particle_i, particle_j, particle_k, neighbours_list, Lx, Ly, Lz, Nx, Ny, Nz);
