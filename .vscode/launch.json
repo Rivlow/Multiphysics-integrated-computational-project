@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/Users/lucas/OneDrive/Unif/Master/Master_1/Q2/Multiphysics_integrated_computational_project/pi_luca_killian",
-      "program": "c:/Users/lucas/OneDrive/Unif/Master/Master_1/Q2/Multiphysics_integrated_computational_project/pi_luca_killian/build/Debug/outDebug",
+      "cwd": "c:/Users/lucas/pi_luca_killian",
+      "program": "c:/Users/lucas/pi_luca_killian/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
