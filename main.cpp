@@ -44,7 +44,7 @@ int main() {
     vector<vector<int>> neighbours_matrix(nb_particles);
 
     // Initialise random particles in the domain
-    setRandomParticles(seed, nb_particles, Lx, Ly, Lz, particle_x, particle_y, particle_z);
+    //setRandomParticles(seed, nb_particles, Lx, Ly, Lz, particle_x, particle_y, particle_z);
 
     // Apply the linked-list algorithm
     linkedList( particle_x, particle_y, particle_z, particle_i, particle_j, particle_k, neighbours_matrix, Lx, Ly, Lz, Nx, Ny, Nz, h);

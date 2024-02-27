@@ -21,7 +21,7 @@ using namespace std;
 };*/
 
 
-// Attention !! s'assurer que rand ne renvoie jamais les mêmes indices !! sinon conflit TO DO !
+/* Attention !! s'assurer que rand ne renvoie jamais les mêmes indices !! sinon conflit TO DO ! A FAIRE PLUS TARD !!! 
 void setRandomParticles(const unsigned &seed, const int &nb_particles, const double &Lx, const double &Ly, const double &Lz, vector<double> &particle_x, vector<double> &particle_y, vector<double> &particle_z){
 
     // Uniform distribution 
@@ -40,7 +40,7 @@ void setRandomParticles(const unsigned &seed, const int &nb_particles, const dou
         particle_y.push_back(y); 
         particle_z.push_back(z); 
     }
-}
+}*/
 
 
 void linkedList( vector<double> &particle_x, vector<double> &particle_y, vector<double> &particle_z, vector<unsigned> &particle_i, vector<unsigned> &particle_j, vector<unsigned> &particle_k, 
@@ -103,9 +103,9 @@ void linkedList( vector<double> &particle_x, vector<double> &particle_y, vector<
                                     r2 = rx + ry + rz;
                                     if(r2<= k*k*h*h){
                                         neighbours_matrix[x].push_back(l); 
-                                        neighbours_matrix[l].push_back(x);// ATTENTION DEMANDER VOISIN PROF KH
+                                        neighbours_matrix[l].push_back(x);
                                     }            
-                                }      // optimisation voisin !!
+                                }      //optimisation voisin 
                             }
                         }        
                     }
