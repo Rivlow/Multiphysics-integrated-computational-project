@@ -61,30 +61,30 @@ void linkedList( vector<double> &particle_x, vector<double> &particle_y, vector<
         unsigned j_cell = particle_y[x]/(Ly/Ny);
         unsigned k_cell = particle_z[x]/(Lz/Nz);
 
-        unsigned i_inf = i_cell -1;
-        unsigned i_supp = i_cell+1;
+        unsigned i_inf = i_cell - 1;
+        unsigned i_supp = i_cell + 1;
         if(i_cell == 0 ){
                 i_inf = 0;
         }
-        if(i_cell == particle_x.size()-1 ){
+        if(i_cell == particle_x.size() - 1 ){
                 i_supp = i_cell;
         }
 
-        unsigned j_inf = j_cell -1;
-        unsigned j_supp = j_cell+1;
+        unsigned j_inf = j_cell - 1;
+        unsigned j_supp = j_cell + 1;
         if(j_cell == 0 ){
                 j_inf = 0;
         }
-        if(j_cell == particle_x.size()-1 ){
+        if(j_cell == particle_x.size() - 1 ){
                 j_supp = j_cell;
         }
 
-        unsigned k_inf = k_cell -1;
-        unsigned k_supp = k_cell+1;
+        unsigned k_inf = k_cell - 1;
+        unsigned k_supp = k_cell + 1;
         if(k_cell == 0 ){
                 k_inf = 0;
         }
-        if(k_cell == particle_x.size()-1 ){
+        if(k_cell == particle_x.size() - 1 ){
                 k_supp = k_cell;
         }
 
