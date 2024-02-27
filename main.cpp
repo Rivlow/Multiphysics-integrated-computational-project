@@ -11,18 +11,11 @@ int main() {
 
     /*Dimension of the domain*/
 
-    // element size in each direction
-    double dx = 0.5; 
-    double dy = 0.5;
-    double dz = 0.5;
-    // Number of elements in each direction
-    int elem_x = 100;
-    int elem_y = 100;
-    int elem_z = 100;
+    
     // Total lenght in each direction
-    double Lx = dx*elem_x;
-    double Ly = dx*elem_y;
-    double Lz = dx*elem_z;
+    double Lx = 5;
+    double Ly = 5;
+    double Lz = 5;
 
     // Number of created particles (test)
     int nb_particles = 100;
@@ -37,9 +30,6 @@ int main() {
 
     unsigned seed = 42;
 
-    // Grid initialisation
-    vector<vector<vector<double>>> domain(elem_x, vector<vector<double>>(elem_y, vector<double>(elem_z))); 
-
     // Location array for particles
     vector<double> particle_x; // x-direction
     vector<double> particle_y; // y-direction
@@ -51,13 +41,13 @@ int main() {
     vector<unsigned> particle_k; // z-direction
 
     // Location matrix for neighbours
-    vector<tuple<Triplet, vector<Triplet>>> neighbours_list;
+    vector<vector<int>> neighbours_matrix(nb_particles);
 
     // Initialise random particles in the domain
-    setRandomParticles(seed, domain, nb_particles, Lx, Ly, Lz, particle_x, particle_y, particle_z);
+    setRandomParticles(seed, nb_particles, Lx, Ly, Lz, particle_x, particle_y, particle_z);
 
     // Apply the linked-list algorithm
-    linkedList(domain, particle_x, particle_y, particle_z, particle_i, particle_j, particle_k, neighbours_list, Lx, Ly, Lz, Nx, Ny, Nz);
+    linkedList( particle_x, particle_y, particle_z, particle_i, particle_j, particle_k, neighbours_matrix, Lx, Ly, Lz, Nx, Ny, Nz, h);
 
 
 }
