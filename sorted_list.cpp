@@ -11,7 +11,7 @@ using namespace std;
 
 
 
-void setParticles(const unsigned &seed, vector<vector<vector<double>>> &particule_grid, const int &nb_particles, const double &Lx, const double &Ly, const double &Lz, vector<double> &particle_x, vector<double> &particle_y, vector<double> &particle_z){
+void setParticles(const int &nb_particles, const double &Lx, const double &Ly, const double &Lz, vector<double> &particle_x, vector<double> &particle_y, vector<double> &particle_z){
 
     for (int i = 0; i < nb_particles; ++i) {
 
