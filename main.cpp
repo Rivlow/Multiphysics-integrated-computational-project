@@ -92,21 +92,15 @@ int main(int argc, char *argv[]){
     // Apply the naive algorithm
     //naiveAlgo(particle_x, particle_y, particle_z, neighbours_matrix_2, h, kappa);
     
-    //printf("longueur matrix = %lld\n",neighbours_matrix_1.size());
+    printf("longueur matrix = %lld\n",neighbours_matrix_1.size());
 
     for (unsigned i = 0; i < neighbours_matrix_1.size(); i++){
-       // printf("length matrix neighbour= %lld\n",neighbours_matrix_1[i].size());
+       printf("length matrix neighbour= %lld\n",neighbours_matrix_1[i].size());
         
 
-        for (unsigned j = 0; i < neighbours_matrix_1[i].size(); j++){
-            
-            //printf("   un de ses voisins est %d\n", neighbours_matrix_1[i][j]);
-            
-           
-           
-        }
-
-        std::cout << std::endl;
+        for (unsigned j = 0; j < neighbours_matrix_1[i].size(); j++){
+            printf("un de ses voisins est %d\n", neighbours_matrix_1[i][j]);
+        } 
     }
 
 //<< neighbours_matrix_2[i][j] << " (for naive)"

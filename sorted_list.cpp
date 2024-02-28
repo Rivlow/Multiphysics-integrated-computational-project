@@ -94,10 +94,10 @@ void linkedListAlgo(vector<double> &particle_x, vector<double> &particle_y, vect
                                     r2 = rx + ry + rz;
                                     
                                     if(r2<= kappa*kappa*h*h){
-                                        printf(" voici le l est %d", l);
+                                        
                                         neighbours_matrix[x].push_back(l); 
                                         neighbours_matrix[l].push_back(x);
-                                        printf("  matrice voisin %d\n", neighbours_matrix[x][l]);
+                                        //printf("le voisin de %d est %d\n", x, neighbours_matrix[x][neighbours_matrix[x].size()-1]);
                                     }            
                                 }      
                             }
