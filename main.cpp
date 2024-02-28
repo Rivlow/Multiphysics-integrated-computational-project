@@ -62,12 +62,15 @@ int main(int argc, char *argv[]){
     int nstepT = data["nstepT"];
 
     // Number of cells we want (in each direction)
-    int Nx = 4;
-    int Ny = 4; 
-    int Nz = 4;
+    int Nx, Ny, Nz ;
+    
 
-    int kappa = 1;
-    int h = 4;
+    int kappa = data["kappa"];
+    double h = 1.2*s;
+
+    Nx = (int) L[0]/(kappa*h); //nombre de cellules dans x 
+    Ny = (int) L[1]/(kappa*h);
+    Nz = (int) L[2]/(kappa*h);
 
     // cell's index for particles
     vector<unsigned> particle_i; // x-direction 
@@ -79,6 +82,7 @@ int main(int argc, char *argv[]){
 
     // Location matrix for neighbours
     int nb_particles = particle_x.size();
+    printf("nb of particles = %d\n",nb_particles);
     vector<vector<int>> neighbours_matrix_1(nb_particles);
     vector<vector<int>> neighbours_matrix_2(nb_particles);
 
@@ -86,20 +90,25 @@ int main(int argc, char *argv[]){
     linkedListAlgo(particle_x, particle_y, particle_z, particle_i, particle_j, particle_k, neighbours_matrix_1, &L[0], Nx, Ny, Nz, h, kappa);
 
     // Apply the naive algorithm
-    naiveAlgo(particle_x, particle_y, particle_z, neighbours_matrix_2, h, kappa);
+    //naiveAlgo(particle_x, particle_y, particle_z, neighbours_matrix_2, h, kappa);
+    
+    //printf("longueur matrix = %lld\n",neighbours_matrix_1.size());
 
     for (unsigned i = 0; i < neighbours_matrix_1.size(); i++){
-
-        std::cout << "Neighbours of particle " << i << " : ";
+       // printf("length matrix neighbour= %lld\n",neighbours_matrix_1[i].size());
+        
 
         for (unsigned j = 0; i < neighbours_matrix_1[i].size(); j++){
-
-            std::cout << neighbours_matrix_1[i][j] << " (for linked list) and " << neighbours_matrix_2[i][j] << " (for naive)";
+            
+            //printf("   un de ses voisins est %d\n", neighbours_matrix_1[i][j]);
+            
+           
+           
         }
 
         std::cout << std::endl;
     }
 
-
+//<< neighbours_matrix_2[i][j] << " (for naive)"
 
 }

@@ -11,38 +11,56 @@ using namespace std;
 
 
 void linkedListAlgo(vector<double> &particle_x, vector<double> &particle_y, vector<double> &particle_z, vector<unsigned> &particle_i, vector<unsigned> &particle_j, vector<unsigned> &particle_k, 
-                 vector<vector<int>> &neighbours_matrix, double L[3], const int &Nx, const int &Ny, const int &Nz, const int &h, const int &kappa){
+                 vector<vector<int>> &neighbours_matrix, double L[3], const int &Nx, const int &Ny, const int &Nz, const double &h, const int &kappa){
 
     // Sort all particles in their corresponding cell
     for (unsigned ite = 0; ite < particle_x.size(); ite ++){
-                particle_i.push_back(particle_x[ite]/(L[0]/Nx));
-                particle_j.push_back(particle_y[ite]/(L[1]/Ny));
-                particle_k.push_back(particle_z[ite]/(L[2]/Nz));
+                int idx_i = particle_x[ite]/(L[0]/Nx);
+                int idx_j = particle_y[ite]/(L[1]/Ny);
+                int idx_k = particle_z[ite]/(L[2]/Nz);
+                if (idx_i == Nx){
+                    idx_i--;
+                }
+                if (idx_j == Ny){
+                    idx_j--;
+                }
+                if (idx_k == Nz){
+                    idx_k--;
+                }
+                particle_i.push_back(idx_i);
+                particle_j.push_back(idx_j);
+                particle_k.push_back(idx_k);
+                
     }
-
+    
     // Find neighbours for each particle
     for (unsigned x = 0; x < particle_x.size(); x++){
         
         // Determine in which cell the particle is a changer peut-être
-        unsigned i_cell = particle_x[x]/(L[0]/Nx);
-        unsigned j_cell = particle_y[x]/(L[1]/Ny);
-        unsigned k_cell = particle_z[x]/(L[2]/Nz);
-
+        unsigned i_cell = particle_i[x];
+        unsigned j_cell = particle_j[x];
+        unsigned k_cell = particle_k[x];
+        int oui = 1;
         unsigned i_inf = i_cell -1;
         unsigned i_supp = i_cell+1;
         if(i_cell == 0 ){
                 i_inf = 0;
+                
         }
-        if(i_cell == particle_x.size()-1 ){
+        
+        if(i_cell == Nx-1 ){
                 i_supp = i_cell;
+                
+                
+                
         }
 
-        unsigned j_inf = j_cell -1;
-        unsigned j_supp = j_cell+1;
+        unsigned j_inf = j_cell - 1;
+        unsigned j_supp = j_cell + 1;
         if(j_cell == 0 ){
                 j_inf = 0;
         }
-        if(j_cell == particle_x.size()-1 ){
+        if(j_cell == Ny-1 ){
                 j_supp = j_cell;
         }
 
@@ -51,16 +69,21 @@ void linkedListAlgo(vector<double> &particle_x, vector<double> &particle_y, vect
         if(k_cell == 0 ){
                 k_inf = 0;
         }
-        if(k_cell == particle_x.size()-1 ){
+        if(k_cell == Nz-1 ){
                 k_supp = k_cell;
         }
 
         // Iterate over all 26 adjacents cells to find neighbours 
-        
         for (unsigned i = i_inf; i <= i_supp; i++){
+            
             for (unsigned j = j_inf; j <= j_supp; j++){
+        
+            
                 for (unsigned k = k_inf; k <= k_supp; k++){
-                    for (unsigned l = x+1; l < particle_i.size(); l++){ // l est pour savoir quand on itère sur la particule si la cellule est voisine ou non 
+                   
+                    for (unsigned l = x+1; l < particle_i.size(); l++){ 
+                        // l est pour savoir quand on itère sur la particule si la cellule est voisine ou non 
+                        
                         if (particle_i[l] == i){
                             if (particle_j[l] == j){
                                 if (particle_k[l] == k){
@@ -69,9 +92,12 @@ void linkedListAlgo(vector<double> &particle_x, vector<double> &particle_y, vect
                                     ry = (particle_y[x] - particle_y[l] )*(particle_y[x] - particle_y[l] );
                                     rz = (particle_z[x] - particle_z[l] )*(particle_z[x] - particle_z[l] );
                                     r2 = rx + ry + rz;
+                                    
                                     if(r2<= kappa*kappa*h*h){
+                                        printf(" voici le l est %d", l);
                                         neighbours_matrix[x].push_back(l); 
                                         neighbours_matrix[l].push_back(x);
+                                        printf("  matrice voisin %d\n", neighbours_matrix[x][l]);
                                     }            
                                 }      
                             }
@@ -79,7 +105,8 @@ void linkedListAlgo(vector<double> &particle_x, vector<double> &particle_y, vect
                     }
                 }
             }
-        }        
+       }
+            
     }
 } 
 

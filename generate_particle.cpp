@@ -31,10 +31,10 @@ void meshcube(double o[3], double L[3], double s, std::vector<double> &particle_
     std::cout << "\tparticle spacing s=(" << dx << "," << dy << "," << dz << ") [target was s=" << s << "]\n";
     std::cout << "\t=> " << ni << "*" << nj << "*" << nk << " = " << ni * nj * nk << " particles to be generated\n";
 
-    // memory allocation
+    /* memory allocation
     particle_x.resize(particle_x.size() + ni * nj * nk);
     particle_y.resize(particle_y.size() + ni * nj * nk);
-    particle_z.resize(particle_z.size() + ni * nj * nk);
+    particle_z.resize(particle_z.size() + ni * nj * nk);*/
 
     // particle generation
     for (int i = 0; i < ni; ++i)
