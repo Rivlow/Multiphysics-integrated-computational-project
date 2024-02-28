@@ -100,7 +100,6 @@ int main(int argc, char *argv[]){
     auto end_naive= std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_naive = end_naive - start_naive;
     std::cout << "Temps écoulé en naive : " << elapsed_naive.count() << " secondes." << std::endl;
-    //printf("longueur matrix = %lld\n",neighbours_matrix_1.size());
 
     for (unsigned i = 0; i < neighbours_matrix_1.size(); i++) {
         std::cout << "Particle " << i << " : ";

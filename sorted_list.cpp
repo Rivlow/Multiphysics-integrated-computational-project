@@ -100,6 +100,5 @@ void naiveAlgo(vector<double> &particle_x, vector<double> &particle_y, vector<do
                 neighbours_matrix[j].push_back(i);
             }
         }
-
     }
 }
