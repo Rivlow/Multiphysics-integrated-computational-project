@@ -90,19 +90,27 @@ int main(int argc, char *argv[]){
     linkedListAlgo(particle_x, particle_y, particle_z, particle_i, particle_j, particle_k, neighbours_matrix_1, &L[0], Nx, Ny, Nz, h, kappa);
 
     // Apply the naive algorithm
-    //naiveAlgo(particle_x, particle_y, particle_z, neighbours_matrix_2, h, kappa);
+    naiveAlgo(particle_x, particle_y, particle_z, neighbours_matrix_2, h, kappa);
     
-    printf("longueur matrix = %lld\n",neighbours_matrix_1.size());
+    //printf("longueur matrix = %lld\n",neighbours_matrix_1.size());
 
-    for (unsigned i = 0; i < neighbours_matrix_1.size(); i++){
-       printf("length matrix neighbour= %lld\n",neighbours_matrix_1[i].size());
-        
+    for (unsigned i = 0; i < neighbours_matrix_1.size(); i++) {
+        std::cout << "Particle " << i << " : ";
 
-        for (unsigned j = 0; j < neighbours_matrix_1[i].size(); j++){
-            printf("un de ses voisins est %d\n", neighbours_matrix_1[i][j]);
-        } 
+        std::cout << "{";
+        for (unsigned j = 0; j < neighbours_matrix_1[i].size(); j++) {
+            std::cout << neighbours_matrix_1[i][j];
+            if (j != neighbours_matrix_1[i].size() - 1) {
+                std::cout << ", ";
+            }
+        }
+        std::cout << "} (Linked-list) VS {";
+        for (unsigned j = 0; j < neighbours_matrix_2[i].size(); j++) {
+            std::cout << neighbours_matrix_2[i][j];
+            if (j != neighbours_matrix_2[i].size() - 1) {
+                std::cout << ", ";
+            }
+        }
+        std::cout << "} (naive)\n";
     }
-
-//<< neighbours_matrix_2[i][j] << " (for naive)"
-
 }

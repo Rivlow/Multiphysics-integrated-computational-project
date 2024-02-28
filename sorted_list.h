@@ -16,5 +16,5 @@ void linkedListAlgo(vector<double> &particle_x, vector<double> &particle_y, vect
     
 
 void naiveAlgo(vector<double> &particle_x, vector<double> &particle_y, vector<double> &particle_z, 
-                 vector<vector<int>> &neighbours_matrix, const int &h, const int &kappa);
+                 vector<vector<int>> &neighbours_matrix, const double &h, const int &kappa);
 

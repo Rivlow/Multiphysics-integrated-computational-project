@@ -40,7 +40,7 @@ void linkedListAlgo(vector<double> &particle_x, vector<double> &particle_y, vect
         unsigned i_cell = particle_i[x];
         unsigned j_cell = particle_j[x];
         unsigned k_cell = particle_k[x];
-        int oui = 1;
+
         unsigned i_inf = i_cell -1;
         unsigned i_supp = i_cell+1;
         if(i_cell == 0 ){
@@ -75,15 +75,11 @@ void linkedListAlgo(vector<double> &particle_x, vector<double> &particle_y, vect
 
         // Iterate over all 26 adjacents cells to find neighbours 
         for (unsigned i = i_inf; i <= i_supp; i++){
-            
             for (unsigned j = j_inf; j <= j_supp; j++){
-        
-            
                 for (unsigned k = k_inf; k <= k_supp; k++){
                    
-                    for (unsigned l = x+1; l < particle_i.size(); l++){ 
-                        // l est pour savoir quand on itère sur la particule si la cellule est voisine ou non 
-                        
+                    // Iterate over all particles to find the corresponding neighbours
+                    for (unsigned l = x+1; l < particle_i.size(); l++){                         
                         if (particle_i[l] == i){
                             if (particle_j[l] == j){
                                 if (particle_k[l] == k){
@@ -94,10 +90,8 @@ void linkedListAlgo(vector<double> &particle_x, vector<double> &particle_y, vect
                                     r2 = rx + ry + rz;
                                     
                                     if(r2<= kappa*kappa*h*h){
-                                        
                                         neighbours_matrix[x].push_back(l); 
                                         neighbours_matrix[l].push_back(x);
-                                        //printf("le voisin de %d est %d\n", x, neighbours_matrix[x][neighbours_matrix[x].size()-1]);
                                     }            
                                 }      
                             }
@@ -111,7 +105,7 @@ void linkedListAlgo(vector<double> &particle_x, vector<double> &particle_y, vect
 } 
 
 void naiveAlgo(vector<double> &particle_x, vector<double> &particle_y, vector<double> &particle_z, 
-                 vector<vector<int>> &neighbours_matrix, const int &h, const int &kappa){
+                 vector<vector<int>> &neighbours_matrix, const double &h, const int &kappa){
 
     // Find neighbours for each particle
     for (unsigned i = 0; i < particle_x.size(); i++){
