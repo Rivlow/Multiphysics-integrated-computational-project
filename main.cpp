@@ -87,11 +87,19 @@ int main(int argc, char *argv[]){
     vector<vector<int>> neighbours_matrix_2(nb_particles);
 
     // Apply the linked-list algorithm
+    auto start_linked = std::chrono::high_resolution_clock::now();
     linkedListAlgo(particle_x, particle_y, particle_z, particle_i, particle_j, particle_k, neighbours_matrix_1, &L[0], Nx, Ny, Nz, h, kappa);
+    auto end_linked= std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed_linked = end_linked - start_linked;
+    std::cout << "Temps écoulé en linked list: " << elapsed_linked.count() << " secondes." << std::endl;
+
 
     // Apply the naive algorithm
+    auto start_naive = std::chrono::high_resolution_clock::now();
     naiveAlgo(particle_x, particle_y, particle_z, neighbours_matrix_2, h, kappa);
-    
+    auto end_naive= std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed_naive = end_naive - start_naive;
+    std::cout << "Temps écoulé en naive : " << elapsed_naive.count() << " secondes." << std::endl;
     //printf("longueur matrix = %lld\n",neighbours_matrix_1.size());
 
     for (unsigned i = 0; i < neighbours_matrix_1.size(); i++) {

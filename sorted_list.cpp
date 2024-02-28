@@ -7,6 +7,7 @@
 #include <list>
 #include <unordered_map>
 #include <iostream>
+#include <chrono>
 using namespace std;
 
 
@@ -36,42 +37,20 @@ void linkedListAlgo(vector<double> &particle_x, vector<double> &particle_y, vect
     // Find neighbours for each particle
     for (unsigned x = 0; x < particle_x.size(); x++){
         
-        // Determine in which cell the particle is a changer peut-être
+        // Determine in which cell the particle is
         unsigned i_cell = particle_i[x];
         unsigned j_cell = particle_j[x];
         unsigned k_cell = particle_k[x];
 
-        unsigned i_inf = i_cell -1;
-        unsigned i_supp = i_cell+1;
-        if(i_cell == 0 ){
-                i_inf = 0;
-                
-        }
-        
-        if(i_cell == Nx-1 ){
-                i_supp = i_cell;
-                
-                
-                
-        }
+        // Define neighboring cell indices
+        unsigned i_inf = (i_cell == 0) ? 0 : i_cell - 1;
+        unsigned i_supp = (i_cell == Nx - 1) ? i_cell : i_cell + 1;
 
-        unsigned j_inf = j_cell - 1;
-        unsigned j_supp = j_cell + 1;
-        if(j_cell == 0 ){
-                j_inf = 0;
-        }
-        if(j_cell == Ny-1 ){
-                j_supp = j_cell;
-        }
+        unsigned j_inf = (j_cell == 0) ? 0 : j_cell - 1;
+        unsigned j_supp = (j_cell == Ny - 1) ? j_cell : j_cell + 1;
 
-        unsigned k_inf = k_cell -1;
-        unsigned k_supp = k_cell+1;
-        if(k_cell == 0 ){
-                k_inf = 0;
-        }
-        if(k_cell == Nz-1 ){
-                k_supp = k_cell;
-        }
+        unsigned k_inf = (k_cell == 0) ? 0 : k_cell - 1;
+        unsigned k_supp = (k_cell == Nz - 1) ? k_cell : k_cell + 1;
 
         // Iterate over all 26 adjacents cells to find neighbours 
         for (unsigned i = i_inf; i <= i_supp; i++){
@@ -99,7 +78,7 @@ void linkedListAlgo(vector<double> &particle_x, vector<double> &particle_y, vect
                     }
                 }
             }
-       }
+        }
             
     }
 } 
