@@ -17,7 +17,7 @@ double f_bell(double r, double h){
     double alpha = 105/(16*M_PI*h*h*h);
     double W = 0;
     if (r/h <= 1){
-        W = (1+3*r/h)*(1-r/h)*(1-r/h)*(1-r/h);
+        W = alpha*(1+3*r/h)*(1-r/h)*(1-r/h)*(1-r/h);
     }
     return W;
 }
@@ -35,10 +35,10 @@ double f_cubic_spline(double r, double h)
 {   double alpha = 3/(2*M_PI*h*h*h);
     double W = 0;
     if(r/h < 1){
-        W = 3/2 - r*r/(h*h) + 1/2 * r*r*r/(h*h*h);
+        W = alpha* (3/2 - r*r/(h*h) + 1/2 * r*r*r/(h*h*h));
     }
-    if(1<= r/h <2){
-        W = 1/6 * pow(1-r/h,3);
+    if(1<= r/h  && r/h<2){
+        W =alpha* 1/6 * pow(1-r/h,3);
     }
     return W;
 }
@@ -47,7 +47,7 @@ double derive_cubic_spline(double r, double h){
     double alpha = 3/(2*M_PI*h*h*h);
     double DW = 0;
     
-    if(1<= r/h <2){
+    if(1<= r/h && r/h<2){
         DW = alpha/h *(3/2*r*r/(h*h) - 2*r/h);
     }
     if(r/h < 1){
@@ -100,10 +100,10 @@ double f_quinitc_spline(double r, double h){
     if(r/h <1){
         W = alpha*((3-r/h)*(3-r/h)*(3-r/h)*(3-r/h)*(3-r/h)-6*(2-r/h)*(2-r/h)*(2-r/h)*(2-r/h)*(2-r/h)+15*(1-r/h)*(1-r/h)*(1-r/h)*(1-r/h)*(1-r/h));
     }
-    if(1<= r/h < 2){
+    if(1<= r/h && r/h < 2){
         W = alpha*((3-r/h)*(3-r/h)*(3-r/h)*(3-r/h)*(3-r/h)-6*(2-r/h)*(2-r/h)*(2-r/h)*(2-r/h)*(2-r/h));
     }
-    if(2<=r/h<3){
+    if(2<=r/h && r/h <3){
         W = alpha*(3-r/h)*(3-r/h)*(3-r/h)*(3-r/h)*(3-r/h);
     }
     return W;
@@ -116,10 +116,10 @@ double derive_quintic_spline(double r, double h){
     if(r/h <1){
         DW = alpha/h*(-5*(3-r/h)*(3-r/h)*(3-r/h)*(3-r/h)+30*(2-r/h)*(2-r/h)*(2-r/h)*(2-r/h)-75*(1-r/h)*(1-r/h)*(1-r/h)*(1-r/h));
     }
-    if(1<= r/h < 2){
+    if(1<= r/h && r/h < 2){
        DW = alpha/h*(-5*(3-r/h)*(3-r/h)*(3-r/h)*(3-r/h)+30*(2-r/h)*(2-r/h)*(2-r/h)*(2-r/h));
     }
-    if(2<=r/h<3){
+    if(2<=r/h && r/h<3){
         DW = -5*alpha/h*(3-r/h)*(3-r/h)*(3-r/h)*(3-r/h);
     }
     return DW;   
