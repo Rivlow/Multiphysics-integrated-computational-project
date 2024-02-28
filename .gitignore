@@ -32,3 +32,6 @@
 *.app
 git 
 build/
+
+# Vscode data
+.vscode/
