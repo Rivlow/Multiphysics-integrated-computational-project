@@ -10,22 +10,6 @@
 using namespace std;
 
 
-
-void setParticles(const int &nb_particles, const double &Lx, const double &Ly, const double &Lz, vector<double> &particle_x, vector<double> &particle_y, vector<double> &particle_z){
-
-    for (int i = 0; i < nb_particles; ++i) {
-
-        double x = Lx/(i+1); 
-        double y = Ly/(i+1); 
-        double z = Lz/(i+1); 
-
-        particle_x.push_back(x); 
-        particle_y.push_back(y); 
-        particle_z.push_back(z); 
-    }
-
-}
-
 void linkedListAlgo(vector<double> &particle_x, vector<double> &particle_y, vector<double> &particle_z, vector<unsigned> &particle_i, vector<unsigned> &particle_j, vector<unsigned> &particle_k, 
                  vector<vector<int>> &neighbours_matrix, double L[3], const int &Nx, const int &Ny, const int &Nz, const int &h, const int &kappa){
 

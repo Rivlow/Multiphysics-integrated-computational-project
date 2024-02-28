@@ -1,4 +1,4 @@
-#include "cube_modified.h"
+#include "generate_particle.h"
 #include <iostream>
 #include <cmath> // ceil
 

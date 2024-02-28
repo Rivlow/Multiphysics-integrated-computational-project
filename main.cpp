@@ -3,7 +3,7 @@
 #include <vector>
 #include "sorted_list.h"
 #include <list>
-#include "cube_modified.h"
+#include "generate_particle.h"
 #include <iostream>
 #include <fstream>
 #include <cassert>
@@ -49,8 +49,7 @@ int main(int argc, char *argv[]){
     std::ifstream inputf(argv[1]);
     json data = json::parse(inputf);
 
-    // Print input data to screen
-    std::cout << argv[1] << ":\n" << data.dump(4) << std::endl;
+    std::cout << argv[1] << ":\n" << data.dump(4) << std::endl;     // Print input data to screen
 
     // Location array for particles
     vector<double> particle_x; // x-direction
