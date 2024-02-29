@@ -51,10 +51,8 @@ int main(int argc, char *argv[]){
 
     std::cout << argv[1] << ":\n" << data.dump(4) << std::endl;     // Print input data to screen
 
-    // Location array for particles
-    vector<double> particle_x; // x-direction
-    vector<double> particle_y; // y-direction
-    vector<double> particle_z; // z-direction 
+
+    
 
     std::vector<double> o = data["o"];
     std::vector<double> L = data["L"];
@@ -72,23 +70,26 @@ int main(int argc, char *argv[]){
     Ny = (int) L[1]/(kappa*h);
     Nz = (int) L[2]/(kappa*h);
 
-    // cell's index for particles
-    vector<unsigned> particle_i; // x-direction 
-    vector<unsigned> particle_j; // y-direction
-    vector<unsigned> particle_k; // z-direction
+    
+
 
     // Initialise random particles in the domain
-    meshcube(&o[0], &L[0], s, particle_x, particle_y, particle_z);
+    vector<double> part_pos;        
+    vector<unsigned> cell_pos;
+    vector<unsigned> tab_cumul(Nx*Ny*Nz);
+    tab_cumul.assign(Nx*Ny*Nz, 0);
+
+    meshcube(&o[0], &L[0], s, part_pos);
 
     // Location matrix for neighbours
-    int nb_particles = particle_x.size();
+    int nb_particles = part_pos.size()/3;
     printf("nb of particles = %d\n",nb_particles);
     vector<vector<int>> neighbours_matrix_1(nb_particles);
     vector<vector<int>> neighbours_matrix_2(nb_particles);
 
     // Apply the linked-list algorithm
     auto start_linked = std::chrono::high_resolution_clock::now();
-    linkedListAlgo(particle_x, particle_y, particle_z, particle_i, particle_j, particle_k, neighbours_matrix_1, &L[0], Nx, Ny, Nz, h, kappa);
+    linkedListAlgo(part_pos, cell_pos, tab_cumul, neighbours_matrix_1, &L[0], Nx, Ny, Nz, h, kappa);
     auto end_linked= std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_linked = end_linked - start_linked;
     std::cout << "Temps écoulé en linked list: " << elapsed_linked.count() << " secondes." << std::endl;
@@ -96,7 +97,7 @@ int main(int argc, char *argv[]){
 
     // Apply the naive algorithm
     auto start_naive = std::chrono::high_resolution_clock::now();
-    naiveAlgo(particle_x, particle_y, particle_z, neighbours_matrix_2, h, kappa);
+    //naiveAlgo(part_pos, neighbours_matrix_2, h, kappa);
     auto end_naive= std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_naive = end_naive - start_naive;
     std::cout << "Temps écoulé en naive : " << elapsed_naive.count() << " secondes." << std::endl;
