@@ -58,7 +58,6 @@ int main(int argc, char *argv[]){
 
     // Number of cells we want (in each direction)
     unsigned Nx, Ny, Nz ;
-    
 
     int kappa = data["kappa"];
     double h = 1.2*s;
