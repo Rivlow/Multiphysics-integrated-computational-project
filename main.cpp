@@ -51,16 +51,13 @@ int main(int argc, char *argv[]){
 
     std::cout << argv[1] << ":\n" << data.dump(4) << std::endl;     // Print input data to screen
 
-
-    
-
     std::vector<double> o = data["o"];
     std::vector<double> L = data["L"];
     double s = data["s"];
     int nstepT = data["nstepT"];
 
     // Number of cells we want (in each direction)
-    int Nx, Ny, Nz ;
+    unsigned Nx, Ny, Nz ;
     
 
     int kappa = data["kappa"];
@@ -70,37 +67,34 @@ int main(int argc, char *argv[]){
     Ny = (int) L[1]/(kappa*h);
     Nz = (int) L[2]/(kappa*h);
 
-    
-
+    printf("(Nx, Ny, Nz) = (%d, %d, %d) \n", Nx,Ny,Nz);
 
     // Initialise random particles in the domain
     vector<double> part_pos;        
-    vector<unsigned> cell_pos;
-    vector<unsigned> tab_cumul(Nx*Ny*Nz);
-    tab_cumul.assign(Nx*Ny*Nz, 0);
+    vector<vector<unsigned>> cell_pos(Nx*Ny*Nz);
 
     meshcube(&o[0], &L[0], s, part_pos);
 
     // Location matrix for neighbours
-    int nb_particles = part_pos.size()/3;
+    unsigned nb_particles = part_pos.size()/3;
     printf("nb of particles = %d\n",nb_particles);
-    vector<vector<int>> neighbours_matrix_1(nb_particles);
-    vector<vector<int>> neighbours_matrix_2(nb_particles);
+    vector<vector<unsigned>> neighbours_matrix_1(nb_particles);
+    vector<vector<unsigned>> neighbours_matrix_2(nb_particles);
 
     // Apply the linked-list algorithm
     auto start_linked = std::chrono::high_resolution_clock::now();
-    linkedListAlgo(part_pos, cell_pos, tab_cumul, neighbours_matrix_1, &L[0], Nx, Ny, Nz, h, kappa);
+    linkedListAlgo(part_pos, cell_pos, neighbours_matrix_1, &L[0], Nx, Ny, Nz, h, kappa);
     auto end_linked= std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_linked = end_linked - start_linked;
-    std::cout << "Temps écoulé en linked list: " << elapsed_linked.count() << " secondes." << std::endl;
+    std::cout << "Time in linked list: " << elapsed_linked.count() << " secondes." << std::endl;
 
 
     // Apply the naive algorithm
     auto start_naive = std::chrono::high_resolution_clock::now();
-    //naiveAlgo(part_pos, neighbours_matrix_2, h, kappa);
+    naiveAlgo(part_pos, neighbours_matrix_2, h, kappa);
     auto end_naive= std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_naive = end_naive - start_naive;
-    std::cout << "Temps écoulé en naive : " << elapsed_naive.count() << " secondes." << std::endl;
+    std::cout << "Time in naive algo: " << elapsed_naive.count() << " secondes. \n" << std::endl;
 
     for (unsigned i = 0; i < neighbours_matrix_1.size(); i++) {
         std::cout << "Particle " << i << " : ";
@@ -113,12 +107,14 @@ int main(int argc, char *argv[]){
             }
         }
         std::cout << "} (Linked-list) VS {";
+        
         for (unsigned j = 0; j < neighbours_matrix_2[i].size(); j++) {
             std::cout << neighbours_matrix_2[i][j];
             if (j != neighbours_matrix_2[i].size() - 1) {
                 std::cout << ", ";
             }
         }
-        std::cout << "} (naive)\n";
+        std::cout << "} (naive)\n \n";
+        
     }
 }

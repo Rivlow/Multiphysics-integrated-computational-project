@@ -13,119 +13,86 @@
 using namespace std;
 
 
-void sort_tableaux(vector<unsigned>& tableau_1, vector<double>& tableau_2) {
-    // Créer un vecteur de paires pour associer chaque élément de tableau_1 avec son indice original
-    vector<pair<int, int>> temp;
-    for (int i = 0; i < tableau_1.size(); ++i) {
-        temp.push_back(make_pair(tableau_1[i], i));
-    }
-
-    // Trier temp en fonction de la première valeur de chaque paire (les valeurs de tableau_1)
-    sort(temp.begin(), temp.end());
-
-    // Réorganiser tableau_1 en fonction de l'ordre obtenu et réorganiser tableau_2 en même temps
-    vector<double> temp_tableau_2(tableau_2.size());
-    for (int i = 0; i < tableau_1.size(); ++i) {
-        tableau_1[i] = temp[i].first;
-        int index_tableau_1 = temp[i].second;
-        temp_tableau_2[i * 3] = tableau_2[index_tableau_1 * 3];
-        temp_tableau_2[i * 3 + 1] = tableau_2[index_tableau_1 * 3 + 1];
-        temp_tableau_2[i * 3 + 2] = tableau_2[index_tableau_1 * 3 + 2];
-    }
-
-    // Copier les valeurs réorganisées de temp_tableau_2 dans tableau_2
-    tableau_2 = temp_tableau_2;
-}
-
-
-
-void linkedListAlgo(vector<double> &part_pos, vector<unsigned> &cell_pos, vector<unsigned> &tab_cumul,
-                 vector<vector<int>> &neighbours_matrix, double L[3], const int &Nx, const int &Ny, const int &Nz, const double &h, const int &kappa){
+void linkedListAlgo(vector<double> &part_pos, vector<vector<unsigned>> &cell_pos,
+                 vector<vector<unsigned>> &neighbours_matrix, double L[3], const unsigned &Nx, const unsigned &Ny, const unsigned &Nz, const double &h, const int &kappa){
 
     // Sort all particles in their corresponding cell
-    for (unsigned ite = 0; ite < part_pos.size()/3; ite ++){
+    for (unsigned pos = 0; pos < part_pos.size()/3; pos ++){
 
-        int idx_i = part_pos[3*ite + 0] / (L[0] / Nx);
-        int idx_j = part_pos[3*ite + 1] / (L[1] / Ny);
-        int idx_k = part_pos[3*ite + 2] / (L[2] / Nz);
+        unsigned idx_i = part_pos[3*pos + 0] / (L[0] / Nx);
+        unsigned idx_j = part_pos[3*pos + 1] / (L[1] / Ny);
+        unsigned idx_k = part_pos[3*pos + 2] / (L[2] / Nz);
 
         idx_i = (idx_i == Nx) ? idx_i - 1 : idx_i;
         idx_j = (idx_j == Ny) ? idx_j - 1 : idx_j;
         idx_k = (idx_k == Nz) ? idx_k - 1 : idx_k;
 
-        cell_pos.push_back(idx_i + Nx*idx_j + Ny*Nx*idx_k);
-        printf("%d \n", idx_i + Nx*idx_j + Ny*Nx*idx_k);
-
-        for (unsigned k = Nx*Ny*Nz - 1; k > idx_i + Nx*idx_j + Ny*Nx*idx_k; k--){
-            tab_cumul[k]++;
-        }
+        cell_pos[idx_i + Nx*idx_j + Ny*Nx*idx_k].push_back(pos);
     }
 
-    sort_tableaux(cell_pos, part_pos);
-
     // Find neighbours for each particle
-    for (unsigned x = 0; x < part_pos.size()/3; x++){
+    for (unsigned pos = 0; pos < part_pos.size()/3; pos ++){
         
         // Determine in which cell the particle is
-        int a = cell_pos[x]%(Ny*Nx);
-        unsigned i_cell = a%Nx;
-        unsigned j_cell = (a - i_cell)/Nx;
-        unsigned k_cell = (cell_pos[x] - a)/(Ny*Nx);
+        unsigned i_cell = part_pos[3*pos + 0] / (L[0] / Nx);
+        unsigned j_cell = part_pos[3*pos + 1] / (L[1] / Ny);
+        unsigned k_cell = part_pos[3*pos + 2] / (L[2] / Nz);
 
-        // Define neighboring cell indices
+        // Define neighbouring cell indices
         unsigned i_inf = (i_cell == 0) ? 0 : i_cell - 1;
-        unsigned i_supp = (i_cell == Nx - 1) ? i_cell : i_cell + 1;
+        unsigned i_supp = (i_cell < Nx - 1) ? i_cell +1 : (i_cell == Nx - 1) ? i_cell : i_cell - 1;
 
         unsigned j_inf = (j_cell == 0) ? 0 : j_cell - 1;
-        unsigned j_supp = (j_cell == Ny - 1) ? j_cell : j_cell + 1;
+        unsigned j_supp = (j_cell < Ny - 1) ? j_cell +1 : (j_cell == Ny - 1) ? j_cell : j_cell - 1;
 
         unsigned k_inf = (k_cell == 0) ? 0 : k_cell - 1;
-        unsigned k_supp = (k_cell == Nz - 1) ? k_cell : k_cell + 1;
+        unsigned k_supp = (k_cell < Nz - 1) ? k_cell +1 : (k_cell == Nz - 1) ? k_cell : k_cell - 1;
+
         
-        // Iterate over all 26 adjacents cells to find neighbours 
+        printf("actual cell : (%d, %d, %d) -> ", i_cell, j_cell, k_cell);
+        printf("neighbour lower : (%d, %d, %d) ", i_inf, j_inf, k_inf);
+        printf("neighbour upper : (%d, %d, %d) ", i_supp, j_supp, k_supp);
+        
+        // Iterate over (max) 26 adjacents cells to find neighbours 
         for (unsigned i = i_inf; i <= i_supp; i++){
             for (unsigned j = j_inf; j <= j_supp; j++){
                 for (unsigned k = k_inf; k <= k_supp; k++){
-                   
-                    // Iterate over all particles to find the corresponding neighbours   
-                    unsigned actual_cell = cell_pos[i + j*Nx + k*Nx*Ny];   
-                    unsigned range_to_look = tab_cumul[actual_cell+1] - tab_cumul[actual_cell];
-                    unsigned idx_init_to_look = cell_pos[tab_cumul[actual_cell]];
-                    unsigned idx_end_to_look = cell_pos[tab_cumul[actual_cell+1]];
 
-                    for (unsigned init = idx_init_to_look; init < idx_end_to_look, init++){
+                    vector<unsigned> &actual_cell = cell_pos[i + j*Nx + k*Nx*Ny];  
+                    int val = i + j*Nx + k*Nx*Ny;
+                    printf("cell en question : %d \n \n", val);
+
+                    for (unsigned idx_neighbour = 0; idx_neighbour < actual_cell.size(); idx_neighbour++){
+                        //printf("idx_neighbour = %d \n", idx_neighbour);
+
                         double rx, ry, rz, r2;
-                        rx = (part_pos[3*x] - part_pos[l] )*(part_pos[x] - part_pos[l] );
-                        ry = (part_pos[3*x + 1] - part_pos[l] )*(part_pos[x] - part_pos[l] );
-                        rz = (part_pos[3*x + 2] - part_pos[l] )*(part_pos[x] - part_pos[l] );
+                        rx = (part_pos[3*pos] - part_pos[3*idx_neighbour])*(part_pos[3*pos] - part_pos[3*idx_neighbour]);
+                        ry = (part_pos[3*pos + 1] - part_pos[3*idx_neighbour+1])*(part_pos[3*pos + 1] - part_pos[3*idx_neighbour+1]);
+                        rz = (part_pos[3*pos + 2] - part_pos[3*idx_neighbour+2])*(part_pos[3*pos + 2] - part_pos[3*idx_neighbour+2]);
                         r2 = rx + ry + rz;
                         
                         if(r2<= kappa*kappa*h*h){
-                            neighbours_matrix[x].push_back(l); 
-                            neighbours_matrix[l].push_back(x);
-                    }      
-                    }
-
-
-
-                                 
+                            neighbours_matrix[pos].push_back(idx_neighbour); 
+                            neighbours_matrix[idx_neighbour].push_back(pos);
+                        }      
+                    }              
                 }
             }
         } 
     }
 } 
 
-void naiveAlgo(vector<double> &particle_x, vector<double> &particle_y, vector<double> &particle_z, 
-                 vector<vector<int>> &neighbours_matrix, const double &h, const int &kappa){
+void naiveAlgo(vector<double> &part_pos, vector<vector<unsigned>> &neighbours_matrix, const double &h, const int &kappa){
 
     // Find neighbours for each particle
-    for (unsigned i = 0; i < particle_x.size(); i++){
-        for (unsigned j = i+1; j < particle_x.size(); j++){
+    for (unsigned i = 0; i < part_pos.size()/3; i++){
+        for (unsigned j = i+1; j < part_pos.size()/3; j++){
+
 
             double rx, ry, rz, r2;
-            rx = (particle_x[i] - particle_x[j] )*(particle_x[i] - particle_x[j] );
-            ry = (particle_y[i] - particle_y[j] )*(particle_y[i] - particle_y[j] );
-            rz = (particle_z[i] - particle_z[j] )*(particle_z[i] - particle_z[j] );
+            rx = (part_pos[3*i] - part_pos[3*j] )*(part_pos[3*i] - part_pos[3*j] );
+            ry = (part_pos[3*i+1] - part_pos[3*j+1] )*(part_pos[3*i+1] - part_pos[3*j]+1 );
+            rz = (part_pos[3*i+2] - part_pos[3*j+2] )*(part_pos[3*i+2] - part_pos[3*j+2] );
             r2 = rx + ry + rz;
             if(r2<= kappa*kappa*h*h){
                 neighbours_matrix[i].push_back(j); 
