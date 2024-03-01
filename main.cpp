@@ -76,7 +76,6 @@ int main(int argc, char *argv[]){
 
     // Location matrix for neighbours
     unsigned nb_particles = part_pos.size()/3;
-    printf("nb of particles = %d\n",nb_particles);
     vector<vector<unsigned>> neighbours_matrix_1(nb_particles);
     vector<vector<unsigned>> neighbours_matrix_2(nb_particles);
 
@@ -95,25 +94,6 @@ int main(int argc, char *argv[]){
     std::chrono::duration<double> elapsed_naive = end_naive - start_naive;
     std::cout << "Time in naive algo: " << elapsed_naive.count() << " secondes. \n" << std::endl;
 
-    /*for (unsigned i = 0; i < neighbours_matrix_1.size(); i++) {
-        std::cout << "Particle " << i << " : ";
+    printNeighbours(neighbours_matrix_1, neighbours_matrix_1);
 
-        std::cout << "{";
-        for (unsigned j = 0; j < neighbours_matrix_1[i].size(); j++) {
-            std::cout << neighbours_matrix_1[i][j];
-            if (j != neighbours_matrix_1[i].size() - 1) {
-                std::cout << ", ";
-            }
-        }
-        std::cout << "} (Linked-list) VS {";
-        
-        for (unsigned j = 0; j < neighbours_matrix_2[i].size(); j++) {
-            std::cout << neighbours_matrix_2[i][j];
-            if (j != neighbours_matrix_2[i].size() - 1) {
-                std::cout << ", ";
-            }
-        }
-        std::cout << "} (naive)\n \n";
-        
-    }*/
-}
+
