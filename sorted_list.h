@@ -14,5 +14,5 @@ void linkedListAlgo(vector<double> &position, vector<vector<unsigned>> &cell_pos
     
 void naiveAlgo(vector<double> &position, vector<vector<unsigned>> &neighbours_matrix, const double &h, const int &kappa);
 
-void printNeighbours(vector<vector<unsigned>> &neighbours_matrix_1, vector<vector<unsigned>> &neighbours_matrix_2)
+void printNeighbours(vector<vector<unsigned>> &neighbours_matrix_1, vector<vector<unsigned>> &neighbours_matrix_2);
 
