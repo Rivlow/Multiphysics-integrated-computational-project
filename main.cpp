@@ -95,7 +95,7 @@ int main(int argc, char *argv[]){
     std::chrono::duration<double> elapsed_naive = end_naive - start_naive;
     std::cout << "Time in naive algo: " << elapsed_naive.count() << " secondes. \n" << std::endl;
 
-    for (unsigned i = 0; i < neighbours_matrix_1.size(); i++) {
+    /*for (unsigned i = 0; i < neighbours_matrix_1.size(); i++) {
         std::cout << "Particle " << i << " : ";
 
         std::cout << "{";
@@ -115,5 +115,5 @@ int main(int argc, char *argv[]){
         }
         std::cout << "} (naive)\n \n";
         
-    }
+    }*/
 }
