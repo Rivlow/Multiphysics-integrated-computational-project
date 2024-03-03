@@ -79,7 +79,7 @@ int main(int argc, char *argv[]){
     unsigned nb_particles = part_pos.size()/3;
 
     vector<double> drhodt_arr(nb_particles);
-    vector<vector<unsigned>> neighbours_matrix; // Location matrix for neighbours
+    vector<vector<unsigned>> neighbours_matrix(nb_particles); // Location matrix for neighbours
     vector<vector<double>> gradW_matrix; // Location matrix for neighbours
 
 
@@ -87,7 +87,7 @@ int main(int argc, char *argv[]){
     /*---------------------------- SPH ALGORITHM  -----------------------------------*/
 
     // Apply the linked-list algorithm
-    printf("test 1");
+    printf("test 1 \n");
     findNeighbours(part_pos, cell_pos, neighbours_matrix, &L[0], Nx, Ny, Nz, h, kappa);
 
     printf("test 2");

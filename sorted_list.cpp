@@ -59,17 +59,22 @@ void findNeighbours(vector<double> &part_pos, vector<vector<unsigned>> &cell_pos
 
 
                     vector<unsigned> &actual_cell = cell_pos[i + j*Nx + k*Nx*Ny];  
+                    cout << " lenght of actual cell " << actual_cell.size() << endl;
 
-                    for (unsigned idx_neighbour = 0; idx_neighbour < actual_cell.size() ; idx_neighbour++){
-                        if(actual_cell[idx_neighbour] != pos){
+                    for (auto idx_neighbour_it = actual_cell.begin(); idx_neighbour_it != actual_cell.end(); idx_neighbour_it++) {
+                        unsigned idx_neighbour = *idx_neighbour_it;
+                        unsigned actual_cell_value = actual_cell[idx_neighbour];
+
+                        if(actual_cell_value != pos){
 
                             double rx, ry, rz, r2;
-                            rx = (part_pos[3*pos] - part_pos[3*actual_cell[idx_neighbour]])*(part_pos[3*pos] - part_pos[3*actual_cell[idx_neighbour]]);
-                            ry = (part_pos[3*pos + 1] - part_pos[3*actual_cell[idx_neighbour]+1])*(part_pos[3*pos + 1] - part_pos[3*actual_cell[idx_neighbour]+1]);
-                            rz = (part_pos[3*pos + 2] - part_pos[3*actual_cell[idx_neighbour]+2])*(part_pos[3*pos + 2] - part_pos[3*actual_cell[idx_neighbour]+2]);
+                            rx = (part_pos[3*pos] - part_pos[3*actual_cell_value])*(part_pos[3*pos] - part_pos[3*actual_cell_value]);
+                            ry = (part_pos[3*pos + 1] - part_pos[3*actual_cell_value+1])*(part_pos[3*pos + 1] - part_pos[3*actual_cell_value+1]);
+                            rz = (part_pos[3*pos + 2] - part_pos[3*actual_cell_value+2])*(part_pos[3*pos + 2] - part_pos[3*actual_cell_value+2]);
                             r2 = rx + ry + rz;
                             if(r2<= kappa*kappa*h*h){
-                                neighbours_matrix[pos].push_back(actual_cell[idx_neighbour]); 
+                                cout << " valeur de matrix : " << actual_cell_value << " et valeur idx : " << idx_neighbour << endl;
+                                neighbours_matrix[pos].push_back(actual_cell_value); 
                             }
                         }      
                     }              
