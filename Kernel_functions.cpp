@@ -124,4 +124,3 @@ double derive_quintic_spline(double r, double h){
     }
     return DW;   
 }
-
