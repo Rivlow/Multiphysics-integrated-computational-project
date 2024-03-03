@@ -38,7 +38,7 @@ double f_cubic_spline(double r, double h)
         W = alpha* (3/2 - r*r/(h*h) + 1/2 * r*r*r/(h*h*h));
     }
     if(1<= r/h  && r/h<2){
-        W =alpha* 1/6 * pow(1-r/h,3);
+        W =alpha* 1/6 * ((1-r/h)*(1-r/h)*(1-r/h));
     }
     return W;
 }

@@ -82,5 +82,6 @@ int main(int argc, char *argv[]){
 
     // Apply the linked-list algorithm
     linkedListAlgo(part_pos, cell_pos, neighbours_matrix_1, &L[0], Nx, Ny, Nz, h, kappa);
+    
 
 
