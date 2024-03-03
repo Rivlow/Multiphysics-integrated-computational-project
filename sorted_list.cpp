@@ -13,7 +13,7 @@
 using namespace std;
 
 
-void linkedListAlgo(vector<double> &part_pos, vector<vector<unsigned>> &cell_pos,
+void findNeighbours(vector<double> &part_pos, vector<vector<unsigned>> &cell_pos,
                  vector<vector<unsigned>> &neighbours_matrix, double L[3], const unsigned &Nx, const unsigned &Ny, const unsigned &Nz, const double &h, const int &kappa){
 
     // Sort all particles in their corresponding cell
@@ -57,11 +57,12 @@ void linkedListAlgo(vector<double> &part_pos, vector<vector<unsigned>> &cell_pos
             for (unsigned j = j_inf; j <= j_supp; j++){
                 for (unsigned k = k_inf; k <= k_supp; k++){
 
+
                     vector<unsigned> &actual_cell = cell_pos[i + j*Nx + k*Nx*Ny];  
-                    int val = i + j*Nx + k*Nx*Ny;
 
                     for (unsigned idx_neighbour = 0; idx_neighbour < actual_cell.size() ; idx_neighbour++){
                         if(actual_cell[idx_neighbour] != pos){
+
                             double rx, ry, rz, r2;
                             rx = (part_pos[3*pos] - part_pos[3*actual_cell[idx_neighbour]])*(part_pos[3*pos] - part_pos[3*actual_cell[idx_neighbour]]);
                             ry = (part_pos[3*pos + 1] - part_pos[3*actual_cell[idx_neighbour]+1])*(part_pos[3*pos + 1] - part_pos[3*actual_cell[idx_neighbour]+1]);
@@ -76,6 +77,7 @@ void linkedListAlgo(vector<double> &part_pos, vector<vector<unsigned>> &cell_pos
             }
         } 
     }
+
 } 
 
 void naiveAlgo(vector<double> &part_pos, vector<vector<unsigned>> &neighbours_matrix, const double &h, const int &kappa){

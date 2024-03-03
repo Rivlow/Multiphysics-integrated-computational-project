@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <vector>
-#include "sorted_list.h"
 #include <list>
-#include "generate_particle.h"
 #include <iostream>
 #include <fstream>
 #include <cassert>
+
+#include "generate_particle.h"
+#include "sorted_list.h"
+#include "gradient.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -56,6 +58,7 @@ int main(int argc, char *argv[]){
     std::vector<double> o = data["o"];
     std::vector<double> L = data["L"];
     double s = data["s"];
+    double mass = s*s*s;
     int nstepT = data["nstepT"];
 
     unsigned Nx, Ny, Nz ;    // Number of cells we want (in each direction)
@@ -69,19 +72,37 @@ int main(int argc, char *argv[]){
 
     printf("(Nx, Ny, Nz) = (%d, %d, %d) \n", Nx,Ny,Nz);
 
-    vector<double> part_pos;          
+    vector<double> part_pos;  
     vector<vector<unsigned>> cell_pos(Nx*Ny*Nz);
     meshcube(&o[0], &L[0], s, part_pos); // Initialise random particles in the domain
 
     unsigned nb_particles = part_pos.size()/3;
-    vector<vector<unsigned>> neighbours_matrix_1(nb_particles); // Location matrix for neighbours
+
+    vector<double> drhodt_arr(nb_particles);
+    vector<vector<unsigned>> neighbours_matrix; // Location matrix for neighbours
+    vector<vector<double>> gradW_matrix; // Location matrix for neighbours
 
 
 
     /*---------------------------- SPH ALGORITHM  -----------------------------------*/
 
     // Apply the linked-list algorithm
-    linkedListAlgo(part_pos, cell_pos, neighbours_matrix_1, &L[0], Nx, Ny, Nz, h, kappa);
-    
+    printf("test 1");
+    findNeighbours(part_pos, cell_pos, neighbours_matrix, &L[0], Nx, Ny, Nz, h, kappa);
+
+    printf("test 2");
+    gradW(part_pos, neighbours_matrix, gradW_matrix, &L[0], h, Nx, Ny, Nz);
+
+    printf("test 3");
+    continuityEquation(part_pos, neighbours_matrix, gradW_matrix, drhodt_arr, mass);
+
+    printf("test");
+    for (unsigned i = 0; i < drhodt_arr.size(); i++){
+        cout << "Particle " << i << " : " << drhodt_arr[i] << " \n" << endl;
+    }
+
+
+}
+
 
 
