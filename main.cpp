@@ -24,6 +24,8 @@ using namespace std;
 
 int main(int argc, char *argv[]){
 
+    /*---------------------------- SETTING COMPILATION PARAMETERS -----------------------------------*/
+
     #ifdef _OPENMP
         std::cout << "OpenMP available: OMP_NUM_THREADS=" << omp_get_max_threads() << "\n";
     #else
@@ -44,7 +46,7 @@ int main(int argc, char *argv[]){
         return EXIT_FAILURE;
     }
 
-    // read input data from json file given as argument
+    /*---------------------------- INPUT PARAMETERS FROM JSON FILES -----------------------------------*/
 
     std::ifstream inputf(argv[1]);
     json data = json::parse(inputf);
@@ -56,8 +58,7 @@ int main(int argc, char *argv[]){
     double s = data["s"];
     int nstepT = data["nstepT"];
 
-    // Number of cells we want (in each direction)
-    unsigned Nx, Ny, Nz ;
+    unsigned Nx, Ny, Nz ;    // Number of cells we want (in each direction)
 
     int kappa = data["kappa"];
     double h = 1.2*s;
@@ -68,32 +69,18 @@ int main(int argc, char *argv[]){
 
     printf("(Nx, Ny, Nz) = (%d, %d, %d) \n", Nx,Ny,Nz);
 
-    // Initialise random particles in the domain
-    vector<double> part_pos;        
+    vector<double> part_pos;          
     vector<vector<unsigned>> cell_pos(Nx*Ny*Nz);
+    meshcube(&o[0], &L[0], s, part_pos); // Initialise random particles in the domain
 
-    meshcube(&o[0], &L[0], s, part_pos);
-
-    // Location matrix for neighbours
     unsigned nb_particles = part_pos.size()/3;
-    vector<vector<unsigned>> neighbours_matrix_1(nb_particles);
-    vector<vector<unsigned>> neighbours_matrix_2(nb_particles);
+    vector<vector<unsigned>> neighbours_matrix_1(nb_particles); // Location matrix for neighbours
+
+
+
+    /*---------------------------- SPH ALGORITHM  -----------------------------------*/
 
     // Apply the linked-list algorithm
-    auto start_linked = std::chrono::high_resolution_clock::now();
     linkedListAlgo(part_pos, cell_pos, neighbours_matrix_1, &L[0], Nx, Ny, Nz, h, kappa);
-    auto end_linked= std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed_linked = end_linked - start_linked;
-    std::cout << "Time in linked list: " << elapsed_linked.count() << " secondes." << std::endl;
-
-
-    // Apply the naive algorithm
-    auto start_naive = std::chrono::high_resolution_clock::now();
-    naiveAlgo(part_pos, neighbours_matrix_2, h, kappa);
-    auto end_naive= std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed_naive = end_naive - start_naive;
-    std::cout << "Time in naive algo: " << elapsed_naive.count() << " secondes. \n" << std::endl;
-
-    printNeighbours(neighbours_matrix_1, neighbours_matrix_1);
 
 
