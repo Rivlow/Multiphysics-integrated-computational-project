@@ -87,16 +87,16 @@ int main(int argc, char *argv[]){
     /*---------------------------- SPH ALGORITHM  -----------------------------------*/
 
     // Apply the linked-list algorithm
-    printf("test 1 \n");
+    
     findNeighbours(part_pos, cell_pos, neighbours_matrix, &L[0], Nx, Ny, Nz, h, kappa);
+    cout << "findNeighbours algo terminated. \n" << endl;
 
-    printf("test 2");
     gradW(part_pos, neighbours_matrix, gradW_matrix, &L[0], h, Nx, Ny, Nz);
+    cout << "gradW algo terminated. \n" << endl;
 
-    printf("test 3");
-    continuityEquation(part_pos, neighbours_matrix, gradW_matrix, drhodt_arr, mass);
+    continuityEquation(part_pos, neighbours_matrix, gradW_matrix, drhodt_arr, mass);    
+    cout << "continuityEquation algo terminated. \n" << endl;
 
-    printf("test");
     for (unsigned i = 0; i < drhodt_arr.size(); i++){
         cout << "Particle " << i << " : " << drhodt_arr[i] << " \n" << endl;
     }

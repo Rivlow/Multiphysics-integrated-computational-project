@@ -30,6 +30,8 @@ void findNeighbours(vector<double> &part_pos, vector<vector<unsigned>> &cell_pos
         cell_pos[idx_i + Nx*idx_j + Ny*Nx*idx_k].push_back(pos);
     }
 
+
+
     // Find neighbours for each particle
     for (unsigned pos = 0; pos < part_pos.size()/3; pos ++){
 
@@ -57,23 +59,19 @@ void findNeighbours(vector<double> &part_pos, vector<vector<unsigned>> &cell_pos
             for (unsigned j = j_inf; j <= j_supp; j++){
                 for (unsigned k = k_inf; k <= k_supp; k++){
 
-
                     vector<unsigned> &actual_cell = cell_pos[i + j*Nx + k*Nx*Ny];  
-                    cout << " lenght of actual cell " << actual_cell.size() << endl;
 
-                    for (auto idx_neighbour_it = actual_cell.begin(); idx_neighbour_it != actual_cell.end(); idx_neighbour_it++) {
-                        unsigned idx_neighbour = *idx_neighbour_it;
-                        unsigned actual_cell_value = actual_cell[idx_neighbour];
+                    for (size_t idx_neighbour_it = 0 ; idx_neighbour_it < actual_cell.size(); idx_neighbour_it++) {
+                        unsigned actual_cell_value = actual_cell[idx_neighbour_it]; 
 
                         if(actual_cell_value != pos){
-
+                            
                             double rx, ry, rz, r2;
                             rx = (part_pos[3*pos] - part_pos[3*actual_cell_value])*(part_pos[3*pos] - part_pos[3*actual_cell_value]);
                             ry = (part_pos[3*pos + 1] - part_pos[3*actual_cell_value+1])*(part_pos[3*pos + 1] - part_pos[3*actual_cell_value+1]);
                             rz = (part_pos[3*pos + 2] - part_pos[3*actual_cell_value+2])*(part_pos[3*pos + 2] - part_pos[3*actual_cell_value+2]);
                             r2 = rx + ry + rz;
-                            if(r2<= kappa*kappa*h*h){
-                                cout << " valeur de matrix : " << actual_cell_value << " et valeur idx : " << idx_neighbour << endl;
+                            if(r2 <= kappa*kappa*h*h){
                                 neighbours_matrix[pos].push_back(actual_cell_value); 
                             }
                         }      
