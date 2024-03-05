@@ -9,6 +9,8 @@
 #include "generate_particle.h"
 #include "sorted_list.h"
 #include "gradient.h"
+#include "initialize.h"
+#include "export.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -76,6 +78,7 @@ int main(int argc, char *argv[]){
     int kappa = data["kappa"];
     double h = 1.2*s;
     const double R = 8.314; // [J/(K.mol)]
+    const double g = 9.81; // [m/s²]
 
     Nx = (int) L[0]/(kappa*h); //nombre de cellules dans x 
     Ny = (int) L[1]/(kappa*h);
@@ -89,19 +92,28 @@ int main(int argc, char *argv[]){
 
     unsigned nb_particles = part_pos.size()/3;
 
-    vector<double> u_arr(3*nb_particles), drhodt(nb_particles), rho_arr(nb_particles), dudt_arr(3*nb_particles), p_arr(nb_particles);
+    double rho_init = data["rho"];
+    vector<double> u_init = data["u"];
+    vector<double> mass_arr(nb_particles), u_arr(3*nb_particles), drhodt(nb_particles), rho_arr(nb_particles), dudt_arr(3*nb_particles), p_arr(nb_particles);
     vector<vector<unsigned>> neighbours_matrix(nb_particles); // Location matrix for neighbours
     vector<vector<double>> gradW_matrix; // Location matrix for neighbours
 
-
-
+    unsigned dt = 0.2;
+    initializeRho(rho_arr,rho_init);
+    initializeMass(rho_arr, s, mass_arr);
+    initializeVelocity(u_arr, u_init);
     /*---------------------------- SPH ALGORITHM  -----------------------------------*/
-    for (unsigned i = 0; i < nstepT; i++){
-
-
+    for (unsigned t = 0; t < nstepT; t++){
         //Apply gravity
-        v_(t+1) = v_(t) + dt*g;
+        for(size_t pos = 0; pos < nb_particles; pos++ ){
+            u_arr[3*pos+2] = u_arr[3*pos+2] - dt*g;
+            part_pos[3*pos+2] = part_pos[3*pos+2] - dt*dt*g*0.5;
 
+        }
+        u_arr[3*t+2] = u_arr[3*t+2] + dt*g;
+        export_particles("sph", nstep, pos, scalars, vectors);
+
+        /*
         // Apply the linked-list algorithm
         findNeighbours(part_pos, cell_pos, neighbours_matrix, &L[0], Nx, Ny, Nz, h, kappa);
         std::cout << "findNeighbours algo terminated. \n" << endl;
@@ -116,11 +128,12 @@ int main(int argc, char *argv[]){
         for (unsigned i = 0; i < drhodt_arr.size(); i++){
             cout << "Particle " << i << " : " << drhodt_arr[i] << " \n" << endl;
         }
-        */
+        
 
     momentumEquation(mass, gradW_matrix, rho_arr, p_arr, state_equation_chosen);
-
+    */
     }
+    
     
 
 
