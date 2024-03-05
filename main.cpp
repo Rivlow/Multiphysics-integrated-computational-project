@@ -69,15 +69,16 @@ int main(int argc, char *argv[]){
         }
     }
     
-    std::cout << "state equation chose : " << state_equation_chosen << " \n" <<endl; // pk "cout" ne marche plus ??? on a definit namespace pourtant !!!
+    cout << "state equation chose : " << state_equation_chosen << " \n" <<endl; 
 
-    unsigned Nx, Ny, Nz ;    // Number of cells we want (in each direction)
+    unsigned Nx, Ny, Nz ;    // Number of cells (in each direction)
 
     int kappa = data["kappa"];
     double h = 1.2*s;
     const double R = 8.314; // [J/(K.mol)]
+    const double g = 9.81; // [m/s²]
 
-    Nx = (int) L[0]/(kappa*h); //nombre de cellules dans x 
+    Nx = (int) L[0]/(kappa*h);
     Ny = (int) L[1]/(kappa*h);
     Nz = (int) L[2]/(kappa*h);
 
@@ -85,23 +86,43 @@ int main(int argc, char *argv[]){
 
     vector<double> part_pos;  
     vector<vector<unsigned>> cell_pos(Nx*Ny*Nz);
-    meshcube(&o[0], &L[0], s, part_pos); // Initialise random particles in the domain
+    meshcube(&o[0], &L[0], s, part_pos); // Initialise particles in the domain
 
     unsigned nb_particles = part_pos.size()/3;
 
-    vector<double> u_arr(3*nb_particles), drhodt(nb_particles), rho_arr(nb_particles), dudt_arr(3*nb_particles), p_arr(nb_particles);
+    double rho_init = data["rho"];
+    vector<double> u_init = data['u'];
+    vector<double> mass_arr(nb_particles), u_arr(3*nb_particles), drhodt(nb_particles), rho_arr(nb_particles), dudt_arr(3*nb_particles), p_arr(nb_particles);
     vector<vector<unsigned>> neighbours_matrix(nb_particles); // Location matrix for neighbours
-    vector<vector<double>> gradW_matrix; // Location matrix for neighbours
+    vector<vector<double>> gradW_matrix, artificial_visc_matrix; 
+
+    std::map<std::string, std::vector<double> *> scalars;
+    std::map<std::string, std::vector<double> *> vectors;
+    vectors["position"] = &part_pos;
+
+    double dt = 0.05;
+    initializeRho(rho_arr,rho_init);
+    initializeMass(rho_arr, s, mass_arr);
+    initializeVelocity(u_arr, u_init);
+
+
 
 
 
     /*---------------------------- SPH ALGORITHM  -----------------------------------*/
-    for (unsigned i = 0; i < nstepT; i++){
 
+    for (unsigned t = 0; t < nstepT; t++){
 
         //Apply gravity
-        v_(t+1) = v_(t) + dt*g;
+        for(size_t pos = 0; pos < nb_particles; pos++ ){
 
+            //u_arr[3*pos+2] = u_arr[3*pos+2] - dt*g;
+            part_pos[3*pos+2] = part_pos[3*pos+2] - dt*dt*g*0.5;
+        }
+
+        export_particles("sph", nstep, pos, scalars, vectors);
+
+        /*
         // Apply the linked-list algorithm
         findNeighbours(part_pos, cell_pos, neighbours_matrix, &L[0], Nx, Ny, Nz, h, kappa);
         std::cout << "findNeighbours algo terminated. \n" << endl;
@@ -112,14 +133,8 @@ int main(int argc, char *argv[]){
         continuityEquation(part_pos, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass, h);    
         std::cout << "continuityEquation algo terminated. \n" << endl;
 
-        /*
-        for (unsigned i = 0; i < drhodt_arr.size(); i++){
-            cout << "Particle " << i << " : " << drhodt_arr[i] << " \n" << endl;
-        }
+        momentumEquation(mass, gradW_matrix, rho_arr, p_arr, state_equation_chosen);    
         */
-
-    momentumEquation(mass, gradW_matrix, rho_arr, p_arr, state_equation_chosen);
-
     }
     
 
