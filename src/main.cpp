@@ -93,11 +93,7 @@ int main(int argc, char *argv[]){
     unsigned nb_particles = part_pos.size()/3;
 
     double rho_init = data["rho"];
-<<<<<<< HEAD
     vector<double> u_init = data['u'];
-=======
-    vector<double> u_init = data["u"];
->>>>>>> ab7aa6ceaace099b6359a2b090d6be069428c087
     vector<double> mass_arr(nb_particles), u_arr(3*nb_particles), drhodt(nb_particles), rho_arr(nb_particles), dudt_arr(3*nb_particles), p_arr(nb_particles);
     vector<vector<unsigned>> neighbours_matrix(nb_particles); // Location matrix for neighbours
     vector<vector<double>> gradW_matrix, artificial_visc_matrix; 
@@ -125,7 +121,6 @@ int main(int argc, char *argv[]){
     initializeMass(rho_arr, s, mass_arr);
     initializeVelocity(u_arr, u_init);
     /*---------------------------- SPH ALGORITHM  -----------------------------------*/
-<<<<<<< HEAD
 
     for (unsigned t = 0; t < nstepT; t++){
 
@@ -136,20 +131,8 @@ int main(int argc, char *argv[]){
             part_pos[3*pos+2] = part_pos[3*pos+2] - dt*dt*g*0.5;
         }
 
-        export_particles("sph", nstep, pos, scalars, vectors);
+        export_particles("sph", nstepT, part_pos, scalars, vectors);
 
-=======
-    for (unsigned t = 0; t < nstepT; t++){
-        //Apply gravity
-        for(size_t pos = 0; pos < nb_particles; pos++ ){
-            //u_arr[3*pos+2] = u_arr[3*pos+2] + dt*g;
-            part_pos[3*pos+2] = part_pos[3*pos+2] - dt*dt*g*0.5;
-            
-        }
-        
-        export_particles("sph", t, part_pos, scalars, vectors);
-
->>>>>>> ab7aa6ceaace099b6359a2b090d6be069428c087
         /*
         // Apply the linked-list algorithm
         findNeighbours(part_pos, cell_pos, neighbours_matrix, &L[0], Nx, Ny, Nz, h, kappa);
@@ -161,19 +144,8 @@ int main(int argc, char *argv[]){
         continuityEquation(part_pos, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass, h);    
         std::cout << "continuityEquation algo terminated. \n" << endl;
 
-<<<<<<< HEAD
         momentumEquation(mass, gradW_matrix, rho_arr, p_arr, state_equation_chosen);    
         */
-=======
-        /*
-        for (unsigned i = 0; i < drhodt_arr.size(); i++){
-            cout << "Particle " << i << " : " << drhodt_arr[i] << " \n" << endl;
-        }
-        
-
-    momentumEquation(mass, gradW_matrix, rho_arr, p_arr, state_equation_chosen);
-    */
->>>>>>> ab7aa6ceaace099b6359a2b090d6be069428c087
     }
     
     
