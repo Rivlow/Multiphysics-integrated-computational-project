@@ -88,7 +88,7 @@ double setArtificialViscosity(vector<vector<double>> &artificial_visc, const vec
     }
 }
 
-void continuityEquation(const vector<double> &part_pos, const vector<vector<unsigned>> &neighbours_matrix, 
+void continuityEquation(const vector<double> &part_pos, const vector<double> &u_arr, const vector<vector<unsigned>> &neighbours_matrix, 
                         const vector<vector<double>> &gradW_matrix, vector<double> &drhodt_arr, vector<double> &rho_arr, const double &mass, const double &h){
 
     // Iterations over each particle                    
@@ -106,13 +106,10 @@ void continuityEquation(const vector<double> &part_pos, const vector<vector<unsi
             font bien reference au meme au meme voisin ???? Normalement oui mais pas sur a 100% "*/
 
             // Dot product of u_ab with grad_a(W_ab)
-
-
-            /* ATTENTION !!!! Ici j'ai mis "(x,y,z)" plutot que "(u_x,u_y,u_z)"" uniquement pour voir ce que ca affichait -> a changer plus tard*/
             double dot_product = 0;
             for (size_t x = 0; x < 3; x++){
 
-                dot_product += (part_pos[3*pos+x] - part_pos[3*neighbours_list[idx_neighbour]+x])*(gradW_list[idx_neighbour+x]);
+                dot_product += (u_arr[3*pos+x] - u_arr[3*neighbours_list[idx_neighbour]+x])*(gradW_list[idx_neighbour+x]);
             }
 
             double rx, ry, rz, r_ab;
@@ -123,7 +120,6 @@ void continuityEquation(const vector<double> &part_pos, const vector<vector<unsi
 
             rho += mass*f_cubic_spline(r_ab, h);
             drhodt += mass*dot_product;
-
         }
 
         rho_arr[pos] = rho;
@@ -131,7 +127,8 @@ void continuityEquation(const vector<double> &part_pos, const vector<vector<unsi
     }
 }
 
-void momentumEquation(const vector<vector<unsigned>> &neighbours_matrix, const double &mass, const vector<vector<double>> &gradW_matrix, const vector<double> &rho_arr, const double &rho_0, const double &c_0,
+void momentumEquation(const vector<vector<unsigned>> &neighbours_matrix, const vector<double> &mass_arr, const vector<vector<double>> &gradW_matrix, 
+                      vector<double> &dudt_arr, vector<vector<double>> &artificial_visc, const vector<double> &rho_arr, const double &rho_0, const double &c_0,
                       vector<double> &p_arr, const double &R, const double &T, const double &M, const double &gamma, const string &state_equation_chosen){
 
     // Iterations over each particle
@@ -143,7 +140,7 @@ void momentumEquation(const vector<vector<unsigned>> &neighbours_matrix, const d
         double p_a, c_a;
         stateEquation(p_a, c_a, rho_arr[pos], rho_0, c_0, R, T, M, gamma, state_equation_chosen);
 
-        vector<double> dudt(3);
+        vector<double> dudt(3, 0.0);
 
         // Summation over b = 1 -> nb_neighbours
         for (size_t idx_neighbour = 0; idx_neighbour < neighbours_list.size(); idx_neighbour++){   
@@ -153,13 +150,18 @@ void momentumEquation(const vector<vector<unsigned>> &neighbours_matrix, const d
 
             double rho_a = rho_arr[pos], rho_b = rho_arr[neighbours_list[idx_neighbour]];
             double rho_ab = 0.5*(rho_a + rho_b);
-            //double pi_ab = se
+            double pi_ab = artificial_visc[pos][neighbours_list[idx_neighbour]];
+            double m_b = mass_arr[neighbours_list[idx_neighbour]];
 
-            dudt[0] = m_b*(p_b/(rho_b*rho_b) + p_a/(rho_a*rho_a) + pi_ab)*gradW_list[idx_neighbour];
-
-            
-
+            for (size_t it = 0; it < 3; it++) {dudt[it] += m_b*(p_b/(rho_b*rho_b) + p_a/(rho_a*rho_a) + pi_ab)*gradW_list[idx_neighbour+it];}
         }
+        
+        for (size_t it = 0; it < 3; it++) {
+
+            dudt[it] *= -1; 
+            dudt_arr[3*pos+it] = dudt[it];
+        }
+
     }
 }
 

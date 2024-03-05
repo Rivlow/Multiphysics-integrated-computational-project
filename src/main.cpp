@@ -98,17 +98,10 @@ int main(int argc, char *argv[]){
     vector<vector<unsigned>> neighbours_matrix(nb_particles); // Location matrix for neighbours
     vector<vector<double>> gradW_matrix, artificial_visc_matrix; 
 
-    std::map<std::string, std::vector<double> *> scalars;
-    std::map<std::string, std::vector<double> *> vectors;
-    vectors["position"] = &part_pos;
-
     double dt = 0.05;
     initializeRho(rho_arr,rho_init);
     initializeMass(rho_arr, s, mass_arr);
     initializeVelocity(u_arr, u_init);
-
-
-
 
     std::map<std::string, std::vector<double> *> scalars;
     std::map<std::string, std::vector<double> *> vectors;
@@ -141,7 +134,7 @@ int main(int argc, char *argv[]){
         gradW(part_pos, neighbours_matrix, gradW_matrix, &L[0], h, Nx, Ny, Nz);
         std::cout << "gradW algo terminated. \n" << endl;
 
-        continuityEquation(part_pos, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass, h);    
+        continuityEquation(part_pos, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass_arr, h);    
         std::cout << "continuityEquation algo terminated. \n" << endl;
 
         momentumEquation(mass, gradW_matrix, rho_arr, p_arr, state_equation_chosen);    
