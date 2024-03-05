@@ -93,21 +93,41 @@ void continuityEquation(const vector<double> &part_pos, const vector<vector<unsi
     }
 }
 
-void momentumEquation(const double &mass, const vector<vector<double>> &gradW_matrix, const vector<double> &rho_arr, const double &rho_0, 
-                      vector<double> &p_arr, const double &R, const double &T, const double &M, const string &state_equation_chosen){
+void momentumEquation(const vector<vector<unsigned>> &neighbours_matrix, const double &mass, const vector<vector<double>> &gradW_matrix, const vector<double> &rho_arr, const double &rho_0, const double &c_0,
+                      vector<double> &p_arr, const double &R, const double &T, const double &M, const double &gamma, const string &state_equation_chosen){
 
-    for (size_t a = 0; a < rho_arr.size(); a++)
-    double p = stateEquation(rho_arr[a], rho_0, R, T, M, state_equation_chosen);
+    for (size_t a = 0; a < rho_arr.size(); a++){
+
+        double p = stateEquation(rho_arr[a], rho_0, c_0, R, T, M, gamma, state_equation_chosen);
+
+       
+
+            const vector<unsigned> &neighbours_list = neighbours_matrix[a];
+            const vector<double> &gradW_list = gradW_matrix[a];
+
+            double dudt = 0;
+
+            // Summation over b = 1 -> nb_neighbours
+            for (size_t idx_neighbour = 0; idx_neighbour < neighbours_list.size(); idx_neighbour++){   
+
+         
+
+   
+            }
+
+        .
+    }
 }
 
 
-double stateEquation(const double &rho, const double &rho_0, const double &R, const double &T,
+double stateEquation(const double &rho, const double &rho_0, const double &c_0, const double &R, const double &T,
                      const double &M, const double &gamma, const string state_equation_chosen){
 
     if (state_equation_chosen == "Ideal gaz law"){
         double p = (rho/rho_0 - 1)*(rho*R*T)/M;
     }
     if (state_equation_chosen == "Quasi incompresible fluid"){
-        double p = (rho*R*T)/M;
+        double B = c_0*c_0*rho_0/gamma;
+        double p = B*(pow(rho/rho_0, gamma) - 1);
     }
 }
