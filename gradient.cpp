@@ -84,7 +84,7 @@ void continuityEquation(const vector<double> &part_pos, const vector<vector<unsi
             r_ab = sqrt(rx + ry + rz);
 
             rho += mass*f_cubic_spline(r_ab, h);
-            drhodt += mass*dot_product; // mass of particles is constant ?? Or rather use mass_matrix (which would be set initially) in case of ?
+            drhodt += mass*dot_product;
 
         }
 
@@ -111,11 +111,7 @@ void momentumEquation(const vector<vector<unsigned>> &neighbours_matrix, const d
             for (size_t idx_neighbour = 0; idx_neighbour < neighbours_list.size(); idx_neighbour++){   
 
          
-
-   
             }
-
-        .
     }
 }
 

@@ -89,31 +89,38 @@ int main(int argc, char *argv[]){
 
     unsigned nb_particles = part_pos.size()/3;
 
-    vector<double> drhodt_arr(nb_particles), rho_arr(nb_particles), dudt_arr(3*nb_particles), p_arr(nb_particles);
+    vector<double> u_arr(3*nb_particles), drhodt(nb_particles), rho_arr(nb_particles), dudt_arr(3*nb_particles), p_arr(nb_particles);
     vector<vector<unsigned>> neighbours_matrix(nb_particles); // Location matrix for neighbours
     vector<vector<double>> gradW_matrix; // Location matrix for neighbours
 
 
 
     /*---------------------------- SPH ALGORITHM  -----------------------------------*/
+    for (unsigned i = 0; i < nstepT; i++){
 
-    // Apply the linked-list algorithm
-    findNeighbours(part_pos, cell_pos, neighbours_matrix, &L[0], Nx, Ny, Nz, h, kappa);
-    std::cout << "findNeighbours algo terminated. \n" << endl;
 
-    gradW(part_pos, neighbours_matrix, gradW_matrix, &L[0], h, Nx, Ny, Nz);
-    std::cout << "gradW algo terminated. \n" << endl;
+        //Apply gravity
+        v_(t+1) = v_(t) + dt*g;
 
-    continuityEquation(part_pos, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass, h);    
-    std::cout << "continuityEquation algo terminated. \n" << endl;
+        // Apply the linked-list algorithm
+        findNeighbours(part_pos, cell_pos, neighbours_matrix, &L[0], Nx, Ny, Nz, h, kappa);
+        std::cout << "findNeighbours algo terminated. \n" << endl;
 
-    /*
-    for (unsigned i = 0; i < drhodt_arr.size(); i++){
-        cout << "Particle " << i << " : " << drhodt_arr[i] << " \n" << endl;
+        gradW(part_pos, neighbours_matrix, gradW_matrix, &L[0], h, Nx, Ny, Nz);
+        std::cout << "gradW algo terminated. \n" << endl;
+
+        continuityEquation(part_pos, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass, h);    
+        std::cout << "continuityEquation algo terminated. \n" << endl;
+
+        /*
+        for (unsigned i = 0; i < drhodt_arr.size(); i++){
+            cout << "Particle " << i << " : " << drhodt_arr[i] << " \n" << endl;
+        }
+        */
+
+    momentumEquation(mass, gradW_matrix, rho_arr, p_arr, state_equation_chosen);
+
     }
-    */
-
-   momentumEquation(mass, gradW_matrix, rho_arr, p_arr, state_equation_chosen);
     
 
 
