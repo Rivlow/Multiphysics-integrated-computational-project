@@ -98,7 +98,14 @@ int main(int argc, char *argv[]){
     vector<vector<unsigned>> neighbours_matrix(nb_particles); // Location matrix for neighbours
     vector<vector<double>> gradW_matrix; // Location matrix for neighbours
 
-    unsigned dt = 0.2;
+
+    std::map<std::string, std::vector<double> *> scalars;
+    std::map<std::string, std::vector<double> *> vectors;
+    
+    vectors["position"] = &part_pos;
+    //vectors["velocity"] = &u_arr;
+
+    double dt = 0.05;
     initializeRho(rho_arr,rho_init);
     initializeMass(rho_arr, s, mass_arr);
     initializeVelocity(u_arr, u_init);
@@ -106,12 +113,12 @@ int main(int argc, char *argv[]){
     for (unsigned t = 0; t < nstepT; t++){
         //Apply gravity
         for(size_t pos = 0; pos < nb_particles; pos++ ){
-            u_arr[3*pos+2] = u_arr[3*pos+2] - dt*g;
+            //u_arr[3*pos+2] = u_arr[3*pos+2] + dt*g;
             part_pos[3*pos+2] = part_pos[3*pos+2] - dt*dt*g*0.5;
-
+            
         }
-        u_arr[3*t+2] = u_arr[3*t+2] + dt*g;
-        export_particles("sph", nstep, pos, scalars, vectors);
+        
+        export_particles("sph", t, part_pos, scalars, vectors);
 
         /*
         // Apply the linked-list algorithm
