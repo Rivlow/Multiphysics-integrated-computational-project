@@ -98,7 +98,6 @@ int main(int argc, char *argv[]){
     /*---------------------------- SPH ALGORITHM  -----------------------------------*/
 
     // Apply the linked-list algorithm
-    
     findNeighbours(part_pos, cell_pos, neighbours_matrix, &L[0], Nx, Ny, Nz, h, kappa);
     std::cout << "findNeighbours algo terminated. \n" << endl;
 

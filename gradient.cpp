@@ -93,15 +93,21 @@ void continuityEquation(const vector<double> &part_pos, const vector<vector<unsi
     }
 }
 
-void momentumEquation(const double &mass, const vector<vector<double>> &gradW_matrix, const vector<double> &rho_arr, vector<double> &p_arr, const string &state_equation_chosen){
+void momentumEquation(const double &mass, const vector<vector<double>> &gradW_matrix, const vector<double> &rho_arr, const double &rho_0, 
+                      vector<double> &p_arr, const double &R, const double &T, const double &M, const string &state_equation_chosen){
 
     for (size_t a = 0; a < rho_arr.size(); a++)
-    double p = stateEquation(rho_arr[a], R, T, M, state_equation_chosen)
+    double p = stateEquation(rho_arr[a], rho_0, R, T, M, state_equation_chosen);
 }
 
 
+double stateEquation(const double &rho, const double &rho_0, const double &R, const double &T,
+                     const double &M, const double &gamma, const string state_equation_chosen){
 
-
-double stateEquation(){
-
+    if (state_equation_chosen == "Ideal gaz law"){
+        double p = (rho/rho_0 - 1)*(rho*R*T)/M;
+    }
+    if (state_equation_chosen == "Quasi incompresible fluid"){
+        double p = (rho*R*T)/M;
+    }
 }
