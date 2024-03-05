@@ -88,6 +88,7 @@ ENDIF()
 # Find zlib for compressed output files
 FIND_PACKAGE(ZLIB)
 # ------------------------------------------------------------------------------
+
 SET(SRCS
     main.cpp
     initialize.cpp
