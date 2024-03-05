@@ -60,11 +60,22 @@ int main(int argc, char *argv[]){
     double s = data["s"];
     double mass = s*s*s;
     int nstepT = data["nstepT"];
+    
+    std::string state_equation_chosen;
+
+    for (auto& it : data["stateEquation"].items()){
+        if (it.value    () == 1){
+            state_equation_chosen = it.key();
+        }
+    }
+    
+    std::cout << "state equation chose : " << state_equation_chosen << " \n" <<endl; // pk "cout" ne marche plus ??? on a definit namespace pourtant !!!
 
     unsigned Nx, Ny, Nz ;    // Number of cells we want (in each direction)
 
     int kappa = data["kappa"];
     double h = 1.2*s;
+    const double R = 8.314; // [J/(K.mol)]
 
     Nx = (int) L[0]/(kappa*h); //nombre de cellules dans x 
     Ny = (int) L[1]/(kappa*h);
@@ -78,7 +89,7 @@ int main(int argc, char *argv[]){
 
     unsigned nb_particles = part_pos.size()/3;
 
-    vector<double> drhodt_arr(nb_particles);
+    vector<double> drhodt_arr(nb_particles), rho_arr(nb_particles), dudt_arr(3*nb_particles), p_arr(nb_particles);
     vector<vector<unsigned>> neighbours_matrix(nb_particles); // Location matrix for neighbours
     vector<vector<double>> gradW_matrix; // Location matrix for neighbours
 
@@ -89,17 +100,22 @@ int main(int argc, char *argv[]){
     // Apply the linked-list algorithm
     
     findNeighbours(part_pos, cell_pos, neighbours_matrix, &L[0], Nx, Ny, Nz, h, kappa);
-    cout << "findNeighbours algo terminated. \n" << endl;
+    std::cout << "findNeighbours algo terminated. \n" << endl;
 
     gradW(part_pos, neighbours_matrix, gradW_matrix, &L[0], h, Nx, Ny, Nz);
-    cout << "gradW algo terminated. \n" << endl;
+    std::cout << "gradW algo terminated. \n" << endl;
 
-    continuityEquation(part_pos, neighbours_matrix, gradW_matrix, drhodt_arr, mass);    
-    cout << "continuityEquation algo terminated. \n" << endl;
+    continuityEquation(part_pos, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass, h);    
+    std::cout << "continuityEquation algo terminated. \n" << endl;
 
+    /*
     for (unsigned i = 0; i < drhodt_arr.size(); i++){
         cout << "Particle " << i << " : " << drhodt_arr[i] << " \n" << endl;
     }
+    */
+
+   momentumEquation(mass, gradW_matrix, rho_arr, p_arr, state_equation_chosen);
+    
 
 
 }

@@ -7,26 +7,22 @@ using namespace std;
 void gradW(const vector<double> &part_pos, const vector<vector<unsigned>> &neighbours_matrix, vector<vector<double>> &gradW_matrix, 
            double L[3], const double &h, const int &Nx, const int &Ny, const int &Nz){
 
+    // Iterations over each particle
     for (unsigned pos = 0; pos < part_pos.size()/3; pos++){
 
         const vector<unsigned> &neighbours_list = neighbours_matrix[pos];
+        cout << "nb neighbours : " << neighbours_list.size() << " \n" << endl;
         vector<double> gradW_vect;
 
+        // Iterations over each associated neighbours of prescribed particles
         for (unsigned idx_neighbour : neighbours_list){     
             
             double rx, ry, rz, r_ab;
 
-            cout << "pos : " << pos << " and idx_neighbour : " << idx_neighbour << endl;
-            rx = (part_pos[3*pos] - part_pos[3*idx_neighbour])*(part_pos[3*pos] - part_pos[3*idx_neighbour]);
-            ry = (part_pos[3*pos + 1] - part_pos[3*idx_neighbour+1])*(part_pos[3*pos + 1] - part_pos[3*idx_neighbour+1]);
-            rz = (part_pos[3*pos + 2] - part_pos[3*idx_neighbour+2])*(part_pos[3*pos + 2] - part_pos[3*idx_neighbour+2]);
-            r_ab = rx + ry + rz;
-
-            cout << " relative x-distance : " << part_pos[3*pos] - part_pos[3*idx_neighbour]<< "\n ";
-            cout << "relative y-distance : " << part_pos[3*pos+1] - part_pos[3*idx_neighbour+1]<< "\n ";
-            cout << "relative z-distance : " << part_pos[3*pos+2] - part_pos[3*idx_neighbour+2] << "\n " << endl;
-
-            cout << "r_ab/h = " << r_ab/h << "\n "<< endl;
+            rx = (part_pos[3*pos+0] - part_pos[3*idx_neighbour+0])*(part_pos[3*pos+0] - part_pos[3*idx_neighbour+0]);
+            ry = (part_pos[3*pos+1] - part_pos[3*idx_neighbour+1])*(part_pos[3*pos+1] - part_pos[3*idx_neighbour+1]);
+            rz = (part_pos[3*pos+2] - part_pos[3*idx_neighbour+2])*(part_pos[3*pos+2] - part_pos[3*idx_neighbour+2]);
+            r_ab = sqrt(rx + ry + rz);
 
             gradW_vect.push_back((part_pos[3*pos+0] - part_pos[3*idx_neighbour+0])/r_ab * derive_cubic_spline(r_ab, h));
             gradW_vect.push_back((part_pos[3*pos+1] - part_pos[3*idx_neighbour+1])/r_ab * derive_cubic_spline(r_ab, h));
@@ -34,17 +30,16 @@ void gradW(const vector<double> &part_pos, const vector<vector<unsigned>> &neigh
         }
 
         gradW_matrix.push_back(gradW_vect);
+        gradW_vect.clear();
     }
 
-        
-    for (size_t i = 0; i < gradW_matrix.size(); ++i) {
+    /*
+    for (size_t i = 0; i < gradW_matrix.size(); i++) {
             std::cout << "Pour le " << i << "e element : (";
             
-            // Parcours de chaque élément dans le vecteur interne
-            for (size_t j = 0; j < gradW_matrix[i].size(); ++j) {
+            for (size_t j = 0; j < gradW_matrix[i].size(); j++) {
                 std::cout << gradW_matrix[i][j];
                 
-                // Ajouter une virgule et un espace pour tous les éléments sauf le dernier
                 if (j < gradW_matrix[i].size() - 1) {
                     std::cout << ", ";
                 }
@@ -52,36 +47,61 @@ void gradW(const vector<double> &part_pos, const vector<vector<unsigned>> &neigh
 
             std::cout << ")" << std::endl;
         }
+    */
     
 }
 
 void continuityEquation(const vector<double> &part_pos, const vector<vector<unsigned>> &neighbours_matrix, 
-                        const vector<vector<double>> &gradW_matrix, vector<double> &drhodt_arr, const double &mass){
+                        const vector<vector<double>> &gradW_matrix, vector<double> &drhodt_arr, vector<double> &rho_arr, const double &mass, const double &h){
 
-    for (unsigned pos = 0; pos < part_pos.size()/3; pos++){
+    for (size_t pos = 0; pos < part_pos.size()/3; pos++){
 
         const vector<unsigned> &neighbours_list = neighbours_matrix[pos];
         const vector<double> &gradW_list = gradW_matrix[pos];
-        vector<double> gradW_vect;
 
-        double drhodt = 0;
+        double drhodt = 0, rho = 0;
 
-        // Summation over b = 1 -> N
-        for (unsigned idx_neighbour : neighbours_list){     
-            
+        // Summation over b = 1 -> nb_neighbours
+        for (size_t idx_neighbour = 0; idx_neighbour < neighbours_list.size(); idx_neighbour++){   
+
+            /* !!!!!! A CHECK : est ce que "part_pos[3*neighbours_list[idx_neighbour]+x]" et "gradW_list[idx_neighbour+x]" 
+            font bien reference au meme au meme voisin ???? Normalement oui mais pas sur a 100% "*/
+
             // Dot product of u_ab with grad_a(W_ab)
-            double dot_product;
-            for (unsigned x = 0; x < 3; x++){
-                dot_product += (part_pos[3*pos+x] - part_pos[3*idx_neighbour+x])*(gradW_list[3*pos*x]);
+
+
+            /* ATTENTION !!!! Ici j'ai mis "(x,y,z)" plutot que "(u_x,u_y,u_z)"" uniquement pour voir ce que ca affichait -> a changer plus tard*/
+            double dot_product = 0;
+            for (size_t x = 0; x < 3; x++){
+
+                dot_product += (part_pos[3*pos+x] - part_pos[3*neighbours_list[idx_neighbour]+x])*(gradW_list[idx_neighbour+x]);
             }
 
+            double rx, ry, rz, r_ab;
+            rx = (part_pos[3*pos+0] - part_pos[3*idx_neighbour+0])*(part_pos[3*pos+0] - part_pos[3*idx_neighbour+0]);
+            ry = (part_pos[3*pos+1] - part_pos[3*idx_neighbour+1])*(part_pos[3*pos+1] - part_pos[3*idx_neighbour+1]);
+            rz = (part_pos[3*pos+2] - part_pos[3*idx_neighbour+2])*(part_pos[3*pos+2] - part_pos[3*idx_neighbour+2]);
+            r_ab = sqrt(rx + ry + rz);
+
+            rho += mass*f_cubic_spline(r_ab, h);
             drhodt += mass*dot_product; // mass of particles is constant ?? Or rather use mass_matrix (which would be set initially) in case of ?
 
         }
 
+        rho_arr[pos] = rho;
         drhodt_arr[pos] = drhodt;
-
-        
     }
-    
+}
+
+void momentumEquation(const double &mass, const vector<vector<double>> &gradW_matrix, const vector<double> &rho_arr, vector<double> &p_arr, const string &state_equation_chosen){
+
+    for (size_t a = 0; a < rho_arr.size(); a++)
+    double p = stateEquation(rho_arr[a], R, T, M, state_equation_chosen)
+}
+
+
+
+
+double stateEquation(){
+
 }
