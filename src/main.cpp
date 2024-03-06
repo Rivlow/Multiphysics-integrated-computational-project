@@ -78,7 +78,7 @@ int main(int argc, char *argv[]){
     int kappa = data["kappa"];
     double h = 1.2*s;
     const double R = 8.314; // [J/(K.mol)]
-    const double g = 9.81; // [m/s²]
+    const double g = -9.81; // [m/s²]
 
     Nx = (int) L[0]/(kappa*h);
     Ny = (int) L[1]/(kappa*h);
@@ -109,36 +109,39 @@ int main(int argc, char *argv[]){
     vectors["position"] = &part_pos;
     //vectors["velocity"] = &u_arr;
 
-    double dt = 0.05;
-    initializeRho(rho_arr,rho_init);
-    initializeMass(rho_arr, s, mass_arr);
-    initializeVelocity(u_arr, u_init);
+    
     /*---------------------------- SPH ALGORITHM  -----------------------------------*/
 
+double  intermediate;
+    
     for (unsigned t = 0; t < nstepT; t++){
-
+        
         //Apply gravity
         for(size_t pos = 0; pos < nb_particles; pos++ ){
+            intermediate = u_arr[3*pos+2];
+            
+            u_arr[3*pos+2] = u_arr[3*pos+2] + dt*g;
 
-            //u_arr[3*pos+2] = u_arr[3*pos+2] - dt*g;
-            part_pos[3*pos+2] = part_pos[3*pos+2] - dt*dt*g*0.5;
+            
+            part_pos[3*pos+2] = part_pos[3*pos+2] + dt*intermediate;
+        
+
+            export_particles("sph", t, part_pos, scalars, vectors);
+
+            
+            // Apply the linked-list algorithm
+            findNeighbours(part_pos, cell_pos, neighbours_matrix, &L[0], Nx, Ny, Nz, h, kappa);
+            std::cout << "findNeighbours algo terminated. \n" << endl;
+
+            gradW(part_pos, neighbours_matrix, gradW_matrix, &L[0], h, Nx, Ny, Nz);
+            std::cout << "gradW algo terminated. \n" << endl;
+
+            continuityEquation(part_pos, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass_arr, h);    
+            std::cout << "continuityEquation algo terminated. \n" << endl;
+
+            momentumEquation(mass_arr, gradW_matrix, rho_arr, rho_0, p_arr, R, T, M, state_equation_chosen);    
         }
-
-        export_particles("sph", t, part_pos, scalars, vectors);
-
-        /*
-        // Apply the linked-list algorithm
-        findNeighbours(part_pos, cell_pos, neighbours_matrix, &L[0], Nx, Ny, Nz, h, kappa);
-        std::cout << "findNeighbours algo terminated. \n" << endl;
-
-        gradW(part_pos, neighbours_matrix, gradW_matrix, &L[0], h, Nx, Ny, Nz);
-        std::cout << "gradW algo terminated. \n" << endl;
-
-        continuityEquation(part_pos, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass_arr, h);    
-        std::cout << "continuityEquation algo terminated. \n" << endl;
-
-        momentumEquation(mass, gradW_matrix, rho_arr, p_arr, state_equation_chosen);    
-        */
+        
     }
     
     
