@@ -78,7 +78,7 @@ int main(int argc, char *argv[]){
     int kappa = data["kappa"];
     double h = 1.2*s;
     const double R = 8.314; // [J/(K.mol)]
-    const double g = 9.81; // [m/s²]
+    const double g = -9.81; // [m/s²]
 
     Nx = (int) L[0]/(kappa*h);
     Ny = (int) L[1]/(kappa*h);
@@ -97,11 +97,6 @@ int main(int argc, char *argv[]){
     vector<double> mass_arr(nb_particles), u_arr(3*nb_particles), drhodt(nb_particles), rho_arr(nb_particles), dudt_arr(3*nb_particles), p_arr(nb_particles);
     vector<vector<unsigned>> neighbours_matrix(nb_particles); // Location matrix for neighbours
     vector<vector<double>> gradW_matrix, artificial_visc_matrix; 
-
-    double dt = 0.05;
-    initializeRho(rho_arr,rho_init);
-    initializeMass(rho_arr, s, mass_arr);
-    initializeVelocity(u_arr, u_init);
 
     std::map<std::string, std::vector<double> *> scalars;
     std::map<std::string, std::vector<double> *> vectors;
