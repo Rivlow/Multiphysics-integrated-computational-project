@@ -3,7 +3,7 @@
 using namespace std;
 
 
-void initializeMass(vector<double> &rho_arr,double s,vector<double> &mass_arr){
+void initializeMass(vector<double> &rho_arr,double &s,vector<double> &mass_arr){
 
     double V = s*s*s;
     for(size_t i = 0; i < rho_arr.size(); i++){

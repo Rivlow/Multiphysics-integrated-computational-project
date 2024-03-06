@@ -77,8 +77,8 @@ int main(int argc, char *argv[]){
 
     int kappa = data["kappa"];
     double h = 1.2*s;
-    const double R = 8.314; // [J/(K.mol)]
-    const double g = -9.81; // [m/s²]
+    double R = 8.314; // [J/(K.mol)]
+    double g = -9.81; // [m/s²]
 
     Nx = (int) L[0]/(kappa*h);
     Ny = (int) L[1]/(kappa*h);
@@ -147,10 +147,6 @@ double  intermediate;
         }
         
     }
-    
-    
-
-
 }
 
 
