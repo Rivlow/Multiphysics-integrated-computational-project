@@ -1,5 +1,7 @@
 #include <iostream>
 #include <cmath>
+#include <stdio.h>
+using namespace std;
 
 double f_gaussian(double r, double h) {
     double alpha = 1/(M_PI*sqrt(M_PI)*h*h*h);
@@ -17,7 +19,7 @@ double f_bell(double r, double h){
     double alpha = 105/(16*M_PI*h*h*h);
     double W = 0;
     if (r/h <= 1){
-        W = (1+3*r/h)*(1-r/h)*(1-r/h)*(1-r/h);
+        W = alpha*(1+3*r/h)*(1-r/h)*(1-r/h)*(1-r/h);
     }
     return W;
 }
@@ -35,24 +37,26 @@ double f_cubic_spline(double r, double h)
 {   double alpha = 3/(2*M_PI*h*h*h);
     double W = 0;
     if(r/h < 1){
-        W = 3/2 - r*r/(h*h) + 1/2 * r*r*r/(h*h*h);
+        W = alpha* (3/2 - r*r/(h*h) + 1/2 * r*r*r/(h*h*h));
     }
-    if(1<= r/h <2){
-        W = 1/6 * pow(1-r/h,3);
+    if(1<= r/h  && r/h<2){
+        W =alpha* 1/6 * ((1-r/h)*(1-r/h)*(1-r/h));
     }
     return W;
 }
 
 double derive_cubic_spline(double r, double h){
+
     double alpha = 3/(2*M_PI*h*h*h);
     double DW = 0;
-    
-    if(1<= r/h <2){
-        DW = alpha/h *(3/2*r*r/(h*h) - 2*r/h);
+
+    if(1.0<= r/h && r/h<2.0){
+        DW = alpha/h *(1.5*r*r/(h*h) - 2*r/h);
     }
-    if(r/h < 1){
-        DW = alpha/h * (-1/2*(1-r/h)*(1-r/h));
+    if(r/h < 1.0){
+        DW = alpha/h * (-0.5*(1-r/h)*(1-r/h));
     }
+
     return DW;
 }
 
@@ -100,10 +104,10 @@ double f_quinitc_spline(double r, double h){
     if(r/h <1){
         W = alpha*((3-r/h)*(3-r/h)*(3-r/h)*(3-r/h)*(3-r/h)-6*(2-r/h)*(2-r/h)*(2-r/h)*(2-r/h)*(2-r/h)+15*(1-r/h)*(1-r/h)*(1-r/h)*(1-r/h)*(1-r/h));
     }
-    if(1<= r/h < 2){
+    if(1<= r/h && r/h < 2){
         W = alpha*((3-r/h)*(3-r/h)*(3-r/h)*(3-r/h)*(3-r/h)-6*(2-r/h)*(2-r/h)*(2-r/h)*(2-r/h)*(2-r/h));
     }
-    if(2<=r/h<3){
+    if(2<=r/h && r/h <3){
         W = alpha*(3-r/h)*(3-r/h)*(3-r/h)*(3-r/h)*(3-r/h);
     }
     return W;
@@ -116,19 +120,11 @@ double derive_quintic_spline(double r, double h){
     if(r/h <1){
         DW = alpha/h*(-5*(3-r/h)*(3-r/h)*(3-r/h)*(3-r/h)+30*(2-r/h)*(2-r/h)*(2-r/h)*(2-r/h)-75*(1-r/h)*(1-r/h)*(1-r/h)*(1-r/h));
     }
-    if(1<= r/h < 2){
+    if(1<= r/h && r/h < 2){
        DW = alpha/h*(-5*(3-r/h)*(3-r/h)*(3-r/h)*(3-r/h)+30*(2-r/h)*(2-r/h)*(2-r/h)*(2-r/h));
     }
-    if(2<=r/h<3){
+    if(2<=r/h && r/h<3){
         DW = -5*alpha/h*(3-r/h)*(3-r/h)*(3-r/h)*(3-r/h);
     }
     return DW;   
 }
-
-int main(){
- int r = 2;
- int h = 1;
- double W = f_gaussian(r,h);
- double DW = deriv_gaussian(r,h);
- printf("%.7lf\n",W);
- printf("%.7lf\n",DW);

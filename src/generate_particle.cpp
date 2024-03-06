@@ -11,8 +11,7 @@
  * @param pos positions of particles
  */
 
-void meshcube(double o[3], double L[3], double s, std::vector<double> &particle_x, 
-                std::vector<double> &particle_y, std::vector<double> &particle_z)
+void meshcube(double o[3], double L[3], double s, std::vector<double> &pos)
 {
     // calculate nb of particles along each direction from target size "s"
     int ni = int(ceil(L[0] / s));
@@ -31,10 +30,8 @@ void meshcube(double o[3], double L[3], double s, std::vector<double> &particle_
     std::cout << "\tparticle spacing s=(" << dx << "," << dy << "," << dz << ") [target was s=" << s << "]\n";
     std::cout << "\t=> " << ni << "*" << nj << "*" << nk << " = " << ni * nj * nk << " particles to be generated\n";
 
-    /* memory allocation
-    particle_x.resize(particle_x.size() + ni * nj * nk);
-    particle_y.resize(particle_y.size() + ni * nj * nk);
-    particle_z.resize(particle_z.size() + ni * nj * nk);*/
+    // memory allocation
+    pos.reserve(pos.size() + ni * nj * nk * 3);
 
     // particle generation
     for (int i = 0; i < ni; ++i)
@@ -46,9 +43,9 @@ void meshcube(double o[3], double L[3], double s, std::vector<double> &particle_
             for (int k = 0; k < nk; ++k)
             {
                 double z = o[2] + k * dz;
-                particle_x.push_back(x);
-                particle_y.push_back(y);
-                particle_z.push_back(z);
+                pos.push_back(x);
+                pos.push_back(y);
+                pos.push_back(z);
             }
         }
     }
