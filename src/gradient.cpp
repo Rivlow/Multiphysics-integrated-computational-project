@@ -34,23 +34,6 @@ void gradW(const vector<double> &part_pos, const vector<vector<unsigned>> &neigh
         gradW_matrix.push_back(gradW_vect);
         gradW_vect.clear();
     }
-
-    /*
-    for (size_t i = 0; i < gradW_matrix.size(); i++) {
-            std::cout << "Pour le " << i << "e element : (";
-            
-            for (size_t j = 0; j < gradW_matrix[i].size(); j++) {
-                std::cout << gradW_matrix[i][j];
-                
-                if (j < gradW_matrix[i].size() - 1) {
-                    std::cout << ", ";
-                }
-            }
-
-            std::cout << ")" << std::endl;
-        }
-    */
-    
 }
 
 double setArtificialViscosity(vector<vector<double>> &artificial_visc, const vector<double> &part_pos, const vector<vector<unsigned>> &neighbours_matrix, vector<double> &u_arr, 

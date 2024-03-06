@@ -93,7 +93,7 @@ int main(int argc, char *argv[]){
     unsigned nb_particles = part_pos.size()/3;
 
     double rho_init = data["rho"];
-    vector<double> u_init = data['u'];
+    vector<double> u_init = data["u"];
     vector<double> mass_arr(nb_particles), u_arr(3*nb_particles), drhodt(nb_particles), rho_arr(nb_particles), dudt_arr(3*nb_particles), p_arr(nb_particles);
     vector<vector<unsigned>> neighbours_matrix(nb_particles); // Location matrix for neighbours
     vector<vector<double>> gradW_matrix, artificial_visc_matrix; 
@@ -124,7 +124,7 @@ int main(int argc, char *argv[]){
             part_pos[3*pos+2] = part_pos[3*pos+2] - dt*dt*g*0.5;
         }
 
-        export_particles("sph", nstepT, part_pos, scalars, vectors);
+        export_particles("sph", t, part_pos, scalars, vectors);
 
         /*
         // Apply the linked-list algorithm
