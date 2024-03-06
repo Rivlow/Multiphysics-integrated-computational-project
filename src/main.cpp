@@ -94,7 +94,7 @@ int main(int argc, char *argv[]){
 
     double rho_init = data["rho"];
     vector<double> u_init = data["u"];
-    vector<double> mass_arr(nb_particles), u_arr(3*nb_particles), drhodt(nb_particles), rho_arr(nb_particles), dudt_arr(3*nb_particles), p_arr(nb_particles);
+    vector<double> mass_arr(nb_particles), u_arr(3*nb_particles), drhodt_arr(nb_particles), rho_arr(nb_particles), dudt_arr(3*nb_particles), p_arr(nb_particles);
     vector<vector<unsigned>> neighbours_matrix(nb_particles); // Location matrix for neighbours
     vector<vector<double>> gradW_matrix, artificial_visc_matrix; 
 
@@ -108,6 +108,9 @@ int main(int argc, char *argv[]){
     
     vectors["position"] = &part_pos;
     //vectors["velocity"] = &u_arr;
+
+    double rho_0 = 1, c_0 = 1.0, T = 273, M = 200, gamma = 7;
+    
 
     
     /*---------------------------- SPH ALGORITHM  -----------------------------------*/
@@ -136,10 +139,11 @@ double  intermediate;
             gradW(part_pos, neighbours_matrix, gradW_matrix, &L[0], h, Nx, Ny, Nz);
             std::cout << "gradW algo terminated. \n" << endl;
 
-            continuityEquation(part_pos, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass_arr, h);    
+            continuityEquation(part_pos,u_arr, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass_arr, h);  
+            
             std::cout << "continuityEquation algo terminated. \n" << endl;
 
-            momentumEquation(mass_arr, gradW_matrix, rho_arr, rho_0, p_arr, R, T, M, state_equation_chosen);    
+            momentumEquation(neighbours_matrix, mass_arr, gradW_matrix, dudt_arr, artificial_visc_matrix, rho_arr, rho_0, c_0, p_arr, R, T, M, gamma, state_equation_chosen);    
         }
         
     }

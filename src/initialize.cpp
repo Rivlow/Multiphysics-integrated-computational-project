@@ -3,7 +3,7 @@
 using namespace std;
 
 
-void initializeMass(vector<double> rho_arr,double s,vector<double> mass_arr){
+void initializeMass(vector<double> &rho_arr,double s,vector<double> &mass_arr){
 
     double V = s*s*s;
     for(size_t i = 0; i < rho_arr.size(); i++){
@@ -11,14 +11,14 @@ void initializeMass(vector<double> rho_arr,double s,vector<double> mass_arr){
     }    
 }
 
-void initializeRho(vector<double> rho_arr,double rho){
+void initializeRho(vector<double> &rho_arr,double &rho){
 
     for(size_t i = 0; i < rho_arr.size(); i++){
         rho_arr[i] = rho;
     }    
 }
 
-void initializeVelocity(vector<double> u_arr,vector<double> u_init){
+void initializeVelocity(vector<double> &u_arr,vector<double> &u_init){
 
     for(size_t i = 0; i < u_arr.size()/3; i++){
         u_arr[3*i] = u_init[0];
