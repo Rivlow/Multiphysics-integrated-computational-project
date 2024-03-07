@@ -33,13 +33,7 @@ ENDIF()
 FIND_PACKAGE(ZLIB)
 # ------------------------------------------------------------------------------
 
-SET(SRCS
-    main.cpp
-    initialize.cpp
-    generate_particle.cpp
-    export.cpp
-    # Add more files as needed
-)
+FILE(GLOB SRCS *.cpp)
 ADD_EXECUTABLE(solver ${SRCS})
 IF(OpenMP_CXX_FOUND)
     TARGET_LINK_LIBRARIES(solver PUBLIC OpenMP::OpenMP_CXX)

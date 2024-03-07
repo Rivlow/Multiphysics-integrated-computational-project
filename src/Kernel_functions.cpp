@@ -40,11 +40,9 @@ double f_cubic_spline(double r, double h)
         W = alpha* (3/2 - r*r/(h*h) + 1/2 * r*r*r/(h*h*h));
     }
     if(1<= r/h  && r/h<2){
-<<<<<<<< HEAD:Kernel_functions.cpp
-        W =alpha* 1/6 * pow(1-r/h,3);
-========
+
         W =alpha* 1/6 * ((1-r/h)*(1-r/h)*(1-r/h));
->>>>>>>> 15f00ac839507c802eb83fb90f8d307f2d41a779:src/Kernel_functions.cpp
+
     }
     return W;
 }
@@ -53,15 +51,15 @@ double derive_cubic_spline(double r, double h){
 
     double alpha = 3/(2*M_PI*h*h*h);
     double DW = 0;
-<<<<<<<< HEAD:Kernel_functions.cpp
+
     
     if(1<= r/h && r/h<2){
         DW = alpha/h *(3/2*r*r/(h*h) - 2*r/h);
-========
+    }
 
     if(1.0<= r/h && r/h<2.0){
         DW = alpha/h *(1.5*r*r/(h*h) - 2*r/h);
->>>>>>>> 15f00ac839507c802eb83fb90f8d307f2d41a779:src/Kernel_functions.cpp
+
     }
     if(r/h < 1.0){
         DW = alpha/h * (-0.5*(1-r/h)*(1-r/h));

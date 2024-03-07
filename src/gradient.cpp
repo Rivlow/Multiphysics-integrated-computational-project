@@ -7,13 +7,13 @@ using namespace std;
 
 
 void gradW( vector<double> &part_pos,  vector<vector<unsigned>> &neighbours_matrix, vector<vector<double>> &gradW_matrix, 
-           double L[3],  double &h,  unsigned &Nx,  unsigned &Ny,  unsigned &Nz){
+            double &h,  unsigned &Nx,  unsigned &Ny,  unsigned &Nz){
 
     // Iterations over each particle
     for (unsigned pos = 0; pos < part_pos.size()/3; pos++){
 
          vector<unsigned> &neighbours_list = neighbours_matrix[pos];
-        cout << "nb neighbours : " << neighbours_list.size() << " \n" << endl;
+        //cout << "nb neighbours : " << neighbours_list.size() << " \n" << endl;
         vector<double> gradW_vect;
 
         // Iterations over each associated neighbours of prescribed particles
@@ -36,7 +36,7 @@ void gradW( vector<double> &part_pos,  vector<vector<unsigned>> &neighbours_matr
     }
 }
 
-double setArtificialViscosity(vector<vector<double>> &artificial_visc,  vector<double> &part_pos,  vector<vector<unsigned>> &neighbours_matrix, vector<double> &u_arr, 
+void setArtificialViscosity(vector<vector<double>> &artificial_visc,  vector<double> &part_pos,  vector<vector<unsigned>> &neighbours_matrix, vector<double> &u_arr, 
                              double &c_ab,  double &rho_ab,  double &alpha,  double &beta,  double &h){
 
 
@@ -66,7 +66,6 @@ double setArtificialViscosity(vector<vector<double>> &artificial_visc,  vector<d
             double nu_2 = 0.01*h*h;
             double mu_ab = (h*res)/(xa_xb + nu_2);
             artificial_visc[pos].push_back((res < 0) ? (-alpha*c_ab*mu_ab + beta*mu_ab*mu_ab)/rho_ab : 0);
-
         }
     }
 }
@@ -101,13 +100,33 @@ void continuityEquation( vector<double> &part_pos,  vector<double> &u_arr,  vect
             rz = (part_pos[3*pos+2] - part_pos[3*idx_neighbour+2])*(part_pos[3*pos+2] - part_pos[3*idx_neighbour+2]);
             r_ab = sqrt(rx + ry + rz);
 
-            rho += mass_arr[neighbours_list[idx_neighbour]]*f_cubic_spline(r_ab, h);
+            //rho += mass_arr[neighbours_list[idx_neighbour]]*f_cubic_spline(r_ab, h);
             drhodt += mass_arr[neighbours_list[idx_neighbour]]*dot_product;
         }
 
-        rho_arr[pos] = rho;
+        //rho_arr[pos] = rho;
         drhodt_arr[pos] = drhodt;
+
+       
     }
+}
+
+
+void stateEquation(double &p, double &c,  double &rho,  double &rho_0,  double &c_0,  double &R,  double &T,
+                      double &M,  double &gamma,  string &state_equation_chosen){
+
+    if (state_equation_chosen == "Ideal gaz law"){
+        p = (rho/rho_0 - 1)*(rho*R*T)/M;
+        c = c_0;
+    }
+    if (state_equation_chosen == "Quasi incompresible fluid"){
+        cout << "QI 1 \n" << endl;
+        double B = c_0*c_0*rho_0/gamma;
+        p = B*(pow(rho/rho_0, gamma) - 1);
+        c = c_0*pow(rho/rho_0, 0.5*(gamma-1));
+        cout << "QI2 \n" << endl;
+    }
+
 }
 
 void momentumEquation(vector<vector<unsigned>> &neighbours_matrix,  vector<double> &mass_arr,  vector<vector<double>> &gradW_matrix, 
@@ -116,31 +135,26 @@ void momentumEquation(vector<vector<unsigned>> &neighbours_matrix,  vector<doubl
 
     // Iterations over each particle
     for (size_t pos = 0; pos < rho_arr.size(); pos++){
-
          vector<unsigned> &neighbours_list = neighbours_matrix[pos];
          vector<double> &gradW_list = gradW_matrix[pos];
 
         double p_a, c_a;
         stateEquation(p_a, c_a, rho_arr[pos], rho_0, c_0, R, T, M, gamma, state_equation_chosen);
-
         vector<double> dudt(3, 0.0);
 
         // Summation over b = 1 -> nb_neighbours
         for (size_t idx_neighbour = 0; idx_neighbour < neighbours_list.size(); idx_neighbour++){   
-
             double p_b, c_b;
             stateEquation(p_b, c_b, rho_arr[neighbours_list[idx_neighbour]], rho_0, c_0, R, T, M, gamma, state_equation_chosen);
-
             double rho_a = rho_arr[pos], rho_b = rho_arr[neighbours_list[idx_neighbour]];
             double rho_ab = 0.5*(rho_a + rho_b);
-            double pi_ab = artificial_visc[pos][neighbours_list[idx_neighbour]];
+            double pi_ab = 0 ; //[pos][neighbours_list[idx_neighbour]];
             double m_b = mass_arr[neighbours_list[idx_neighbour]];
-
             for (size_t it = 0; it < 3; it++) {dudt[it] += m_b*(p_b/(rho_b*rho_b) + p_a/(rho_a*rho_a) + pi_ab)*gradW_list[idx_neighbour+it];}
+            
         }
-        
-        for (size_t it = 0; it < 3; it++) {
 
+        for (size_t it = 0; it < 3; it++) {
             dudt[it] *= -1; 
             dudt_arr[3*pos+it] = dudt[it];
         }
@@ -148,18 +162,3 @@ void momentumEquation(vector<vector<unsigned>> &neighbours_matrix,  vector<doubl
     }
 }
 
-
-void stateEquation(double &p, double &c,  double &rho,  double &rho_0,  double &c_0,  double &R,  double &T,
-                      double &M,  double &gamma,  string state_equation_chosen){
-
-    if (state_equation_chosen == "Ideal gaz law"){
-        p = (rho/rho_0 - 1)*(rho*R*T)/M;
-        c = c_0;
-    }
-    if (state_equation_chosen == "Quasi incompresible fluid"){
-        double B = c_0*c_0*rho_0/gamma;
-        p = B*(pow(rho/rho_0, gamma) - 1);
-        c = c_0*pow(rho/rho_0, 0.5*(gamma-1));
-    }
-
-}
