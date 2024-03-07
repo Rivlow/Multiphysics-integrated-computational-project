@@ -6,13 +6,13 @@ using namespace std;
 
 
 
-void gradW(const vector<double> &part_pos, const vector<vector<unsigned>> &neighbours_matrix, vector<vector<double>> &gradW_matrix, 
-           double L[3], const double &h, const int &Nx, const int &Ny, const int &Nz){
+void gradW( vector<double> &part_pos,  vector<vector<unsigned>> &neighbours_matrix, vector<vector<double>> &gradW_matrix, 
+           double L[3],  double &h,  unsigned &Nx,  unsigned &Ny,  unsigned &Nz){
 
     // Iterations over each particle
     for (unsigned pos = 0; pos < part_pos.size()/3; pos++){
 
-        const vector<unsigned> &neighbours_list = neighbours_matrix[pos];
+         vector<unsigned> &neighbours_list = neighbours_matrix[pos];
         cout << "nb neighbours : " << neighbours_list.size() << " \n" << endl;
         vector<double> gradW_vect;
 
@@ -36,8 +36,8 @@ void gradW(const vector<double> &part_pos, const vector<vector<unsigned>> &neigh
     }
 }
 
-double setArtificialViscosity(vector<vector<double>> &artificial_visc, const vector<double> &part_pos, const vector<vector<unsigned>> &neighbours_matrix, vector<double> &u_arr, 
-                            const double &c_ab, const double &rho_ab, const double &alpha, const double &beta, const double &h){
+double setArtificialViscosity(vector<vector<double>> &artificial_visc,  vector<double> &part_pos,  vector<vector<unsigned>> &neighbours_matrix, vector<double> &u_arr, 
+                             double &c_ab,  double &rho_ab,  double &alpha,  double &beta,  double &h){
 
 
     vector<double> rel_displ(3), rel_velo(3);
@@ -45,7 +45,7 @@ double setArtificialViscosity(vector<vector<double>> &artificial_visc, const vec
     // Iterations over each particle
     for (size_t pos = 0; pos < part_pos.size(); pos++){
 
-        const vector<unsigned> &neighbours_list = neighbours_matrix[pos];
+         vector<unsigned> &neighbours_list = neighbours_matrix[pos];
         for (size_t idx_neighbour = 0; idx_neighbour < neighbours_list.size(); idx_neighbour++){   
 
             rel_displ[0] = (part_pos[3*pos+0] - part_pos[3*idx_neighbour+0]);
@@ -71,14 +71,14 @@ double setArtificialViscosity(vector<vector<double>> &artificial_visc, const vec
     }
 }
 
-void continuityEquation(const vector<double> &part_pos, const vector<double> &u_arr, const vector<vector<unsigned>> &neighbours_matrix, 
-                        const vector<vector<double>> &gradW_matrix, vector<double> &drhodt_arr, vector<double> &rho_arr, const double &mass, const double &h){
+void continuityEquation( vector<double> &part_pos,  vector<double> &u_arr,  vector<vector<unsigned>> &neighbours_matrix, 
+                         vector<vector<double>> &gradW_matrix, vector<double> &drhodt_arr, vector<double> &rho_arr,  vector<double> &mass_arr,  double &h){
 
     // Iterations over each particle                    
     for (size_t pos = 0; pos < part_pos.size()/3; pos++){
 
-        const vector<unsigned> &neighbours_list = neighbours_matrix[pos];
-        const vector<double> &gradW_list = gradW_matrix[pos];
+         vector<unsigned> &neighbours_list = neighbours_matrix[pos];
+         vector<double> &gradW_list = gradW_matrix[pos];
 
         double drhodt = 0, rho = 0;
 
@@ -101,8 +101,8 @@ void continuityEquation(const vector<double> &part_pos, const vector<double> &u_
             rz = (part_pos[3*pos+2] - part_pos[3*idx_neighbour+2])*(part_pos[3*pos+2] - part_pos[3*idx_neighbour+2]);
             r_ab = sqrt(rx + ry + rz);
 
-            rho += mass*f_cubic_spline(r_ab, h);
-            drhodt += mass*dot_product;
+            rho += mass_arr[neighbours_list[idx_neighbour]]*f_cubic_spline(r_ab, h);
+            drhodt += mass_arr[neighbours_list[idx_neighbour]]*dot_product;
         }
 
         rho_arr[pos] = rho;
@@ -110,15 +110,15 @@ void continuityEquation(const vector<double> &part_pos, const vector<double> &u_
     }
 }
 
-void momentumEquation(const vector<vector<unsigned>> &neighbours_matrix, const vector<double> &mass_arr, const vector<vector<double>> &gradW_matrix, 
-                      vector<double> &dudt_arr, vector<vector<double>> &artificial_visc, const vector<double> &rho_arr, const double &rho_0, const double &c_0,
-                      vector<double> &p_arr, const double &R, const double &T, const double &M, const double &gamma, const string &state_equation_chosen){
+void momentumEquation(vector<vector<unsigned>> &neighbours_matrix,  vector<double> &mass_arr,  vector<vector<double>> &gradW_matrix, 
+                      vector<double> &dudt_arr, vector<vector<double>> &artificial_visc,  vector<double> &rho_arr,  double &rho_0,  double &c_0,
+                      vector<double> &p_arr,  double &R,  double &T,  double &M,  double &gamma,  string &state_equation_chosen){
 
     // Iterations over each particle
     for (size_t pos = 0; pos < rho_arr.size(); pos++){
 
-        const vector<unsigned> &neighbours_list = neighbours_matrix[pos];
-        const vector<double> &gradW_list = gradW_matrix[pos];
+         vector<unsigned> &neighbours_list = neighbours_matrix[pos];
+         vector<double> &gradW_list = gradW_matrix[pos];
 
         double p_a, c_a;
         stateEquation(p_a, c_a, rho_arr[pos], rho_0, c_0, R, T, M, gamma, state_equation_chosen);
@@ -149,8 +149,8 @@ void momentumEquation(const vector<vector<unsigned>> &neighbours_matrix, const v
 }
 
 
-void stateEquation(double &p, double &c, const double &rho, const double &rho_0, const double &c_0, const double &R, const double &T,
-                     const double &M, const double &gamma, const string state_equation_chosen){
+void stateEquation(double &p, double &c,  double &rho,  double &rho_0,  double &c_0,  double &R,  double &T,
+                      double &M,  double &gamma,  string state_equation_chosen){
 
     if (state_equation_chosen == "Ideal gaz law"){
         p = (rho/rho_0 - 1)*(rho*R*T)/M;

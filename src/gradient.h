@@ -3,14 +3,16 @@
 #include "sorted_list.h"
 using namespace std;
 
-void gradW(const vector<double> &part_pos, const vector<vector<unsigned>> &neighbours_matrix, vector<vector<double>> &gradW_matrix, 
-           double L[3], const double &h, const int &Nx, const int &Ny, const int &Nz);
+void gradW( vector<double> &part_pos,  vector<vector<unsigned>> &neighbours_matrix, vector<vector<double>> &gradW_matrix, 
+           double L[3],  double &h,  unsigned &Nx,  unsigned &Ny,  unsigned &Nz);
 
-double setArtificialViscosity(vector<vector<double>> &artificial_visc, const vector<double> &part_pos, const vector<vector<unsigned>> &neighbours_matrix, vector<double> &u_arr, 
-                            const double &c_ab, const double &rho_ab, const double &alpha, const double &beta, const double &h);
+double setArtificialViscosity(vector<vector<double>> &artificial_visc,  vector<double> &part_pos,  vector<vector<unsigned>> &neighbours_matrix, vector<double> &u_arr, 
+                             double &c_ab,  double &rho_ab,  double &alpha,  double &beta,  double &h);
 
-void continuityEquation(const vector<double> &part_pos, const vector<double> &u_arr, const vector<vector<unsigned>> &neighbours_matrix, 
-                        const vector<vector<double>> &gradW_matrix, vector<double> &drhodt_arr, vector<double> &rho_arr, const double &mass, const double &h);
+void continuityEquation( vector<double> &part_pos,  vector<double> &u_arr,  vector<vector<unsigned>> &neighbours_matrix, 
+                         vector<vector<double>> &gradW_matrix, vector<double> &drhodt_arr, vector<double> &rho_arr,  vector<double> &mass_arr,  double &h);
 
-void momentumEquation(const vector<vector<unsigned>> &neighbours_matrix, const vector<double> &mass, const vector<vector<double>> &gradW_matrix, 
-                      vector<vector<double>> &artificial_visc, const vector<double> &rho_arr, vector<double> p_arr, const string &state_equation_chosen);
+
+void momentumEquation(vector<vector<unsigned>> &neighbours_matrix,  vector<double> &mass_arr,  vector<vector<double>> &gradW_matrix, 
+                      vector<double> &dudt_arr, vector<vector<double>> &artificial_visc,  vector<double> &rho_arr,  double &rho_0,  double &c_0,
+                      vector<double> &p_arr,  double &R,  double &T,  double &M,  double &gamma,  string &state_equation_chosen);
