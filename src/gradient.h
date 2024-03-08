@@ -3,8 +3,7 @@
 #include "sorted_list.h"
 using namespace std;
 
-void gradW( vector<double> &part_pos,  vector<vector<unsigned>> &neighbours_matrix, vector<vector<double>> &gradW_matrix, 
-           double L[3],  double &h,  unsigned &Nx,  unsigned &Ny,  unsigned &Nz);
+void gradW( vector<double> &part_pos,  vector<vector<unsigned>> &neighbours_matrix, vector<vector<double>> &gradW_matrix,  double &h,  unsigned &Nx,  unsigned &Ny,  unsigned &Nz);
 
 double setArtificialViscosity(vector<vector<double>> &artificial_visc,  vector<double> &part_pos,  vector<vector<unsigned>> &neighbours_matrix, vector<double> &u_arr, 
                              double &c_ab,  double &rho_ab,  double &alpha,  double &beta,  double &h);

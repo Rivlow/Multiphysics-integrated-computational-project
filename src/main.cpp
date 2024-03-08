@@ -60,7 +60,6 @@ int main(int argc, char *argv[]){
     std::vector<double> o = data["o"];
     std::vector<double> L = data["L"];
     double s = data["s"];
-    double mass = s*s*s;
     int nstepT = data["nstepT"];
     
     std::string state_equation_chosen;
@@ -86,11 +85,11 @@ int main(int argc, char *argv[]){
 
     printf("(Nx, Ny, Nz) = (%d, %d, %d) \n", Nx,Ny,Nz);
 
-    vector<double> part_pos;  
+    vector<double> pos_arr;  
     vector<vector<unsigned>> cell_pos(Nx*Ny*Nz);
-    meshcube(&o[0], &L[0], s, part_pos); // Initialise particles in the domain
+    meshcube(&o[0], &L[0], s, pos_arr); // Initialise particles in the domain
 
-    unsigned nb_particles = part_pos.size()/3;
+    unsigned nb_particles = pos_arr.size()/3;
 
     double rho_init = data["rho"];
     vector<double> u_init = data["u"];
@@ -106,7 +105,7 @@ int main(int argc, char *argv[]){
     std::map<std::string, std::vector<double> *> scalars;
     std::map<std::string, std::vector<double> *> vectors;
     
-    vectors["position"] = &part_pos;
+    vectors["position"] = &pos_arr;
     //vectors["velocity"] = &u_arr;
 
     double rho_0 = 1, c_0 = 1.0, T = 273, M = 200, gamma = 7;
@@ -115,37 +114,36 @@ int main(int argc, char *argv[]){
     
     /*---------------------------- SPH ALGORITHM  -----------------------------------*/
 
-double  intermediate;
+    vector<double> u_temp(3*nb_particles), rho_temp(nb_particles), pos_temp(nb_particles);
     
-    for (unsigned t = 0; t < nstepT; t++){
-        
-        //Apply gravity
+    for (int t = 0; t < nstepT; t++){
+
+        // Apply the linked-list algorithm
+        findNeighbours(pos_arr, cell_pos, neighbours_matrix, &L[0], Nx, Ny, Nz, h, kappa);
+
+        // Compute ∇_a(W_ab) for all particles
+        gradW(pos_arr, neighbours_matrix, gradW_matrix, h, Nx, Ny, Nz);
+
+        // Compute D(rho)/Dt for all particles
+        continuityEquation(pos_arr,u_arr, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass_arr, h);  
+
+        // Compute D(u)/Dt for all particles
+        momentumEquation(neighbours_matrix, mass_arr, gradW_matrix, dudt_arr, artificial_visc_matrix, rho_arr, rho_0, c_0, p_arr, R, T, M, gamma, state_equation_chosen);    
+
+        // Update density, velocity and position for each particle (Euler explicit scheme)
         for(size_t pos = 0; pos < nb_particles; pos++ ){
-            intermediate = u_arr[3*pos+2];
-            
-            u_arr[3*pos+2] = u_arr[3*pos+2] + dt*g;
 
-            
-            part_pos[3*pos+2] = part_pos[3*pos+2] + dt*intermediate;
-        
+            rho_arr[pos] = rho_arr[pos] + dt*drhodt_arr[pos];
+            u_arr[3*pos+2] = u_arr[3*pos+2] + dt*g; // Apply gravity
 
-            export_particles("sph", t, part_pos, scalars, vectors);
+            for (size_t cord = 0; cord < 2; cord++){
+                pos_arr[3*pos+cord] = pos_arr[3*pos+cord] + dt*u_arr[3*pos+cord];
+                pos_arr[3*pos+cord] = (pos_arr[3*pos+cord] < 0) ? 0 : pos_arr[3*pos+cord];
+                u_arr[3*pos+cord] = u_arr[3*pos+cord] + dt*dudt_arr[3*pos+cord];
+            }
+        } 
 
-            
-            // Apply the linked-list algorithm
-            findNeighbours(part_pos, cell_pos, neighbours_matrix, &L[0], Nx, Ny, Nz, h, kappa);
-            std::cout << "findNeighbours algo terminated. \n" << endl;
-
-            gradW(part_pos, neighbours_matrix, gradW_matrix, &L[0], h, Nx, Ny, Nz);
-            std::cout << "gradW algo terminated. \n" << endl;
-
-            continuityEquation(part_pos,u_arr, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass_arr, h);  
-            
-            std::cout << "continuityEquation algo terminated. \n" << endl;
-
-            momentumEquation(neighbours_matrix, mass_arr, gradW_matrix, dudt_arr, artificial_visc_matrix, rho_arr, rho_0, c_0, p_arr, R, T, M, gamma, state_equation_chosen);    
-        }
-        
+        export_particles("sph", t, pos_arr, scalars, vectors);
     }
 }
 

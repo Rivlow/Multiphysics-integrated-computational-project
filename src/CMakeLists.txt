@@ -38,6 +38,9 @@ SET(SRCS
     initialize.cpp
     generate_particle.cpp
     export.cpp
+    gradient.cpp
+    Kernel_functions.cpp
+    sorted_list.cpp
     # Add more files as needed
 )
 ADD_EXECUTABLE(solver ${SRCS})

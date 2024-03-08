@@ -6,11 +6,10 @@ using namespace std;
 
 
 
-void gradW( vector<double> &part_pos,  vector<vector<unsigned>> &neighbours_matrix, vector<vector<double>> &gradW_matrix, 
-           double L[3],  double &h,  unsigned &Nx,  unsigned &Ny,  unsigned &Nz){
+void gradW( vector<double> &pos_arr,  vector<vector<unsigned>> &neighbours_matrix, vector<vector<double>> &gradW_matrix,  double &h,  unsigned &Nx,  unsigned &Ny,  unsigned &Nz){
 
     // Iterations over each particle
-    for (unsigned pos = 0; pos < part_pos.size()/3; pos++){
+    for (unsigned pos = 0; pos < pos_arr.size()/3; pos++){
 
          vector<unsigned> &neighbours_list = neighbours_matrix[pos];
         cout << "nb neighbours : " << neighbours_list.size() << " \n" << endl;
@@ -21,14 +20,14 @@ void gradW( vector<double> &part_pos,  vector<vector<unsigned>> &neighbours_matr
             
             double rx, ry, rz, r_ab;
 
-            rx = (part_pos[3*pos+0] - part_pos[3*idx_neighbour+0])*(part_pos[3*pos+0] - part_pos[3*idx_neighbour+0]);
-            ry = (part_pos[3*pos+1] - part_pos[3*idx_neighbour+1])*(part_pos[3*pos+1] - part_pos[3*idx_neighbour+1]);
-            rz = (part_pos[3*pos+2] - part_pos[3*idx_neighbour+2])*(part_pos[3*pos+2] - part_pos[3*idx_neighbour+2]);
+            rx = (pos_arr[3*pos+0] - pos_arr[3*idx_neighbour+0])*(pos_arr[3*pos+0] - pos_arr[3*idx_neighbour+0]);
+            ry = (pos_arr[3*pos+1] - pos_arr[3*idx_neighbour+1])*(pos_arr[3*pos+1] - pos_arr[3*idx_neighbour+1]);
+            rz = (pos_arr[3*pos+2] - pos_arr[3*idx_neighbour+2])*(pos_arr[3*pos+2] - pos_arr[3*idx_neighbour+2]);
             r_ab = sqrt(rx + ry + rz);
 
-            gradW_vect.push_back((part_pos[3*pos+0] - part_pos[3*idx_neighbour+0])/r_ab * derive_cubic_spline(r_ab, h));
-            gradW_vect.push_back((part_pos[3*pos+1] - part_pos[3*idx_neighbour+1])/r_ab * derive_cubic_spline(r_ab, h));
-            gradW_vect.push_back((part_pos[3*pos+2] - part_pos[3*idx_neighbour+2])/r_ab * derive_cubic_spline(r_ab, h));
+            gradW_vect.push_back((pos_arr[3*pos+0] - pos_arr[3*idx_neighbour+0])/r_ab * derive_cubic_spline(r_ab, h));
+            gradW_vect.push_back((pos_arr[3*pos+1] - pos_arr[3*idx_neighbour+1])/r_ab * derive_cubic_spline(r_ab, h));
+            gradW_vect.push_back((pos_arr[3*pos+2] - pos_arr[3*idx_neighbour+2])/r_ab * derive_cubic_spline(r_ab, h));
         }
 
         gradW_matrix.push_back(gradW_vect);
@@ -36,21 +35,21 @@ void gradW( vector<double> &part_pos,  vector<vector<unsigned>> &neighbours_matr
     }
 }
 
-double setArtificialViscosity(vector<vector<double>> &artificial_visc,  vector<double> &part_pos,  vector<vector<unsigned>> &neighbours_matrix, vector<double> &u_arr, 
+double setArtificialViscosity(vector<vector<double>> &artificial_visc,  vector<double> &pos_arr,  vector<vector<unsigned>> &neighbours_matrix, vector<double> &u_arr, 
                              double &c_ab,  double &rho_ab,  double &alpha,  double &beta,  double &h){
 
 
     vector<double> rel_displ(3), rel_velo(3);
 
     // Iterations over each particle
-    for (size_t pos = 0; pos < part_pos.size(); pos++){
+    for (size_t pos = 0; pos < pos_arr.size(); pos++){
 
          vector<unsigned> &neighbours_list = neighbours_matrix[pos];
         for (size_t idx_neighbour = 0; idx_neighbour < neighbours_list.size(); idx_neighbour++){   
 
-            rel_displ[0] = (part_pos[3*pos+0] - part_pos[3*idx_neighbour+0]);
-            rel_displ[1] = (part_pos[3*pos+1] - part_pos[3*idx_neighbour+1]);
-            rel_displ[2] = (part_pos[3*pos+2] - part_pos[3*idx_neighbour+2]);
+            rel_displ[0] = (pos_arr[3*pos+0] - pos_arr[3*idx_neighbour+0]);
+            rel_displ[1] = (pos_arr[3*pos+1] - pos_arr[3*idx_neighbour+1]);
+            rel_displ[2] = (pos_arr[3*pos+2] - pos_arr[3*idx_neighbour+2]);
 
             rel_velo[0] = (u_arr[3*pos+0] - u_arr[3*idx_neighbour+0]);
             rel_velo[1] = (u_arr[3*pos+1] - u_arr[3*idx_neighbour+1]);
@@ -71,11 +70,11 @@ double setArtificialViscosity(vector<vector<double>> &artificial_visc,  vector<d
     }
 }
 
-void continuityEquation( vector<double> &part_pos,  vector<double> &u_arr,  vector<vector<unsigned>> &neighbours_matrix, 
+void continuityEquation( vector<double> &pos_arr,  vector<double> &u_arr,  vector<vector<unsigned>> &neighbours_matrix, 
                          vector<vector<double>> &gradW_matrix, vector<double> &drhodt_arr, vector<double> &rho_arr,  vector<double> &mass_arr,  double &h){
 
     // Iterations over each particle                    
-    for (size_t pos = 0; pos < part_pos.size()/3; pos++){
+    for (size_t pos = 0; pos < pos_arr.size()/3; pos++){
 
          vector<unsigned> &neighbours_list = neighbours_matrix[pos];
          vector<double> &gradW_list = gradW_matrix[pos];
@@ -85,10 +84,7 @@ void continuityEquation( vector<double> &part_pos,  vector<double> &u_arr,  vect
         // Summation over b = 1 -> nb_neighbours
         for (size_t idx_neighbour = 0; idx_neighbour < neighbours_list.size(); idx_neighbour++){   
 
-            /* !!!!!! A CHECK : est ce que "part_pos[3*neighbours_list[idx_neighbour]+x]" et "gradW_list[idx_neighbour+x]" 
-            font bien reference au meme au meme voisin ???? Normalement oui mais pas sur a 100% "*/
-
-            // Dot product of u_ab with grad_a(W_ab)
+            // Dot product of u_ab with ∇_a(W_ab)
             double dot_product = 0;
             for (size_t x = 0; x < 3; x++){
 
@@ -96,18 +92,34 @@ void continuityEquation( vector<double> &part_pos,  vector<double> &u_arr,  vect
             }
 
             double rx, ry, rz, r_ab;
-            rx = (part_pos[3*pos+0] - part_pos[3*idx_neighbour+0])*(part_pos[3*pos+0] - part_pos[3*idx_neighbour+0]);
-            ry = (part_pos[3*pos+1] - part_pos[3*idx_neighbour+1])*(part_pos[3*pos+1] - part_pos[3*idx_neighbour+1]);
-            rz = (part_pos[3*pos+2] - part_pos[3*idx_neighbour+2])*(part_pos[3*pos+2] - part_pos[3*idx_neighbour+2]);
+            rx = (pos_arr[3*pos+0] - pos_arr[3*idx_neighbour+0])*(pos_arr[3*pos+0] - pos_arr[3*idx_neighbour+0]);
+            ry = (pos_arr[3*pos+1] - pos_arr[3*idx_neighbour+1])*(pos_arr[3*pos+1] - pos_arr[3*idx_neighbour+1]);
+            rz = (pos_arr[3*pos+2] - pos_arr[3*idx_neighbour+2])*(pos_arr[3*pos+2] - pos_arr[3*idx_neighbour+2]);
             r_ab = sqrt(rx + ry + rz);
 
-            rho += mass_arr[neighbours_list[idx_neighbour]]*f_cubic_spline(r_ab, h);
+            //rho += mass_arr[neighbours_list[idx_neighbour]]*f_cubic_spline(r_ab, h);
             drhodt += mass_arr[neighbours_list[idx_neighbour]]*dot_product;
         }
 
-        rho_arr[pos] = rho;
+        //rho_arr[pos] = rho;
         drhodt_arr[pos] = drhodt;
     }
+}
+
+
+void stateEquation(double &p, double &c,  double &rho,  double &rho_0,  double &c_0,  double &R,  double &T,
+                      double &M,  double &gamma,  string state_equation_chosen){
+
+    if (state_equation_chosen == "Ideal gaz law"){
+        p = (rho/rho_0 - 1)*(rho*R*T)/M;
+        c = c_0;
+    }
+    if (state_equation_chosen == "Quasi incompresible fluid"){
+        double B = c_0*c_0*rho_0/gamma;
+        p = B*(pow(rho/rho_0, gamma) - 1);
+        c = c_0*pow(rho/rho_0, 0.5*(gamma-1));
+    }
+
 }
 
 void momentumEquation(vector<vector<unsigned>> &neighbours_matrix,  vector<double> &mass_arr,  vector<vector<double>> &gradW_matrix, 
@@ -148,18 +160,3 @@ void momentumEquation(vector<vector<unsigned>> &neighbours_matrix,  vector<doubl
     }
 }
 
-
-void stateEquation(double &p, double &c,  double &rho,  double &rho_0,  double &c_0,  double &R,  double &T,
-                      double &M,  double &gamma,  string state_equation_chosen){
-
-    if (state_equation_chosen == "Ideal gaz law"){
-        p = (rho/rho_0 - 1)*(rho*R*T)/M;
-        c = c_0;
-    }
-    if (state_equation_chosen == "Quasi incompresible fluid"){
-        double B = c_0*c_0*rho_0/gamma;
-        p = B*(pow(rho/rho_0, gamma) - 1);
-        c = c_0*pow(rho/rho_0, 0.5*(gamma-1));
-    }
-
-}
