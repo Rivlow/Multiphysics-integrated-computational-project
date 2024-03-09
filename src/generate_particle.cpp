@@ -1,6 +1,7 @@
 #include "generate_particle.h"
 #include <iostream>
 #include <cmath> // ceil
+using namespace std;
 
 /**
  * @brief build a cube of particles aligned with x,y,z axes.
@@ -11,7 +12,7 @@
  * @param pos positions of particles
  */
 
-void meshcube(double o[3], double L[3], double s, std::vector<double> &pos)
+void meshcube(vector<double> &o, vector<double> &L, double &s, std::vector<double> &pos)
 {
     // calculate nb of particles along each direction from target size "s"
     int ni = int(ceil(L[0] / s));

@@ -3,6 +3,6 @@
 
 #include <vector>
 
-void meshcube(double o[3], double L[3], double s, std::vector<double> &pos);
+void meshcube(vector<double> &o, vector<double> &L, double &s, std::vector<double> &pos);
 
 #endif // CUBE_H

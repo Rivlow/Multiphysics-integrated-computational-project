@@ -89,7 +89,7 @@ int main(int argc, char *argv[]){
 
     vector<double> pos_arr;  
     vector<vector<unsigned>> cell_pos(Nx*Ny*Nz);
-    meshcube(&o[0], &L[0], s, pos_arr); // Initialise particles in the domain
+    meshcube(o, L, s, pos_arr); // Initialise particles in the domain
 
     unsigned nb_particles = pos_arr.size()/3;
 
@@ -128,7 +128,7 @@ for(size_t i = 0; i<artificial_visc_matrix.size();i++){
     for (int t = 0; t < nstepT; t++){
         
         // Apply the linked-list algorithm
-        findNeighbours(pos_arr, cell_pos, neighbours_matrix, &L_d[0], Nx, Ny, Nz, h, kappa);
+        findNeighbours(pos_arr, cell_pos, neighbours_matrix, L_d, Nx, Ny, Nz, h, kappa);
 
         // Compute ∇_a(W_ab) for all particles
         gradW(pos_arr, neighbours_matrix, gradW_matrix, h, Nx, Ny, Nz);
@@ -143,8 +143,6 @@ for(size_t i = 0; i<artificial_visc_matrix.size();i++){
         for(size_t pos = 0; pos < nb_particles; pos++ ){
 
             rho_arr[pos] = rho_arr[pos] + dt*drhodt_arr[pos];
-            cout << " rho est de " << rho_arr[pos]<< endl;
-            cout << " drho dt est de " << drhodt_arr[pos]<< endl;
 
             for (size_t cord = 0; cord < 2; cord++){
                 pos_arr[3*pos+cord] = pos_arr[3*pos+cord] + dt*u_arr[3*pos+cord];
