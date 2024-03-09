@@ -10,8 +10,7 @@
 using namespace std;
 
 
-void findNeighbours(vector<double> &position, vector<vector<unsigned>> &cell_pos, vector<vector<unsigned>> &neighbours_matrix, 
-                    vector<double> L, const unsigned &Nx, const unsigned &Ny, const unsigned &Nz, const double &h, const int &kappa);
+void findNeighbours(vector<double> &position, vector<vector<unsigned>> &cell_pos, vector<vector<unsigned>> &neighbours_matrix, double L[3], const unsigned &Nx, const unsigned &Ny, const unsigned &Nz, const double &h, const int &kappa);
     
 void naiveAlgo(vector<double> &position, vector<vector<unsigned>> &neighbours_matrix, const double &h, const int &kappa);
 
