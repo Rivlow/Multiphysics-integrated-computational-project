@@ -10,18 +10,20 @@
 #include <chrono>
 #include <algorithm>
 
+
 using namespace std;
 
 
-void findNeighbours(vector<double> &part_pos, vector<vector<unsigned>> &cell_pos,
+
+void findNeighbours(vector<double> &pos_arr, vector<vector<unsigned>> &cell_pos,
                  vector<vector<unsigned>> &neighbours_matrix, vector<double> &L_d, const unsigned &Nx, const unsigned &Ny, const unsigned &Nz, const double &h, const int &kappa){
 
     // Sort all particles in their corresponding cell
-    for (unsigned pos = 0; pos < part_pos.size()/3; pos ++){
+    for (unsigned pos = 0; pos < pos_arr.size()/3; pos ++){
 
-        unsigned idx_i = part_pos[3*pos + 0] / (L_d[0] / Nx);
-        unsigned idx_j = part_pos[3*pos + 1] / (L_d[1] / Ny);
-        unsigned idx_k = part_pos[3*pos + 2] / (L_d[2] / Nz);
+        unsigned idx_i = pos_arr[3*pos + 0] / (L_d[0] / Nx);
+        unsigned idx_j = pos_arr[3*pos + 1] / (L_d[1] / Ny);
+        unsigned idx_k = pos_arr[3*pos + 2] / (L_d[2] / Nz);
         
         idx_i = (idx_i == Nx) ? idx_i - 1 : idx_i;
         idx_j = (idx_j == Ny) ? idx_j - 1 : idx_j;
@@ -34,9 +36,9 @@ void findNeighbours(vector<double> &part_pos, vector<vector<unsigned>> &cell_pos
     for (unsigned pos = 0; pos < pos_arr.size()/3; pos ++){
 
         // Determine in which cell the particle is
-        unsigned i_cell = part_pos[3*pos + 0] / (L_d[0] / Nx);
-        unsigned j_cell = part_pos[3*pos + 1] / (L_d[1] / Ny);
-        unsigned k_cell = part_pos[3*pos + 2] / (L_d[2] / Nz);
+        unsigned i_cell = pos_arr[3*pos + 0] / (L_d[0] / Nx);
+        unsigned j_cell = pos_arr[3*pos + 1] / (L_d[1] / Ny);
+        unsigned k_cell = pos_arr[3*pos + 2] / (L_d[2] / Nz);
 
         i_cell = (i_cell >= Nx) ? Nx-1 : i_cell;
         j_cell = (j_cell >= Ny) ? Ny-1 : j_cell;

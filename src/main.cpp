@@ -11,6 +11,8 @@
 #include "gradient.h"
 #include "initialize.h"
 #include "export.h"
+#include "Kernel_functions.h"
+
 
 #ifdef _OPENMP
 #include <omp.h>

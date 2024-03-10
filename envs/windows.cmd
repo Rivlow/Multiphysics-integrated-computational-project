@@ -63,4 +63,7 @@ set MAKESYSTEM=
 :: open terminal
 CD /d "%~dp0"
 CD ..
+CD src/build
 %comspec% /K
+
+

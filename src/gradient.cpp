@@ -6,8 +6,8 @@ using namespace std;
 
 
 
-void gradW( vector<double> &part_pos,  vector<vector<unsigned>> &neighbours_matrix, vector<vector<double>> &gradW_matrix, 
-            double &h,  unsigned &Nx,  unsigned &Ny,  unsigned &Nz){
+void gradW(vector<double> &pos_arr, vector<vector<unsigned>> &neighbours_matrix, vector<vector<double>> &gradW_matrix, 
+                    double &h, unsigned &Nx, unsigned &Ny, unsigned &Nz){
 
     // Iterations over each particle
     for (unsigned pos = 0; pos < pos_arr.size()/3; pos++){
@@ -35,7 +35,7 @@ void gradW( vector<double> &part_pos,  vector<vector<unsigned>> &neighbours_matr
     }
 }
 
-void setArtificialViscosity(vector<vector<double>> &artificial_visc,  vector<double> &part_pos,  vector<vector<unsigned>> &neighbours_matrix, vector<double> &u_arr, 
+void setArtificialViscosity(vector<vector<double>> &artificial_visc,  vector<double> &pos_arr,  vector<vector<unsigned>> &neighbours_matrix, vector<double> &u_arr, 
                              double &c_ab,  double &rho_ab,  double &alpha,  double &beta,  double &h){
 
 
@@ -69,7 +69,7 @@ void setArtificialViscosity(vector<vector<double>> &artificial_visc,  vector<dou
     }
 }
 
-void continuityEquation( vector<double> &part_pos,  vector<double> &u_arr,  vector<vector<unsigned>> &neighbours_matrix, 
+void continuityEquation(vector<double> &pos_arr,  vector<double> &u_arr,  vector<vector<unsigned>> &neighbours_matrix, 
                          vector<vector<double>> &gradW_matrix, vector<double> &drhodt_arr, vector<double> &rho_arr,  vector<double> &mass_arr,  double &h){
 
     // Iterations over each particle                    
