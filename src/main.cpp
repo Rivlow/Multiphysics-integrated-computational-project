@@ -81,7 +81,7 @@ int main(int argc, char *argv[]){
     int kappa = data["kappa"];
     double h = 1.2*s;
     double R = 8.314; // [J/(K.mol)]
-    double g = -9.81; // [m/s²]
+    double g = 9.81; // [m/s²]
 
     Nx = (int) L_d[0]/(kappa*h);
     Ny = (int) L_d[1]/(kappa*h);
@@ -128,7 +128,7 @@ for(size_t i = 0; i<artificial_visc_matrix.size();i++){
     vector<double> u_temp(3*nb_particles), rho_temp(nb_particles), pos_temp(nb_particles);
 
     for (int t = 0; t < nstepT; t++){
-        
+
         // Apply the linked-list algorithm
         findNeighbours(pos_arr, cell_pos, neighbours_matrix, L_d, Nx, Ny, Nz, h, kappa);
 
@@ -141,40 +141,46 @@ for(size_t i = 0; i<artificial_visc_matrix.size();i++){
         // Compute D(u)/Dt for all particles
         momentumEquation(neighbours_matrix, mass_arr, gradW_matrix, dudt_arr, artificial_visc_matrix, rho_arr, 
                         rho_0, c_0, p_arr, R, T, M, gamma, g, state_equation_chosen);
-
+  
         // Update density, velocity and position for each particle (Euler explicit scheme)
         for(size_t pos = 0; pos < nb_particles; pos++ ){
 
             rho_arr[pos] = rho_arr[pos] + dt*drhodt_arr[pos];
 
-            for (size_t cord = 0; cord < 2; cord++){
-                pos_arr[3*pos+cord] = pos_arr[3*pos+cord] + dt*u_arr[3*pos+cord];
-                
-                u_arr[3*pos+cord] = u_arr[3*pos+cord] + dt*dudt_arr[3*pos+cord];
-                
-                u_arr[3*pos+2] = u_arr[3*pos+2] + dt*g;
-                pos_arr[3*pos+cord] = (pos_arr[3*pos+cord] < 0.0) ? 0.0 : pos_arr[3*pos+cord];
-                pos_arr[3*pos+cord] = (pos_arr[3*pos+cord] > L_d[cord]) ? L_d[cord] : pos_arr[3*pos+cord];
+            for (size_t cord = 0; cord < 3; cord++){
+
+                //cout << "dudt_arr[3*pos+cord] (in main): " << dudt_arr[3*pos+2] << endl;
+                pos_arr[3*pos+cord] += dt*u_arr[3*pos+cord];
+                u_arr[3*pos+cord] += dt*dudt_arr[3*pos+cord];
+
+                // Check boundaries
                 u_arr[3*pos+cord] = (pos_arr[3*pos+cord] < 0.0) ? 0.0 : u_arr[3*pos+cord];
                 u_arr[3*pos+cord] = (pos_arr[3*pos+cord] > L_d[cord]) ? 0.0 : u_arr[3*pos+cord];
+                pos_arr[3*pos+cord] = (pos_arr[3*pos+cord] < 0.0) ? 0.0 : pos_arr[3*pos+cord];
+                pos_arr[3*pos+cord] = (pos_arr[3*pos+cord] > L_d[cord]) ? L_d[cord] : pos_arr[3*pos+cord];
             }
-            
-
         }
          
         for(size_t i = 0 ; i<neighbours_matrix.size(); i++ ){
             
             neighbours_matrix[i].clear();
         }
+
+        //cout << "after clear, neighbours_matrix : " << endl;
+
         for(size_t i = 0 ; i<cell_pos.size(); i++ ){
             
             cell_pos[i].clear();
         }
+
+        //cout << "after clear, cell_pos : " << endl;
+
         for(size_t i = 0 ; i<gradW_matrix.size(); i++ ){
             
             gradW_matrix[i].clear();
         }
 
+        //cout << "after clear, gradW_matrix : " << endl;
 
         export_particles("sph", t, pos_arr, scalars, vectors);
     }

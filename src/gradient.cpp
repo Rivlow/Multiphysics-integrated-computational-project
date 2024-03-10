@@ -151,12 +151,12 @@ void momentumEquation(vector<vector<unsigned>> &neighbours_matrix,  vector<doubl
             for (size_t cord = 0; cord < 3; cord++) {
                 dudt[cord] += m_b*(p_b/(rho_b*rho_b) + p_a/(rho_a*rho_a) + pi_ab)*gradW_list[idx_neighbour+cord] + F_vol[cord];
             }
-            
         }
 
         for (size_t cord = 0; cord < 3; cord++) {
             dudt[cord] *= -1; 
             dudt_arr[3*pos+cord] = dudt[cord];
+            //cout << "dudt_arr[3*pos+cord] (in gradient): " << dudt_arr[3*pos+cord] << endl;
         }
 
     }
