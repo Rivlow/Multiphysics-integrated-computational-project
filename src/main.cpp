@@ -139,7 +139,8 @@ for(size_t i = 0; i<artificial_visc_matrix.size();i++){
         continuityEquation(pos_arr ,u_arr, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass_arr, h);
 
         // Compute D(u)/Dt for all particles
-        momentumEquation(neighbours_matrix, mass_arr, gradW_matrix, dudt_arr, artificial_visc_matrix, rho_arr, rho_0, c_0, p_arr, R, T, M, gamma, state_equation_chosen);
+        momentumEquation(neighbours_matrix, mass_arr, gradW_matrix, dudt_arr, artificial_visc_matrix, rho_arr, 
+                        rho_0, c_0, p_arr, R, T, M, gamma, g, state_equation_chosen);
 
         // Update density, velocity and position for each particle (Euler explicit scheme)
         for(size_t pos = 0; pos < nb_particles; pos++ ){
@@ -151,7 +152,7 @@ for(size_t i = 0; i<artificial_visc_matrix.size();i++){
                 
                 u_arr[3*pos+cord] = u_arr[3*pos+cord] + dt*dudt_arr[3*pos+cord];
                 
-                u_arr[3*pos+2] = u_arr[3*pos+2] + dt*g*1000;
+                u_arr[3*pos+2] = u_arr[3*pos+2] + dt*g;
                 pos_arr[3*pos+cord] = (pos_arr[3*pos+cord] < 0.0) ? 0.0 : pos_arr[3*pos+cord];
                 pos_arr[3*pos+cord] = (pos_arr[3*pos+cord] > L_d[cord]) ? L_d[cord] : pos_arr[3*pos+cord];
                 u_arr[3*pos+cord] = (pos_arr[3*pos+cord] < 0.0) ? 0.0 : u_arr[3*pos+cord];
@@ -169,6 +170,12 @@ for(size_t i = 0; i<artificial_visc_matrix.size();i++){
             
             cell_pos[i].clear();
         }
+        for(size_t i = 0 ; i<gradW_matrix.size(); i++ ){
+            
+            gradW_matrix[i].clear();
+        }
+
+
         export_particles("sph", t, pos_arr, scalars, vectors);
     }
 }

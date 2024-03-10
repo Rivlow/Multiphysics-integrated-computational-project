@@ -15,7 +15,7 @@ void continuityEquation( vector<double> &part_pos,  vector<double> &u_arr,  vect
 
 void momentumEquation(vector<vector<unsigned>> &neighbours_matrix,  vector<double> &mass_arr,  vector<vector<double>> &gradW_matrix, 
                       vector<double> &dudt_arr, vector<vector<double>> &artificial_visc,  vector<double> &rho_arr,  double &rho_0,  double &c_0,
-                      vector<double> &p_arr,  double &R,  double &T,  double &M,  double &gamma,  string &state_equation_chosen);
+                      vector<double> &p_arr,  double &R,  double &T,  double &M,  double &gamma, double &g, string &state_equation_chosen);
 
 void stateEquation(double &p, double &c,  double &rho,  double &rho_0,  double &c_0,  double &R,  double &T,
                     double &M,  double &gamma,  string &state_equation_chosen);

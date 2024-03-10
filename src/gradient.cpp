@@ -69,6 +69,23 @@ void setArtificialViscosity(vector<vector<double>> &artificial_visc,  vector<dou
     }
 }
 
+
+
+void stateEquation(double &p, double &c,  double &rho,  double &rho_0,  double &c_0,  double &R,  double &T,
+                      double &M,  double &gamma,  string &state_equation_chosen){
+
+    if (state_equation_chosen == "Ideal gaz law"){
+        p = (rho/rho_0 - 1)*(rho*R*T)/M;
+        c = c_0;
+    }
+    if (state_equation_chosen == "Quasi incompresible fluid"){
+        double B = c_0*c_0*rho_0/gamma;
+        p = B*(pow(rho/rho_0, gamma) - 1);
+        c = c_0*pow(rho/rho_0, 0.5*(gamma-1));
+    }
+
+}
+
 void continuityEquation(vector<double> &pos_arr,  vector<double> &u_arr,  vector<vector<unsigned>> &neighbours_matrix, 
                          vector<vector<double>> &gradW_matrix, vector<double> &drhodt_arr, vector<double> &rho_arr,  vector<double> &mass_arr,  double &h){
 
@@ -108,24 +125,9 @@ void continuityEquation(vector<double> &pos_arr,  vector<double> &u_arr,  vector
 }
 
 
-void stateEquation(double &p, double &c,  double &rho,  double &rho_0,  double &c_0,  double &R,  double &T,
-                      double &M,  double &gamma,  string &state_equation_chosen){
-
-    if (state_equation_chosen == "Ideal gaz law"){
-        p = (rho/rho_0 - 1)*(rho*R*T)/M;
-        c = c_0;
-    }
-    if (state_equation_chosen == "Quasi incompresible fluid"){
-        double B = c_0*c_0*rho_0/gamma;
-        p = B*(pow(rho/rho_0, gamma) - 1);
-        c = c_0*pow(rho/rho_0, 0.5*(gamma-1));
-    }
-
-}
-
 void momentumEquation(vector<vector<unsigned>> &neighbours_matrix,  vector<double> &mass_arr,  vector<vector<double>> &gradW_matrix, 
                       vector<double> &dudt_arr, vector<vector<double>> &artificial_visc,  vector<double> &rho_arr,  double &rho_0,  double &c_0,
-                      vector<double> &p_arr,  double &R,  double &T,  double &M,  double &gamma,  string &state_equation_chosen){
+                      vector<double> &p_arr,  double &R,  double &T,  double &M,  double &gamma, double &g, string &state_equation_chosen){
 
     // Iterations over each particle
     for (size_t pos = 0; pos < rho_arr.size(); pos++){
@@ -134,23 +136,27 @@ void momentumEquation(vector<vector<unsigned>> &neighbours_matrix,  vector<doubl
 
         double p_a, c_a;
         stateEquation(p_a, c_a, rho_arr[pos], rho_0, c_0, R, T, M, gamma, state_equation_chosen);
-        vector<double> dudt(3, 0.0);
+        vector<double> dudt(3, 0.0), F_vol = {0.0, 0.0, mass_arr[pos]*g};
 
         // Summation over b = 1 -> nb_neighbours
         for (size_t idx_neighbour = 0; idx_neighbour < neighbours_list.size(); idx_neighbour++){   
+
             double p_b, c_b;
             stateEquation(p_b, c_b, rho_arr[neighbours_list[idx_neighbour]], rho_0, c_0, R, T, M, gamma, state_equation_chosen);
             double rho_a = rho_arr[pos], rho_b = rho_arr[neighbours_list[idx_neighbour]];
             double rho_ab = 0.5*(rho_a + rho_b);
             double pi_ab = 0 ; //[pos][neighbours_list[idx_neighbour]];
             double m_b = mass_arr[neighbours_list[idx_neighbour]];
-            for (size_t it = 0; it < 3; it++) {dudt[it] += m_b*(p_b/(rho_b*rho_b) + p_a/(rho_a*rho_a) + pi_ab)*gradW_list[idx_neighbour+it];}
+
+            for (size_t cord = 0; cord < 3; cord++) {
+                dudt[cord] += m_b*(p_b/(rho_b*rho_b) + p_a/(rho_a*rho_a) + pi_ab)*gradW_list[idx_neighbour+cord] + F_vol[cord];
+            }
             
         }
 
-        for (size_t it = 0; it < 3; it++) {
-            dudt[it] *= -1; 
-            dudt_arr[3*pos+it] = dudt[it];
+        for (size_t cord = 0; cord < 3; cord++) {
+            dudt[cord] *= -1; 
+            dudt_arr[3*pos+cord] = dudt[cord];
         }
 
     }
