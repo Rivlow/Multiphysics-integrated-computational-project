@@ -12,6 +12,9 @@
     "u": [ 0.0, 0.0, 0.0],
     "c0": 340, 
     "gamma":1, 
-    "stateEquation" : {"Ideal gaz law":1, "Quasi incompresible fluid":0}
+    "alpha":0.25,
+    "beta":0,
+    "stateEquation" : {"Ideal gaz law":1, "Quasi incompresible fluid":0},
+    "initialCondition" : {"Hydrostatic":1, "Constant":0}
 }
 
