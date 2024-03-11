@@ -12,8 +12,7 @@ void gradW( vector<double> &part_pos,  vector<vector<unsigned>> &neighbours_matr
     // Iterations over each particle
     for (unsigned pos = 0; pos < part_pos.size()/3; pos++){
 
-         vector<unsigned> &neighbours_list = neighbours_matrix[pos];
-        //cout << "nb neighbours : " << neighbours_list.size() << " \n" << endl;
+        vector<unsigned> &neighbours_list = neighbours_matrix[pos];
         vector<double> gradW_vect;
 
         // Iterations over each associated neighbours of prescribed particles
@@ -45,7 +44,7 @@ void setArtificialViscosity(vector<vector<double>> &artificial_visc,  vector<dou
     // Iterations over each particle
     for (size_t pos = 0; pos < part_pos.size(); pos++){
 
-         vector<unsigned> &neighbours_list = neighbours_matrix[pos];
+        vector<unsigned> &neighbours_list = neighbours_matrix[pos];
         for (size_t idx_neighbour = 0; idx_neighbour < neighbours_list.size(); idx_neighbour++){   
 
             rel_displ[0] = (part_pos[3*pos+0] - part_pos[3*idx_neighbour+0]);
@@ -84,9 +83,6 @@ void continuityEquation( vector<double> &part_pos,  vector<double> &u_arr,  vect
         // Summation over b = 1 -> nb_neighbours
         for (size_t idx_neighbour = 0; idx_neighbour < neighbours_list.size(); idx_neighbour++){   
 
-            /* !!!!!! A CHECK : est ce que "part_pos[3*neighbours_list[idx_neighbour]+x]" et "gradW_list[idx_neighbour+x]" 
-            font bien reference au meme au meme voisin ???? Normalement oui mais pas sur a 100% "*/
-
             // Dot product of u_ab with grad_a(W_ab)
             double dot_product = 0;
             for (size_t x = 0; x < 3; x++){
@@ -120,11 +116,9 @@ void stateEquation(double &p, double &c,  double &rho,  double &rho_0,  double &
         c = c_0;
     }
     if (state_equation_chosen == "Quasi incompresible fluid"){
-        cout << "QI 1 \n" << endl;
         double B = c_0*c_0*rho_0/gamma;
         p = B*(pow(rho/rho_0, gamma) - 1);
         c = c_0*pow(rho/rho_0, 0.5*(gamma-1));
-        cout << "QI2 \n" << endl;
     }
 
 }

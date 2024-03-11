@@ -14,30 +14,20 @@ using namespace std;
 
 
 void findNeighbours(vector<double> &part_pos, vector<vector<unsigned>> &cell_pos,
-                 vector<vector<unsigned>> &neighbours_matrix, double L_d[3], const unsigned &Nx, const unsigned &Ny, const unsigned &Nz, const double &h, const int &kappa){
-    //cout<<"taille vect cellule:" <<part_pos.size()<< endl;
+                 vector<vector<unsigned>> &neighbours_matrix, vector<double> &L_d, const unsigned &Nx, const unsigned &Ny, const unsigned &Nz, const double &h, const int &kappa){
+
     // Sort all particles in their corresponding cell
     for (unsigned pos = 0; pos < part_pos.size()/3; pos ++){
-        //cout<<"oui" <<endl;
+
         unsigned idx_i = part_pos[3*pos + 0] / (L_d[0] / Nx);
         unsigned idx_j = part_pos[3*pos + 1] / (L_d[1] / Ny);
         unsigned idx_k = part_pos[3*pos + 2] / (L_d[2] / Nz);
         
-        /*cout<<"idx_i vaut "<< idx_i <<endl;
-        cout<<"idx_j vaut "<< idx_j <<endl;
-        cout<<"idx_k vaut "<< idx_k  <<endl;*/
-        //cout<<" la particule " << pos << " a comme position "<< part_pos[3*pos + 2] <<endl;
-
-        
-        
-        //cout<<"non" <<endl;
         idx_i = (idx_i == Nx) ? idx_i - 1 : idx_i;
         idx_j = (idx_j == Ny) ? idx_j - 1 : idx_j;
         idx_k = (idx_k == Nz) ? idx_k - 1 : idx_k;
-       // cout<<"peut etre " <<endl;
         cell_pos[idx_i + Nx*idx_j + Ny*Nx*idx_k].push_back(pos);
     }
-    //cout<<"taille vect cellule:" <<cell_pos.size()<< endl;
     
 
     // Find neighbours for each particle
@@ -79,9 +69,7 @@ void findNeighbours(vector<double> &part_pos, vector<vector<unsigned>> &cell_pos
                             ry = (part_pos[3*pos + 1] - part_pos[3*actual_cell_value+1])*(part_pos[3*pos + 1] - part_pos[3*actual_cell_value+1]);
                             rz = (part_pos[3*pos + 2] - part_pos[3*actual_cell_value+2])*(part_pos[3*pos + 2] - part_pos[3*actual_cell_value+2]);
                             r2 = rx + ry + rz;
-                            //cout << "pour la particule " << pos << " et " << actual_cell_value << " la distance est de " << r2 << " et k*h = " << kappa *kappa * h*h << endl;
                             if(r2 <= kappa*kappa*h*h){
-                                //cout << "on est rentré dedans " << endl;
                                 neighbours_matrix[pos].push_back(actual_cell_value); 
                              }
                         }      
