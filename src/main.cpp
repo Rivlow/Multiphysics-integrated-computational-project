@@ -99,7 +99,7 @@ int main(int argc, char *argv[]){
     vector<vector<double>> gradW_matrix, artificial_visc_matrix(nb_particles); 
     vector<vector<unsigned>>  neighbours_matrix(nb_particles);
 
-    double dt = 0.005;
+    double dt = 0.1;
     initializeRho(rho_arr,rho_init);
     initializeMass(rho_arr, s, mass_arr);
     initializeVelocity(u_arr, u_init);
@@ -143,8 +143,8 @@ for(size_t i = 0; i<artificial_visc_matrix.size();i++){
         for(size_t pos = 0; pos < nb_particles; pos++ ){
 
             rho_arr[pos] = rho_arr[pos] + dt*drhodt_arr[pos];
-            cout << " rho est de " << rho_arr[pos]<< endl;
-            cout << " drho dt est de " << drhodt_arr[pos]<< endl;
+            
+            //cout << " drho dt est de " << drhodt_arr[pos]<< endl;
 
             for (size_t cord = 0; cord < 2; cord++){
                 pos_arr[3*pos+cord] = pos_arr[3*pos+cord] + dt*u_arr[3*pos+cord];
@@ -164,7 +164,9 @@ for(size_t i = 0; i<artificial_visc_matrix.size();i++){
         for(size_t i = 0 ; i<neighbours_matrix.size(); i++ ){
             
             neighbours_matrix[i].clear();
+            gradW_matrix[i].clear();
         }
+        gradW_matrix.clear();
         for(size_t i = 0 ; i<cell_pos.size(); i++ ){
             
             cell_pos[i].clear();

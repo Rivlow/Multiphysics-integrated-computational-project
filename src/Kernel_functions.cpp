@@ -53,16 +53,16 @@ double derive_cubic_spline(double r, double h){
     double DW = 0;
 
     
-    if(1<= r/h && r/h<2){
-        DW = alpha/h *(3/2*r*r/(h*h) - 2*r/h);
+    if(1.0<= r/h && r/h<2.0){
+        DW = alpha/h *(1.5*r*r/(h*h) - 2.0*r/h);
     }
 
     if(1.0<= r/h && r/h<2.0){
-        DW = alpha/h *(1.5*r*r/(h*h) - 2*r/h);
+        DW = alpha/h *(1.5*r*r/(h*h) - 2.0*r/h);
 
     }
     if(r/h < 1.0){
-        DW = alpha/h * (-0.5*(1-r/h)*(1-r/h));
+        DW = alpha/h * (-0.5*(1-r/h)*(1.0-r/h));
     }
 
     return DW;
