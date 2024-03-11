@@ -109,8 +109,9 @@ int main(int argc, char *argv[]){
     vector<vector<double>> gradW_matrix, artificial_visc_matrix(nb_particles); 
     vector<vector<unsigned>>  neighbours_matrix(nb_particles);
 
-    double dt = 0.005;
-    initializeRho(rho_arr,rho_init, state_equation_chosen, state_initial_condition);
+    double dt = 0.05;
+    double rho_0 = 1000, rho = 1000, c_0 = 340.0, T = 273, M = 200, gamma = 7, H = 1;
+    initializeRho(rho_arr, rho, rho_0, c_0, M, g, H, R, T, gamma, state_equation_chosen, state_initial_condition);
     initializeMass(rho_arr, s, mass_arr);
     initializeVelocity(u_arr, u_init);
 
@@ -120,7 +121,7 @@ int main(int argc, char *argv[]){
     vectors["position"] = &pos_arr;
     vectors["velocity"] = &u_arr;
 
-    double rho_0 = 1000, c_0 = 340.0, T = 273, M = 200, gamma = 7;
+    
 
 for(size_t i = 0; i<artificial_visc_matrix.size();i++){
     for(size_t j=0 ; artificial_visc_matrix[i].size();j++){
@@ -149,17 +150,17 @@ for(size_t i = 0; i<artificial_visc_matrix.size();i++){
 
         // Compute pressure for all particles
         setPressure(p_arr, rho_arr, rho_0, c_0, R, T, M, gamma, state_equation_chosen);
-        //cout << "After setPressure " << endl;
+        cout << "After setPressure " << endl;
 
         // Compute artificial viscosity Π_ab for all particles
         setArtificialViscosity(t, artificial_visc_matrix, pos_arr, neighbours_matrix, rho_arr, u_arr,
                                alpha, beta, rho_0, c_0, gamma, R, T, M, h, state_equation_chosen);
-        //cout << "After setArtificialViscosity " << endl;
+        cout << "After setArtificialViscosity " << endl;
 
         // Compute D(u)/Dt for all particles
         momentumEquation(neighbours_matrix, mass_arr, gradW_matrix, dudt_arr, artificial_visc_matrix, rho_arr, 
                         rho_0, c_0, p_arr, R, T, M, gamma, g, state_equation_chosen);
-        //cout << "After momentumEquation " << endl;
+        cout << "After momentumEquation " << endl;
   
         // Update density, velocity and position for each particle (Euler explicit scheme)
         for(size_t pos = 0; pos < nb_particles; pos++ ){
@@ -180,7 +181,7 @@ for(size_t i = 0; i<artificial_visc_matrix.size();i++){
             }
         }
 
-        //cout << "After update " << endl;
+        cout << "After update " << endl;
   
         for(size_t i = 0 ; i<artificial_visc_matrix.size(); i++ ){
             
@@ -205,7 +206,7 @@ for(size_t i = 0; i<artificial_visc_matrix.size();i++){
             
             gradW_matrix[i].clear();
         }
-
+        gradW_matrix.clear();
         //cout << "after clear, gradW_matrix : " << endl;
 
         export_particles("sph", t, pos_arr, scalars, vectors);
