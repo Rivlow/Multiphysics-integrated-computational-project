@@ -9,10 +9,10 @@ using namespace std;
  * @param o corner of the cube with the lowest (x,y,z) values
  * @param L edge lengths along x,y and z
  * @param s particle spacing
- * @param pos positions of particles
+ * @param pos_arr pos_arritions of particles
  */
 
-void meshcube(vector<double> &o, vector<double> &L, double &s, std::vector<double> &pos)
+void meshcube(vector<double> &o, vector<double> &L, double &s, std::vector<double> &pos_arr)
 {
     // calculate nb of particles along each direction from target size "s"
     int ni = int(ceil(L[0] / s));
@@ -32,7 +32,7 @@ void meshcube(vector<double> &o, vector<double> &L, double &s, std::vector<doubl
     std::cout << "\t=> " << ni << "*" << nj << "*" << nk << " = " << ni * nj * nk << " particles to be generated\n";
 
     // memory allocation
-    pos.reserve(pos.size() + ni * nj * nk * 3);
+    pos_arr.reserve(pos_arr.size() + ni * nj * nk * 3);
 
     // particle generation
     for (int i = 0; i < ni; ++i)
@@ -44,9 +44,9 @@ void meshcube(vector<double> &o, vector<double> &L, double &s, std::vector<doubl
             for (int k = 0; k < nk; ++k)
             {
                 double z = o[2] + k * dz;
-                pos.push_back(x);
-                pos.push_back(y);
-                pos.push_back(z);
+                pos_arr.push_back(x);
+                pos_arr.push_back(y);
+                pos_arr.push_back(z);
             }
         }
     }

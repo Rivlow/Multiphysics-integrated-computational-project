@@ -11,6 +11,8 @@
 #include "gradient.h"
 #include "initialize.h"
 #include "export.h"
+#include "Kernel_functions.h"
+
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -64,11 +66,17 @@ int main(int argc, char *argv[]){
     std::vector<double> o_d = data["o_d"];
     std::vector<double> L_d = data["L_d"];
     
-    std::string state_equation_chosen;
+    std::string state_equation_chosen, state_initial_condition;
 
     for (auto& it : data["stateEquation"].items()){
         if (it.value    () == 1){
             state_equation_chosen = it.key();
+        }
+    }
+
+    for (auto& it : data["initialCondition"].items()){
+        if (it.value    () == 1){
+            state_initial_condition = it.key();
         }
     }
     
@@ -77,9 +85,11 @@ int main(int argc, char *argv[]){
     unsigned Nx, Ny, Nz ;    // Number of cells (in each direction)
 
     int kappa = data["kappa"];
+    double alpha = data["alpha"];
+    double beta = data["beta"];
     double h = 1.2*s;
     double R = 8.314; // [J/(K.mol)]
-    double g = -9.81; // [m/s²]
+    double g = 9.81; // [m/s²]
 
     Nx = (int) L_d[0]/(kappa*h);
     Ny = (int) L_d[1]/(kappa*h);
@@ -99,8 +109,8 @@ int main(int argc, char *argv[]){
     vector<vector<double>> gradW_matrix, artificial_visc_matrix(nb_particles); 
     vector<vector<unsigned>>  neighbours_matrix(nb_particles);
 
-    double dt = 0.1;
-    initializeRho(rho_arr,rho_init);
+    double dt = 0.005;
+    initializeRho(rho_arr,rho_init, state_equation_chosen, state_initial_condition);
     initializeMass(rho_arr, s, mass_arr);
     initializeVelocity(u_arr, u_init);
 
@@ -123,54 +133,81 @@ for(size_t i = 0; i<artificial_visc_matrix.size();i++){
     
   /*---------------------------- SPH ALGORITHM  -----------------------------------*/
 
-    vector<double> u_temp(3*nb_particles), rho_temp(nb_particles), pos_temp(nb_particles);
-
     for (int t = 0; t < nstepT; t++){
-        
+
         // Apply the linked-list algorithm
         findNeighbours(pos_arr, cell_pos, neighbours_matrix, L_d, Nx, Ny, Nz, h, kappa);
+        //cout << "After findNeighbours " << endl;
 
         // Compute ∇_a(W_ab) for all particles
         gradW(pos_arr, neighbours_matrix, gradW_matrix, h, Nx, Ny, Nz);
+        //cout << "After gradW " << endl;
 
         // Compute D(rho)/Dt for all particles
         continuityEquation(pos_arr ,u_arr, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass_arr, h);
+        //cout << "After continuityEquation " << endl;
+
+        // Compute pressure for all particles
+        setPressure(p_arr, rho_arr, rho_0, c_0, R, T, M, gamma, state_equation_chosen);
+        //cout << "After setPressure " << endl;
+
+        // Compute artificial viscosity Π_ab for all particles
+        setArtificialViscosity(t, artificial_visc_matrix, pos_arr, neighbours_matrix, rho_arr, u_arr,
+                               alpha, beta, rho_0, c_0, gamma, R, T, M, h, state_equation_chosen);
+        //cout << "After setArtificialViscosity " << endl;
 
         // Compute D(u)/Dt for all particles
-        momentumEquation(neighbours_matrix, mass_arr, gradW_matrix, dudt_arr, artificial_visc_matrix, rho_arr, rho_0, c_0, p_arr, R, T, M, gamma, state_equation_chosen);
-
+        momentumEquation(neighbours_matrix, mass_arr, gradW_matrix, dudt_arr, artificial_visc_matrix, rho_arr, 
+                        rho_0, c_0, p_arr, R, T, M, gamma, g, state_equation_chosen);
+        //cout << "After momentumEquation " << endl;
+  
         // Update density, velocity and position for each particle (Euler explicit scheme)
         for(size_t pos = 0; pos < nb_particles; pos++ ){
 
             rho_arr[pos] = rho_arr[pos] + dt*drhodt_arr[pos];
-            
-            //cout << " drho dt est de " << drhodt_arr[pos]<< endl;
 
-            for (size_t cord = 0; cord < 2; cord++){
-                pos_arr[3*pos+cord] = pos_arr[3*pos+cord] + dt*u_arr[3*pos+cord];
-                
-                u_arr[3*pos+cord] = u_arr[3*pos+cord] + dt*dudt_arr[3*pos+cord];
-                
-                u_arr[3*pos+2] = u_arr[3*pos+2] + dt*g*1000;
-                pos_arr[3*pos+cord] = (pos_arr[3*pos+cord] < 0.0) ? 0.0 : pos_arr[3*pos+cord];
-                pos_arr[3*pos+cord] = (pos_arr[3*pos+cord] > L_d[cord]) ? L_d[cord] : pos_arr[3*pos+cord];
+            for (size_t cord = 0; cord < 3; cord++){
+
+                //cout << "dudt_arr[3*pos+cord] (in main): " << dudt_arr[3*pos+2] << endl;
+                pos_arr[3*pos+cord] += dt*u_arr[3*pos+cord];
+                u_arr[3*pos+cord] += dt*dudt_arr[3*pos+cord];
+
+                // Check boundaries
                 u_arr[3*pos+cord] = (pos_arr[3*pos+cord] < 0.0) ? 0.0 : u_arr[3*pos+cord];
                 u_arr[3*pos+cord] = (pos_arr[3*pos+cord] > L_d[cord]) ? 0.0 : u_arr[3*pos+cord];
+                pos_arr[3*pos+cord] = (pos_arr[3*pos+cord] < 0.0) ? 0.0 : pos_arr[3*pos+cord];
+                pos_arr[3*pos+cord] = (pos_arr[3*pos+cord] > L_d[cord]) ? L_d[cord] : pos_arr[3*pos+cord];
             }
-            
-
         }
-         
+
+        //cout << "After update " << endl;
+  
+        for(size_t i = 0 ; i<artificial_visc_matrix.size(); i++ ){
+            
+            artificial_visc_matrix[i].clear();
+        }
+
         for(size_t i = 0 ; i<neighbours_matrix.size(); i++ ){
             
             neighbours_matrix[i].clear();
-            gradW_matrix[i].clear();
         }
-        gradW_matrix.clear();
+
+        //cout << "after clear, neighbours_matrix : " << endl;
+
         for(size_t i = 0 ; i<cell_pos.size(); i++ ){
             
             cell_pos[i].clear();
         }
+
+        //cout << "after clear, cell_pos : " << endl;
+
+        for(size_t i = 0 ; i<gradW_matrix.size(); i++ ){
+            
+            gradW_matrix[i].clear();
+        }
+
+        //cout << "after clear, gradW_matrix : " << endl;
+
         export_particles("sph", t, pos_arr, scalars, vectors);
     }
 }

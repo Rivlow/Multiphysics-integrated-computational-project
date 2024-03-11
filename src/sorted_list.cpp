@@ -10,18 +10,20 @@
 #include <chrono>
 #include <algorithm>
 
+
 using namespace std;
 
 
-void findNeighbours(vector<double> &part_pos, vector<vector<unsigned>> &cell_pos,
+
+void findNeighbours(vector<double> &pos_arr, vector<vector<unsigned>> &cell_pos,
                  vector<vector<unsigned>> &neighbours_matrix, vector<double> &L_d, const unsigned &Nx, const unsigned &Ny, const unsigned &Nz, const double &h, const int &kappa){
 
     // Sort all particles in their corresponding cell
-    for (unsigned pos = 0; pos < part_pos.size()/3; pos ++){
+    for (unsigned pos = 0; pos < pos_arr.size()/3; pos ++){
 
-        unsigned idx_i = part_pos[3*pos + 0] / (L_d[0] / Nx);
-        unsigned idx_j = part_pos[3*pos + 1] / (L_d[1] / Ny);
-        unsigned idx_k = part_pos[3*pos + 2] / (L_d[2] / Nz);
+        unsigned idx_i = pos_arr[3*pos + 0] / (L_d[0] / Nx);
+        unsigned idx_j = pos_arr[3*pos + 1] / (L_d[1] / Ny);
+        unsigned idx_k = pos_arr[3*pos + 2] / (L_d[2] / Nz);
         
         idx_i = (idx_i == Nx) ? idx_i - 1 : idx_i;
         idx_j = (idx_j == Ny) ? idx_j - 1 : idx_j;
@@ -31,12 +33,12 @@ void findNeighbours(vector<double> &part_pos, vector<vector<unsigned>> &cell_pos
     
 
     // Find neighbours for each particle
-    for (unsigned pos = 0; pos < part_pos.size()/3; pos ++){
+    for (unsigned pos = 0; pos < pos_arr.size()/3; pos ++){
 
         // Determine in which cell the particle is
-        unsigned i_cell = part_pos[3*pos + 0] / (L_d[0] / Nx);
-        unsigned j_cell = part_pos[3*pos + 1] / (L_d[1] / Ny);
-        unsigned k_cell = part_pos[3*pos + 2] / (L_d[2] / Nz);
+        unsigned i_cell = pos_arr[3*pos + 0] / (L_d[0] / Nx);
+        unsigned j_cell = pos_arr[3*pos + 1] / (L_d[1] / Ny);
+        unsigned k_cell = pos_arr[3*pos + 2] / (L_d[2] / Nz);
 
         i_cell = (i_cell >= Nx) ? Nx-1 : i_cell;
         j_cell = (j_cell >= Ny) ? Ny-1 : j_cell;
@@ -65,9 +67,9 @@ void findNeighbours(vector<double> &part_pos, vector<vector<unsigned>> &cell_pos
                         if(actual_cell_value != pos){
                             
                             double rx, ry, rz, r2;
-                            rx = (part_pos[3*pos] - part_pos[3*actual_cell_value])*(part_pos[3*pos] - part_pos[3*actual_cell_value]);
-                            ry = (part_pos[3*pos + 1] - part_pos[3*actual_cell_value+1])*(part_pos[3*pos + 1] - part_pos[3*actual_cell_value+1]);
-                            rz = (part_pos[3*pos + 2] - part_pos[3*actual_cell_value+2])*(part_pos[3*pos + 2] - part_pos[3*actual_cell_value+2]);
+                            rx = (pos_arr[3*pos] - pos_arr[3*actual_cell_value])*(pos_arr[3*pos] - pos_arr[3*actual_cell_value]);
+                            ry = (pos_arr[3*pos + 1] - pos_arr[3*actual_cell_value+1])*(pos_arr[3*pos + 1] - pos_arr[3*actual_cell_value+1]);
+                            rz = (pos_arr[3*pos + 2] - pos_arr[3*actual_cell_value+2])*(pos_arr[3*pos + 2] - pos_arr[3*actual_cell_value+2]);
                             r2 = rx + ry + rz;
                             if(r2 <= kappa*kappa*h*h){
                                 neighbours_matrix[pos].push_back(actual_cell_value); 
@@ -80,17 +82,17 @@ void findNeighbours(vector<double> &part_pos, vector<vector<unsigned>> &cell_pos
     }
 } 
 
-void naiveAlgo(vector<double> &part_pos, vector<vector<unsigned>> &neighbours_matrix, const double &h, const int &kappa){
+void naiveAlgo(vector<double> &pos_arr, vector<vector<unsigned>> &neighbours_matrix, const double &h, const int &kappa){
 
     // Find neighbours for each particle
-    for (unsigned i = 0; i < part_pos.size()/3; i++){
-        for (unsigned j = i+1; j < part_pos.size()/3; j++){
+    for (unsigned i = 0; i < pos_arr.size()/3; i++){
+        for (unsigned j = i+1; j < pos_arr.size()/3; j++){
 
 
             double rx, ry, rz, r2;
-            rx = (part_pos[3*i] - part_pos[3*j] )*(part_pos[3*i] - part_pos[3*j] );
-            ry = (part_pos[3*i+1] - part_pos[3*j+1] )*(part_pos[3*i+1] - part_pos[3*j+1] );
-            rz = (part_pos[3*i+2] - part_pos[3*j+2] )*(part_pos[3*i+2] - part_pos[3*j+2] );
+            rx = (pos_arr[3*i] - pos_arr[3*j] )*(pos_arr[3*i] - pos_arr[3*j] );
+            ry = (pos_arr[3*i+1] - pos_arr[3*j+1] )*(pos_arr[3*i+1] - pos_arr[3*j+1] );
+            rz = (pos_arr[3*i+2] - pos_arr[3*j+2] )*(pos_arr[3*i+2] - pos_arr[3*j+2] );
             r2 = rx + ry + rz;
             if(r2<= kappa*kappa*h*h){
                 neighbours_matrix[i].push_back(j); 
