@@ -15,7 +15,7 @@ using namespace std;
 
 
 
-void findNeighbours(vector<double> &pos_arr, vector<vector<unsigned>> &cell_pos,
+void findNeighbours(vector<double> &pos_arr, vector<vector<unsigned>> &cell_matrix, vector<unsigned> &cumul_arr,
                  vector<vector<unsigned>> &neighbours_matrix, vector<double> &L_d, const unsigned &Nx, const unsigned &Ny, const unsigned &Nz, const double &h, const int &kappa){
 
     // Sort all particles in their corresponding cell
@@ -28,9 +28,8 @@ void findNeighbours(vector<double> &pos_arr, vector<vector<unsigned>> &cell_pos,
         idx_i = (idx_i == Nx) ? idx_i - 1 : idx_i;
         idx_j = (idx_j == Ny) ? idx_j - 1 : idx_j;
         idx_k = (idx_k == Nz) ? idx_k - 1 : idx_k;
-        cell_pos[idx_i + Nx*idx_j + Ny*Nx*idx_k].push_back(pos);
+        cell_matrix[idx_i + Nx*idx_j + Ny*Nx*idx_k].push_back(pos);
     }
-    
 
     // Find neighbours for each particle
     for (unsigned pos = 0; pos < pos_arr.size()/3; pos ++){
@@ -55,27 +54,57 @@ void findNeighbours(vector<double> &pos_arr, vector<vector<unsigned>> &cell_pos,
         unsigned k_supp = (k_cell < Nz - 1) ? k_cell +1 : (k_cell == Nz - 1) ? k_cell : k_cell - 1;
 
         // Iterate over (max) 26 adjacents cells to find neighbours 
-        for (unsigned i = i_inf; i <= i_supp; i++){
-            for (unsigned j = j_inf; j <= j_supp; j++){
-                for (unsigned k = k_inf; k <= k_supp; k++){
+        for (size_t i = i_inf; i <= i_supp; i++){
+            for (size_t j = j_inf; j <= j_supp; j++){
+                for (size_t k = k_inf; k <= k_supp; k++){
 
-                    vector<unsigned> &actual_cell = cell_pos[i + j*Nx + k*Nx*Ny];  
+                    
+                    vector<unsigned> &actual_cell = cell_matrix[i + j*Nx + k*Nx*Ny]; 
+                    
+                    //cout << "actual cell value [" << i + j*Nx + k*Nx*Ny << "] : (";
+                    //for (size_t idx_neighbour_it = 0 ; idx_neighbour_it < actual_cell.size(); idx_neighbour_it++) {
+                    //    cout << actual_cell[idx_neighbour_it] << ", ";
+                    //}
+                    //cout << " )" << endl;
+                    
 
-                    for (size_t idx_neighbour_it = 0 ; idx_neighbour_it < actual_cell.size(); idx_neighbour_it++) {
-                        unsigned actual_cell_value = actual_cell[idx_neighbour_it]; 
 
-                        if(actual_cell_value != pos){
+                    if (actual_cell.size() > 0){
+                        
+                        //cout << "val cumul" << cumul_arr[i + Nx*j + Ny*Nx*k] << endl;
+                        for (size_t idx_neighbour_it = cumul_arr[i + Nx*j + Ny*Nx*k] ; idx_neighbour_it < actual_cell.size(); idx_neighbour_it++) {
                             
-                            double rx, ry, rz, r2;
-                            rx = (pos_arr[3*pos] - pos_arr[3*actual_cell_value])*(pos_arr[3*pos] - pos_arr[3*actual_cell_value]);
-                            ry = (pos_arr[3*pos + 1] - pos_arr[3*actual_cell_value+1])*(pos_arr[3*pos + 1] - pos_arr[3*actual_cell_value+1]);
-                            rz = (pos_arr[3*pos + 2] - pos_arr[3*actual_cell_value+2])*(pos_arr[3*pos + 2] - pos_arr[3*actual_cell_value+2]);
-                            r2 = rx + ry + rz;
-                            if(r2 <= kappa*kappa*h*h){
-                                neighbours_matrix[pos].push_back(actual_cell_value); 
-                             }
-                        }      
-                    }              
+                            unsigned actual_cell_value = actual_cell[idx_neighbour_it]; 
+
+                            //cout << "actual_cell_value : " << actual_cell_value  << endl;
+                            //cout << "pos : " << pos << endl;
+
+                            if(actual_cell_value != pos){
+                                
+                                double rx, ry, rz, r2;
+                                rx = (pos_arr[3*pos] - pos_arr[3*actual_cell_value])*(pos_arr[3*pos] - pos_arr[3*actual_cell_value]);
+                                ry = (pos_arr[3*pos + 1] - pos_arr[3*actual_cell_value+1])*(pos_arr[3*pos + 1] - pos_arr[3*actual_cell_value+1]);
+                                rz = (pos_arr[3*pos + 2] - pos_arr[3*actual_cell_value+2])*(pos_arr[3*pos + 2] - pos_arr[3*actual_cell_value+2]);
+                                r2 = rx + ry + rz;
+
+                                if(r2 <= kappa*kappa*h*h){
+
+                                    neighbours_matrix[pos].push_back(actual_cell_value); 
+                                    neighbours_matrix[actual_cell_value].push_back(pos);
+
+                                    unsigned i_add = pos_arr[3*actual_cell_value + 0] / (L_d[0] / Nx);
+                                    unsigned j_add = pos_arr[3*actual_cell_value + 1] / (L_d[1] / Ny);
+                                    unsigned k_add = pos_arr[3*actual_cell_value + 2] / (L_d[2] / Nz);
+
+                                    i_add = (i_add >= Nx) ? Nx-1 : i_add;
+                                    j_add = (j_add >= Ny) ? Ny-1 : j_add;
+                                    k_add = (k_cell >= Nx) ? Nz-1 : k_add;
+
+                                    cumul_arr[i_add + Nx*j_add + Ny*Nx*k_add]++;
+                                }
+                            }      
+                        }  
+                    }            
                 }
             }
         } 

@@ -87,6 +87,7 @@ int main(int argc, char *argv[]){
     int kappa = data["kappa"];
     double alpha = data["alpha"];
     double beta = data["beta"];
+    double c_0 = data["c_0"];
     double h = 1.2*s;
     double R = 8.314; // [J/(K.mol)]
     double g = 9.81; // [m/s²]
@@ -98,19 +99,24 @@ int main(int argc, char *argv[]){
     printf("(Nx, Ny, Nz) = (%d, %d, %d) \n", Nx,Ny,Nz);
 
     vector<double> pos_arr;  
-    vector<vector<unsigned>> cell_pos(Nx*Ny*Nz);
+    vector<vector<unsigned>> cell_matrix(Nx*Ny*Nz);
+    vector<unsigned> cumul_arr(Nx*Ny*Nz, 0);
     meshcube(o, L, s, pos_arr); // Initialise particles in the domain
 
     unsigned nb_particles = pos_arr.size()/3;
 
     double rho_init = data["rho"];
+    double rho_0 = data["rho_0"];
+    double M = data["M"];
+    double T = data["T"];
+    double gamma = data["gamma"];
     vector<double> u_init = data["u"];
     vector<double> mass_arr(nb_particles), u_arr(3*nb_particles), drhodt_arr(nb_particles), rho_arr(nb_particles), dudt_arr(3*nb_particles), p_arr(nb_particles);
     vector<vector<double>> gradW_matrix, artificial_visc_matrix(nb_particles); 
-    vector<vector<unsigned>>  neighbours_matrix(nb_particles);
+    vector<vector<unsigned>>  neighbours_matrix(nb_particles), neighbours_matrix_1(nb_particles);
 
     double dt = 0.005;
-    initializeRho(rho_arr,rho_init, state_equation_chosen, state_initial_condition);
+    initializeRho(pos_arr, rho_arr, rho_init, rho_0, c_0, M, g, R, T, gamma, state_equation_chosen, state_initial_condition);
     initializeMass(rho_arr, s, mass_arr);
     initializeVelocity(u_arr, u_init);
 
@@ -119,8 +125,6 @@ int main(int argc, char *argv[]){
     
     vectors["position"] = &pos_arr;
     vectors["velocity"] = &u_arr;
-
-    double rho_0 = 1000, c_0 = 340.0, T = 273, M = 200, gamma = 7;
 
 for(size_t i = 0; i<artificial_visc_matrix.size();i++){
     for(size_t j=0 ; artificial_visc_matrix[i].size();j++){
@@ -136,8 +140,11 @@ for(size_t i = 0; i<artificial_visc_matrix.size();i++){
     for (int t = 0; t < nstepT; t++){
 
         // Apply the linked-list algorithm
-        findNeighbours(pos_arr, cell_pos, neighbours_matrix, L_d, Nx, Ny, Nz, h, kappa);
+        findNeighbours(pos_arr, cell_matrix, cumul_arr, neighbours_matrix, L_d, Nx, Ny, Nz, h, kappa);
+        naiveAlgo(pos_arr, neighbours_matrix_1, h, kappa);
         //cout << "After findNeighbours " << endl;
+
+        printNeighbours(neighbours_matrix, neighbours_matrix_1);
 
         // Compute ∇_a(W_ab) for all particles
         gradW(pos_arr, neighbours_matrix, gradW_matrix, h, Nx, Ny, Nz);
@@ -154,6 +161,25 @@ for(size_t i = 0; i<artificial_visc_matrix.size();i++){
         // Compute artificial viscosity Π_ab for all particles
         setArtificialViscosity(t, artificial_visc_matrix, pos_arr, neighbours_matrix, rho_arr, u_arr,
                                alpha, beta, rho_0, c_0, gamma, R, T, M, h, state_equation_chosen);
+
+        /*
+        for (size_t idx_1 = 0; idx_1 < artificial_visc_matrix.size(); idx_1++){
+
+            cout << "For timestep = " << t << ", artificial_visc[idx_1] : (";
+
+            for(size_t idx_2 = 0; idx_2 < artificial_visc_matrix[idx_1].size(); idx_2++){
+
+                cout << artificial_visc_matrix[idx_1][idx_2] << ", ";
+
+            }
+
+            cout << ")" << endl;
+
+
+        }
+        */
+
+        
         //cout << "After setArtificialViscosity " << endl;
 
         // Compute D(u)/Dt for all particles
@@ -194,12 +220,12 @@ for(size_t i = 0; i<artificial_visc_matrix.size();i++){
 
         //cout << "after clear, neighbours_matrix : " << endl;
 
-        for(size_t i = 0 ; i<cell_pos.size(); i++ ){
+        for(size_t i = 0 ; i<cell_matrix.size(); i++ ){
             
-            cell_pos[i].clear();
+            cell_matrix[i].clear();
         }
 
-        //cout << "after clear, cell_pos : " << endl;
+        //cout << "after clear, cell_matrix : " << endl;
 
         for(size_t i = 0 ; i<gradW_matrix.size(); i++ ){
             

@@ -1,6 +1,6 @@
 {
-    "s": 0.1,
-    "nstepT": 50,
+    "s": 0.5,
+    "nstepT": 1,
     "o": [ 1.0, 1.0, 1.0],
     "L": [ 1.0, 1.0, 1.0],
     "L_d": [3.0, 3.0 , 3.0],
@@ -10,11 +10,12 @@
     "rho":1000,
     "T": 298.15,
     "u": [ 0.0, 0.0, 0.0],
-    "c0": 340, 
+    "c_0": 340, 
     "gamma":1, 
     "alpha":0.25,
     "beta":0,
+    "M":0.18, 
     "stateEquation" : {"Ideal gaz law":1, "Quasi incompresible fluid":0},
-    "initialCondition" : {"Hydrostatic":1, "Constant":0}
+    "initialCondition" : {"Hydrostatic":0, "Constant":1}
 }
 
