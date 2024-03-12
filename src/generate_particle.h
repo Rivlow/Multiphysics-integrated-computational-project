@@ -11,5 +11,6 @@ void meshcube(vector<double> &o, vector<double> &L, double &s, std::vector<doubl
 void clearAllVectors(vector<vector<double>> & artificial_visc_matrix, vector<vector<unsigned>> &neighbours_matrix, 
                      vector<vector<unsigned>> &cell_matrix, vector<vector<double>> &gradW_matrix);
 
+void meshBoundary(vector<double> &o, vector<double> &L, double &s, std::vector<double> &bound_arr);
 
 #endif // CUBE_H

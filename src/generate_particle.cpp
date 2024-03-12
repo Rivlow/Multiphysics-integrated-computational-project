@@ -97,6 +97,67 @@ void clearAllVectors(vector<vector<double>> & artificial_visc_matrix, vector<vec
     }
 
     //cout << "after clear, gradW_matrix : " << endl;           
+}
 
+void meshBoundary(vector<double> &o_d, vector<double> &L_d, double &s, std::vector<double> &bound_arr){
+    int ni = int(ceil(L_d[0] / s));
+    double dx = L_d[0] / ni;
+    ++ni;
+    int nj = int(ceil(L_d[1] / s));
+    double dy = L_d[1] / nj;
+    ++nj;
+    int nk = int(ceil(L_d[2] / s));
+    double dz = L_d[2] / nk;
+    ++nk;
+    cout << "ni, nj, nk = " << ni <<   nj << nk << endl;
 
+    bound_arr.reserve(bound_arr.size() + 6*(ni*nj + (nk-2)*nj + (ni-2)*(nk-2)));
+
+    for (int i = 0; i < ni; ++i) // along x
+    {
+        double x = o_d[0] + i * dx;
+        for (int j = 0; j < nj; ++j) // along y 
+        {
+         double y = o_d[1] + j * dy;  
+        bound_arr.push_back(x);
+        bound_arr.push_back(y);
+        bound_arr.push_back(o_d[2]);
+        bound_arr.push_back(x);
+        bound_arr.push_back(y);
+        bound_arr.push_back(L_d[2] + o_d[2]);
+        
+        }
+    }
+
+    for (int j = 0; j < nj; ++j) // along y
+    {
+        double y = o_d[1] + j * dy;
+        for (int k = 1; k < nk-1; ++k) // along z
+        {
+         double z = o_d[2] + k * dz;  
+        bound_arr.push_back(o_d[0]);
+        bound_arr.push_back(y);
+        bound_arr.push_back(z);
+        bound_arr.push_back(L_d[0] + o_d[0]);
+        bound_arr.push_back(y);
+        bound_arr.push_back(z);
+        
+        }
+    }
+    for (int i = 1; i < ni-1; ++i) // along x
+    {
+        double x = o_d[0] + i * dx;
+        for (int k = 1; k < nk-1; ++k) // along z
+        {
+         double z = o_d[2] + k * dz;  
+        bound_arr.push_back(x);
+        bound_arr.push_back(o_d[1]);
+        bound_arr.push_back(z);
+        bound_arr.push_back(x);
+        bound_arr.push_back(L_d[1]+ o_d[1]);
+        bound_arr.push_back(z);
+        
+        }
+    }
+    cout <<" longueur de bound_arr :"<< bound_arr.size()/3 << endl;
 }
