@@ -199,31 +199,31 @@ void momentumEquation(vector<vector<unsigned>> &neighbours_matrix, vector<double
         vector<double> &artificial_visc_arr = artificial_visc_matrix[pos];
         vector<double> dudt(3, 0.0), F_vol = {0.0, 0.0, g};
 
-        // Summation over b = 1 -> nb_neighbours
-        for (size_t idx_neighbour = 0; idx_neighbour < neighbours_arr.size(); idx_neighbour++){   
 
-            double rho_a = rho_arr[pos], rho_b = rho_arr[neighbours_arr[idx_neighbour]];
-            double pi_ab = artificial_visc_arr[idx_neighbour];
-            double m_b = mass_arr[neighbours_arr[idx_neighbour]];
-            double p_a = p_arr[pos], p_b = p_arr[neighbours_arr[idx_neighbour]];
 
-            p_a = 0.0;
-            p_b = 0.0; 
-            //cout << "p_a" << p_a <<endl;
-            //cout << "p_b" << p_a <<endl;
-            //cout << "pi_ab" << p_a <<endl;
+        for (size_t cord = 0; cord < 3; cord++){
 
-            for (size_t cord = 0; cord < 3; cord++){
-                //dudt[cord] += m_b*(p_b/(rho_b*rho_b) + p_a/(rho_a*rho_a) + pi_ab)*gradW_arr[idx_neighbour+cord] + F_vol[cord];
-                dudt[cord] +=  F_vol[cord];
+            // Summation over b = 1 -> nb_neighbours
+            for (size_t idx_neighbour = 0; idx_neighbour < neighbours_arr.size(); idx_neighbour++){   
+
+                double rho_a = rho_arr[pos], rho_b = rho_arr[neighbours_arr[idx_neighbour]];
+                double pi_ab = artificial_visc_arr[idx_neighbour];
+                double m_b = mass_arr[neighbours_arr[idx_neighbour]];
+                double p_a = p_arr[pos], p_b = p_arr[neighbours_arr[idx_neighbour]];
+
+                dudt[cord] += m_b*(p_b/(rho_b*rho_b) + p_a/(rho_a*rho_a) + pi_ab)*gradW_arr[idx_neighbour+cord];
+                
             }
 
+            dudt[cord] +=  F_vol[cord];
 
         }
+
+
         for (size_t cord = 0; cord < 3; cord++) {
             dudt[cord] *= -1; 
             dudt_arr[3*pos+cord] = dudt[cord];
-            cout << "dudt_arr[3*pos+cord] " << dudt_arr[3*pos+cord] << endl;
+            //cout << "dudt_arr[3*pos+cord] " << dudt_arr[3*pos+cord] << endl;
         }
 
     }

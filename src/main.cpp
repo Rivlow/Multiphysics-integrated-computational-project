@@ -141,7 +141,7 @@ int main(int argc, char *argv[]){
 
         findNeighbours(pos_arr, cell_matrix, neighbours_matrix, L_d, Nx, Ny, Nz, h, kappa); // Apply the linked-list algorithm
         gradW(pos_arr, neighbours_matrix, gradW_matrix, h, Nx, Ny, Nz); // Compute ∇_a(W_ab) for all particles
-        
+
         continuityEquation(pos_arr ,u_arr, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass_arr, h); // Compute D(rho)/Dt for all particles
         setPressure(p_arr, rho_arr, rho_0, c_0, R, T, M, gamma, state_equation_chosen); // Compute pressure for all particles
         setArtificialViscosity(t, artificial_visc_matrix, pos_arr, neighbours_matrix, rho_arr, u_arr,
@@ -168,7 +168,7 @@ int main(int argc, char *argv[]){
 
                 double vel_after_1 = u_arr[3*pos+cord];
 
-                cout << vel_after_1 - vel_before_1 <<", ";
+                //cout << vel_after_1 - vel_before_1 <<", ";
 
                 // Check boundaries (temporary)
                 u_arr[3*pos+cord] = (pos_arr[3*pos+cord] < 0.0) ? 0.0 : u_arr[3*pos+cord];
@@ -176,7 +176,7 @@ int main(int argc, char *argv[]){
                 pos_arr[3*pos+cord] = (pos_arr[3*pos+cord] < 0.0) ? 0.0 : pos_arr[3*pos+cord];
                 pos_arr[3*pos+cord] = (pos_arr[3*pos+cord] > L_d[cord]) ? L_d[cord] : pos_arr[3*pos+cord];
             }
-            cout <<")"<<endl;
+            //cout <<")"<<endl;
         }
 
         clearAllVectors(artificial_visc_matrix, neighbours_matrix, cell_matrix, gradW_matrix);
