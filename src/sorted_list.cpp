@@ -72,7 +72,7 @@ void findNeighbours(vector<double> &pos_arr, vector<vector<unsigned>> &cell_matr
                     if (actual_cell.size() > 0){
                         
                         //cout << "val cumul" << cumul_arr[i + Nx*j + Ny*Nx*k] << endl;
-                        for (size_t idx_neighbour_it = cumul_arr[i + Nx*j + Ny*Nx*k] ; idx_neighbour_it < actual_cell.size(); idx_neighbour_it++) {
+                        for (size_t idx_neighbour_it = 0 ; idx_neighbour_it< actual_cell.size(); idx_neighbour_it++) {
                             
                             unsigned actual_cell_value = actual_cell[idx_neighbour_it]; 
 
@@ -91,6 +91,7 @@ void findNeighbours(vector<double> &pos_arr, vector<vector<unsigned>> &cell_matr
 
                                     neighbours_matrix[pos].push_back(actual_cell_value); 
                                     neighbours_matrix[actual_cell_value].push_back(pos);
+                                    
 
                                     unsigned i_add = pos_arr[3*actual_cell_value + 0] / (L_d[0] / Nx);
                                     unsigned j_add = pos_arr[3*actual_cell_value + 1] / (L_d[1] / Ny);
@@ -108,6 +109,7 @@ void findNeighbours(vector<double> &pos_arr, vector<vector<unsigned>> &cell_matr
                 }
             }
         } 
+        cell_matrix[i_cell + j_cell*Nx + k_cell*Nx*Ny].erase(cell_matrix[i_cell + j_cell*Nx + k_cell*Nx*Ny].begin());
     }
 } 
 
