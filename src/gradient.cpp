@@ -147,7 +147,6 @@ void setArtificialViscosity(int &t, vector<vector<double>> &artificial_visc, vec
     }
 }
 
-
 void continuityEquation(vector<double> &pos_arr, vector<double> &u_arr, vector<vector<unsigned>> &neighbours_matrix, 
                          vector<vector<double>> &gradW_matrix, vector<double> &drhodt_arr, vector<double> &rho_arr, vector<double> &mass_arr,  double &h){
 
@@ -177,7 +176,6 @@ void continuityEquation(vector<double> &pos_arr, vector<double> &u_arr, vector<v
        
     }
 }
-
 
 void momentumEquation(vector<vector<unsigned>> &neighbours_matrix, vector<double> &mass_arr, vector<vector<double>> &gradW_matrix, 
                       vector<double> &dudt_arr, vector<vector<double>> &artificial_visc_matrix, vector<double> &rho_arr, double &rho_0, double &c_0,

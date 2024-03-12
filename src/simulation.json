@@ -1,20 +1,23 @@
 {
     "s": 0.05,
     "nstepT": 200,
-    "o": [ 1.0, 1.0, 1.0],
-    "L": [ 1.0, 1.0, 1.0],
+
+    "o": [1.0, 1.0, 1.0],
+    "L": [1.0, 1.0, 1.0],
     "L_d": [2.0, 2.0 , 2.0],
-    "o_d": [ 0.0, 0.0, 0.0],
+    "o_d": [0.0, 0.0, 0.0],
+
     "kappa": 1,
     "rho_0": 1000,
-    "rho":1000,
+    "rho": 1000,
     "T": 298.15,
-    "u": [ 0.0, 0.0, 0.0],
+    "u": [0.0, 0.0, 0.0],
     "c_0": 340, 
-    "gamma":1, 
-    "alpha":0.25,
-    "beta":0,
-    "M":0.18, 
+    "gamma": 1, 
+    "alpha": 0.25,
+    "beta": 0,
+    "M": 0.18, 
+
     "stateEquation" : {"Ideal gaz law":1, "Quasi incompresible fluid":0},
     "initialCondition" : {"Hydrostatic":0, "Constant":1}
 }

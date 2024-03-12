@@ -11,3 +11,5 @@ void initializeRho(vector<double> &pos_arr, vector<double> &rho_arr,double &rho,
                    std::string &state_initial_condition);
 
 void initializeVelocity(vector<double> &u_arr, vector<double> &u_init);
+
+void initializeViscosity(vector<vector<double>> &artificial_visc_matrix);

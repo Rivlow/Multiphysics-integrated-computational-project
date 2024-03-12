@@ -50,3 +50,12 @@ void initializeVelocity(vector<double> &u_arr,vector<double> &u_init){
         u_arr[3*i+2] = u_init[2];
     }    
 }
+
+void initializeViscosity(vector<vector<double>> &artificial_visc_matrix){
+
+    for(size_t i = 0; i<artificial_visc_matrix.size();i++){
+        for(size_t j=0 ; artificial_visc_matrix[i].size();j++){
+            artificial_visc_matrix[i][j] = 0.0;
+        }
+    }  
+}
