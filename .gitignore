@@ -32,9 +32,14 @@
 *.app
 git 
 build/
+<<<<<<< HEAD
+.vscode/
+=======
 
 # Vscode data
 .vscode/
+output/
 
 # Pictures
 *.PDF
+>>>>>>> 15f00ac839507c802eb83fb90f8d307f2d41a779

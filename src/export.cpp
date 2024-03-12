@@ -205,6 +205,10 @@ void export_particles(std::string const &filename,
     int nbp = (int)pos.size() / 3;
     assert(pos.size() == (size_t)nbp * 3); // should be multiple of 3
 
+
+    std::string outputDirectory = "../../output/"; // Chemin vers le répertoire de sortie
+
+
     // build file name + stepno + vtk extension
     std::stringstream s;
     s << filename << std::setw(8) << std::setfill('0') << step << ".vtp";
@@ -214,7 +218,7 @@ void export_particles(std::string const &filename,
     // open file
     if (verb)
         std::cout << "writing results to " << s.str() << " (compression:" <<  (usez? "on" : "off") << ")\n";
-    std::ofstream f(s.str().c_str(), std::ios::binary | std::ios::out);
+    std::ofstream f(outputDirectory+s.str().c_str(), std::ios::binary | std::ios::out);
     std::ofstream f2(s2.str().c_str(), std::ios::binary | std::ios::out); // temp binary file
     f << std::scientific;
 
