@@ -10,10 +10,7 @@
 #include <chrono>
 #include <algorithm>
 
-
 using namespace std;
-
-
 
 void findNeighbours(vector<double> &pos_arr, vector<vector<unsigned>> &cell_matrix,
                  vector<vector<unsigned>> &neighbours_matrix, vector<double> &L_d, const unsigned &Nx, const unsigned &Ny, const unsigned &Nz, const double &h, const int &kappa){
@@ -58,7 +55,6 @@ void findNeighbours(vector<double> &pos_arr, vector<vector<unsigned>> &cell_matr
             for (size_t j = j_inf; j <= j_supp; j++){
                 for (size_t k = k_inf; k <= k_supp; k++){
 
-                    
                     vector<unsigned> &actual_cell = cell_matrix[i + j*Nx + k*Nx*Ny]; 
 
                     if (actual_cell.size() > 0){

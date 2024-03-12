@@ -5,7 +5,6 @@ using namespace std;
 
 /**
  * @brief build a cube of particles aligned with x,y,z axes.
- *
  * @param o corner of the cube with the lowest (x,y,z) values
  * @param L edge lengths along x,y and z
  * @param s particle spacing
