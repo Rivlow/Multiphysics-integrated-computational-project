@@ -193,13 +193,10 @@ void momentumEquation(vector<vector<unsigned>> &neighbours_matrix, vector<double
         dudt_arr[3*pos+cord] = 0.0;
         }   
 
-
         vector<unsigned> &neighbours_arr = neighbours_matrix[pos];
         vector<double> &gradW_arr = gradW_matrix[pos];
         vector<double> &artificial_visc_arr = artificial_visc_matrix[pos];
         vector<double> dudt(3, 0.0), F_vol = {0.0, 0.0, g};
-
-
 
         for (size_t cord = 0; cord < 3; cord++){
 
