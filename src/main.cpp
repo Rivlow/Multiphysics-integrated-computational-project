@@ -115,7 +115,7 @@ int main(int argc, char *argv[]){
     int nb_particles = evaluateNumberParticles(L, s);
 
     // Vector used (and labelled w.r.t particles location)
-    vector<double> pos_arr;  
+    vector<double> pos_arr, bound_arr;  
     vector<vector<unsigned>> cell_matrix(Nx*Ny*Nz);
     vector<double> mass_arr(nb_particles), u_arr(3*nb_particles), drhodt_arr(nb_particles), rho_arr(nb_particles), dudt_arr(3*nb_particles, 0.0), p_arr(nb_particles);
     vector<vector<double>> gradW_matrix, artificial_visc_matrix(nb_particles); 
@@ -131,6 +131,13 @@ int main(int argc, char *argv[]){
 
     // Initialization of the problem
     meshcube(o, L, s, pos_arr); 
+    meshBoundary(o_d, L_d, s, bound_arr);
+    for(size_t i = 0; i < 3; i++){
+        o_d[i] = o_d[i] - s*0.5;
+        L_d[i] = L_d[i] + s ;
+        //cout << " le centre et longueur de l'axe " << i << "est "<< o_d[i] << " et  " << L_d[i] << endl;
+    }
+    meshBoundary(o_d, L_d, s, bound_arr);
     initializeRho(pos_arr, rho_arr, rho_init, rho_0, c_0, M, g, R, T, gamma, state_equation_chosen, state_initial_condition);
     initializeMass(rho_arr, s, mass_arr);
 
