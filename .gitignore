@@ -38,6 +38,7 @@ build/
 
 # Vscode data
 .vscode/
+.output/
 
 # Pictures
 *.PDF
