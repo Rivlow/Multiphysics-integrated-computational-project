@@ -81,7 +81,7 @@ void setArtificialViscosity(int &t, vector<vector<double>> &artificial_visc, vec
     }
 
     else{
-        vector<double> rel_displ(3), rel_velo(3);
+        vector<double> rel_displ(3), rel_vel(3);
 
         // Iterations over each particle
         for (size_t pos = 0; pos < pos_arr.size()/3; pos++){
@@ -95,15 +95,23 @@ void setArtificialViscosity(int &t, vector<vector<double>> &artificial_visc, vec
                 rel_displ[1] = (pos_arr[3*pos+1] - pos_arr[3*idx_neighbour+1]);
                 rel_displ[2] = (pos_arr[3*pos+2] - pos_arr[3*idx_neighbour+2]);
 
-                rel_velo[0] = (u_arr[3*pos+0] - u_arr[3*idx_neighbour+0]);
-                rel_velo[1] = (u_arr[3*pos+1] - u_arr[3*idx_neighbour+1]);
-                rel_velo[2] = (u_arr[3*pos+2] - u_arr[3*idx_neighbour+2]);
+                rel_vel[0] = (u_arr[3*pos+0] - u_arr[3*idx_neighbour+0]);
+                rel_vel[1] = (u_arr[3*pos+1] - u_arr[3*idx_neighbour+1]);
+                rel_vel[2] = (u_arr[3*pos+2] - u_arr[3*idx_neighbour+2]);
+
+                cout << "rel_displ (x): " << rel_displ[0];
+                cout << "rel_displ (y): " << rel_displ[1];
+                cout << "rel_displ (z): " << rel_displ[2] << endl;
+
+                cout << "rel_vel (x): " << rel_vel[0];
+                cout << "rel_vel (y): " << rel_vel[1];
+                cout << "rel_vel (z): " << rel_vel[2] << endl;
 
                 double res = 0, xa_xb = 0;
 
                 // Dot product
                 for (size_t cord = 0; cord < 3; cord++){
-                    res += rel_velo[cord]*rel_displ[cord];
+                    res += rel_vel[cord]*rel_displ[cord];
                     xa_xb += rel_displ[cord]*rel_displ[cord];
                 }
 
