@@ -15,7 +15,7 @@ using namespace std;
 
 
 
-void findNeighbours(vector<double> &pos_arr, vector<vector<unsigned>> &cell_matrix, vector<unsigned> &cumul_arr,
+void findNeighbours(vector<double> &pos_arr, vector<vector<unsigned>> &cell_matrix,
                  vector<vector<unsigned>> &neighbours_matrix, vector<double> &L_d, const unsigned &Nx, const unsigned &Ny, const unsigned &Nz, const double &h, const int &kappa){
 
     // Sort all particles in their corresponding cell
@@ -60,24 +60,12 @@ void findNeighbours(vector<double> &pos_arr, vector<vector<unsigned>> &cell_matr
 
                     
                     vector<unsigned> &actual_cell = cell_matrix[i + j*Nx + k*Nx*Ny]; 
-                    
-                    //cout << "actual cell value [" << i + j*Nx + k*Nx*Ny << "] : (";
-                    //for (size_t idx_neighbour_it = 0 ; idx_neighbour_it < actual_cell.size(); idx_neighbour_it++) {
-                    //    cout << actual_cell[idx_neighbour_it] << ", ";
-                    //}
-                    //cout << " )" << endl;
-                    
-
 
                     if (actual_cell.size() > 0){
                         
-                        //cout << "val cumul" << cumul_arr[i + Nx*j + Ny*Nx*k] << endl;
-                        for (size_t idx_neighbour_it = cumul_arr[i + Nx*j + Ny*Nx*k] ; idx_neighbour_it < actual_cell.size(); idx_neighbour_it++) {
+                        for (size_t idx_neighbour_it = 0; idx_neighbour_it < actual_cell.size(); idx_neighbour_it++) {
                             
                             unsigned actual_cell_value = actual_cell[idx_neighbour_it]; 
-
-                            //cout << "actual_cell_value : " << actual_cell_value  << endl;
-                            //cout << "pos : " << pos << endl;
 
                             if(actual_cell_value != pos){
                                 
@@ -100,7 +88,6 @@ void findNeighbours(vector<double> &pos_arr, vector<vector<unsigned>> &cell_matr
                                     j_add = (j_add >= Ny) ? Ny-1 : j_add;
                                     k_add = (k_cell >= Nx) ? Nz-1 : k_add;
 
-                                    cumul_arr[i_add + Nx*j_add + Ny*Nx*k_add]++;
                                 }
                             }      
                         }  
@@ -108,6 +95,9 @@ void findNeighbours(vector<double> &pos_arr, vector<vector<unsigned>> &cell_matr
                 }
             }
         } 
+
+    cell_matrix[i_cell + j_cell*Nx + k_cell*Nx*Ny].erase(cell_matrix[i_cell + j_cell*Nx + k_cell*Nx*Ny].begin());
+
     }
 } 
 

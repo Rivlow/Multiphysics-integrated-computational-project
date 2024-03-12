@@ -100,7 +100,6 @@ int main(int argc, char *argv[]){
 
     vector<double> pos_arr;  
     vector<vector<unsigned>> cell_matrix(Nx*Ny*Nz);
-    vector<unsigned> cumul_arr(Nx*Ny*Nz, 0);
     meshcube(o, L, s, pos_arr); // Initialise particles in the domain
 
     unsigned nb_particles = pos_arr.size()/3;
@@ -140,11 +139,11 @@ for(size_t i = 0; i<artificial_visc_matrix.size();i++){
     for (int t = 0; t < nstepT; t++){
 
         // Apply the linked-list algorithm
-        findNeighbours(pos_arr, cell_matrix, cumul_arr, neighbours_matrix, L_d, Nx, Ny, Nz, h, kappa);
-        naiveAlgo(pos_arr, neighbours_matrix_1, h, kappa);
+        findNeighbours(pos_arr, cell_matrix, neighbours_matrix, L_d, Nx, Ny, Nz, h, kappa);
+        //naiveAlgo(pos_arr, neighbours_matrix_1, h, kappa);
         //cout << "After findNeighbours " << endl;
 
-        printNeighbours(neighbours_matrix, neighbours_matrix_1);
+        //printNeighbours(neighbours_matrix, neighbours_matrix_1);
 
         // Compute ∇_a(W_ab) for all particles
         gradW(pos_arr, neighbours_matrix, gradW_matrix, h, Nx, Ny, Nz);
@@ -161,30 +160,13 @@ for(size_t i = 0; i<artificial_visc_matrix.size();i++){
         // Compute artificial viscosity Π_ab for all particles
         setArtificialViscosity(t, artificial_visc_matrix, pos_arr, neighbours_matrix, rho_arr, u_arr,
                                alpha, beta, rho_0, c_0, gamma, R, T, M, h, state_equation_chosen);
-
-        /*
-        for (size_t idx_1 = 0; idx_1 < artificial_visc_matrix.size(); idx_1++){
-
-            cout << "For timestep = " << t << ", artificial_visc[idx_1] : (";
-
-            for(size_t idx_2 = 0; idx_2 < artificial_visc_matrix[idx_1].size(); idx_2++){
-
-                cout << artificial_visc_matrix[idx_1][idx_2] << ", ";
-
-            }
-
-            cout << ")" << endl;
-
-
-        }
-        */
-
         
         //cout << "After setArtificialViscosity " << endl;
 
         // Compute D(u)/Dt for all particles
         momentumEquation(neighbours_matrix, mass_arr, gradW_matrix, dudt_arr, artificial_visc_matrix, rho_arr, 
                         rho_0, c_0, p_arr, R, T, M, gamma, g, state_equation_chosen);
+
         //cout << "After momentumEquation " << endl;
   
         // Update density, velocity and position for each particle (Euler explicit scheme)
@@ -197,6 +179,8 @@ for(size_t i = 0; i<artificial_visc_matrix.size();i++){
                 //cout << "dudt_arr[3*pos+cord] (in main): " << dudt_arr[3*pos+2] << endl;
                 pos_arr[3*pos+cord] += dt*u_arr[3*pos+cord];
                 u_arr[3*pos+cord] += dt*dudt_arr[3*pos+cord];
+
+                //cout << "incremental velo update : " << dt*dudt_arr[3*pos+cord] << endl;
 
                 // Check boundaries
                 u_arr[3*pos+cord] = (pos_arr[3*pos+cord] < 0.0) ? 0.0 : u_arr[3*pos+cord];
@@ -216,6 +200,11 @@ for(size_t i = 0; i<artificial_visc_matrix.size();i++){
         for(size_t i = 0 ; i<neighbours_matrix.size(); i++ ){
             
             neighbours_matrix[i].clear();
+        }
+
+                for(size_t i = 0 ; i<neighbours_matrix_1.size(); i++ ){
+            
+            neighbours_matrix_1[i].clear();
         }
 
         //cout << "after clear, neighbours_matrix : " << endl;
