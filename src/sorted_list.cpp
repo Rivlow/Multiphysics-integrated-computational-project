@@ -12,7 +12,7 @@
 
 using namespace std;
 
-void findNeighbours(vector<double> &pos_arr, vector<vector<unsigned>> &cell_matrix,
+void findNeighbours(unsigned &nb_moving_part, vector<double> &pos_arr, vector<vector<unsigned>> &cell_matrix,
                  vector<vector<unsigned>> &neighbours_matrix, vector<double> &L_d, const unsigned &Nx, const unsigned &Ny, const unsigned &Nz, const double &h, const int &kappa){
 
     // Sort all particles in their corresponding cell
@@ -26,15 +26,19 @@ void findNeighbours(vector<double> &pos_arr, vector<vector<unsigned>> &cell_matr
         idx_j = (idx_j == Ny) ? idx_j - 1 : idx_j;
         idx_k = (idx_k == Nz) ? idx_k - 1 : idx_k;
         cell_matrix[idx_i + Nx*idx_j + Ny*Nx*idx_k].push_back(pos);
+
+        //cout << "For part : " << pos << ", cell's index = (" << idx_i << ", " << idx_j << ", " << idx_k << ")" << endl;
     }
 
     // Find neighbours for each particle
-    for (unsigned pos = 0; pos < pos_arr.size()/3; pos ++){
+    for (unsigned pos = 0; pos < nb_moving_part; pos++){
 
         // Determine in which cell the particle is
         unsigned i_cell = pos_arr[3*pos + 0] / (L_d[0] / Nx);
         unsigned j_cell = pos_arr[3*pos + 1] / (L_d[1] / Ny);
         unsigned k_cell = pos_arr[3*pos + 2] / (L_d[2] / Nz);
+
+        //cout << "cell's indices computed" << endl;
 
         i_cell = (i_cell >= Nx) ? Nx-1 : i_cell;
         j_cell = (j_cell >= Ny) ? Ny-1 : j_cell;
@@ -50,18 +54,24 @@ void findNeighbours(vector<double> &pos_arr, vector<vector<unsigned>> &cell_matr
         unsigned k_inf = (k_cell == 0) ? 0 : k_cell - 1;
         unsigned k_supp = (k_cell < Nz - 1) ? k_cell +1 : (k_cell == Nz - 1) ? k_cell : k_cell - 1;
 
+        //cout << "cell's neighbours computed" << endl;
+
+
         // Iterate over (max) 26 adjacents cells to find neighbours 
         for (size_t i = i_inf; i <= i_supp; i++){
             for (size_t j = j_inf; j <= j_supp; j++){
                 for (size_t k = k_inf; k <= k_supp; k++){
 
                     vector<unsigned> &actual_cell = cell_matrix[i + j*Nx + k*Nx*Ny]; 
+                    //cout << "len(actual_cell vector) : " << actual_cell.size() << endl;
 
                     if (actual_cell.size() > 0){
                         
                         for (size_t idx_neighbour_it = 0; idx_neighbour_it < actual_cell.size(); idx_neighbour_it++) {
                             
                             unsigned actual_cell_value = actual_cell[idx_neighbour_it]; 
+                            //cout << "actual_cell_value defined" << endl;
+
 
                             if(actual_cell_value != pos){
                                 
@@ -73,16 +83,15 @@ void findNeighbours(vector<double> &pos_arr, vector<vector<unsigned>> &cell_matr
 
                                 if(r2 <= kappa*kappa*h*h){
 
+                                    //cout << "neighbour founded (before push)" << endl;
+                                    //cout << "pos : " << pos << endl;
+                                    //cout << "actual_cell_value : " << actual_cell_value << endl;
                                     neighbours_matrix[pos].push_back(actual_cell_value); 
+                                   // cout << "after first push_back" << endl;
+                                    //cout << "len(neighbour_matrix) = " << neighbours_matrix.size() << endl;
                                     neighbours_matrix[actual_cell_value].push_back(pos);
+                                    //cout << "neighbour founded (after push)" << endl;
 
-                                    unsigned i_add = pos_arr[3*actual_cell_value + 0] / (L_d[0] / Nx);
-                                    unsigned j_add = pos_arr[3*actual_cell_value + 1] / (L_d[1] / Ny);
-                                    unsigned k_add = pos_arr[3*actual_cell_value + 2] / (L_d[2] / Nz);
-
-                                    i_add = (i_add >= Nx) ? Nx-1 : i_add;
-                                    j_add = (j_add >= Ny) ? Ny-1 : j_add;
-                                    k_add = (k_cell >= Nx) ? Nz-1 : k_add;
 
                                 }
                             }      
@@ -97,11 +106,11 @@ void findNeighbours(vector<double> &pos_arr, vector<vector<unsigned>> &cell_matr
     }
 } 
 
-void naiveAlgo(vector<double> &pos_arr, vector<vector<unsigned>> &neighbours_matrix, const double &h, const int &kappa){
+void naiveAlgo(unsigned &nb_moving_part, vector<double> &pos_arr, vector<vector<unsigned>> &neighbours_matrix, const double &h, const int &kappa){
 
     // Find neighbours for each particle
-    for (unsigned i = 0; i < pos_arr.size()/3; i++){
-        for (unsigned j = i+1; j < pos_arr.size()/3; j++){
+    for (unsigned i = 0; i < nb_moving_part; i++){
+        for (unsigned j = i+1; j < nb_moving_part; j++){
 
 
             double rx, ry, rz, r2;

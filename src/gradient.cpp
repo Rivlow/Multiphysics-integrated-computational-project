@@ -6,11 +6,11 @@ using namespace std;
 
 
 
-void gradW(vector<double> &pos_arr, vector<vector<unsigned>> &neighbours_matrix, vector<vector<double>> &gradW_matrix, 
+void gradW(unsigned &nb_moving_part, vector<double> &pos_arr, vector<vector<unsigned>> &neighbours_matrix, vector<vector<double>> &gradW_matrix, 
                     double &h, unsigned &Nx, unsigned &Ny, unsigned &Nz){
 
     // Iterations over each particle
-    for (unsigned pos = 0; pos < pos_arr.size()/3; pos++){
+    for (unsigned pos = 0; pos < nb_moving_part; pos++){
 
         vector<unsigned> &neighbours_list = neighbours_matrix[pos];
         vector<double> gradW_vect;
@@ -50,10 +50,10 @@ double setSpeedOfSound(double &rho, double &rho_0, double &c_0, double &gamma, s
     return c;
 }
 
-void setPressure(vector<double> &p_arr, vector<double> &rho_arr, double &rho_0,  double &c_0, double &R,  double &T,
+void setPressure(unsigned &nb_moving_part, vector<double> &p_arr, vector<double> &rho_arr, double &rho_0,  double &c_0, double &R,  double &T,
                       double &M, double &gamma, string &state_equation_chosen){
 
-    for (size_t pos = 0; pos < p_arr.size(); pos++){
+    for (size_t pos = 0; pos < nb_moving_part; pos++){
 
         if (state_equation_chosen == "Ideal gaz law"){
             p_arr[pos] = (rho_arr[pos]/rho_0 - 1)*(R*T)/M;
@@ -66,11 +66,11 @@ void setPressure(vector<double> &p_arr, vector<double> &rho_arr, double &rho_0, 
     }
 }
 
-void setArtificialViscosity(int &t, vector<vector<double>> &artificial_visc, vector<double> &pos_arr, vector<vector<unsigned>> &neighbours_matrix, vector<double> &rho_arr, 
+void setArtificialViscosity(int &t, vector<vector<double>> &artificial_visc, unsigned &nb_moving_part, vector<double> &pos_arr, vector<vector<unsigned>> &neighbours_matrix, vector<double> &rho_arr, 
                             vector<double> &u_arr, double &alpha, double &beta, double &rho_0, double &c_0, double &gamma, double &R, double &T, double &M, double &h, string &state_equation_chosen){
 
-    if (1){
-        for (size_t pos = 0; pos < pos_arr.size()/3; pos++){
+    if (t == 0){
+        for (size_t pos = 0; pos < nb_moving_part; pos++){
 
             vector<unsigned> &neighbours_list = neighbours_matrix[pos];
         
@@ -86,9 +86,13 @@ void setArtificialViscosity(int &t, vector<vector<double>> &artificial_visc, vec
         vector<double> rel_displ(3), rel_vel(3);
 
         // Iterations over each particle
-        for (size_t pos = 0; pos < pos_arr.size()/3; pos++){
+        for (size_t pos = 0; pos < nb_moving_part; pos++){
 
             vector<unsigned> &neighbours_arr = neighbours_matrix[pos];
+           // cout << "For particle : " << pos << endl;
+           // cout << " pos (x): " << pos_arr[3*pos+0];
+           // cout << " pos (y): " << pos_arr[3*pos+1];
+           // cout << " pos (z): " << pos_arr[3*pos+2] << "\n" <<endl;
             
             // Iteration over each associated neighbours
             for (size_t idx_neighbour = 0; idx_neighbour < neighbours_arr.size(); idx_neighbour++){   
@@ -103,15 +107,13 @@ void setArtificialViscosity(int &t, vector<vector<double>> &artificial_visc, vec
                 rel_vel[1] = (u_arr[3*pos+1] - u_arr[3*neighbour_value+1]);
                 rel_vel[2] = (u_arr[3*pos+2] - u_arr[3*neighbour_value+2]);
 
-                /*
-                cout << "vel pos (x): " << u_arr[3*pos+0];
-                cout << " vel pos (y): " << u_arr[3*pos+1];
-                cout << " vel pos (z): " << u_arr[3*pos+2] << endl;
+                
+                
 
-                cout << "vel nei (x): " << u_arr[3*neighbour_value+0];
-                cout << " vel nei (y): " << u_arr[3*neighbour_value+1];
-                cout << " vel nei (z): " << u_arr[3*neighbour_value+2] << endl;
-                */
+                //cout << "vel nei (x): " << u_arr[3*neighbour_value+0];
+                //cout << " vel nei (y): " << u_arr[3*neighbour_value+1];
+                //cout << " vel nei (z): " << u_arr[3*neighbour_value+2] << endl;
+                
 
                 double res = 0, xa_xb = 0;
 
@@ -148,11 +150,11 @@ void setArtificialViscosity(int &t, vector<vector<double>> &artificial_visc, vec
     }
 }
 
-void continuityEquation(vector<double> &pos_arr, vector<double> &u_arr, vector<vector<unsigned>> &neighbours_matrix, 
+void continuityEquation(unsigned &nb_moving_part, vector<double> &pos_arr, vector<double> &u_arr, vector<vector<unsigned>> &neighbours_matrix, 
                          vector<vector<double>> &gradW_matrix, vector<double> &drhodt_arr, vector<double> &rho_arr, vector<double> &mass_arr,  double &h){
 
     // Iterations over each particle                    
-    for (size_t pos = 0; pos < pos_arr.size()/3; pos++){
+    for (size_t pos = 0; pos < nb_moving_part; pos++){
 
         drhodt_arr[pos] = 0;
 
@@ -160,7 +162,7 @@ void continuityEquation(vector<double> &pos_arr, vector<double> &u_arr, vector<v
         vector<double> &gradW_list = gradW_matrix[pos];
 
         double drhodt = 0;
-
+        
         // Summation over b = 1 -> nb_neighbours
         for (size_t idx_neighbour = 0; idx_neighbour < neighbours_list.size(); idx_neighbour++){   
 
@@ -172,6 +174,7 @@ void continuityEquation(vector<double> &pos_arr, vector<double> &u_arr, vector<v
             }
 
             drhodt += mass_arr[neighbours_list[idx_neighbour]]*dot_product;
+
             //cout << "mass used : " << mass_arr[neighbours_list[idx_neighbour]] << " and dot product : " << dot_product << endl;
         }
 
@@ -181,13 +184,13 @@ void continuityEquation(vector<double> &pos_arr, vector<double> &u_arr, vector<v
     }
 }
 
-void momentumEquation(vector<vector<unsigned>> &neighbours_matrix, vector<double> &mass_arr, vector<vector<double>> &gradW_matrix, 
+void momentumEquation(unsigned &nb_moving_part, vector<vector<unsigned>> &neighbours_matrix, vector<double> &mass_arr, vector<vector<double>> &gradW_matrix, 
                       vector<double> &dudt_arr, vector<vector<double>> &artificial_visc_matrix, vector<double> &rho_arr, double &rho_0, double &c_0,
                       vector<double> &p_arr, double &R, double &T, double &M, double &gamma, double &g, string &state_equation_chosen){
 
     // Iterations over each particle
  
-    for (size_t pos = 0; pos < rho_arr.size(); pos++){
+    for (size_t pos = 0; pos < nb_moving_part; pos++){
         
         for (size_t cord = 0; cord < 3; cord++){
         dudt_arr[3*pos+cord] = 0.0;
@@ -218,7 +221,6 @@ void momentumEquation(vector<vector<unsigned>> &neighbours_matrix, vector<double
             dudt[cord] +=  F_vol[cord];
 
         }
-
 
         for (size_t cord = 0; cord < 3; cord++) {
             dudt[cord] *= -1; 
