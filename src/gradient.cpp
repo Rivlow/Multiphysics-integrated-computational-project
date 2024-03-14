@@ -9,25 +9,33 @@ using namespace std;
 void gradW(unsigned &nb_moving_part, vector<double> &pos_arr, vector<vector<unsigned>> &neighbours_matrix, vector<vector<double>> &gradW_matrix, 
                     double &h, unsigned &Nx, unsigned &Ny, unsigned &Nz){
 
+    
     // Iterations over each particle
     for (unsigned pos = 0; pos < nb_moving_part; pos++){
-
         vector<unsigned> &neighbours_list = neighbours_matrix[pos];
+        cout << "len(neighbour_list) : " << neighbours_list.size() << endl;
         vector<double> gradW_vect;
 
         // Iterations over each associated neighbours of prescribed particles
         for (unsigned idx_neighbour : neighbours_list){     
             
             double rx, ry, rz, r_ab;
-
+            cout << "entrance in neighbour loop (before rx, ry, rz) \n";
             rx = (pos_arr[3*pos+0] - pos_arr[3*idx_neighbour+0])*(pos_arr[3*pos+0] - pos_arr[3*idx_neighbour+0]);
             ry = (pos_arr[3*pos+1] - pos_arr[3*idx_neighbour+1])*(pos_arr[3*pos+1] - pos_arr[3*idx_neighbour+1]);
             rz = (pos_arr[3*pos+2] - pos_arr[3*idx_neighbour+2])*(pos_arr[3*pos+2] - pos_arr[3*idx_neighbour+2]);
             r_ab = sqrt(rx + ry + rz);
+            cout << "entrance in neighbour loop (after rx, ry, rz) \n";
 
             gradW_vect.push_back((pos_arr[3*pos+0] - pos_arr[3*idx_neighbour+0])/r_ab * derive_cubic_spline(r_ab, h));
             gradW_vect.push_back((pos_arr[3*pos+1] - pos_arr[3*idx_neighbour+1])/r_ab * derive_cubic_spline(r_ab, h));
+            cout << "pos used : " << pos << " and idx_neighbour used : " << idx_neighbour << endl;
+            cout << "len (pos_arr) : " << pos_arr.size() << endl;
+            cout << "pos_arr associated : " << pos_arr[3*pos+2] << endl;
+            cout << "idx_neighbour associated : " << pos_arr[3*idx_neighbour+2] << endl;
             gradW_vect.push_back((pos_arr[3*pos+2] - pos_arr[3*idx_neighbour+2])/r_ab * derive_cubic_spline(r_ab, h));
+            cout << "entrance in neighbour loop (after third pushback) \n";
+
         }
 
         gradW_matrix.push_back(gradW_vect);

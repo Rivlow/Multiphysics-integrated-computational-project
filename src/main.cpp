@@ -100,7 +100,7 @@ int main(int argc, char *argv[]){
     /*---------------------------- INITIALIZATION OF VARIABLES USED -----------------------------------*/
 
     // Debug variable
-    const bool PRINT = false;
+    const bool PRINT = true;
 
     // Constants
     double h = 1.2*s;
@@ -149,8 +149,8 @@ int main(int argc, char *argv[]){
 
     unsigned nb_tot_part = pos_arr.size();
 
-    vector<double> mass_arr(nb_particles), u_arr(3*nb_tot_part), drhodt_arr(nb_tot_part), rho_arr(nb_tot_part), dudt_arr(3*nb_tot_part, 0.0), p_arr(nb_tot_part);
-    vector<vector<double>> gradW_matrix, artificial_visc_matrix(nb_tot_part); 
+    vector<double> mass_arr(nb_tot_part), u_arr(3*nb_tot_part), drhodt_arr(nb_tot_part), rho_arr(nb_tot_part), dudt_arr(3*nb_tot_part, 0.0), p_arr(nb_tot_part);
+    vector<vector<double>> artificial_visc_matrix(nb_tot_part); 
     vector<vector<unsigned>>  neighbours_matrix(nb_tot_part), neighbours_matrix_1(nb_tot_part);
 
     vectors["position"] = &pos_arr;
@@ -173,12 +173,40 @@ int main(int argc, char *argv[]){
 
     for (int t = 0; t < nstepT; t++){
 
+
+    cout << "pos_arr vals : (";
+        for (size_t idx = 0; idx < pos_arr.size(); idx++){
+            cout << pos_arr[idx] << ", ";
+        }
+        cout << ") \n" << endl; 
+
+    
+
+
+
         findNeighbours(nb_moving_part, pos_arr, cell_matrix, neighbours_matrix, L_d, Nx, Ny, Nz, h, kappa); // Apply the linked-list algorithm
         if(PRINT){cout << "findNeighbours passed" << endl;}
 
+        /*
+        cout << "For iteration (gradW_matrix): " << t << endl;
+        for (int i = 0; i < neighbours_matrix.size(); ++i){
+            cout << "For pos " << i << " : (";
+            for (int j = 0; j < neighbours_matrix[i].size(); ++j) {
+                cout << neighbours_matrix[i][j];
+                if (j != neighbours_matrix[i].size() - 1) {
+                    cout << ", ";
+                }
+            }
+            cout << ")" << endl;
+        }
+        */
+
+
+        vector<vector<double>> gradW_matrix;
         gradW(nb_moving_part, pos_arr, neighbours_matrix, gradW_matrix, h, Nx, Ny, Nz); // Compute ∇_a(W_ab) for all particles
         if(PRINT){cout << "gradW passed" << endl;}
-        printMatrix(gradW_matrix);
+
+
 
         continuityEquation(nb_moving_part, pos_arr ,u_arr, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass_arr, h); // Compute D(rho)/Dt for all particles
         if(PRINT){cout << "continuityEquation passed" << endl;}
@@ -220,7 +248,15 @@ int main(int argc, char *argv[]){
         if(PRINT){cout << "clearAllVectors passed" << endl;}
         
         export_particles("test", t, pos_arr, scalars, vectors);
+        /*
+        cout << "pos_arr vals : (";
+        for (size_t idx = 0; idx < pos_arr.size(); idx++){
+            cout << pos_arr[idx] << ", ";
+        }
+        cout << ") \n" << endl; 
 
+    }
+    */
     }
 }
 
