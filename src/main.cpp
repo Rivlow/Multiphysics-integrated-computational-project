@@ -12,6 +12,7 @@
 #include "initialize.h"
 #include "export.h"
 #include "Kernel_functions.h"
+#include "tools.h"
 
 
 #ifdef _OPENMP
@@ -54,6 +55,7 @@ int main(int argc, char *argv[]){
 
     /*---------------------------- INPUT PARAMETERS FROM JSON FILES -----------------------------------*/
 
+
     std::ifstream inputf(argv[1]);
     json data = json::parse(inputf);
 
@@ -87,7 +89,8 @@ int main(int argc, char *argv[]){
     double beta = data["beta"];
     double c_0 = data["c_0"];
 
-    double rho_init = data["rho"];
+    double rho_init = data["rho_moving"];
+    double rho_fixed = data["rho_fixed"];
     double rho_0 = data["rho_0"];
     double M = data["M"];
     double T = data["T"];
@@ -95,6 +98,9 @@ int main(int argc, char *argv[]){
     vector<double> u_init = data["u"];
 
     /*---------------------------- INITIALIZATION OF VARIABLES USED -----------------------------------*/
+
+    // Debug variable
+    const bool PRINT = false;
 
     // Constants
     double h = 1.2*s;
@@ -117,44 +123,79 @@ int main(int argc, char *argv[]){
     // Vector used (and labelled w.r.t particles location)
     vector<double> pos_arr, bound_arr;  
     vector<vector<unsigned>> cell_matrix(Nx*Ny*Nz);
-    vector<double> mass_arr(nb_particles), u_arr(3*nb_particles), drhodt_arr(nb_particles), rho_arr(nb_particles), dudt_arr(3*nb_particles, 0.0), p_arr(nb_particles);
-    vector<vector<double>> gradW_matrix, artificial_visc_matrix(nb_particles); 
-    vector<vector<unsigned>>  neighbours_matrix(nb_particles), neighbours_matrix_1(nb_particles);
-
+ 
     // Variables defined to used "export.cpp"
     std::map<std::string, std::vector<double> *> scalars;
     std::map<std::string, std::vector<double> *> vectors;
-    vectors["position"] = &pos_arr;
-    vectors["velocity"] = &u_arr;
+
 
   /*---------------------------- SPH ALGORITHM  -----------------------------------*/
 
-    // Initialization of the problem
+    // Initialization of the problem (moving particles and fixed particles)
     meshcube(o, L, s, pos_arr); 
-    meshBoundary(o_d, L_d, s, bound_arr);
+    unsigned nb_moving_part = pos_arr.size()/3;
+    meshBoundary(o_d, L_d, s, pos_arr);
+
+
     for(size_t i = 0; i < 3; i++){
         o_d[i] = o_d[i] - s*0.5;
         L_d[i] = L_d[i] + s ;
         //cout << " le centre et longueur de l'axe " << i << "est "<< o_d[i] << " et  " << L_d[i] << endl;
     }
-    meshBoundary(o_d, L_d, s, bound_arr);
-    initializeRho(pos_arr, rho_arr, rho_init, rho_0, c_0, M, g, R, T, gamma, state_equation_chosen, state_initial_condition);
-    initializeMass(rho_arr, s, mass_arr);
 
-    initializeVelocity(u_arr, u_init);
+    meshBoundary(o_d, L_d, s, pos_arr);
+
+    //cout << "nb_tot_part : " << pos_arr.size() << endl; 
+
+    unsigned nb_tot_part = pos_arr.size();
+
+    vector<double> mass_arr(nb_particles), u_arr(3*nb_tot_part), drhodt_arr(nb_tot_part), rho_arr(nb_tot_part), dudt_arr(3*nb_tot_part, 0.0), p_arr(nb_tot_part);
+    vector<vector<double>> gradW_matrix, artificial_visc_matrix(nb_tot_part); 
+    vector<vector<unsigned>>  neighbours_matrix(nb_tot_part), neighbours_matrix_1(nb_tot_part);
+
+    vectors["position"] = &pos_arr;
+    //vectors["velocity"] = &u_arr;
+
+    cout << "len(u_arr) : " << pos_arr.size() << endl;
+    cout << "len(pos_arr) : " << u_arr.size() << endl;
+
+    initializeRho(nb_moving_part, pos_arr, rho_arr, rho_init, rho_fixed, rho_0, c_0, M, g, R, T, gamma, state_equation_chosen, state_initial_condition);
+    if(PRINT){cout << "initializeRho passed" << endl;}
+
+    initializeMass(rho_arr, s, mass_arr);
+    if(PRINT){cout << "initializeMass passed" << endl;}
+    
+    initializeVelocity(nb_moving_part, u_arr, u_init);
+    if(PRINT){cout << "initializeVelocity passed" << endl;}
+   
     initializeViscosity(artificial_visc_matrix);
+    if(PRINT){cout << "initializeViscosity passed" << endl;}
 
     for (int t = 0; t < nstepT; t++){
 
-        findNeighbours(pos_arr, cell_matrix, neighbours_matrix, L_d, Nx, Ny, Nz, h, kappa); // Apply the linked-list algorithm
-        gradW(pos_arr, neighbours_matrix, gradW_matrix, h, Nx, Ny, Nz); // Compute ∇_a(W_ab) for all particles
+        findNeighbours(nb_moving_part, pos_arr, cell_matrix, neighbours_matrix, L_d, Nx, Ny, Nz, h, kappa); // Apply the linked-list algorithm
+        if(PRINT){cout << "findNeighbours passed" << endl;}
 
-        continuityEquation(pos_arr ,u_arr, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass_arr, h); // Compute D(rho)/Dt for all particles
-        setPressure(p_arr, rho_arr, rho_0, c_0, R, T, M, gamma, state_equation_chosen); // Compute pressure for all particles
-        setArtificialViscosity(t, artificial_visc_matrix, pos_arr, neighbours_matrix, rho_arr, u_arr,
+        gradW(nb_moving_part, pos_arr, neighbours_matrix, gradW_matrix, h, Nx, Ny, Nz); // Compute ∇_a(W_ab) for all particles
+        if(PRINT){cout << "gradW passed" << endl;}
+        printMatrix(gradW_matrix);
+
+        continuityEquation(nb_moving_part, pos_arr ,u_arr, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass_arr, h); // Compute D(rho)/Dt for all particles
+        if(PRINT){cout << "continuityEquation passed" << endl;}
+        //printArray(drhodt_arr);
+
+        setPressure(nb_moving_part, p_arr, rho_arr, rho_0, c_0, R, T, M, gamma, state_equation_chosen); // Compute pressure for all particles
+        if(PRINT){cout << "setPressure passed" << endl;}
+
+        setArtificialViscosity(t, artificial_visc_matrix, nb_moving_part, pos_arr, neighbours_matrix, rho_arr, u_arr,
                                alpha, beta, rho_0, c_0, gamma, R, T, M, h, state_equation_chosen); // Compute artificial viscosity Π_ab for all particles
-        momentumEquation(neighbours_matrix, mass_arr, gradW_matrix, dudt_arr, artificial_visc_matrix, rho_arr, 
+        if(PRINT){cout << "setArtificialViscosity passed" << endl;}
+        //printMatrix(artificial_visc_matrix);
+
+        
+        momentumEquation(nb_moving_part, neighbours_matrix, mass_arr, gradW_matrix, dudt_arr, artificial_visc_matrix, rho_arr, 
                         rho_0, c_0, p_arr, R, T, M, gamma, g, state_equation_chosen); // Compute D(u)/Dt for all particles
+        if(PRINT){cout << "momentumEquation passed" << endl;}
 
         // Update density, velocity and position for each particle (Euler explicit scheme)
         for(size_t pos = 0; pos < nb_particles; pos++ ){
@@ -164,18 +205,8 @@ int main(int argc, char *argv[]){
             //cout << "for particle : " << "(";
             for (size_t cord = 0; cord < 3; cord++){
 
-
-
                 pos_arr[3*pos+cord] += dt*u_arr[3*pos+cord];
-
-
-                double vel_before_1 = u_arr[3*pos+cord];
-
                 u_arr[3*pos+cord] += dt*dudt_arr[3*pos+cord];
-
-                double vel_after_1 = u_arr[3*pos+cord];
-
-                //cout << vel_after_1 - vel_before_1 <<", ";
 
                 // Check boundaries (temporary)
                 u_arr[3*pos+cord] = (pos_arr[3*pos+cord] < 0.0) ? 0.0 : u_arr[3*pos+cord];
@@ -183,11 +214,13 @@ int main(int argc, char *argv[]){
                 pos_arr[3*pos+cord] = (pos_arr[3*pos+cord] < 0.0) ? 0.0 : pos_arr[3*pos+cord];
                 pos_arr[3*pos+cord] = (pos_arr[3*pos+cord] > L_d[cord]) ? L_d[cord] : pos_arr[3*pos+cord];
             }
-            //cout <<")"<<endl;
         }
 
         clearAllVectors(artificial_visc_matrix, neighbours_matrix, cell_matrix, gradW_matrix);
-        export_particles("sph", t, pos_arr, scalars, vectors);
+        if(PRINT){cout << "clearAllVectors passed" << endl;}
+        
+        export_particles("test", t, pos_arr, scalars, vectors);
+
     }
 }
 

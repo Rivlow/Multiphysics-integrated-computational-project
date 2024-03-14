@@ -100,6 +100,7 @@ void clearAllVectors(vector<vector<double>> & artificial_visc_matrix, vector<vec
 }
 
 void meshBoundary(vector<double> &o_d, vector<double> &L_d, double &s, std::vector<double> &bound_arr){
+    
     int ni = int(ceil(L_d[0] / s));
     double dx = L_d[0] / ni;
     ++ni;
