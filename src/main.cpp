@@ -100,7 +100,7 @@ int main(int argc, char *argv[]){
     /*---------------------------- INITIALIZATION OF VARIABLES USED -----------------------------------*/
 
     // Debug variable
-    const bool PRINT = true;
+    const bool PRINT = false;
 
     // Constants
     double h = 1.2*s;
@@ -174,32 +174,16 @@ int main(int argc, char *argv[]){
     for (int t = 0; t < nstepT; t++){
 
 
-    cout << "pos_arr vals : (";
+    //cout << "pos_arr vals : (";
         for (size_t idx = 0; idx < pos_arr.size(); idx++){
-            cout << pos_arr[idx] << ", ";
+            //cout << pos_arr[idx] << ", ";
         }
-        cout << ") \n" << endl; 
-
-    
-
+        //cout << ") \n" << endl; 
 
 
         findNeighbours(nb_moving_part, pos_arr, cell_matrix, neighbours_matrix, L_d, Nx, Ny, Nz, h, kappa); // Apply the linked-list algorithm
         if(PRINT){cout << "findNeighbours passed" << endl;}
 
-        /*
-        cout << "For iteration (gradW_matrix): " << t << endl;
-        for (int i = 0; i < neighbours_matrix.size(); ++i){
-            cout << "For pos " << i << " : (";
-            for (int j = 0; j < neighbours_matrix[i].size(); ++j) {
-                cout << neighbours_matrix[i][j];
-                if (j != neighbours_matrix[i].size() - 1) {
-                    cout << ", ";
-                }
-            }
-            cout << ")" << endl;
-        }
-        */
 
         gradW(gradW_matrix, nb_moving_part, pos_arr, neighbours_matrix, h, Nx, Ny, Nz); // Compute ∇_a(W_ab) for all particles
         if(PRINT){cout << "gradW passed" << endl;}
@@ -216,7 +200,7 @@ int main(int argc, char *argv[]){
         setArtificialViscosity(t, artificial_visc_matrix, nb_moving_part, pos_arr, neighbours_matrix, rho_arr, u_arr,
                                alpha, beta, rho_0, c_0, gamma, R, T, M, h, state_equation_chosen); // Compute artificial viscosity Π_ab for all particles
         if(PRINT){cout << "setArtificialViscosity passed" << endl;}
-        //printMatrix(artificial_visc_matrix);
+        printMatrix(artificial_visc_matrix);
 
         
         momentumEquation(nb_moving_part, neighbours_matrix, mass_arr, gradW_matrix, dudt_arr, artificial_visc_matrix, rho_arr, 
@@ -246,16 +230,8 @@ int main(int argc, char *argv[]){
                      cell_matrix, gradW_matrix);
         if(PRINT){cout << "clearAllVectors passed" << endl;}
         
-        export_particles("test", t, pos_arr, scalars, vectors);
-        /*
-        cout << "pos_arr vals : (";
-        for (size_t idx = 0; idx < pos_arr.size(); idx++){
-            cout << pos_arr[idx] << ", ";
-        }
-        cout << ") \n" << endl; 
+        export_particles("sph", t, pos_arr, scalars, vectors);
 
-    }
-    */
     }
 }
 
