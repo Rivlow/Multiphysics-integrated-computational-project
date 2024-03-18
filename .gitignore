@@ -35,6 +35,9 @@ build/
 
 # Vscode data
 .vscode/
+!.vscode/launch.json
+
+output/
 
 # Pictures
 *.PDF
