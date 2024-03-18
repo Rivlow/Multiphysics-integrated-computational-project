@@ -100,7 +100,7 @@ int main(int argc, char *argv[]){
     /*---------------------------- INITIALIZATION OF VARIABLES USED -----------------------------------*/
 
     // Debug variable
-    const bool PRINT = false;
+    const bool PRINT = true;
 
     // Constants
     double h = 1.2*s;
@@ -121,7 +121,7 @@ int main(int argc, char *argv[]){
     int nb_particles = evaluateNumberParticles(L, s);
 
     // Vector used (and labelled w.r.t particles location)
-    vector<double> pos_arr, bound_arr;  
+    vector<double> pos_arr, type_arr;  
     vector<vector<unsigned>> cell_matrix(Nx*Ny*Nz);
  
     // Variables defined to used "export.cpp"
@@ -131,10 +131,12 @@ int main(int argc, char *argv[]){
 
   /*---------------------------- SPH ALGORITHM  -----------------------------------*/
 
+    //deletePreviousOutputFiles(); // ACCESS DENIED ????
+  
     // Initialization of the problem (moving particles and fixed particles)
-    meshcube(o, L, s, pos_arr); 
+    meshcube(o, L, s, pos_arr, type_arr); 
     unsigned nb_moving_part = pos_arr.size()/3;
-    meshBoundary(o_d, L_d, s, pos_arr);
+    meshBoundary(o_d, L_d, s, pos_arr, type_arr);
 
 
     for(size_t i = 0; i < 3; i++){
@@ -143,9 +145,7 @@ int main(int argc, char *argv[]){
         //cout << " le centre et longueur de l'axe " << i << "est "<< o_d[i] << " et  " << L_d[i] << endl;
     }
 
-    meshBoundary(o_d, L_d, s, pos_arr);
-
-    //cout << "nb_tot_part : " << pos_arr.size() << endl; 
+    meshBoundary(o_d, L_d, s, pos_arr, type_arr);
 
     unsigned nb_tot_part = pos_arr.size();
 
@@ -154,6 +154,7 @@ int main(int argc, char *argv[]){
     vector<vector<unsigned>>  neighbours_matrix(nb_tot_part), neighbours_matrix_1(nb_tot_part);
 
     vectors["position"] = &pos_arr;
+    //scalars["type"] = &type_arr;
     //vectors["velocity"] = &u_arr;
 
     cout << "len(u_arr) : " << pos_arr.size() << endl;
@@ -173,13 +174,8 @@ int main(int argc, char *argv[]){
 
     for (int t = 0; t < nstepT; t++){
 
-
-    //cout << "pos_arr vals : (";
-        for (size_t idx = 0; idx < pos_arr.size(); idx++){
-            //cout << pos_arr[idx] << ", ";
-        }
-        //cout << ") \n" << endl; 
-
+        //printMatrix(neighbours_matrix);
+        printArray(pos_arr);
 
         findNeighbours(nb_moving_part, pos_arr, cell_matrix, neighbours_matrix, L_d, Nx, Ny, Nz, h, kappa); // Apply the linked-list algorithm
         if(PRINT){cout << "findNeighbours passed" << endl;}
@@ -187,8 +183,6 @@ int main(int argc, char *argv[]){
 
         gradW(gradW_matrix, nb_moving_part, pos_arr, neighbours_matrix, h, Nx, Ny, Nz); // Compute ∇_a(W_ab) for all particles
         if(PRINT){cout << "gradW passed" << endl;}
-
-
 
         continuityEquation(nb_moving_part, pos_arr ,u_arr, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass_arr, h); // Compute D(rho)/Dt for all particles
         if(PRINT){cout << "continuityEquation passed" << endl;}
@@ -200,7 +194,7 @@ int main(int argc, char *argv[]){
         setArtificialViscosity(t, artificial_visc_matrix, nb_moving_part, pos_arr, neighbours_matrix, rho_arr, u_arr,
                                alpha, beta, rho_0, c_0, gamma, R, T, M, h, state_equation_chosen); // Compute artificial viscosity Π_ab for all particles
         if(PRINT){cout << "setArtificialViscosity passed" << endl;}
-        printMatrix(artificial_visc_matrix);
+        //printMatrix(artificial_visc_matrix);
 
         
         momentumEquation(nb_moving_part, neighbours_matrix, mass_arr, gradW_matrix, dudt_arr, artificial_visc_matrix, rho_arr, 
@@ -212,17 +206,18 @@ int main(int argc, char *argv[]){
 
             rho_arr[pos] = rho_arr[pos] + dt*drhodt_arr[pos];
 
-            //cout << "for particle : " << "(";
             for (size_t cord = 0; cord < 3; cord++){
 
                 pos_arr[3*pos+cord] += dt*u_arr[3*pos+cord];
                 u_arr[3*pos+cord] += dt*dudt_arr[3*pos+cord];
 
+                /*
                 // Check boundaries (temporary)
                 u_arr[3*pos+cord] = (pos_arr[3*pos+cord] < 0.0) ? 0.0 : u_arr[3*pos+cord];
                 u_arr[3*pos+cord] = (pos_arr[3*pos+cord] > L_d[cord]) ? 0.0 : u_arr[3*pos+cord];
                 pos_arr[3*pos+cord] = (pos_arr[3*pos+cord] < 0.0) ? 0.0 : pos_arr[3*pos+cord];
                 pos_arr[3*pos+cord] = (pos_arr[3*pos+cord] > L_d[cord]) ? L_d[cord] : pos_arr[3*pos+cord];
+                */
             }
         }
 

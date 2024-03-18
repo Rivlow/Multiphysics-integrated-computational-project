@@ -1,7 +1,11 @@
 #include <stdio.h>
 #include <vector>
+#include <string>
+
 
 using namespace std;
+
+void deletePreviousOutputFiles();
 
 template<typename T>
 void printMatrix(vector<vector<T>> &matrix);
