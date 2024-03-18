@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cmath>
 #include <stdio.h>
+#include "Kernel_functions.h"
+
 using namespace std;
 
 double f_gaussian(double r, double h) {

@@ -138,8 +138,8 @@ int main(int argc, char *argv[]){
 
 
     for(size_t i = 0; i < 3; i++){
-        o_d[i] = o_d[i] - s*0.5;
-        L_d[i] = L_d[i] + s ;
+        o_d[i] = o_d[i] + s*0.5;
+        L_d[i] = L_d[i] - s ;
         //cout << " le centre et longueur de l'axe " << i << "est "<< o_d[i] << " et  " << L_d[i] << endl;
     }
 

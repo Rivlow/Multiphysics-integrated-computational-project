@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <vector>
 #include <string>
+#include "initialize.h"
+
 
 using namespace std;
 
