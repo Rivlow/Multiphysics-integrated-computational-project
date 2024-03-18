@@ -150,7 +150,7 @@ int main(int argc, char *argv[]){
     unsigned nb_tot_part = pos_arr.size();
 
     vector<double> mass_arr(nb_tot_part), u_arr(3*nb_tot_part), drhodt_arr(nb_tot_part), rho_arr(nb_tot_part), dudt_arr(3*nb_tot_part, 0.0), p_arr(nb_tot_part);
-    vector<vector<double>> artificial_visc_matrix(nb_tot_part); 
+    vector<vector<double>> artificial_visc_matrix(nb_tot_part), gradW_matrix(nb_tot_part); 
     vector<vector<unsigned>>  neighbours_matrix(nb_tot_part), neighbours_matrix_1(nb_tot_part);
 
     vectors["position"] = &pos_arr;
@@ -201,9 +201,7 @@ int main(int argc, char *argv[]){
         }
         */
 
-
-        vector<vector<double>> gradW_matrix;
-        gradW(nb_moving_part, pos_arr, neighbours_matrix, gradW_matrix, h, Nx, Ny, Nz); // Compute ∇_a(W_ab) for all particles
+        gradW(gradW_matrix, nb_moving_part, pos_arr, neighbours_matrix, h, Nx, Ny, Nz); // Compute ∇_a(W_ab) for all particles
         if(PRINT){cout << "gradW passed" << endl;}
 
 
@@ -244,7 +242,8 @@ int main(int argc, char *argv[]){
             }
         }
 
-        clearAllVectors(artificial_visc_matrix, neighbours_matrix, cell_matrix, gradW_matrix);
+        clearAllVectors(artificial_visc_matrix, neighbours_matrix, 
+                     cell_matrix, gradW_matrix);
         if(PRINT){cout << "clearAllVectors passed" << endl;}
         
         export_particles("test", t, pos_arr, scalars, vectors);

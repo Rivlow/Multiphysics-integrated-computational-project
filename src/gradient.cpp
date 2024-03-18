@@ -1,63 +1,60 @@
+#include "gradient.h"
 #include <stdio.h>
 #include <vector>
 #include "sorted_list.h"
 #include "Kernel_functions.h"
-#include "gradient.h"
 using namespace std;
 
 
 
-void gradW(unsigned &nb_moving_part, vector<double> &pos_arr, vector<vector<unsigned>> &neighbours_matrix, vector<vector<double>> &gradW_matrix, 
+void gradW(vector<vector<double>> &gradW_matrix, unsigned &nb_moving_part, vector<double> &pos_arr, vector<vector<unsigned>> &neighbours_matrix, 
                     double &h, unsigned &Nx, unsigned &Ny, unsigned &Nz){
 
     
     // Iterations over each particle
     for (size_t pos = 0; pos < nb_moving_part; pos++){
         vector<unsigned> &neighbours_list = neighbours_matrix[pos];
-        cout << "len(neighbour_list) : " << neighbours_list.size() << endl;
-        vector<double> gradW_vect;
+        //cout << "len(neighbour_list) : " << neighbours_list.size() << endl;
 
         // Iterations over each associated neighbours of prescribed particles
         for (size_t idx = 0; idx < neighbours_list.size(); idx++){     
             
             size_t idx_neighbour = neighbours_list[idx];
             double rx, ry, rz, r_ab;
-            cout << "entrance in neighbour loop (before rx, ry, rz) \n";
+            //cout << "entrance in neighbour loop (before rx, ry, rz) \n";
             rx = (pos_arr[3*pos+0] - pos_arr[3*idx_neighbour+0])*(pos_arr[3*pos+0] - pos_arr[3*idx_neighbour+0]);
             ry = (pos_arr[3*pos+1] - pos_arr[3*idx_neighbour+1])*(pos_arr[3*pos+1] - pos_arr[3*idx_neighbour+1]);
             rz = (pos_arr[3*pos+2] - pos_arr[3*idx_neighbour+2])*(pos_arr[3*pos+2] - pos_arr[3*idx_neighbour+2]);
             r_ab = sqrt(rx + ry + rz);
-            cout << "entrance in neighbour loop (after rx, ry, rz) \n";
+            //cout << "entrance in neighbour loop (after rx, ry, rz) \n";
 
-            cout << "Val in neighbour list : (";
+            //cout << "Val in neighbour list : (";
             for (size_t idxx = 0; idxx < neighbours_list.size(); idxx++){
-                cout << neighbours_list[idxx] << " , ";
+                //cout << neighbours_list[idxx] << " , ";
             }
-            cout << ")" << endl;
-            cout << "val1 : " << (pos_arr[3*pos+0] - pos_arr[3*idx_neighbour+0])/r_ab * derive_cubic_spline(r_ab, h)<< endl;
-            cout <<  "val2 : " << (pos_arr[3*pos+1] - pos_arr[3*idx_neighbour+1])/r_ab * derive_cubic_spline(r_ab, h)<< endl;
-            cout << "val3 : " << (pos_arr[3*pos+2] - pos_arr[3*idx_neighbour+2])/r_ab * derive_cubic_spline(r_ab, h)<< endl;
-            cout << "pos used : " << pos << " and idx_neighbour used : " << idx_neighbour << endl;
-            cout << "len (pos_arr) : " << pos_arr.size() << endl;
-            cout << "len (neighbour_list) : " << neighbours_list.size() << endl;
-            cout << "pos_arr associated : " << pos_arr[3*pos+0] << endl;
-            cout << "idx_neighbour associated : " << pos_arr[3*idx_neighbour+0] << endl;
+
+            //cout << ")" << endl;
+            //cout << "val1 : " << (pos_arr[3*pos+0] - pos_arr[3*idx_neighbour+0])/r_ab * derive_cubic_spline(r_ab, h)<< endl;
+            //cout <<  "val2 : " << (pos_arr[3*pos+1] - pos_arr[3*idx_neighbour+1])/r_ab * derive_cubic_spline(r_ab, h)<< endl;
+            //cout << "val3 : " << (pos_arr[3*pos+2] - pos_arr[3*idx_neighbour+2])/r_ab * derive_cubic_spline(r_ab, h)<< endl;
+            //cout << "pos used : " << pos << " and idx_neighbour used : " << idx_neighbour << endl;
+           // cout << "len (pos_arr) : " << pos_arr.size() << endl;
+           // cout << "len (neighbour_list) : " << neighbours_list.size() << endl;
+           // cout << "pos_arr associated : " << pos_arr[3*pos+0] << endl;
+           // cout << "idx_neighbour associated : " << pos_arr[3*idx_neighbour+0] << endl;
             
             double val_0 = abs(pos_arr[3*pos+0] - pos_arr[3*idx_neighbour+0])/r_ab * derive_cubic_spline(r_ab, h);
             double val_1 = abs(pos_arr[3*pos+1] - pos_arr[3*idx_neighbour+1])/r_ab * derive_cubic_spline(r_ab, h);
             double val_2 = abs(pos_arr[3*pos+2] - pos_arr[3*idx_neighbour+2])/r_ab * derive_cubic_spline(r_ab, h);
 
-            gradW_vect.push_back(val_0);
-            cout << "after first push_back"<<endl;
-            gradW_vect.push_back(val_1);
-            cout << "after second push_back"<<endl;
-            gradW_vect.push_back(val_2);
-            cout << "after third push_back"<<endl;
+            gradW_matrix[pos].push_back(val_0);
+          //  cout << "after first push_back"<<endl;
+            gradW_matrix[pos].push_back(val_1);
+           // cout << "after second push_back"<<endl;
+            gradW_matrix[pos].push_back(val_2);
+            //cout << "after third push_back"<<endl;
 
         }
-
-        gradW_matrix.push_back(gradW_vect);
-        gradW_vect.clear();
     }
 }
 

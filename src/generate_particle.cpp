@@ -69,36 +69,6 @@ void meshcube(vector<double> &o, vector<double> &L, double &s, std::vector<doubl
     }
 }
 
-void clearAllVectors(vector<vector<double>> & artificial_visc_matrix, vector<vector<unsigned>> &neighbours_matrix, 
-                     vector<vector<unsigned>> &cell_matrix, vector<vector<double>> &gradW_matrix){
-
-    for(size_t i = 0 ; i<artificial_visc_matrix.size(); i++ ){
-        artificial_visc_matrix[i].clear();
-    }
-    artificial_visc_matrix.clear();    
-
-    for(size_t i = 0 ; i<neighbours_matrix.size(); i++ ){
-        neighbours_matrix[i].clear();
-    }
-    neighbours_matrix.clear();    
-
-
-    //cout << "after clear, neighbours_matrix : " << endl;
-
-    for(size_t i = 0 ; i<cell_matrix.size(); i++ ){
-        cell_matrix[i].clear();
-    }
-    cell_matrix.clear(); 
-
-    //cout << "after clear, cell_matrix : " << endl;
-
-    for(size_t i = 0 ; i<gradW_matrix.size(); i++ ){
-        gradW_matrix[i].clear();
-    }
-    gradW_matrix.clear(); 
-
-    //cout << "after clear, gradW_matrix : " << endl;           
-}
 
 void meshBoundary(vector<double> &o_d, vector<double> &L_d, double &s, std::vector<double> &bound_arr){
     
