@@ -121,7 +121,7 @@ int main(int argc, char *argv[]){
     int nb_particles = evaluateNumberParticles(L, s);
 
     // Vector used (and labelled w.r.t particles location)
-    vector<double> pos_arr, bound_arr;  
+    vector<double> pos_arr, type_arr;  
     vector<vector<unsigned>> cell_matrix(Nx*Ny*Nz);
  
     // Variables defined to used "export.cpp"
@@ -131,29 +131,30 @@ int main(int argc, char *argv[]){
 
   /*---------------------------- SPH ALGORITHM  -----------------------------------*/
 
+    //deletePreviousOutputFiles(); // ACCESS DENIED ????
+  
     // Initialization of the problem (moving particles and fixed particles)
-    meshcube(o, L, s, pos_arr); 
+    meshcube(o, L, s, pos_arr, type_arr); 
     unsigned nb_moving_part = pos_arr.size()/3;
-    meshBoundary(o_d, L_d, s, pos_arr);
+    meshBoundary(o_d, L_d, s, pos_arr, type_arr);
 
 
     for(size_t i = 0; i < 3; i++){
-        o_d[i] = o_d[i] - s*0.5;
-        L_d[i] = L_d[i] + s ;
+        o_d[i] = o_d[i] + s*0.5;
+        L_d[i] = L_d[i] - s ;
         //cout << " le centre et longueur de l'axe " << i << "est "<< o_d[i] << " et  " << L_d[i] << endl;
     }
 
-    meshBoundary(o_d, L_d, s, pos_arr);
-
-    //cout << "nb_tot_part : " << pos_arr.size() << endl; 
+    meshBoundary(o_d, L_d, s, pos_arr, type_arr);
 
     unsigned nb_tot_part = pos_arr.size();
 
     vector<double> mass_arr(nb_tot_part), u_arr(3*nb_tot_part), drhodt_arr(nb_tot_part), rho_arr(nb_tot_part), dudt_arr(3*nb_tot_part, 0.0), p_arr(nb_tot_part);
-    vector<vector<double>> artificial_visc_matrix(nb_tot_part); 
+    vector<vector<double>> artificial_visc_matrix(nb_tot_part), gradW_matrix(nb_tot_part); 
     vector<vector<unsigned>>  neighbours_matrix(nb_tot_part), neighbours_matrix_1(nb_tot_part);
 
     vectors["position"] = &pos_arr;
+    //scalars["type"] = &type_arr;
     //vectors["velocity"] = &u_arr;
 
     cout << "len(u_arr) : " << pos_arr.size() << endl;
@@ -173,40 +174,15 @@ int main(int argc, char *argv[]){
 
     for (int t = 0; t < nstepT; t++){
 
-
-    cout << "pos_arr vals : (";
-        for (size_t idx = 0; idx < pos_arr.size(); idx++){
-            cout << pos_arr[idx] << ", ";
-        }
-        cout << ") \n" << endl; 
-
-    
-
-
+        //printMatrix(neighbours_matrix);
+        printArray(pos_arr);
 
         findNeighbours(nb_moving_part, pos_arr, cell_matrix, neighbours_matrix, L_d, Nx, Ny, Nz, h, kappa); // Apply the linked-list algorithm
         if(PRINT){cout << "findNeighbours passed" << endl;}
 
-        /*
-        cout << "For iteration (gradW_matrix): " << t << endl;
-        for (int i = 0; i < neighbours_matrix.size(); ++i){
-            cout << "For pos " << i << " : (";
-            for (int j = 0; j < neighbours_matrix[i].size(); ++j) {
-                cout << neighbours_matrix[i][j];
-                if (j != neighbours_matrix[i].size() - 1) {
-                    cout << ", ";
-                }
-            }
-            cout << ")" << endl;
-        }
-        */
 
-
-        vector<vector<double>> gradW_matrix;
-        gradW(nb_moving_part, pos_arr, neighbours_matrix, gradW_matrix, h, Nx, Ny, Nz); // Compute ∇_a(W_ab) for all particles
+        gradW(gradW_matrix, nb_moving_part, pos_arr, neighbours_matrix, h, Nx, Ny, Nz); // Compute ∇_a(W_ab) for all particles
         if(PRINT){cout << "gradW passed" << endl;}
-
-
 
         continuityEquation(nb_moving_part, pos_arr ,u_arr, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass_arr, h); // Compute D(rho)/Dt for all particles
         if(PRINT){cout << "continuityEquation passed" << endl;}
@@ -230,33 +206,27 @@ int main(int argc, char *argv[]){
 
             rho_arr[pos] = rho_arr[pos] + dt*drhodt_arr[pos];
 
-            //cout << "for particle : " << "(";
             for (size_t cord = 0; cord < 3; cord++){
 
                 pos_arr[3*pos+cord] += dt*u_arr[3*pos+cord];
                 u_arr[3*pos+cord] += dt*dudt_arr[3*pos+cord];
 
+                /*
                 // Check boundaries (temporary)
                 u_arr[3*pos+cord] = (pos_arr[3*pos+cord] < 0.0) ? 0.0 : u_arr[3*pos+cord];
                 u_arr[3*pos+cord] = (pos_arr[3*pos+cord] > L_d[cord]) ? 0.0 : u_arr[3*pos+cord];
                 pos_arr[3*pos+cord] = (pos_arr[3*pos+cord] < 0.0) ? 0.0 : pos_arr[3*pos+cord];
                 pos_arr[3*pos+cord] = (pos_arr[3*pos+cord] > L_d[cord]) ? L_d[cord] : pos_arr[3*pos+cord];
+                */
             }
         }
 
-        clearAllVectors(artificial_visc_matrix, neighbours_matrix, cell_matrix, gradW_matrix);
+        clearAllVectors(artificial_visc_matrix, neighbours_matrix, 
+                     cell_matrix, gradW_matrix);
         if(PRINT){cout << "clearAllVectors passed" << endl;}
         
-        export_particles("test", t, pos_arr, scalars, vectors);
-        /*
-        cout << "pos_arr vals : (";
-        for (size_t idx = 0; idx < pos_arr.size(); idx++){
-            cout << pos_arr[idx] << ", ";
-        }
-        cout << ") \n" << endl; 
+        export_particles("sph", t, pos_arr, scalars, vectors);
 
-    }
-    */
     }
 }
 

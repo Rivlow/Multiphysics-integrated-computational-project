@@ -29,7 +29,7 @@ int evaluateNumberParticles(vector<double> &L, double &s){
     return ni*nj*nk;
 }
 
-void meshcube(vector<double> &o, vector<double> &L, double &s, std::vector<double> &pos_arr)
+void meshcube(vector<double> &o, vector<double> &L, double &s, vector<double> &pos_arr, vector<double> &type_arr)
 {
     // calculate nb of particles along each direction from target size "s"
     int ni = int(ceil(L[0] / s));
@@ -64,43 +64,14 @@ void meshcube(vector<double> &o, vector<double> &L, double &s, std::vector<doubl
                 pos_arr.push_back(x);
                 pos_arr.push_back(y);
                 pos_arr.push_back(z);
+                //type_arr.push_back(1.0);
             }
         }
     }
 }
 
-void clearAllVectors(vector<vector<double>> & artificial_visc_matrix, vector<vector<unsigned>> &neighbours_matrix, 
-                     vector<vector<unsigned>> &cell_matrix, vector<vector<double>> &gradW_matrix){
 
-    for(size_t i = 0 ; i<artificial_visc_matrix.size(); i++ ){
-        artificial_visc_matrix[i].clear();
-    }
-    artificial_visc_matrix.clear();    
-
-    for(size_t i = 0 ; i<neighbours_matrix.size(); i++ ){
-        neighbours_matrix[i].clear();
-    }
-    neighbours_matrix.clear();    
-
-
-    //cout << "after clear, neighbours_matrix : " << endl;
-
-    for(size_t i = 0 ; i<cell_matrix.size(); i++ ){
-        cell_matrix[i].clear();
-    }
-    cell_matrix.clear(); 
-
-    //cout << "after clear, cell_matrix : " << endl;
-
-    for(size_t i = 0 ; i<gradW_matrix.size(); i++ ){
-        gradW_matrix[i].clear();
-    }
-    gradW_matrix.clear(); 
-
-    //cout << "after clear, gradW_matrix : " << endl;           
-}
-
-void meshBoundary(vector<double> &o_d, vector<double> &L_d, double &s, std::vector<double> &bound_arr){
+void meshBoundary(vector<double> &o_d, vector<double> &L_d, double &s, vector<double> &bound_arr, vector<double> &type_arr){
     
     int ni = int(ceil(L_d[0] / s));
     double dx = L_d[0] / ni;
@@ -124,9 +95,11 @@ void meshBoundary(vector<double> &o_d, vector<double> &L_d, double &s, std::vect
         bound_arr.push_back(x);
         bound_arr.push_back(y);
         bound_arr.push_back(o_d[2]);
+        //type_arr.push_back(0.0);
         bound_arr.push_back(x);
         bound_arr.push_back(y);
         bound_arr.push_back(L_d[2] + o_d[2]);
+        //type_arr.push_back(0.0);
         
         }
     }
@@ -140,9 +113,11 @@ void meshBoundary(vector<double> &o_d, vector<double> &L_d, double &s, std::vect
         bound_arr.push_back(o_d[0]);
         bound_arr.push_back(y);
         bound_arr.push_back(z);
+        //type_arr.push_back(0.0);
         bound_arr.push_back(L_d[0] + o_d[0]);
         bound_arr.push_back(y);
         bound_arr.push_back(z);
+        //type_arr.push_back(0.0);
         
         }
     }
@@ -155,9 +130,11 @@ void meshBoundary(vector<double> &o_d, vector<double> &L_d, double &s, std::vect
         bound_arr.push_back(x);
         bound_arr.push_back(o_d[1]);
         bound_arr.push_back(z);
+        //type_arr.push_back(0.0);
         bound_arr.push_back(x);
         bound_arr.push_back(L_d[1]+ o_d[1]);
         bound_arr.push_back(z);
+        //type_arr.push_back(0.0);
         
         }
     }
