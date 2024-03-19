@@ -52,7 +52,6 @@ void printMatrix(vector<vector<T>> &matrix){
 template void printMatrix<int>(vector<vector<int>> &);
 template void printMatrix<float>(vector<vector<float>> &);
 template void printMatrix<double>(vector<vector<double>> &);
-template void printMatrix<unsigned>(vector<vector<unsigned>> &);
 
 
 template<typename T>
@@ -71,12 +70,11 @@ void printArray(vector<T> &array){
 template void printArray<int>(vector<int> &);
 template void printArray<float>(vector<float> &);
 template void printArray<double>(vector<double> &);
-template void printArray<unsigned>(vector<unsigned> &);
 
 
 
-void clearAllVectors(vector<vector<double>> &artificial_visc_matrix, vector<vector<unsigned>> &neighbours_matrix, 
-                     vector<vector<unsigned>> &cell_matrix, vector<vector<double>> &gradW_matrix){
+void clearAllVectors(vector<vector<double>> &artificial_visc_matrix, vector<vector<int>> &neighbours_matrix, 
+                     vector<vector<int>> &cell_matrix, vector<vector<double>> &gradW_matrix){
 
     for(size_t i = 0 ; i<artificial_visc_matrix.size(); i++ ){
         artificial_visc_matrix[i].clear();

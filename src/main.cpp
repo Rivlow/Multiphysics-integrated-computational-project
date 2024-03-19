@@ -109,7 +109,7 @@ int main(int argc, char *argv[]){
     double dt = 0.005;
 
     // Number of cells (in each direction) 
-    unsigned Nx, Ny, Nz ;    
+    int Nx, Ny, Nz ;    
     Nx = (int) L_d[0]/(kappa*h);
     Ny = (int) L_d[1]/(kappa*h);
     Nz = (int) L_d[2]/(kappa*h);
@@ -122,7 +122,7 @@ int main(int argc, char *argv[]){
 
     // Vector used (and labelled w.r.t particles location)
     vector<double> pos_arr, type_arr;  
-    vector<vector<unsigned>> cell_matrix(Nx*Ny*Nz);
+    vector<vector<int>> cell_matrix(Nx*Ny*Nz);
  
     // Variables defined to used "export.cpp"
     std::map<std::string, std::vector<double> *> scalars;
@@ -135,8 +135,9 @@ int main(int argc, char *argv[]){
   
     // Initialization of the problem (moving particles and fixed particles)
     meshcube(o, L, s, pos_arr, type_arr); 
-    unsigned nb_moving_part = pos_arr.size()/3;
-    /*meshBoundary(o_d, L_d, s, pos_arr, type_arr);
+    int nb_moving_part = pos_arr.size()/3;
+    s = s/30;
+    meshBoundary(o_d, L_d, s, pos_arr, type_arr);
 
 
     for(size_t i = 0; i < 3; i++){
@@ -145,13 +146,13 @@ int main(int argc, char *argv[]){
         //cout << " le centre et longueur de l'axe " << i << "est "<< o_d[i] << " et  " << L_d[i] << endl;
     }
 
-    meshBoundary(o_d, L_d, s, pos_arr, type_arr);*/
-
-    unsigned nb_tot_part = pos_arr.size();
+    meshBoundary(o_d, L_d, s, pos_arr, type_arr);
+    s = s*30;
+    int nb_tot_part = pos_arr.size();
 
     vector<double> mass_arr(nb_tot_part), u_arr(3*nb_tot_part), drhodt_arr(nb_tot_part), rho_arr(nb_tot_part), dudt_arr(3*nb_tot_part, 0.0), p_arr(nb_tot_part);
     vector<vector<double>> artificial_visc_matrix(nb_tot_part), gradW_matrix(nb_tot_part); 
-    vector<vector<unsigned>>  neighbours_matrix(nb_tot_part), neighbours_matrix_1(nb_tot_part);
+    vector<vector<int>>  neighbours_matrix(nb_tot_part), neighbours_matrix_1(nb_tot_part);
 
     vectors["position"] = &pos_arr;
     scalars["type"] = &type_arr;
@@ -180,7 +181,6 @@ int main(int argc, char *argv[]){
         findNeighbours(nb_moving_part, pos_arr, cell_matrix, neighbours_matrix, L_d, Nx, Ny, Nz, h, kappa); // Apply the linked-list algorithm
         if(PRINT){cout << "findNeighbours passed" << endl;}
 
-
         gradW(gradW_matrix, nb_moving_part, pos_arr, neighbours_matrix, h, Nx, Ny, Nz); // Compute ∇_a(W_ab) for all particles
         if(PRINT){cout << "gradW passed" << endl;}
 
@@ -196,10 +196,23 @@ int main(int argc, char *argv[]){
         if(PRINT){cout << "setArtificialViscosity passed" << endl;}
         //printMatrix(artificial_visc_matrix);
 
-        
         momentumEquation(nb_moving_part, neighbours_matrix, mass_arr, gradW_matrix, dudt_arr, artificial_visc_matrix, rho_arr, 
                         rho_0, c_0, p_arr, R, T, M, gamma, g, state_equation_chosen); // Compute D(u)/Dt for all particles
         if(PRINT){cout << "momentumEquation passed" << endl;}
+
+        /*
+        cout << "-------------------------------------" << endl;
+        cout << " For continuityEquation " << endl;
+        cout << "-------------------------------------" << endl;
+        for (size_t i = 0; i < 3*nb_moving_part; ++i){
+        cout << "For column " << i << " : (";
+            cout << drhodt_arr[i];
+            if (i != drhodt_arr.size() - 1) {
+                cout << ", " <<endl;
+            }
+        }
+        cout << ")" << "\n" << endl;
+        */
 
         // Update density, velocity and position for each particle (Euler explicit scheme)
         for(size_t pos = 0; pos < nb_particles; pos++ ){

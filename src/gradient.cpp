@@ -7,13 +7,12 @@ using namespace std;
 
 
 
-void gradW(vector<vector<double>> &gradW_matrix, unsigned &nb_moving_part, vector<double> &pos_arr, vector<vector<unsigned>> &neighbours_matrix, 
-                    double &h, unsigned &Nx, unsigned &Ny, unsigned &Nz){
-
+void gradW(vector<vector<double>> &gradW_matrix, int &nb_moving_part, vector<double> &pos_arr, vector<vector<int>> &neighbours_matrix, 
+                    double &h, int &Nx, int &Ny, int &Nz){
     
     // Iterations over each particle
     for (size_t pos = 0; pos < nb_moving_part; pos++){
-        vector<unsigned> &neighbours_list = neighbours_matrix[pos];
+        vector<int> &neighbours_list = neighbours_matrix[pos];
         //cout << "len(neighbour_list) : " << neighbours_list.size() << endl;
 
         // Iterations over each associated neighbours of prescribed particles
@@ -26,8 +25,8 @@ void gradW(vector<vector<double>> &gradW_matrix, unsigned &nb_moving_part, vecto
             ry = (pos_arr[3*pos+1] - pos_arr[3*idx_neighbour+1])*(pos_arr[3*pos+1] - pos_arr[3*idx_neighbour+1]);
             rz = (pos_arr[3*pos+2] - pos_arr[3*idx_neighbour+2])*(pos_arr[3*pos+2] - pos_arr[3*idx_neighbour+2]);
             r_ab = sqrt(rx + ry + rz);
-            //cout << "entrance in neighbour loop (after rx, ry, rz) \n";
 
+            //cout << "entrance in neighbour loop (after rx, ry, rz) \n";
             //cout << "Val in neighbour list : (";
             for (size_t idxx = 0; idxx < neighbours_list.size(); idxx++){
                 //cout << neighbours_list[idxx] << " , ";
@@ -38,19 +37,19 @@ void gradW(vector<vector<double>> &gradW_matrix, unsigned &nb_moving_part, vecto
             //cout <<  "val2 : " << (pos_arr[3*pos+1] - pos_arr[3*idx_neighbour+1])/r_ab * derive_cubic_spline(r_ab, h)<< endl;
             //cout << "val3 : " << (pos_arr[3*pos+2] - pos_arr[3*idx_neighbour+2])/r_ab * derive_cubic_spline(r_ab, h)<< endl;
             //cout << "pos used : " << pos << " and idx_neighbour used : " << idx_neighbour << endl;
-           // cout << "len (pos_arr) : " << pos_arr.size() << endl;
-           // cout << "len (neighbour_list) : " << neighbours_list.size() << endl;
-           // cout << "pos_arr associated : " << pos_arr[3*pos+0] << endl;
-           // cout << "idx_neighbour associated : " << pos_arr[3*idx_neighbour+0] << endl;
+            //cout << "len (pos_arr) : " << pos_arr.size() << endl;
+            //cout << "len (neighbour_list) : " << neighbours_list.size() << endl;
+            //cout << "pos_arr associated : " << pos_arr[3*pos+0] << endl;
+            //cout << "idx_neighbour associated : " << pos_arr[3*idx_neighbour+0] << endl;
             
             double val_0 = abs(pos_arr[3*pos+0] - pos_arr[3*idx_neighbour+0])/r_ab * derive_cubic_spline(r_ab, h);
             double val_1 = abs(pos_arr[3*pos+1] - pos_arr[3*idx_neighbour+1])/r_ab * derive_cubic_spline(r_ab, h);
             double val_2 = abs(pos_arr[3*pos+2] - pos_arr[3*idx_neighbour+2])/r_ab * derive_cubic_spline(r_ab, h);
 
             gradW_matrix[pos].push_back(val_0);
-          //  cout << "after first push_back"<<endl;
+            //cout << "after first push_back"<<endl;
             gradW_matrix[pos].push_back(val_1);
-           // cout << "after second push_back"<<endl;
+            //cout << "after second push_back"<<endl;
             gradW_matrix[pos].push_back(val_2);
             //cout << "after third push_back"<<endl;
 
@@ -69,11 +68,10 @@ double setSpeedOfSound(double &rho, double &rho_0, double &c_0, double &gamma, s
     if (state_equation_chosen == "Quasi incompresible fluid"){
         c = c_0*pow(rho/rho_0, 0.5*(gamma-1));
     }
-
     return c;
 }
 
-void setPressure(unsigned &nb_moving_part, vector<double> &p_arr, vector<double> &rho_arr, double &rho_0,  double &c_0, double &R,  double &T,
+void setPressure(int &nb_moving_part, vector<double> &p_arr, vector<double> &rho_arr, double &rho_0,  double &c_0, double &R,  double &T,
                       double &M, double &gamma, string &state_equation_chosen){
 
     for (size_t pos = 0; pos < nb_moving_part; pos++){
@@ -89,13 +87,13 @@ void setPressure(unsigned &nb_moving_part, vector<double> &p_arr, vector<double>
     }
 }
 
-void setArtificialViscosity(int &t, vector<vector<double>> &artificial_visc, unsigned &nb_moving_part, vector<double> &pos_arr, vector<vector<unsigned>> &neighbours_matrix, vector<double> &rho_arr, 
+void setArtificialViscosity(int &t, vector<vector<double>> &artificial_visc, int &nb_moving_part, vector<double> &pos_arr, vector<vector<int>> &neighbours_matrix, vector<double> &rho_arr, 
                             vector<double> &u_arr, double &alpha, double &beta, double &rho_0, double &c_0, double &gamma, double &R, double &T, double &M, double &h, string &state_equation_chosen){
 
     if (t == 0){
         for (size_t pos = 0; pos < nb_moving_part; pos++){
 
-            vector<unsigned> &neighbours_list = neighbours_matrix[pos];
+            vector<int> &neighbours_list = neighbours_matrix[pos];
         
             for (size_t idx_neighbour = 0; idx_neighbour < neighbours_list.size(); idx_neighbour++){
                 artificial_visc[pos].push_back(0.0);
@@ -111,7 +109,7 @@ void setArtificialViscosity(int &t, vector<vector<double>> &artificial_visc, uns
         // Iterations over each particle
         for (size_t pos = 0; pos < nb_moving_part; pos++){
 
-            vector<unsigned> &neighbours_arr = neighbours_matrix[pos];
+            vector<int> &neighbours_arr = neighbours_matrix[pos];
            // cout << "For particle : " << pos << endl;
            // cout << " pos (x): " << pos_arr[3*pos+0];
            // cout << " pos (y): " << pos_arr[3*pos+1];
@@ -120,7 +118,7 @@ void setArtificialViscosity(int &t, vector<vector<double>> &artificial_visc, uns
             // Iteration over each associated neighbours
             for (size_t idx_neighbour = 0; idx_neighbour < neighbours_arr.size(); idx_neighbour++){   
 
-                unsigned neighbour_value = neighbours_arr[idx_neighbour];
+                int neighbour_value = neighbours_arr[idx_neighbour];
 
                 rel_displ[0] = (pos_arr[3*pos+0] - pos_arr[3*neighbour_value+0]);
                 rel_displ[1] = (pos_arr[3*pos+1] - pos_arr[3*neighbour_value+1]);
@@ -173,7 +171,7 @@ void setArtificialViscosity(int &t, vector<vector<double>> &artificial_visc, uns
     }
 }
 
-void continuityEquation(unsigned &nb_moving_part, vector<double> &pos_arr, vector<double> &u_arr, vector<vector<unsigned>> &neighbours_matrix, 
+void continuityEquation(int &nb_moving_part, vector<double> &pos_arr, vector<double> &u_arr, vector<vector<int>> &neighbours_matrix, 
                          vector<vector<double>> &gradW_matrix, vector<double> &drhodt_arr, vector<double> &rho_arr, vector<double> &mass_arr,  double &h){
 
     // Iterations over each particle                    
@@ -181,8 +179,8 @@ void continuityEquation(unsigned &nb_moving_part, vector<double> &pos_arr, vecto
 
         drhodt_arr[pos] = 0;
 
-        vector<unsigned> &neighbours_list = neighbours_matrix[pos];
-        vector<double> &gradW_list = gradW_matrix[pos];
+        vector<int> neighbours_list = neighbours_matrix[pos];
+        vector<double> gradW_list = gradW_matrix[pos];
 
         double drhodt = 0;
         
@@ -207,7 +205,7 @@ void continuityEquation(unsigned &nb_moving_part, vector<double> &pos_arr, vecto
     }
 }
 
-void momentumEquation(unsigned &nb_moving_part, vector<vector<unsigned>> &neighbours_matrix, vector<double> &mass_arr, vector<vector<double>> &gradW_matrix, 
+void momentumEquation(int &nb_moving_part, vector<vector<int>> &neighbours_matrix, vector<double> &mass_arr, vector<vector<double>> &gradW_matrix, 
                       vector<double> &dudt_arr, vector<vector<double>> &artificial_visc_matrix, vector<double> &rho_arr, double &rho_0, double &c_0,
                       vector<double> &p_arr, double &R, double &T, double &M, double &gamma, double &g, string &state_equation_chosen){
 
@@ -220,7 +218,7 @@ void momentumEquation(unsigned &nb_moving_part, vector<vector<unsigned>> &neighb
         }   
 
 
-        vector<unsigned> &neighbours_arr = neighbours_matrix[pos];
+        vector<int> &neighbours_arr = neighbours_matrix[pos];
         vector<double> &gradW_arr = gradW_matrix[pos];
         vector<double> &artificial_visc_arr = artificial_visc_matrix[pos];
         vector<double> dudt(3, 0.0), F_vol = {0.0, 0.0, g};
@@ -233,12 +231,17 @@ void momentumEquation(unsigned &nb_moving_part, vector<vector<unsigned>> &neighb
             for (size_t idx_neighbour = 0; idx_neighbour < neighbours_arr.size(); idx_neighbour++){   
 
                 double rho_a = rho_arr[pos], rho_b = rho_arr[neighbours_arr[idx_neighbour]];
-                double pi_ab = artificial_visc_arr[idx_neighbour];
+                double pi_ab = 0; //artificial_visc_arr[idx_neighbour];
                 double m_b = mass_arr[neighbours_arr[idx_neighbour]];
                 double p_a = p_arr[pos], p_b = p_arr[neighbours_arr[idx_neighbour]];
 
                 dudt[cord] += m_b*(p_b/(rho_b*rho_b) + p_a/(rho_a*rho_a) + pi_ab)*gradW_arr[idx_neighbour+cord];
-                
+                //cout << "p_a" << p_a << endl;
+                //cout << "p_b" << p_b << endl;
+                //cout << "rho_b" << rho_b << endl;
+                //cout << "rho_a" << rho_a << endl;
+                //cout << "m_b" << m_b << endl;
+
             }
 
             dudt[cord] +=  F_vol[cord];
@@ -247,6 +250,7 @@ void momentumEquation(unsigned &nb_moving_part, vector<vector<unsigned>> &neighb
 
         for (size_t cord = 0; cord < 3; cord++) {
             dudt[cord] *= -1; 
+            //cout << "dudt : " << dudt[cord] << " at cord : " << cord << endl;
             dudt_arr[3*pos+cord] = dudt[cord];
             //cout << "dudt_arr[3*pos+cord] " << dudt_arr[3*pos+cord] << endl;
         }
