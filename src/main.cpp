@@ -136,7 +136,7 @@ int main(int argc, char *argv[]){
     // Initialization of the problem (moving particles and fixed particles)
     meshcube(o, L, s, pos_arr, type_arr); 
     unsigned nb_moving_part = pos_arr.size()/3;
-    meshBoundary(o_d, L_d, s, pos_arr, type_arr);
+    /*meshBoundary(o_d, L_d, s, pos_arr, type_arr);
 
 
     for(size_t i = 0; i < 3; i++){
@@ -145,7 +145,7 @@ int main(int argc, char *argv[]){
         //cout << " le centre et longueur de l'axe " << i << "est "<< o_d[i] << " et  " << L_d[i] << endl;
     }
 
-    meshBoundary(o_d, L_d, s, pos_arr, type_arr);
+    meshBoundary(o_d, L_d, s, pos_arr, type_arr);*/
 
     unsigned nb_tot_part = pos_arr.size();
 
@@ -154,7 +154,7 @@ int main(int argc, char *argv[]){
     vector<vector<unsigned>>  neighbours_matrix(nb_tot_part), neighbours_matrix_1(nb_tot_part);
 
     vectors["position"] = &pos_arr;
-    //scalars["type"] = &type_arr;
+    scalars["type"] = &type_arr;
     //vectors["velocity"] = &u_arr;
 
     cout << "len(u_arr) : " << pos_arr.size() << endl;
@@ -175,7 +175,7 @@ int main(int argc, char *argv[]){
     for (int t = 0; t < nstepT; t++){
 
         //printMatrix(neighbours_matrix);
-        printArray(pos_arr);
+        //printArray(pos_arr);
 
         findNeighbours(nb_moving_part, pos_arr, cell_matrix, neighbours_matrix, L_d, Nx, Ny, Nz, h, kappa); // Apply the linked-list algorithm
         if(PRINT){cout << "findNeighbours passed" << endl;}
