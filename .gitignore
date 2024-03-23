@@ -41,4 +41,8 @@ output/
 
 # Pictures
 *.PDF
+*.vtp
+
+# Text files
+*.txt
 
