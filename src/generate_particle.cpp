@@ -92,7 +92,7 @@ void meshBoundary(vector<double> &o_d, vector<double> &L_d, double &s, vector<do
         double x = o_d[0] + i * dx;
         for (int j = nj/4; j < 3*nj/4; ++j) // along y 
         {
-         double y = o_d[1] + j * dy;  
+        double y = o_d[1] + j * dy;  
         bound_arr.push_back(x);
         bound_arr.push_back(y);
         bound_arr.push_back(o_d[2]+1);

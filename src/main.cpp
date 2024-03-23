@@ -100,13 +100,13 @@ int main(int argc, char *argv[]){
     /*---------------------------- INITIALIZATION OF VARIABLES USED -----------------------------------*/
 
     // Debug variable
-    const bool PRINT = true;
+    const bool PRINT = data["print_debug"];
 
     // Constants
     double h = 1.2*s;
     double R = 8.314; // [J/(K.mol)]
-    double g = 9.81; // [m/s²]
-    double dt = 0.005;
+    double g = -9.81; // [m/s²]
+    double dt = 0.01;
 
     // Number of cells (in each direction) 
     int Nx, Ny, Nz ;    
@@ -118,7 +118,7 @@ int main(int argc, char *argv[]){
     printf("(Nx, Ny, Nz) = (%d, %d, %d) \n", Nx,Ny,Nz);
 
     // Nb of particles along each direction from target size "s"
-    int nb_particles = evaluateNumberParticles(L, s);
+    size_t nb_particles = evaluateNumberParticles(L, s);
 
     // Vector used (and labelled w.r.t particles location)
     vector<double> pos_arr, type_arr;  
@@ -135,8 +135,8 @@ int main(int argc, char *argv[]){
   
     // Initialization of the problem (moving particles and fixed particles)
     meshcube(o, L, s, pos_arr, type_arr); 
-    int nb_moving_part = pos_arr.size()/3;
-    s = s/30;
+    size_t nb_moving_part = pos_arr.size()/3;
+    s = s/10;
     meshBoundary(o_d, L_d, s, pos_arr, type_arr);
 
 
@@ -147,7 +147,7 @@ int main(int argc, char *argv[]){
     }
 
     meshBoundary(o_d, L_d, s, pos_arr, type_arr);
-    s = s*30;
+    s = s*10;
     int nb_tot_part = pos_arr.size();
 
     vector<double> mass_arr(nb_tot_part), u_arr(3*nb_tot_part), drhodt_arr(nb_tot_part), rho_arr(nb_tot_part), dudt_arr(3*nb_tot_part, 0.0), p_arr(nb_tot_part);
@@ -175,8 +175,8 @@ int main(int argc, char *argv[]){
 
     for (int t = 0; t < nstepT; t++){
 
-        //printMatrix(neighbours_matrix);
-        //printArray(pos_arr);
+        printArray(u_arr, nb_moving_part, "u_arr")
+
 
         findNeighbours(nb_moving_part, pos_arr, cell_matrix, neighbours_matrix, L_d, Nx, Ny, Nz, h, kappa); // Apply the linked-list algorithm
         if(PRINT){cout << "findNeighbours passed" << endl;}
@@ -184,9 +184,8 @@ int main(int argc, char *argv[]){
         gradW(gradW_matrix, nb_moving_part, pos_arr, neighbours_matrix, h, Nx, Ny, Nz); // Compute ∇_a(W_ab) for all particles
         if(PRINT){cout << "gradW passed" << endl;}
 
-        continuityEquation(nb_moving_part, pos_arr ,u_arr, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass_arr, h); // Compute D(rho)/Dt for all particles
+        continuityEquation(nb_moving_part, pos_arr, u_arr, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass_arr, h); // Compute D(rho)/Dt for all particles
         if(PRINT){cout << "continuityEquation passed" << endl;}
-        //printArray(drhodt_arr);
 
         setPressure(nb_moving_part, p_arr, rho_arr, rho_0, c_0, R, T, M, gamma, state_equation_chosen); // Compute pressure for all particles
         if(PRINT){cout << "setPressure passed" << endl;}
@@ -194,25 +193,10 @@ int main(int argc, char *argv[]){
         setArtificialViscosity(t, artificial_visc_matrix, nb_moving_part, pos_arr, neighbours_matrix, rho_arr, u_arr,
                                alpha, beta, rho_0, c_0, gamma, R, T, M, h, state_equation_chosen); // Compute artificial viscosity Π_ab for all particles
         if(PRINT){cout << "setArtificialViscosity passed" << endl;}
-        //printMatrix(artificial_visc_matrix);
 
         momentumEquation(nb_moving_part, neighbours_matrix, mass_arr, gradW_matrix, dudt_arr, artificial_visc_matrix, rho_arr, 
                         rho_0, c_0, p_arr, R, T, M, gamma, g, state_equation_chosen); // Compute D(u)/Dt for all particles
         if(PRINT){cout << "momentumEquation passed" << endl;}
-
-        /*
-        cout << "-------------------------------------" << endl;
-        cout << " For continuityEquation " << endl;
-        cout << "-------------------------------------" << endl;
-        for (size_t i = 0; i < 3*nb_moving_part; ++i){
-        cout << "For column " << i << " : (";
-            cout << drhodt_arr[i];
-            if (i != drhodt_arr.size() - 1) {
-                cout << ", " <<endl;
-            }
-        }
-        cout << ")" << "\n" << endl;
-        */
 
         // Update density, velocity and position for each particle (Euler explicit scheme)
         for(size_t pos = 0; pos < nb_particles; pos++ ){
@@ -223,16 +207,11 @@ int main(int argc, char *argv[]){
 
                 pos_arr[3*pos+cord] += dt*u_arr[3*pos+cord];
                 u_arr[3*pos+cord] += dt*dudt_arr[3*pos+cord];
-
-                /*
-                // Check boundaries (temporary)
-                u_arr[3*pos+cord] = (pos_arr[3*pos+cord] < 0.0) ? 0.0 : u_arr[3*pos+cord];
-                u_arr[3*pos+cord] = (pos_arr[3*pos+cord] > L_d[cord]) ? 0.0 : u_arr[3*pos+cord];
-                pos_arr[3*pos+cord] = (pos_arr[3*pos+cord] < 0.0) ? 0.0 : pos_arr[3*pos+cord];
-                pos_arr[3*pos+cord] = (pos_arr[3*pos+cord] > L_d[cord]) ? L_d[cord] : pos_arr[3*pos+cord];
-                */
             }
         }
+
+        printArray(pos_arr, nb_moving_part, "pos_arr");
+
 
         clearAllVectors(artificial_visc_matrix, neighbours_matrix, 
                      cell_matrix, gradW_matrix);

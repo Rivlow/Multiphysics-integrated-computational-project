@@ -34,42 +34,50 @@ void deletePreviousOutputFiles(){
 
 
 template<typename T>
-void printMatrix(vector<vector<T>> &matrix){
+void printMatrix(vector<vector<T>> &matrix, size_t size, string name){
 
-    for (size_t i = 0; i < matrix.size(); ++i){
 
-        cout << "For column " << i << " : (";
+    cout << "------------------------------------"<<endl;
+    cout << "           " << name << endl;
+    cout << "------------------------------------"<< "\n" <<endl;
+
+    for (size_t i = 0; i < size; ++i){
+
+        cout << "For lign " << i << " : (";
         for (size_t j = 0; j < matrix[i].size(); ++j) {
             cout << matrix[i][j];
             if (j != matrix[i].size() - 1) {
                 cout << ", ";
             }
         }
-        cout << ")" << endl;
+        cout << ")" << "\n" <<endl;
     }
 }
 // Explicit instantiation for types we might use
-template void printMatrix<int>(vector<vector<int>> &);
-template void printMatrix<float>(vector<vector<float>> &);
-template void printMatrix<double>(vector<vector<double>> &);
+template void printMatrix<int>(vector<vector<int>> &, size_t, string);
+template void printMatrix<float>(vector<vector<float>> &, size_t, string);
+template void printMatrix<double>(vector<vector<double>> &, size_t, string );
 
 
 template<typename T>
-void printArray(vector<T> &array){
+void printArray(vector<T> &array, size_t size, string name){
 
-    std::cout << "For idx i : (";
-    for (size_t i = 0; i < array.size(); ++i) {
+    cout << "------------------------------------"<<endl;
+    cout << "           " << name << endl;
+    cout << "------------------------------------"<< "\n" <<endl;
+
+    for (size_t i = 0; i < size; ++i) {
         std::cout << array[i];
         if (i != array.size() - 1) {
             std::cout << ", ";
         }
     }
-    std::cout << ")" << std::endl;
+    std::cout << ")" << "\n" << endl;
 }
 // Explicit instantiation for types we might use
-template void printArray<int>(vector<int> &);
-template void printArray<float>(vector<float> &);
-template void printArray<double>(vector<double> &);
+template void printArray<int>(vector<int> &, size_t, string);
+template void printArray<float>(vector<float> &, size_t, string);
+template void printArray<double>(vector<double> &, size_t, string);
 
 
 

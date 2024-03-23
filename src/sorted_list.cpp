@@ -14,11 +14,11 @@
 
 using namespace std;
 
-void findNeighbours(int &nb_moving_part, vector<double> &pos_arr, vector<vector<int>> &cell_matrix,
+void findNeighbours(size_t nb_moving_part, vector<double> &pos_arr, vector<vector<int>> &cell_matrix,
                  vector<vector<int>> &neighbours_matrix, vector<double> &L_d, const int &Nx, const int &Ny, const int &Nz, const double &h, const int &kappa){
 
     // Sort all particles in their corresponding cell
-    for (int pos = 0; pos < pos_arr.size()/3; pos ++){
+    for (size_t pos = 0; pos < pos_arr.size()/3; pos ++){
 
         int idx_i = pos_arr[3*pos + 0] / (L_d[0] / Nx);
         int idx_j = pos_arr[3*pos + 1] / (L_d[1] / Ny);
@@ -108,7 +108,7 @@ void findNeighbours(int &nb_moving_part, vector<double> &pos_arr, vector<vector<
     }
 } 
 
-void naiveAlgo(int &nb_moving_part, vector<double> &pos_arr, vector<vector<int>> &neighbours_matrix, const double &h, const int &kappa){
+void naiveAlgo(size_t nb_moving_part, vector<double> &pos_arr, vector<vector<int>> &neighbours_matrix, const double &h, const int &kappa){
 
     // Find neighbours for each particle
     for (int i = 0; i < nb_moving_part; i++){
