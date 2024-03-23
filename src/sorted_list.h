@@ -10,10 +10,10 @@
 using namespace std;
 
 
-void findNeighbours(unsigned &nb_moving_part, vector<double> &pos_arr, vector<vector<unsigned>> &cell_matrix, vector<vector<unsigned>> &neighbours_matrix, 
-                    vector<double> &L_d, const unsigned &Nx, const unsigned &Ny, const unsigned &Nz, const double &h, const int &kappa);
+void findNeighbours(int &nb_moving_part, vector<double> &pos_arr, vector<vector<int>> &cell_matrix, vector<vector<int>> &neighbours_matrix, 
+                    vector<double> &L_d, const int &Nx, const int &Ny, const int &Nz, const double &h, const int &kappa);
     
-void naiveAlgo(unsigned &nb_moving_part, vector<double> &pos_arr, vector<vector<unsigned>> &neighbours_matrix, const double &h, const int &kappa);
+void naiveAlgo(int &nb_moving_part, vector<double> &pos_arr, vector<vector<int>> &neighbours_matrix, const double &h, const int &kappa);
 
-void printNeighbours(vector<vector<unsigned>> &neighbours_matrix_1, vector<vector<unsigned>> &neighbours_matrix_2);
+void printNeighbours(vector<vector<int>> &neighbours_matrix_1, vector<vector<int>> &neighbours_matrix_2);
 

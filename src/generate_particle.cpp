@@ -87,25 +87,26 @@ void meshBoundary(vector<double> &o_d, vector<double> &L_d, double &s, vector<do
 
     bound_arr.reserve(bound_arr.size() + 6*(ni*nj + (nk-2)*nj + (ni-2)*(nk-2)));
 
-    for (int i = 0; i < ni; ++i) // along x
+    for (int i = ni/4; i < 3*ni/4; ++i) // along x
     {
         double x = o_d[0] + i * dx;
-        for (int j = 0; j < nj; ++j) // along y 
+        for (int j = nj/4; j < 3*nj/4; ++j) // along y 
         {
          double y = o_d[1] + j * dy;  
         bound_arr.push_back(x);
         bound_arr.push_back(y);
         bound_arr.push_back(o_d[2]+1);
         type_arr.push_back(0.0);
-        /*bound_arr.push_back(x);
-        bound_arr.push_back(y);
-        bound_arr.push_back(L_d[2] + o_d[2]);
-        type_arr.push_back(0.0);*/
+        //bound_arr.push_back(x);
+        //bound_arr.push_back(y);
+        //bound_arr.push_back(L_d[2] + o_d[2]);
+        //type_arr.push_back(0.0);
         
         }
     }
 
-    /*for (int j = 0; j < nj; ++j) // along y
+    /*
+    for (int j = 0; j < nj; ++j) // along y
     {
         double y = o_d[1] + j * dy;
         for (int k = 1; k < nk-1; ++k) // along z
@@ -138,6 +139,7 @@ void meshBoundary(vector<double> &o_d, vector<double> &L_d, double &s, vector<do
         type_arr.push_back(0.0);
         
         }
-    }*/
+    }
     cout <<" longueur de bound_arr :"<< bound_arr.size()/3 << endl;
+    */
 }

@@ -14,15 +14,15 @@
 
 using namespace std;
 
-void findNeighbours(unsigned &nb_moving_part, vector<double> &pos_arr, vector<vector<unsigned>> &cell_matrix,
-                 vector<vector<unsigned>> &neighbours_matrix, vector<double> &L_d, const unsigned &Nx, const unsigned &Ny, const unsigned &Nz, const double &h, const int &kappa){
+void findNeighbours(int &nb_moving_part, vector<double> &pos_arr, vector<vector<int>> &cell_matrix,
+                 vector<vector<int>> &neighbours_matrix, vector<double> &L_d, const int &Nx, const int &Ny, const int &Nz, const double &h, const int &kappa){
 
     // Sort all particles in their corresponding cell
-    for (unsigned pos = 0; pos < pos_arr.size()/3; pos ++){
+    for (int pos = 0; pos < pos_arr.size()/3; pos ++){
 
-        unsigned idx_i = pos_arr[3*pos + 0] / (L_d[0] / Nx);
-        unsigned idx_j = pos_arr[3*pos + 1] / (L_d[1] / Ny);
-        unsigned idx_k = pos_arr[3*pos + 2] / (L_d[2] / Nz);
+        int idx_i = pos_arr[3*pos + 0] / (L_d[0] / Nx);
+        int idx_j = pos_arr[3*pos + 1] / (L_d[1] / Ny);
+        int idx_k = pos_arr[3*pos + 2] / (L_d[2] / Nz);
         
         idx_i = (idx_i == Nx) ? idx_i - 1 : idx_i;
         idx_j = (idx_j == Ny) ? idx_j - 1 : idx_j;
@@ -33,12 +33,12 @@ void findNeighbours(unsigned &nb_moving_part, vector<double> &pos_arr, vector<ve
     }
 
     // Find neighbours for each particle
-    for (unsigned pos = 0; pos < nb_moving_part; pos++){
+    for (int pos = 0; pos < nb_moving_part; pos++){
 
         // Determine in which cell the particle is
-        unsigned i_cell = pos_arr[3*pos + 0] / (L_d[0] / Nx);
-        unsigned j_cell = pos_arr[3*pos + 1] / (L_d[1] / Ny);
-        unsigned k_cell = pos_arr[3*pos + 2] / (L_d[2] / Nz);
+        int i_cell = pos_arr[3*pos + 0] / (L_d[0] / Nx);
+        int j_cell = pos_arr[3*pos + 1] / (L_d[1] / Ny);
+        int k_cell = pos_arr[3*pos + 2] / (L_d[2] / Nz);
 
         //cout << "cell's indices computed" << endl;
 
@@ -47,14 +47,14 @@ void findNeighbours(unsigned &nb_moving_part, vector<double> &pos_arr, vector<ve
         k_cell = (k_cell >= Nx) ? Nz-1 : k_cell;
 
         // Define neighbouring cell indices
-        unsigned i_inf = (i_cell == 0) ? 0 : i_cell - 1;
-        unsigned i_supp = (i_cell < Nx - 1) ? i_cell +1 : (i_cell == Nx - 1) ? i_cell : i_cell - 1;
+        int i_inf = (i_cell == 0) ? 0 : i_cell - 1;
+        int i_supp = (i_cell < Nx - 1) ? i_cell +1 : (i_cell == Nx - 1) ? i_cell : i_cell - 1;
 
-        unsigned j_inf = (j_cell == 0) ? 0 : j_cell - 1;
-        unsigned j_supp = (j_cell < Ny - 1) ? j_cell +1 : (j_cell == Ny - 1) ? j_cell : j_cell - 1;
+        int j_inf = (j_cell == 0) ? 0 : j_cell - 1;
+        int j_supp = (j_cell < Ny - 1) ? j_cell +1 : (j_cell == Ny - 1) ? j_cell : j_cell - 1;
 
-        unsigned k_inf = (k_cell == 0) ? 0 : k_cell - 1;
-        unsigned k_supp = (k_cell < Nz - 1) ? k_cell +1 : (k_cell == Nz - 1) ? k_cell : k_cell - 1;
+        int k_inf = (k_cell == 0) ? 0 : k_cell - 1;
+        int k_supp = (k_cell < Nz - 1) ? k_cell +1 : (k_cell == Nz - 1) ? k_cell : k_cell - 1;
 
         //cout << "cell's neighbours computed" << endl;
 
@@ -64,14 +64,14 @@ void findNeighbours(unsigned &nb_moving_part, vector<double> &pos_arr, vector<ve
             for (size_t j = j_inf; j <= j_supp; j++){
                 for (size_t k = k_inf; k <= k_supp; k++){
 
-                    vector<unsigned> &actual_cell = cell_matrix[i + j*Nx + k*Nx*Ny]; 
+                    vector<int> &actual_cell = cell_matrix[i + j*Nx + k*Nx*Ny]; 
                     //cout << "len(actual_cell vector) : " << actual_cell.size() << endl;
 
                     if (actual_cell.size() > 0){
                         
                         for (size_t idx_neighbour_it = 0; idx_neighbour_it < actual_cell.size(); idx_neighbour_it++) {
                             
-                            unsigned actual_cell_value = actual_cell[idx_neighbour_it]; 
+                            int actual_cell_value = actual_cell[idx_neighbour_it]; 
                             //cout << "actual_cell_value defined" << endl;
 
 
@@ -108,11 +108,11 @@ void findNeighbours(unsigned &nb_moving_part, vector<double> &pos_arr, vector<ve
     }
 } 
 
-void naiveAlgo(unsigned &nb_moving_part, vector<double> &pos_arr, vector<vector<unsigned>> &neighbours_matrix, const double &h, const int &kappa){
+void naiveAlgo(int &nb_moving_part, vector<double> &pos_arr, vector<vector<int>> &neighbours_matrix, const double &h, const int &kappa){
 
     // Find neighbours for each particle
-    for (unsigned i = 0; i < nb_moving_part; i++){
-        for (unsigned j = i+1; j < nb_moving_part; j++){
+    for (int i = 0; i < nb_moving_part; i++){
+        for (int j = i+1; j < nb_moving_part; j++){
 
 
             double rx, ry, rz, r2;
@@ -128,13 +128,13 @@ void naiveAlgo(unsigned &nb_moving_part, vector<double> &pos_arr, vector<vector<
     }
 }
 
-void printNeighbours(vector<vector<unsigned>> &neighbours_matrix_1, vector<vector<unsigned>> &neighbours_matrix_2){
+void printNeighbours(vector<vector<int>> &neighbours_matrix_1, vector<vector<int>> &neighbours_matrix_2){
 
-    for (unsigned i = 0; i < neighbours_matrix_1.size(); i++) {
+    for (int i = 0; i < neighbours_matrix_1.size(); i++) {
         std::cout << "Particle " << i << " : ";
 
         std::cout << "{";
-        for (unsigned j = 0; j < neighbours_matrix_1[i].size(); j++) {
+        for (int j = 0; j < neighbours_matrix_1[i].size(); j++) {
             std::cout << neighbours_matrix_1[i][j];
             if (j != neighbours_matrix_1[i].size() - 1) {
                 std::cout << ", ";
@@ -142,7 +142,7 @@ void printNeighbours(vector<vector<unsigned>> &neighbours_matrix_1, vector<vecto
         }
         std::cout << "} (Linked-list) VS {";
         
-        for (unsigned j = 0; j < neighbours_matrix_2[i].size(); j++) {
+        for (int j = 0; j < neighbours_matrix_2[i].size(); j++) {
             std::cout << neighbours_matrix_2[i][j];
             if (j != neighbours_matrix_2[i].size() - 1) {
                 std::cout << ", ";
