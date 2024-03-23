@@ -106,7 +106,7 @@ int main(int argc, char *argv[]){
     double h = 1.2*s;
     double R = 8.314; // [J/(K.mol)]
     double g = -9.81; // [m/s²]
-    double dt = 0.01;
+    double dt = 0.005;
 
     // Number of cells (in each direction) 
     int Nx, Ny, Nz ;    
@@ -175,7 +175,9 @@ int main(int argc, char *argv[]){
 
     for (int t = 0; t < nstepT; t++){
 
-        printArray(u_arr, nb_moving_part, "u_arr")
+        vector<double> drhodt_arr(nb_tot_part, 0.0), dudt_arr(3*nb_tot_part, 0.0);
+
+        //printArray(pos_arr, nb_moving_part, "pos_arr");
 
 
         findNeighbours(nb_moving_part, pos_arr, cell_matrix, neighbours_matrix, L_d, Nx, Ny, Nz, h, kappa); // Apply the linked-list algorithm
@@ -198,6 +200,10 @@ int main(int argc, char *argv[]){
                         rho_0, c_0, p_arr, R, T, M, gamma, g, state_equation_chosen); // Compute D(u)/Dt for all particles
         if(PRINT){cout << "momentumEquation passed" << endl;}
 
+        //printArray(rho_arr, nb_moving_part, "rho_arr");
+        printArray(dudt_arr, nb_moving_part, "dudt_arr");
+
+
         // Update density, velocity and position for each particle (Euler explicit scheme)
         for(size_t pos = 0; pos < nb_particles; pos++ ){
 
@@ -210,7 +216,6 @@ int main(int argc, char *argv[]){
             }
         }
 
-        printArray(pos_arr, nb_moving_part, "pos_arr");
 
 
         clearAllVectors(artificial_visc_matrix, neighbours_matrix, 

@@ -198,27 +198,24 @@ void momentumEquation(size_t nb_moving_part, vector<vector<int>> &neighbours_mat
                       vector<double> &p_arr, double &R, double &T, double &M, double &gamma, double &g, string &state_equation_chosen){
 
     // Iterations over each particle
- 
     for (size_t pos = 0; pos < nb_moving_part; pos++){
         
-        for (size_t cord = 0; cord < 3; cord++){
-        dudt_arr[3*pos+cord] = 0.0;
-        }   
-
         vector<int> &neighbours_arr = neighbours_matrix[pos];
         vector<double> &gradW_arr = gradW_matrix[pos];
         vector<double> &artificial_visc_arr = artificial_visc_matrix[pos];
         vector<double> F_vol = {0.0, 0.0, g};
+        double rho_a = rho_arr[pos];
+        double p_a = p_arr[pos];
 
         for (size_t cord = 0; cord < 3; cord++){
 
             // Summation over b = 1 -> nb_neighbours
             for (size_t idx_neighbour = 0; idx_neighbour < neighbours_arr.size(); idx_neighbour++){   
 
-                double rho_a = rho_arr[pos], rho_b = rho_arr[neighbours_arr[idx_neighbour]];
                 double pi_ab = 0; //artificial_visc_arr[idx_neighbour];
+                double rho_b = rho_arr[neighbours_arr[idx_neighbour]];
                 double m_b = mass_arr[neighbours_arr[idx_neighbour]];
-                double p_a = p_arr[pos], p_b = p_arr[neighbours_arr[idx_neighbour]];
+                double p_b = p_arr[neighbours_arr[idx_neighbour]];
 
                 dudt_arr[3*pos+cord] += m_b*(p_b/(rho_b*rho_b) + p_a/(rho_a*rho_a) + pi_ab)*gradW_arr[idx_neighbour+cord];
                 //cout << "p_a" << p_a << endl;
@@ -226,15 +223,12 @@ void momentumEquation(size_t nb_moving_part, vector<vector<int>> &neighbours_mat
                 //cout << "rho_b" << rho_b << endl;
                 //cout << "rho_a" << rho_a << endl;
                 //cout << "m_b" << m_b << endl;
-
+                //cout << "\n " <<endl;
             }
-        }
 
-        for (size_t cord = 0; cord < 3; cord++) {
-            dudt_arr[3*pos+cord] *= -1; 
+            dudt_arr[3*pos+cord] *= -1;
             dudt_arr[3*pos+cord] +=  F_vol[cord];
         }
-
     }
 }
 

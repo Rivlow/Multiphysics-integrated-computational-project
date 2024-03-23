@@ -1,6 +1,6 @@
 {
     "s": 0.25,
-    "nstepT": 100,
+    "nstepT": 200,
 
     "o": [2, 2, 2],
     "L": [1, 1, 1],
@@ -9,8 +9,8 @@
 
     "kappa": 1,
     "rho_0": 1000,
-    "rho_moving": 1000,
-    "rho_fixed" : 1000,
+    "rho_moving": 2000,
+    "rho_fixed" : 2000,
     "T": 298.15,
     "u": [0.0, 0.0, 0.0],
     "c_0": 30, 
@@ -19,7 +19,7 @@
     "beta": 0,
     "M": 18, 
 
-    "print_debug":true,
+    "print_debug":false,
     "stateEquation" : {"Ideal gaz law":1, "Quasi incompresible fluid":0},
     "initialCondition" : {"Hydrostatic":0, "Constant":1}
 }

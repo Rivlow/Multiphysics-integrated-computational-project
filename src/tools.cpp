@@ -41,7 +41,7 @@ void printMatrix(vector<vector<T>> &matrix, size_t size, string name){
     cout << "           " << name << endl;
     cout << "------------------------------------"<< "\n" <<endl;
 
-    for (size_t i = 0; i < size; ++i){
+    for (size_t i = 0; i <= size; ++i){
 
         cout << "For lign " << i << " : (";
         for (size_t j = 0; j < matrix[i].size(); ++j) {
@@ -66,7 +66,7 @@ void printArray(vector<T> &array, size_t size, string name){
     cout << "           " << name << endl;
     cout << "------------------------------------"<< "\n" <<endl;
 
-    for (size_t i = 0; i < size; ++i) {
+    for (size_t i = 0; i <= size; ++i) {
         std::cout << array[i];
         if (i != array.size() - 1) {
             std::cout << ", ";
