@@ -194,11 +194,12 @@ void continuityEquation(unsigned &nb_moving_part, vector<double> &pos_arr, vecto
             for (size_t x = 0; x < 3; x++){
 
                 dot_product += (u_arr[3*pos+x] - u_arr[3*neighbours_list[idx_neighbour]+x])*(gradW_list[idx_neighbour+x]);
+                //cout << " grandW : " << gradW_list[idx_neighbour+x] << endl;
             }
-
+            
             drhodt += mass_arr[neighbours_list[idx_neighbour]]*dot_product;
-
-            //cout << "mass used : " << mass_arr[neighbours_list[idx_neighbour]] << " and dot product : " << dot_product << endl;
+            
+            cout << "mass used : " << mass_arr[neighbours_list[idx_neighbour]] << " and dot product : " << dot_product << endl;
         }
 
         drhodt_arr[pos] = drhodt;

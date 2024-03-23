@@ -136,7 +136,8 @@ int main(int argc, char *argv[]){
     // Initialization of the problem (moving particles and fixed particles)
     meshcube(o, L, s, pos_arr, type_arr); 
     unsigned nb_moving_part = pos_arr.size()/3;
-    /*meshBoundary(o_d, L_d, s, pos_arr, type_arr);
+    s = s/10;
+    meshBoundary(o_d, L_d, s, pos_arr, type_arr);
 
 
     for(size_t i = 0; i < 3; i++){
@@ -145,8 +146,8 @@ int main(int argc, char *argv[]){
         //cout << " le centre et longueur de l'axe " << i << "est "<< o_d[i] << " et  " << L_d[i] << endl;
     }
 
-    meshBoundary(o_d, L_d, s, pos_arr, type_arr);*/
-
+    meshBoundary(o_d, L_d, s, pos_arr, type_arr);
+    s = s*10;
     unsigned nb_tot_part = pos_arr.size();
 
     vector<double> mass_arr(nb_tot_part), u_arr(3*nb_tot_part), drhodt_arr(nb_tot_part), rho_arr(nb_tot_part), dudt_arr(3*nb_tot_part, 0.0), p_arr(nb_tot_part);
