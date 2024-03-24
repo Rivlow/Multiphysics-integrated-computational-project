@@ -45,7 +45,7 @@ void gradW(vector<vector<double>> &gradW_matrix, int &nb_moving_part, vector<dou
             double val_0 = abs(pos_arr[3*pos+0] - pos_arr[3*idx_neighbour+0])/r_ab * derive_cubic_spline(r_ab, h);
             double val_1 = abs(pos_arr[3*pos+1] - pos_arr[3*idx_neighbour+1])/r_ab * derive_cubic_spline(r_ab, h);
             double val_2 = abs(pos_arr[3*pos+2] - pos_arr[3*idx_neighbour+2])/r_ab * derive_cubic_spline(r_ab, h);
-
+            //cout << "derive cubic spline : " << derive_cubic_spline(r_ab, h) << " r_ab/h : " << r_ab/h << endl;
             gradW_matrix[pos].push_back(val_0);
             //cout << "after first push_back"<<endl;
             gradW_matrix[pos].push_back(val_1);
@@ -74,7 +74,7 @@ double setSpeedOfSound(double &rho, double &rho_0, double &c_0, double &gamma, s
 void setPressure(int &nb_moving_part, vector<double> &p_arr, vector<double> &rho_arr, double &rho_0,  double &c_0, double &R,  double &T,
                       double &M, double &gamma, string &state_equation_chosen){
 
-    for (size_t pos = 0; pos < nb_moving_part; pos++){
+    for (size_t pos = 0; pos < p_arr.size(); pos++){
 
         if (state_equation_chosen == "Ideal gaz law"){
             p_arr[pos] = (rho_arr[pos]/rho_0 - 1)*(R*T)/M;
@@ -181,7 +181,9 @@ void continuityEquation(int &nb_moving_part, vector<double> &pos_arr, vector<dou
 
         vector<int> neighbours_list = neighbours_matrix[pos];
         vector<double> gradW_list = gradW_matrix[pos];
-
+        
+        //cout << "for part : " << pos << "number of nei : " << gradW_list.size()  << endl;
+        //cout << "for part : " << pos << "number of nei : " << neighbours_list.size()  << endl;
         double drhodt = 0;
         
         // Summation over b = 1 -> nb_neighbours
@@ -191,16 +193,25 @@ void continuityEquation(int &nb_moving_part, vector<double> &pos_arr, vector<dou
             double dot_product = 0;
             for (size_t x = 0; x < 3; x++){
 
-                dot_product += (u_arr[3*pos+x] - u_arr[3*neighbours_list[idx_neighbour]+x])*(gradW_list[idx_neighbour+x]);
+                dot_product += (u_arr[3*pos+x] - u_arr[3*neighbours_list[idx_neighbour]+x])*(gradW_list[3*idx_neighbour+x]);
+                
             }
+            if(u_arr[3*pos+2] - u_arr[3*neighbours_list[idx_neighbour]+2]){
+               double rx = (pos_arr[3*pos+0] - pos_arr[3*neighbours_list[idx_neighbour]+0])*(pos_arr[3*pos+0] - pos_arr[3*neighbours_list[idx_neighbour]+0]);
+            double ry = (pos_arr[3*pos+1] - pos_arr[3*neighbours_list[idx_neighbour]+1])*(pos_arr[3*pos+1] - pos_arr[3*neighbours_list[idx_neighbour]+1]);
+            double rz = (pos_arr[3*pos+2] - pos_arr[3*neighbours_list[idx_neighbour]+2])*(pos_arr[3*pos+2] - pos_arr[3*neighbours_list[idx_neighbour]+2]);
+            double r_ab = sqrt(rx + ry + rz);
+            //cout << "relative velocity : " << u_arr[3*pos+2] - u_arr[3*neighbours_list[idx_neighbour]+2]<< "relative position : "<< r_ab/h << " and gradW : " << gradW_list[idx_neighbour+2] << endl;
 
+            } 
             drhodt += mass_arr[neighbours_list[idx_neighbour]]*dot_product;
-
+            //if(u_arr[3*pos+2] - u_arr[3*neighbours_list[idx_neighbour]+2]) cout << "drhodt " << drhodt << endl;
             //cout << "mass used : " << mass_arr[neighbours_list[idx_neighbour]] << " and dot product : " << dot_product << endl;
         }
 
         drhodt_arr[pos] = drhodt;
-
+        
+        //cout << "drhost : " << drhodt << endl;
        
     }
 }
@@ -235,12 +246,12 @@ void momentumEquation(int &nb_moving_part, vector<vector<int>> &neighbours_matri
                 double m_b = mass_arr[neighbours_arr[idx_neighbour]];
                 double p_a = p_arr[pos], p_b = p_arr[neighbours_arr[idx_neighbour]];
 
-                dudt[cord] += m_b*(p_b/(rho_b*rho_b) + p_a/(rho_a*rho_a) + pi_ab)*gradW_arr[idx_neighbour+cord];
-                //cout << "p_a" << p_a << endl;
-                //cout << "p_b" << p_b << endl;
-                //cout << "rho_b" << rho_b << endl;
-                //cout << "rho_a" << rho_a << endl;
-                //cout << "m_b" << m_b << endl;
+                dudt[cord] += m_b*(p_b/(rho_b*rho_b) + p_a/(rho_a*rho_a) + pi_ab)*gradW_arr[3*idx_neighbour+cord];/*
+                cout << "p_a" << p_a << endl;
+                cout << "p_b" << p_b << endl;
+                cout << "rho_b" << rho_b << endl;
+                cout << "rho_a" << rho_a << endl;
+                cout << "m_b" << m_b << endl;*/
 
             }
 

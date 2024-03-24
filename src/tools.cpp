@@ -37,7 +37,7 @@ template<typename T>
 void printMatrix(vector<vector<T>> &matrix){
 
     for (size_t i = 0; i < matrix.size(); ++i){
-
+        if(matrix[i].size()){
         cout << "For column " << i << " : (";
         for (size_t j = 0; j < matrix[i].size(); ++j) {
             cout << matrix[i][j];
@@ -46,7 +46,8 @@ void printMatrix(vector<vector<T>> &matrix){
             }
         }
         cout << ")" << endl;
-    }
+    
+    }}
 }
 // Explicit instantiation for types we might use
 template void printMatrix<int>(vector<vector<int>> &);

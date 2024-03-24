@@ -71,7 +71,7 @@ int main(int argc, char *argv[]){
     std::string state_equation_chosen, state_initial_condition;
 
     for (auto& it : data["stateEquation"].items()){
-        if (it.value    () == 1){
+        if (it.value    () == 0){
             state_equation_chosen = it.key();
         }
     }
@@ -100,7 +100,7 @@ int main(int argc, char *argv[]){
     /*---------------------------- INITIALIZATION OF VARIABLES USED -----------------------------------*/
 
     // Debug variable
-    const bool PRINT = true;
+    const bool PRINT = false;
 
     // Constants
     double h = 1.2*s;
@@ -136,7 +136,7 @@ int main(int argc, char *argv[]){
     // Initialization of the problem (moving particles and fixed particles)
     meshcube(o, L, s, pos_arr, type_arr); 
     int nb_moving_part = pos_arr.size()/3;
-    s = s/30;
+    s = s/5;
     meshBoundary(o_d, L_d, s, pos_arr, type_arr);
 
 
@@ -147,7 +147,7 @@ int main(int argc, char *argv[]){
     }
 
     meshBoundary(o_d, L_d, s, pos_arr, type_arr);
-    s = s*30;
+    s = s*5;
     int nb_tot_part = pos_arr.size();
 
     vector<double> mass_arr(nb_tot_part), u_arr(3*nb_tot_part), drhodt_arr(nb_tot_part), rho_arr(nb_tot_part), dudt_arr(3*nb_tot_part, 0.0), p_arr(nb_tot_part);
@@ -180,19 +180,30 @@ int main(int argc, char *argv[]){
 
         findNeighbours(nb_moving_part, pos_arr, cell_matrix, neighbours_matrix, L_d, Nx, Ny, Nz, h, kappa); // Apply the linked-list algorithm
         if(PRINT){cout << "findNeighbours passed" << endl;}
-
+        //printMatrix(neighbours_matrix);
         gradW(gradW_matrix, nb_moving_part, pos_arr, neighbours_matrix, h, Nx, Ny, Nz); // Compute ∇_a(W_ab) for all particles
         if(PRINT){cout << "gradW passed" << endl;}
-
+        //printMatrix(gradW_matrix);
         continuityEquation(nb_moving_part, pos_arr ,u_arr, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass_arr, h); // Compute D(rho)/Dt for all particles
         if(PRINT){cout << "continuityEquation passed" << endl;}
-        //printArray(drhodt_arr);
+        if(t > 70 ) {
+            cout<< "(";
+            for(size_t index = 0 ; index < nb_moving_part ; index ++ )
+             {cout<< drhodt_arr[index] <<", ";
+             }
+             cout<< ")";}
 
         setPressure(nb_moving_part, p_arr, rho_arr, rho_0, c_0, R, T, M, gamma, state_equation_chosen); // Compute pressure for all particles
         if(PRINT){cout << "setPressure passed" << endl;}
+        /*if(t > 80 ) {
+            cout<< "(";
+            for(size_t index = 0 ; index < nb_moving_part ; index ++ )
+             {cout<< p_arr[index] <<", ";
+             }
+             cout<< ")";}*/
 
-        setArtificialViscosity(t, artificial_visc_matrix, nb_moving_part, pos_arr, neighbours_matrix, rho_arr, u_arr,
-                               alpha, beta, rho_0, c_0, gamma, R, T, M, h, state_equation_chosen); // Compute artificial viscosity Π_ab for all particles
+        //setArtificialViscosity(t, artificial_visc_matrix, nb_moving_part, pos_arr, neighbours_matrix, rho_arr, u_arr,
+        //                       alpha, beta, rho_0, c_0, gamma, R, T, M, h, state_equation_chosen); // Compute artificial viscosity Π_ab for all particles
         if(PRINT){cout << "setArtificialViscosity passed" << endl;}
         //printMatrix(artificial_visc_matrix);
 
@@ -215,10 +226,10 @@ int main(int argc, char *argv[]){
         */
 
         // Update density, velocity and position for each particle (Euler explicit scheme)
-        for(size_t pos = 0; pos < nb_particles; pos++ ){
+        for(size_t pos = 0; pos < nb_moving_part; pos++ ){
 
             rho_arr[pos] = rho_arr[pos] + dt*drhodt_arr[pos];
-
+            //cout << "rho of part : " << pos << " is : " << rho_arr[pos] << endl;
             for (size_t cord = 0; cord < 3; cord++){
 
                 pos_arr[3*pos+cord] += dt*u_arr[3*pos+cord];
@@ -232,8 +243,9 @@ int main(int argc, char *argv[]){
                 pos_arr[3*pos+cord] = (pos_arr[3*pos+cord] > L_d[cord]) ? L_d[cord] : pos_arr[3*pos+cord];
                 */
             }
+            
         }
-
+        //printArray(rho_arr);
         clearAllVectors(artificial_visc_matrix, neighbours_matrix, 
                      cell_matrix, gradW_matrix);
         if(PRINT){cout << "clearAllVectors passed" << endl;}
