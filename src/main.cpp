@@ -14,7 +14,6 @@
 #include "Kernel_functions.h"
 #include "tools.h"
 
-
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -23,29 +22,28 @@
 using json = nlohmann::json;
 using namespace std;
 
-
-
 /**
  * @brief Dummy SPH simulation testing paraview export formats
  */
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[])
+{
 
-    /*---------------------------- SETTING COMPILATION PARAMETERS -----------------------------------*/
+    /*------------- SETTING COMPILATION PARAMETERS ---------------------------*/
 
-    #ifdef _OPENMP
-        std::cout << "OpenMP available: OMP_NUM_THREADS=" << omp_get_max_threads() << "\n";
-    #else
-        std::cout << "OpenMP not available.\n";
-    #endif
+#ifdef _OPENMP
+    std::cout << "OpenMP available: OMP_NUM_THREADS=" << omp_get_max_threads() << "\n";
+#else
+    std::cout << "OpenMP not available.\n";
+#endif
 
-    #ifdef NDEBUG
-        // code has been configured with "cmake -DCMAKE_BUILD_TYPE=Release .."
-        std::cout << "code built in RELEASE mode.\n";
-    #else
-        // code has been configured with "cmake .."
-        std::cout << "code built in DEBUG mode.\n";
-    #endif
+#ifdef NDEBUG
+    // code has been configured with "cmake -DCMAKE_BUILD_TYPE=Release .."
+    std::cout << "code built in RELEASE mode.\n";
+#else
+    // code has been configured with "cmake .."
+    std::cout << "code built in DEBUG mode.\n";
+#endif
 
     if (argc != 2)
     {
@@ -53,13 +51,13 @@ int main(int argc, char *argv[]){
         return EXIT_FAILURE;
     }
 
-    /*---------------------------- INPUT PARAMETERS FROM JSON FILES -----------------------------------*/
-
+    /*---------------------------- INPUT PARAMETERS FROM JSON FILES ----------*/
 
     std::ifstream inputf(argv[1]);
     json data = json::parse(inputf);
 
-    std::cout << argv[1] << ":\n" << data.dump(4) << std::endl; // Print input data to screen
+    std::cout << argv[1] << ":\n"
+              << data.dump(4) << std::endl; // Print input data to screen
 
     std::vector<double> o = data["o"];
     std::vector<double> L = data["L"];
@@ -67,22 +65,27 @@ int main(int argc, char *argv[]){
     int nstepT = data["nstepT"];
     std::vector<double> o_d = data["o_d"];
     std::vector<double> L_d = data["L_d"];
-    
+
     std::string state_equation_chosen, state_initial_condition;
 
-    for (auto& it : data["stateEquation"].items()){
-        if (it.value    () == 1){
+    for (auto &it : data["stateEquation"].items())
+    {
+        if (it.value() == 1)
+        {
             state_equation_chosen = it.key();
         }
     }
 
-    for (auto& it : data["initialCondition"].items()){
-        if (it.value    () == 1){
+    for (auto &it : data["initialCondition"].items())
+    {
+        if (it.value() == 1)
+        {
             state_initial_condition = it.key();
         }
     }
-    
-    cout << "state equation chose : " << state_equation_chosen << " \n" <<endl; 
+
+    cout << "state equation chose : " << state_equation_chosen << " \n"
+         << endl;
 
     int kappa = data["kappa"];
     double alpha = data["alpha"];
@@ -97,134 +100,182 @@ int main(int argc, char *argv[]){
     double gamma = data["gamma"];
     vector<double> u_init = data["u"];
 
-    /*---------------------------- INITIALIZATION OF VARIABLES USED -----------------------------------*/
+    /*---------------------------- INITIALIZATION OF VARIABLES USED ----------*/
 
     // Debug variable
     const bool PRINT = data["print_debug"];
 
     // Constants
-    double h = 1.2*s;
+    double h = 1.2 * s;
     double R = 8.314; // [J/(K.mol)]
     double g = -9.81; // [m/s²]
     double dt = 0.005;
 
-    // Number of cells (in each direction) 
-    int Nx, Ny, Nz ;    
-    Nx = (int) L_d[0]/(kappa*h);
-    Ny = (int) L_d[1]/(kappa*h);
-    Nz = (int) L_d[2]/(kappa*h);
+    // Number of cells (in each direction)
+    int Nx, Ny, Nz;
+    Nx = (int)L_d[0] / (kappa * h);
+    Ny = (int)L_d[1] / (kappa * h);
+    Nz = (int)L_d[2] / (kappa * h);
 
-    cout << " kappa * h =" << kappa*h << endl;
-    printf("(Nx, Ny, Nz) = (%d, %d, %d) \n", Nx,Ny,Nz);
+    cout << " kappa * h =" << kappa * h << endl;
+    printf("(Nx, Ny, Nz) = (%d, %d, %d) \n", Nx, Ny, Nz);
 
     // Nb of particles along each direction from target size "s"
     size_t nb_particles = evaluateNumberParticles(L, s);
 
     // Vector used (and labelled w.r.t particles location)
-    vector<double> pos_arr, type_arr;  
-    vector<vector<int>> cell_matrix(Nx*Ny*Nz);
- 
+    vector<double> pos_arr, type_arr;
+    vector<vector<int>> cell_matrix(Nx * Ny * Nz);
+
     // Variables defined to used "export.cpp"
     std::map<std::string, std::vector<double> *> scalars;
     std::map<std::string, std::vector<double> *> vectors;
 
+    /*---------------------------- SPH ALGORITHM  ----------------------------*/
 
-  /*---------------------------- SPH ALGORITHM  -----------------------------------*/
+    // deletePreviousOutputFiles(); // ACCESS DENIED ????
 
-    //deletePreviousOutputFiles(); // ACCESS DENIED ????
-  
     // Initialization of the problem (moving particles and fixed particles)
-    meshcube(o, L, s, pos_arr, type_arr); 
-    size_t nb_moving_part = pos_arr.size()/3;
-    s = s/10;
+    meshcube(o, L, s, pos_arr, type_arr);
+    size_t nb_moving_part = pos_arr.size() / 3;
+    s = s / 10;
     meshBoundary(o_d, L_d, s, pos_arr, type_arr);
 
-
-    for(size_t i = 0; i < 3; i++){
-        o_d[i] = o_d[i] + s*0.5;
-        L_d[i] = L_d[i] - s ;
-        //cout << " le centre et longueur de l'axe " << i << "est "<< o_d[i] << " et  " << L_d[i] << endl;
+    for (size_t i = 0; i < 3; i++)
+    {
+        o_d[i] = o_d[i] + s * 0.5;
+        L_d[i] = L_d[i] - s;
+        // cout << " le centre et longueur de l'axe " << i << "est "<< o_d[i] << " et  " << L_d[i] << endl;
     }
 
     meshBoundary(o_d, L_d, s, pos_arr, type_arr);
-    s = s*10;
+    s = s * 10;
     int nb_tot_part = pos_arr.size();
 
-    vector<double> mass_arr(nb_tot_part), u_arr(3*nb_tot_part), drhodt_arr(nb_tot_part), rho_arr(nb_tot_part), dudt_arr(3*nb_tot_part, 0.0), p_arr(nb_tot_part);
-    vector<vector<double>> artificial_visc_matrix(nb_tot_part), gradW_matrix(nb_tot_part); 
-    vector<vector<int>>  neighbours_matrix(nb_tot_part), neighbours_matrix_1(nb_tot_part);
+    vector<double> mass_arr(nb_tot_part),
+        u_arr(3 * nb_tot_part),
+        drhodt_arr(nb_tot_part),
+        rho_arr(nb_tot_part),
+        dudt_arr(3 * nb_tot_part, 0.0),
+        p_arr(nb_tot_part);
+    vector<vector<double>> artificial_visc_matrix(nb_tot_part),
+        gradW_matrix(nb_tot_part);
+    vector<vector<int>> neighbours_matrix(nb_tot_part),
+        neighbours_matrix_1(nb_tot_part);
 
     vectors["position"] = &pos_arr;
     scalars["type"] = &type_arr;
-    //vectors["velocity"] = &u_arr;
+    // vectors["velocity"] = &u_arr;
 
     cout << "len(u_arr) : " << pos_arr.size() << endl;
     cout << "len(pos_arr) : " << u_arr.size() << endl;
 
-    initializeRho(nb_moving_part, pos_arr, rho_arr, rho_init, rho_fixed, rho_0, c_0, M, g, R, T, gamma, state_equation_chosen, state_initial_condition);
-    if(PRINT){cout << "initializeRho passed" << endl;}
+    initializeRho(nb_moving_part, pos_arr, rho_arr,
+                  rho_init, rho_fixed, rho_0,
+                  c_0, M, g, R, T, gamma,
+                  state_equation_chosen,
+                  state_initial_condition);
+    if (PRINT)
+    {
+        cout << "initializeRho passed" << endl;
+    }
 
     initializeMass(rho_arr, s, mass_arr);
-    if(PRINT){cout << "initializeMass passed" << endl;}
-    
+    if (PRINT)
+    {
+        cout << "initializeMass passed" << endl;
+    }
+
     initializeVelocity(nb_moving_part, u_arr, u_init);
-    if(PRINT){cout << "initializeVelocity passed" << endl;}
-   
+    if (PRINT)
+    {
+        cout << "initializeVelocity passed" << endl;
+    }
+
     initializeViscosity(artificial_visc_matrix);
-    if(PRINT){cout << "initializeViscosity passed" << endl;}
+    if (PRINT)
+    {
+        cout << "initializeViscosity passed" << endl;
+    }
 
-    for (int t = 0; t < nstepT; t++){
+    for (int t = 0; t < nstepT; t++)
+    {
+        vector<double> drhodt_arr(nb_tot_part, 0.0), dudt_arr(3 * nb_tot_part, 0.0);
 
-        vector<double> drhodt_arr(nb_tot_part, 0.0), dudt_arr(3*nb_tot_part, 0.0);
+        // printArray(pos_arr, nb_moving_part, "pos_arr");
 
-        //printArray(pos_arr, nb_moving_part, "pos_arr");
+        findNeighbours(nb_moving_part, pos_arr, cell_matrix, neighbours_matrix,
+                       L_d, Nx, Ny, Nz, h, kappa); // Apply the linked-list algorithm
+        if (PRINT)
+        {
+            cout << "findNeighbours passed" << endl;
+        }
 
+        gradW(gradW_matrix, nb_moving_part, pos_arr,
+              neighbours_matrix, h, Nx, Ny, Nz); // Compute ∇_a(W_ab) for all particles
+        if (PRINT)
+        {
+            cout << "gradW passed" << endl;
+        }
 
-        findNeighbours(nb_moving_part, pos_arr, cell_matrix, neighbours_matrix, L_d, Nx, Ny, Nz, h, kappa); // Apply the linked-list algorithm
-        if(PRINT){cout << "findNeighbours passed" << endl;}
+        continuityEquation(nb_moving_part, pos_arr, u_arr, neighbours_matrix,
+                           gradW_matrix, drhodt_arr, rho_arr,
+                           mass_arr, h); // Compute D(rho)/Dt for all particles
+        if (PRINT)
+        {
+            cout << "continuityEquation passed" << endl;
+        }
 
-        gradW(gradW_matrix, nb_moving_part, pos_arr, neighbours_matrix, h, Nx, Ny, Nz); // Compute ∇_a(W_ab) for all particles
-        if(PRINT){cout << "gradW passed" << endl;}
+        setPressure(nb_moving_part, p_arr, rho_arr, rho_0, c_0, R, T, M,
+                    gamma, state_equation_chosen); // Compute pressure for all particles
+        if (PRINT)
+        {
+            cout << "setPressure passed" << endl;
+        }
 
-        continuityEquation(nb_moving_part, pos_arr, u_arr, neighbours_matrix, gradW_matrix, drhodt_arr, rho_arr, mass_arr, h); // Compute D(rho)/Dt for all particles
-        if(PRINT){cout << "continuityEquation passed" << endl;}
+        setArtificialViscosity(t, artificial_visc_matrix, nb_moving_part,
+                               pos_arr, neighbours_matrix, rho_arr, u_arr,
+                               alpha, beta, rho_0, c_0, gamma, R, T, M, h,
+                               state_equation_chosen); // Compute artificial viscosity Π_ab for all particles
+        if (PRINT)
+        {
+            cout << "setArtificialViscosity passed" << endl;
+        }
 
-        setPressure(nb_moving_part, p_arr, rho_arr, rho_0, c_0, R, T, M, gamma, state_equation_chosen); // Compute pressure for all particles
-        if(PRINT){cout << "setPressure passed" << endl;}
+        momentumEquation(nb_moving_part, neighbours_matrix, mass_arr,
+                         gradW_matrix, dudt_arr,
+                         artificial_visc_matrix, rho_arr,
+                         rho_0, c_0, p_arr, R, T, M,
+                         gamma, g, state_equation_chosen); // Compute D(u)/Dt for all particles
+        if (PRINT)
+        {
+            cout << "momentumEquation passed" << endl;
+        }
 
-        setArtificialViscosity(t, artificial_visc_matrix, nb_moving_part, pos_arr, neighbours_matrix, rho_arr, u_arr,
-                               alpha, beta, rho_0, c_0, gamma, R, T, M, h, state_equation_chosen); // Compute artificial viscosity Π_ab for all particles
-        if(PRINT){cout << "setArtificialViscosity passed" << endl;}
-
-        momentumEquation(nb_moving_part, neighbours_matrix, mass_arr, gradW_matrix, dudt_arr, artificial_visc_matrix, rho_arr, 
-                        rho_0, c_0, p_arr, R, T, M, gamma, g, state_equation_chosen); // Compute D(u)/Dt for all particles
-        if(PRINT){cout << "momentumEquation passed" << endl;}
-
-        //printArray(rho_arr, nb_moving_part, "rho_arr");
+        // printArray(rho_arr, nb_moving_part, "rho_arr");
         printArray(dudt_arr, nb_moving_part, "dudt_arr");
 
-
         // Update density, velocity and position for each particle (Euler explicit scheme)
-        for(size_t pos = 0; pos < nb_particles; pos++ ){
+        for (size_t pos = 0; pos < nb_particles; pos++)
+        {
 
-            rho_arr[pos] = rho_arr[pos] + dt*drhodt_arr[pos];
+            rho_arr[pos] = rho_arr[pos] + dt * drhodt_arr[pos];
 
-            for (size_t cord = 0; cord < 3; cord++){
+            for (size_t cord = 0; cord < 3; cord++)
+            {
 
-                pos_arr[3*pos+cord] += dt*u_arr[3*pos+cord];
-                u_arr[3*pos+cord] += dt*dudt_arr[3*pos+cord];
+                pos_arr[3 * pos + cord] += dt * u_arr[3 * pos + cord];
+                u_arr[3 * pos + cord] += dt * dudt_arr[3 * pos + cord];
             }
         }
 
+        clearAllVectors(artificial_visc_matrix, neighbours_matrix,
+                        cell_matrix, gradW_matrix);
+        if (PRINT)
+        {
+            cout << "clearAllVectors passed" << endl;
+        }
 
-
-        clearAllVectors(artificial_visc_matrix, neighbours_matrix, 
-                     cell_matrix, gradW_matrix);
-        if(PRINT){cout << "clearAllVectors passed" << endl;}
-        
         export_particles("sph", t, pos_arr, scalars, vectors);
-
     }
 }
-
-
