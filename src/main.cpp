@@ -66,7 +66,8 @@ int main(int argc, char *argv[])
     std::vector<double> o_d = data["o_d"];
     std::vector<double> L_d = data["L_d"];
 
-    std::string state_equation_chosen, state_initial_condition;
+    std::string state_equation_chosen; /// p expl "Ideal gaz law"
+    std::string state_initial_condition;
 
     for (auto &it : data["stateEquation"].items())
     {
@@ -84,7 +85,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    cout << "state equation chose : " << state_equation_chosen << " \n"
+    cout << "state equation chosen : " << state_equation_chosen << " \n"
          << endl;
 
     int kappa = data["kappa"];
@@ -98,7 +99,9 @@ int main(int argc, char *argv[])
     double M = data["M"];
     double T = data["T"];
     double gamma = data["gamma"];
-    vector<double> u_init = data["u"];
+    double dt = data["dt"]; // RB
+    int nsave = data["nsave"]; // RB
+    vector<double> u_init = data["u"];         // RB: inutile
 
     /*---------------------------- INITIALIZATION OF VARIABLES USED ----------*/
 
@@ -106,10 +109,10 @@ int main(int argc, char *argv[])
     const bool PRINT = data["print_debug"];
 
     // Constants
-    double h = 1.2 * s;
+    double h = 1.2 * s;                    
     double R = 8.314; // [J/(K.mol)]
     double g = -9.81; // [m/s²]
-    double dt = 0.005;
+    //double dt = 0.005;
 
     // Number of cells (in each direction)
     int Nx, Ny, Nz;
@@ -138,9 +141,10 @@ int main(int argc, char *argv[])
     // Initialization of the problem (moving particles and fixed particles)
     meshcube(o, L, s, pos_arr, type_arr);
     size_t nb_moving_part = pos_arr.size() / 3;
-    s = s / 10;
+    s = s / 1; // RB: quelle horreur, mais pourquoi ne pas passer s/xx en argument????
     meshBoundary(o_d, L_d, s, pos_arr, type_arr);
 
+    // RB: qu'est ce qu'on fait ici????
     for (size_t i = 0; i < 3; i++)
     {
         o_d[i] = o_d[i] + s * 0.5;
@@ -149,8 +153,14 @@ int main(int argc, char *argv[])
     }
 
     meshBoundary(o_d, L_d, s, pos_arr, type_arr);
-    s = s * 10;
-    int nb_tot_part = pos_arr.size();
+    s = s * 1; 
+    int nb_tot_part = pos_arr.size()/3;
+
+    std::cout << "nb_moving_part = " << nb_moving_part << std::endl;
+    std::cout << "nb_tot_part = " << nb_tot_part << std::endl;
+    std::cout << "s=" << s << std::endl;
+    std::cout << "kappa=" << kappa << std::endl;
+    std::cout << "h=" << h << std::endl;
 
     vector<double> mass_arr(nb_tot_part),
         u_arr(3 * nb_tot_part),
@@ -160,11 +170,23 @@ int main(int argc, char *argv[])
         p_arr(nb_tot_part);
     vector<vector<double>> artificial_visc_matrix(nb_tot_part),
         gradW_matrix(nb_tot_part);
-    vector<vector<int>> neighbours_matrix(nb_tot_part),
-        neighbours_matrix_1(nb_tot_part);
+    vector<vector<int>> neighbours_matrix(nb_tot_part);
+
+    // RB
+    std::vector<double> nvoisins(nb_tot_part, 0.0);
+
+
+    scalars["type"] = &type_arr;
+    scalars["mass_arr"] = &mass_arr;
+    scalars["rho_arr"] = &rho_arr;
+    scalars["p_arr"] = &p_arr;
+    scalars["drhodt_arr"] = &drhodt_arr;
+    scalars["nvoisins"] = &nvoisins;
 
     vectors["position"] = &pos_arr;
-    scalars["type"] = &type_arr;
+    vectors["u_arr"] = &u_arr;
+    vectors["dudt_arr"] = &dudt_arr;
+
     // vectors["velocity"] = &u_arr;
 
     cout << "len(u_arr) : " << pos_arr.size() << endl;
@@ -198,14 +220,23 @@ int main(int argc, char *argv[])
         cout << "initializeViscosity passed" << endl;
     }
 
+
     for (int t = 0; t < nstepT; t++)
     {
+        // compute dt_max = min_a h_a/F
+
+        // double dt_max = sqrt(kappa * h / abs(g)); // CFL condition
+        // std::cout << "dt_max = " << dt_max << "    dt = " << dt << std::endl;
+
         vector<double> drhodt_arr(nb_tot_part, 0.0), dudt_arr(3 * nb_tot_part, 0.0);
 
         // printArray(pos_arr, nb_moving_part, "pos_arr");
 
-        findNeighbours(nb_moving_part, pos_arr, cell_matrix, neighbours_matrix,
-                       L_d, Nx, Ny, Nz, h, kappa); // Apply the linked-list algorithm
+        //findNeighbours(nb_moving_part, pos_arr, cell_matrix, neighbours_matrix,
+        //               L_d, Nx, Ny, Nz, h, kappa); // Apply the linked-list algorithm
+
+        naiveAlgo(nb_tot_part, pos_arr, neighbours_matrix, h, kappa);
+
         if (PRINT)
         {
             cout << "findNeighbours passed" << endl;
@@ -253,7 +284,7 @@ int main(int argc, char *argv[])
         }
 
         // printArray(rho_arr, nb_moving_part, "rho_arr");
-        printArray(dudt_arr, nb_moving_part, "dudt_arr");
+        // printArray(dudt_arr, nb_moving_part, "dudt_arr");
 
         // Update density, velocity and position for each particle (Euler explicit scheme)
         for (size_t pos = 0; pos < nb_particles; pos++)
@@ -269,6 +300,11 @@ int main(int argc, char *argv[])
             }
         }
 
+        // RB: count number of neighbours
+        for(int i=0; i<nb_tot_part; i++){
+            nvoisins[i] = neighbours_matrix[i].size();
+        }
+
         clearAllVectors(artificial_visc_matrix, neighbours_matrix,
                         cell_matrix, gradW_matrix);
         if (PRINT)
@@ -276,6 +312,11 @@ int main(int argc, char *argv[])
             cout << "clearAllVectors passed" << endl;
         }
 
-        export_particles("sph", t, pos_arr, scalars, vectors);
+
+        if(t % nsave == 0)
+            export_particles("sph", t, pos_arr, scalars, vectors);
     }
+
+    std::cout << "\nSimulation done." << std::endl;
+    return 0;
 }

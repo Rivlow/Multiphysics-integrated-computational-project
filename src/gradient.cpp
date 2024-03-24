@@ -125,7 +125,7 @@ void setArtificialViscosity(int &t, vector<vector<double>> &artificial_visc,
             }
         }
     }
-
+/*
     else
     {
 
@@ -184,6 +184,7 @@ void setArtificialViscosity(int &t, vector<vector<double>> &artificial_visc,
             }
         }
     }
+    */
 }
 
 void continuityEquation(size_t nb_moving_part,
