@@ -10,6 +10,7 @@
 #include <filesystem>
 
 using namespace std;
+namespace fs = std::filesystem;
 
 void deletePreviousOutputFiles()
 {
@@ -91,6 +92,44 @@ void printArray(vector<T> &array, size_t size, string name)
 template void printArray<int>(vector<int> &, size_t, string);
 template void printArray<float>(vector<float> &, size_t, string);
 template void printArray<double>(vector<double> &, size_t, string);
+
+void createOutputFolder() {
+
+    std::string outputPath = "../../output";
+
+    if (fs::exists(outputPath)) {
+        std::cout << "Folder 'output' already exists.\n";
+        return; 
+    }
+
+    try {
+        fs::create_directories(outputPath);
+        std::cout << "Folder 'output' has been successfully created.\n";
+    } catch (const std::exception& e) {
+        std::cerr << "Error while creating folder 'output': " << e.what() << '\n';
+    }
+}
+
+
+void clearOutputFiles(){
+
+    std::string outputPath = "../../output";
+
+    try {
+
+        for (const auto& entry : fs::directory_iterator(outputPath)){
+            if (entry.is_regular_file() && entry.path().extension() == ".vtp") {
+                // Supprimer les fichiers avec l'extension .vtp
+                fs::remove(entry.path());
+            }
+        }
+            std::cout << "All '.vtp' files have been successfully removed.\n";
+    } catch (const std::exception& e) {
+        std::cerr << "Error while removing '.vtp' files : " << e.what() << '\n';
+    }
+
+}
+
 
 void clearAllVectors(vector<vector<double>> &artificial_visc_matrix,
                      vector<vector<int>> &neighbours_matrix,

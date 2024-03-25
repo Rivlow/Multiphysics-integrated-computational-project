@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <cassert>
+#include <cstdlib>
 
 #include "generate_particle.h"
 #include "sorted_list.h"
@@ -26,7 +27,7 @@ using namespace std;
 int main(int argc, char *argv[])
 {
 
-    /*------------- SETTING COMPILATION PARAMETERS ---------------------------*/
+    /*------------- SETTING COMPILATION PARAMETERS/Folders needed ---------------------------*/
 
 #ifdef _OPENMP
     std::cout << "OpenMP available: OMP_NUM_THREADS=" << omp_get_max_threads() << "\n";
@@ -47,6 +48,7 @@ int main(int argc, char *argv[])
         std::cout << "\nusage: " << argv[0] << " <param.json>\n\n";
         return EXIT_FAILURE;
     }
+
 
     /*---------------------------- INPUT PARAMETERS FROM JSON FILES ----------*/
 
@@ -81,6 +83,9 @@ int main(int argc, char *argv[])
             state_initial_condition = it.key();
         }
     }
+
+    createOutputFolder();
+    clearOutputFiles();
 
     cout << "state equation chosen : " << state_equation_chosen << " \n"
          << endl;
