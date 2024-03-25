@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
     size_t nb_particles = evaluateNumberParticles(L, s);
 
     // Vector used (and labelled w.r.t particles location)
-    vector<double> pos_arr, type_arr;
+    vector<double> pos_array, type_arr;
     vector<vector<int>> cell_matrix(Nx * Ny * Nz);
 
     // Variables defined to used "export.cpp"
@@ -138,25 +138,14 @@ int main(int argc, char *argv[])
 
     /*---------------------------- SPH ALGORITHM  ----------------------------*/
 
-    // deletePreviousOutputFiles(); // ACCESS DENIED ????
-
     // Initialization of the problem (moving particles and fixed particles)
-    meshcube(o, L, s, pos_arr, type_arr);
-    size_t nb_moving_part = pos_arr.size() / 3;
+    meshcube(o, L, s, pos_array, type_arr);
+    size_t nb_moving_part = pos_array.size() / 3;
     s = s / 1; // RB: quelle horreur, mais pourquoi ne pas passer s/xx en argument????
-    meshBoundary(o_d, L_d, s, pos_arr, type_arr);
-
-    // RB: qu'est ce qu'on fait ici????
-    for (size_t i = 0; i < 3; i++)
-    {
-        o_d[i] = o_d[i] + s * 0.5;
-        L_d[i] = L_d[i] - s;
-        // cout << " le centre et longueur de l'axe " << i << "est "<< o_d[i] << " et  " << L_d[i] << endl;
-    }
-
-    meshBoundary(o_d, L_d, s, pos_arr, type_arr);
+    meshBoundary(o_d, L_d, s, pos_array, type_arr);
     s = s * 1; 
-    int nb_tot_part = pos_arr.size()/3;
+
+    int nb_tot_part = pos_array.size()/3;
 
     std::cout << "nb_moving_part = " << nb_moving_part << std::endl;
     std::cout << "nb_tot_part = " << nb_tot_part << std::endl;
@@ -164,12 +153,12 @@ int main(int argc, char *argv[])
     std::cout << "kappa=" << kappa << std::endl;
     std::cout << "h=" << h << std::endl;
 
-    vector<double> mass_arr(nb_tot_part),
+    vector<double> mass_array(nb_tot_part),
         u_arr(3 * nb_tot_part),
         drhodt_arr(nb_tot_part),
         rho_arr(nb_tot_part),
         dudt_arr(3 * nb_tot_part, 0.0),
-        p_arr(nb_tot_part);
+        p_array(nb_tot_part);
     vector<vector<double>> artificial_visc_matrix(nb_tot_part),
         gradW_matrix(nb_tot_part);
     vector<vector<int>> neighbours_matrix(nb_tot_part);
@@ -179,22 +168,22 @@ int main(int argc, char *argv[])
 
 
     scalars["type"] = &type_arr;
-    scalars["mass_arr"] = &mass_arr;
+    scalars["mass_array"] = &mass_array;
     scalars["rho_arr"] = &rho_arr;
-    scalars["p_arr"] = &p_arr;
+    scalars["p_array"] = &p_array;
     scalars["drhodt_arr"] = &drhodt_arr;
     scalars["nvoisins"] = &nvoisins;
 
-    vectors["position"] = &pos_arr;
+    vectors["position"] = &pos_array;
     vectors["u_arr"] = &u_arr;
     vectors["dudt_arr"] = &dudt_arr;
 
     // vectors["velocity"] = &u_arr;
 
-    cout << "len(u_arr) : " << pos_arr.size() << endl;
-    cout << "len(pos_arr) : " << u_arr.size() << endl;
+    cout << "len(u_arr) : " << pos_array.size() << endl;
+    cout << "len(pos_array) : " << u_arr.size() << endl;
 
-    initializeRho(nb_moving_part, pos_arr, rho_arr,
+    initializeRho(nb_moving_part, pos_array, rho_arr,
                   rho_init, rho_fixed, rho_0,
                   c_0, M, g, R, T, gamma,
                   state_equation_chosen,
@@ -204,7 +193,7 @@ int main(int argc, char *argv[])
         cout << "initializeRho passed" << endl;
     }
 
-    initializeMass(rho_arr, s, mass_arr);
+    initializeMass(rho_arr, s, mass_array);
     if (PRINT)
     {
         cout << "initializeMass passed" << endl;
@@ -232,12 +221,12 @@ int main(int argc, char *argv[])
 
         vector<double> drhodt_arr(nb_tot_part, 0.0), dudt_arr(3 * nb_tot_part, 0.0);
 
-        // printArray(pos_arr, nb_moving_part, "pos_arr");
+        // printArray(pos_array, nb_moving_part, "pos_array");
 
-        //findNeighbours(nb_moving_part, pos_arr, cell_matrix, neighbours_matrix,
+        //findNeighbours(nb_moving_part, pos_array, cell_matrix, neighbours_matrix,
         //               L_d, Nx, Ny, Nz, h, kappa); // Apply the linked-list algorithm
 
-        naiveAlgo(nb_tot_part, pos_arr, neighbours_matrix, h, kappa);
+        naiveAlgo(nb_tot_part, pos_array, neighbours_matrix, h, kappa);
 
         if (PRINT)
         {
@@ -247,7 +236,7 @@ int main(int argc, char *argv[])
         // Compute ∇_a(W_ab) for all particles
         gradW(nb_moving_part, 
               gradW_matrix, 
-              pos_arr,
+              pos_array,
               neighbours_matrix, 
               h, Nx, Ny, Nz); 
 
@@ -257,16 +246,16 @@ int main(int argc, char *argv[])
         }
 
         // Compute D(rho)/Dt for all particles
-        continuityEquation(nb_moving_part, pos_arr, u_arr, neighbours_matrix,
+        continuityEquation(nb_moving_part, pos_array, u_arr, neighbours_matrix,
                            gradW_matrix, drhodt_arr, rho_arr,
-                           mass_arr, h); 
+                           mass_array, h); 
         if (PRINT)
         {
             cout << "continuityEquation passed" << endl;
         }
 
         // Compute pressure for all particles
-        setPressure(nb_moving_part, p_arr, rho_arr, rho_0, c_0, R, T, M,
+        setPressure(nb_moving_part, p_array, rho_arr, rho_0, c_0, R, T, M,
                     gamma, state_equation_chosen); 
         if (PRINT)
         {
@@ -275,7 +264,7 @@ int main(int argc, char *argv[])
 
         // Compute artificial viscosity Π_ab for all particles
         setArtificialViscosity(t, artificial_visc_matrix, nb_moving_part,
-                               pos_arr, neighbours_matrix, rho_arr, u_arr,
+                               pos_array, neighbours_matrix, rho_arr, u_arr,
                                alpha, beta, rho_0, c_0, gamma, R, T, M, h,
                                state_equation_chosen); 
         if (PRINT)
@@ -287,12 +276,12 @@ int main(int argc, char *argv[])
         // Compute D(u)/Dt for all particles
         momentumEquation(nb_moving_part, 
                          neighbours_matrix,
-                         mass_arr,
+                         mass_array,
                          gradW_matrix, 
                          dudt_arr,
                          artificial_visc_matrix, 
                          rho_arr,
-                         p_arr,
+                         p_array,
                          rho_0, c_0, 
                          gamma,
                          R, T, M,
@@ -316,7 +305,7 @@ int main(int argc, char *argv[])
             for (size_t cord = 0; cord < 3; cord++)
             {
 
-                pos_arr[3 * pos + cord] += dt * u_arr[3 * pos + cord];
+                pos_array[3 * pos + cord] += dt * u_arr[3 * pos + cord];
                 u_arr[3 * pos + cord] += dt * dudt_arr[3 * pos + cord];
             }
         }
@@ -335,7 +324,7 @@ int main(int argc, char *argv[])
 
 
         if(t % nsave == 0)
-            export_particles("sph", t, pos_arr, scalars, vectors);
+            export_particles("sph", t, pos_array, scalars, vectors);
     }
 
     std::cout << "\nSimulation done." << std::endl;

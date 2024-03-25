@@ -107,6 +107,34 @@ void meshBoundary(vector<double> &o_d, vector<double> &L_d, double &s,
         }
     }
 
+    for (size_t i = 0; i < 3; i++)
+    {
+        o_d[i] = o_d[i] + s * 0.5;
+        L_d[i] = L_d[i] - s;
+        // cout << " le centre et longueur de l'axe " << i << "est "<< o_d[i] << " et  " << L_d[i] << endl;
+    }
+
+    for (int i = ni / 4; i < 3 * ni / 4; ++i) // along x
+    {
+        double x = o_d[0] + i * dx;
+        for (int j = nj / 4; j < 3 * nj / 4; ++j) // along y
+        {
+            double y = o_d[1] + j * dy;
+            bound_arr.push_back(x);
+            bound_arr.push_back(y);
+            bound_arr.push_back(o_d[2] + 1);
+            type_arr.push_back(0.0);
+            // bound_arr.push_back(x);
+            // bound_arr.push_back(y);
+            // bound_arr.push_back(L_d[2] + o_d[2]);
+            // type_arr.push_back(0.0);
+        }
+    }
+
+
+
+
+
     /*
     for (int j = 0; j < nj; ++j) // along y
     {
