@@ -1,6 +1,8 @@
 {
-    "s": 0.1,
-    "nstepT": 200,
+    "s": 0.25,
+    "nstepT": 10000,
+    "dt": 0.00005,
+    "nsave": 100,
 
     "o": [2, 2, 2],
     "L": [1, 1, 1],
@@ -14,11 +16,12 @@
     "T": 298.15,
     "u": [0.0, 0.0, 0.0],
     "c_0": 30, 
-    "gamma": 7, 
-    "alpha": 0.5,
+    "gamma": 1, 
+    "alpha": 0.25,
     "beta": 0,
-    "M": 18, 
+    "M": 18e-3, 
 
+    "print_debug":false,
     "stateEquation" : {"Ideal gaz law":1, "Quasi incompresible fluid":0},
     "initialCondition" : {"Hydrostatic":0, "Constant":1}
 }

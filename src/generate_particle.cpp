@@ -12,24 +12,26 @@ using namespace std;
  * @param pos_arr pos_arritions of particles
  */
 
-int evaluateNumberParticles(vector<double> &L, double &s){
+int evaluateNumberParticles(vector<double> &L, double &s)
+{
 
     int ni = int(ceil(L[0] / s));
-    double dx = L[0] / ni;
+    // double dx = L[0] / ni;
     ++ni;
     int nj = int(ceil(L[1] / s));
-    double dy = L[1] / nj;
+    // double dy = L[1] / nj;
     ++nj;
     int nk = int(ceil(L[2] / s));
-    double dz = L[2] / nk;
+    // double dz = L[2] / nk;
     ++nk;
 
     std::cout << "\t=> " << ni << "*" << nj << "*" << nk << " = " << ni * nj * nk << " particles to be generated\n";
 
-    return ni*nj*nk;
+    return ni * nj * nk;
 }
 
-void meshcube(vector<double> &o, vector<double> &L, double &s, vector<double> &pos_arr, vector<double> &type_arr)
+void meshcube(vector<double> &o, vector<double> &L, double &s,
+              vector<double> &pos_arr, vector<double> &type_arr)
 {
     // calculate nb of particles along each direction from target size "s"
     int ni = int(ceil(L[0] / s));
@@ -46,7 +48,7 @@ void meshcube(vector<double> &o, vector<double> &L, double &s, vector<double> &p
     std::cout << "meshing cube at o=(" << o[0] << "," << o[1] << "," << o[2] << ") ";
     std::cout << "of size L=(" << L[0] << "," << L[1] << "," << L[2] << ")\n";
     std::cout << "\tparticle spacing s=(" << dx << "," << dy << "," << dz << ") [target was s=" << s << "]\n";
-    //std::cout << "\t=> " << ni << "*" << nj << "*" << nk << " = " << ni * nj * nk << " particles to be generated\n";
+    // std::cout << "\t=> " << ni << "*" << nj << "*" << nk << " = " << ni * nj * nk << " particles to be generated\n";
 
     // memory allocation
     pos_arr.reserve(pos_arr.size() + ni * nj * nk * 3);
@@ -64,16 +66,17 @@ void meshcube(vector<double> &o, vector<double> &L, double &s, vector<double> &p
                 pos_arr.push_back(x);
                 pos_arr.push_back(y);
                 pos_arr.push_back(z);
-                
+
                 type_arr.push_back(1.0);
             }
         }
     }
 }
 
+void meshBoundary(vector<double> &o_d, vector<double> &L_d, double &s,
+                  vector<double> &bound_arr, vector<double> &type_arr)
+{
 
-void meshBoundary(vector<double> &o_d, vector<double> &L_d, double &s, vector<double> &bound_arr, vector<double> &type_arr){
-    
     int ni = int(ceil(L_d[0] / s));
     double dx = L_d[0] / ni;
     ++ni;
@@ -83,25 +86,24 @@ void meshBoundary(vector<double> &o_d, vector<double> &L_d, double &s, vector<do
     int nk = int(ceil(L_d[2] / s));
     double dz = L_d[2] / nk;
     ++nk;
-    cout << "ni, nj, nk = " << ni <<   nj << nk << endl;
+    cout << "ni, nj, nk = " << ni << nj << nk << endl;
 
-    bound_arr.reserve(bound_arr.size() + 6*(ni*nj + (nk-2)*nj + (ni-2)*(nk-2)));
+    bound_arr.reserve(bound_arr.size() + 6 * (ni * nj + (nk - 2) * nj + (ni - 2) * (nk - 2)));
 
-    for (int i = ni/4; i < 3*ni/4; ++i) // along x
+    for (int i = ni / 4; i < 3 * ni / 4; ++i) // along x
     {
         double x = o_d[0] + i * dx;
-        for (int j = nj/4; j < 3*nj/4; ++j) // along y 
+        for (int j = nj / 4; j < 3 * nj / 4; ++j) // along y
         {
-         double y = o_d[1] + j * dy;  
-        bound_arr.push_back(x);
-        bound_arr.push_back(y);
-        bound_arr.push_back(o_d[2]+1);
-        type_arr.push_back(0.0);
-        //bound_arr.push_back(x);
-        //bound_arr.push_back(y);
-        //bound_arr.push_back(L_d[2] + o_d[2]);
-        //type_arr.push_back(0.0);
-        
+            double y = o_d[1] + j * dy;
+            bound_arr.push_back(x);
+            bound_arr.push_back(y);
+            bound_arr.push_back(o_d[2] + 1);
+            type_arr.push_back(0.0);
+            // bound_arr.push_back(x);
+            // bound_arr.push_back(y);
+            // bound_arr.push_back(L_d[2] + o_d[2]);
+            // type_arr.push_back(0.0);
         }
     }
 
@@ -111,7 +113,7 @@ void meshBoundary(vector<double> &o_d, vector<double> &L_d, double &s, vector<do
         double y = o_d[1] + j * dy;
         for (int k = 1; k < nk-1; ++k) // along z
         {
-         double z = o_d[2] + k * dz;  
+         double z = o_d[2] + k * dz;
         bound_arr.push_back(o_d[0]);
         bound_arr.push_back(y);
         bound_arr.push_back(z);
@@ -120,7 +122,7 @@ void meshBoundary(vector<double> &o_d, vector<double> &L_d, double &s, vector<do
         bound_arr.push_back(y);
         bound_arr.push_back(z);
         type_arr.push_back(0.0);
-        
+
         }
     }
     for (int i = 1; i < ni-1; ++i) // along x
@@ -128,7 +130,7 @@ void meshBoundary(vector<double> &o_d, vector<double> &L_d, double &s, vector<do
         double x = o_d[0] + i * dx;
         for (int k = 1; k < nk-1; ++k) // along z
         {
-         double z = o_d[2] + k * dz;  
+         double z = o_d[2] + k * dz;
         bound_arr.push_back(x);
         bound_arr.push_back(o_d[1]);
         bound_arr.push_back(z);
@@ -137,7 +139,7 @@ void meshBoundary(vector<double> &o_d, vector<double> &L_d, double &s, vector<do
         bound_arr.push_back(L_d[1]+ o_d[1]);
         bound_arr.push_back(z);
         type_arr.push_back(0.0);
-        
+
         }
     }
     cout <<" longueur de bound_arr :"<< bound_arr.size()/3 << endl;
