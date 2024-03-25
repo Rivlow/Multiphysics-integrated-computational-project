@@ -224,7 +224,7 @@ void continuityEquation(size_t nb_moving_part,
             {
 
                 double u_a = u_arr[3 * pos + x], u_b = u_arr[3 * neighbours_list[idx_neighbour] + x];
-                dot_product += (u_a - u_b) * gradW_list[idx_neighbour + x];
+                dot_product += (u_a - u_b) * gradW_list[3*idx_neighbour + x];
             }
 
             drhodt += m_b * dot_product;
@@ -271,7 +271,7 @@ void momentumEquation(size_t nb_moving_part,
                 double m_b = mass_arr[neighbours_arr[idx_neighbour]];
                 double p_b = p_arr[neighbours_arr[idx_neighbour]];
 
-                dudt_arr[3 * pos + cord] += m_b * (p_b / (rho_b * rho_b) + p_a / (rho_a * rho_a) + pi_ab) * gradW_arr[idx_neighbour + cord];
+                dudt_arr[3 * pos + cord] += m_b * (p_b / (rho_b * rho_b) + p_a / (rho_a * rho_a) + pi_ab) * gradW_arr[3*idx_neighbour + cord];
                 // cout << "p_a" << p_a << endl;
                 // cout << "p_b" << p_b << endl;
                 // cout << "rho_b" << rho_b << endl;
