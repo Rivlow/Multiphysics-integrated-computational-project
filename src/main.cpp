@@ -22,9 +22,6 @@
 using json = nlohmann::json;
 using namespace std;
 
-/**
- * @brief Dummy SPH simulation testing paraview export formats
- */
 
 int main(int argc, char *argv[])
 {
@@ -242,42 +239,61 @@ int main(int argc, char *argv[])
             cout << "findNeighbours passed" << endl;
         }
 
-        gradW(gradW_matrix, nb_moving_part, pos_arr,
-              neighbours_matrix, h, Nx, Ny, Nz); // Compute ∇_a(W_ab) for all particles
+        // Compute ∇_a(W_ab) for all particles
+        gradW(nb_moving_part, 
+              gradW_matrix, 
+              pos_arr,
+              neighbours_matrix, 
+              h, Nx, Ny, Nz); 
+
         if (PRINT)
         {
             cout << "gradW passed" << endl;
         }
 
+        // Compute D(rho)/Dt for all particles
         continuityEquation(nb_moving_part, pos_arr, u_arr, neighbours_matrix,
                            gradW_matrix, drhodt_arr, rho_arr,
-                           mass_arr, h); // Compute D(rho)/Dt for all particles
+                           mass_arr, h); 
         if (PRINT)
         {
             cout << "continuityEquation passed" << endl;
         }
 
+        // Compute pressure for all particles
         setPressure(nb_moving_part, p_arr, rho_arr, rho_0, c_0, R, T, M,
-                    gamma, state_equation_chosen); // Compute pressure for all particles
+                    gamma, state_equation_chosen); 
         if (PRINT)
         {
             cout << "setPressure passed" << endl;
         }
 
+        // Compute artificial viscosity Π_ab for all particles
         setArtificialViscosity(t, artificial_visc_matrix, nb_moving_part,
                                pos_arr, neighbours_matrix, rho_arr, u_arr,
                                alpha, beta, rho_0, c_0, gamma, R, T, M, h,
-                               state_equation_chosen); // Compute artificial viscosity Π_ab for all particles
+                               state_equation_chosen); 
         if (PRINT)
         {
             cout << "setArtificialViscosity passed" << endl;
         }
+        
 
-        momentumEquation(nb_moving_part, neighbours_matrix, mass_arr,
-                         gradW_matrix, dudt_arr,
-                         artificial_visc_matrix, rho_arr,
-                         rho_0, c_0, p_arr, R, T, M,
-                         gamma, g, state_equation_chosen); // Compute D(u)/Dt for all particles
+        // Compute D(u)/Dt for all particles
+        momentumEquation(nb_moving_part, 
+                         neighbours_matrix,
+                         mass_arr,
+                         gradW_matrix, 
+                         dudt_arr,
+                         artificial_visc_matrix, 
+                         rho_arr,
+                         p_arr,
+                         rho_0, c_0, 
+                         gamma,
+                         R, T, M,
+                         g, 
+                         state_equation_chosen); 
+
         if (PRINT)
         {
             cout << "momentumEquation passed" << endl;
