@@ -139,11 +139,9 @@ int main(int argc, char *argv[])
     /*---------------------------- SPH ALGORITHM  ----------------------------*/
 
     // Initialization of the problem (moving particles and fixed particles)
-    meshcube(o, L, s, pos_array, type_arr);
+    meshcube(o, L, pos_array, type_arr, s);
     size_t nb_moving_part = pos_array.size() / 3;
-    s = s / 1; // RB: quelle horreur, mais pourquoi ne pas passer s/xx en argument????
-    meshBoundary(o_d, L_d, s, pos_array, type_arr);
-    s = s * 1; 
+    meshBoundary(o_d, L_d, pos_array, type_arr, s);
 
     int nb_tot_part = pos_array.size()/3;
 
@@ -154,52 +152,48 @@ int main(int argc, char *argv[])
     std::cout << "h=" << h << std::endl;
 
     vector<double> mass_array(nb_tot_part),
-        u_arr(3 * nb_tot_part),
-        drhodt_arr(nb_tot_part),
-        rho_arr(nb_tot_part),
-        dudt_arr(3 * nb_tot_part, 0.0),
-        p_array(nb_tot_part);
+                   u_array(3 * nb_tot_part),
+                   drhodt_array(nb_tot_part),
+                   rho_array(nb_tot_part),
+                   dudt_array(3 * nb_tot_part, 0.0),
+                   p_array(nb_tot_part);
     vector<vector<double>> artificial_visc_matrix(nb_tot_part),
-        gradW_matrix(nb_tot_part);
+                           gradW_matrix(nb_tot_part);
     vector<vector<int>> neighbours_matrix(nb_tot_part);
-
-    // RB
-    std::vector<double> nvoisins(nb_tot_part, 0.0);
+    std::vector<double> nvoisins(nb_tot_part, 0.0); //RB
 
 
     scalars["type"] = &type_arr;
     scalars["mass_array"] = &mass_array;
-    scalars["rho_arr"] = &rho_arr;
+    scalars["rho_array"] = &rho_array;
     scalars["p_array"] = &p_array;
-    scalars["drhodt_arr"] = &drhodt_arr;
+    scalars["drhodt_array"] = &drhodt_array;
     scalars["nvoisins"] = &nvoisins;
-
     vectors["position"] = &pos_array;
-    vectors["u_arr"] = &u_arr;
-    vectors["dudt_arr"] = &dudt_arr;
+    vectors["u_array"] = &u_array;
+    vectors["dudt_array"] = &dudt_array;
 
-    // vectors["velocity"] = &u_arr;
+    cout << "len(u_array) : " << pos_array.size() << endl;
+    cout << "len(pos_array) : " << u_array.size() << endl;
 
-    cout << "len(u_arr) : " << pos_array.size() << endl;
-    cout << "len(pos_array) : " << u_arr.size() << endl;
-
-    initializeRho(nb_moving_part, pos_array, rho_arr,
+    initializeRho(pos_array, rho_array,
+                  nb_moving_part,
                   rho_init, rho_fixed, rho_0,
                   c_0, M, g, R, T, gamma,
-                  state_equation_chosen,
-                  state_initial_condition);
+                  state_equation_chosen, state_initial_condition);
+
     if (PRINT)
     {
         cout << "initializeRho passed" << endl;
     }
 
-    initializeMass(rho_arr, s, mass_array);
+    initializeMass(rho_array, mass_array, s);
     if (PRINT)
     {
         cout << "initializeMass passed" << endl;
     }
 
-    initializeVelocity(nb_moving_part, u_arr, u_init);
+    initializeVelocity(u_array, u_init, nb_moving_part);
     if (PRINT)
     {
         cout << "initializeVelocity passed" << endl;
@@ -219,14 +213,15 @@ int main(int argc, char *argv[])
         // double dt_max = sqrt(kappa * h / abs(g)); // CFL condition
         // std::cout << "dt_max = " << dt_max << "    dt = " << dt << std::endl;
 
-        vector<double> drhodt_arr(nb_tot_part, 0.0), dudt_arr(3 * nb_tot_part, 0.0);
+        vector<double> drhodt_array(nb_tot_part, 0.0), dudt_array(3 * nb_tot_part, 0.0);
 
         // printArray(pos_array, nb_moving_part, "pos_array");
 
-        //findNeighbours(nb_moving_part, pos_array, cell_matrix, neighbours_matrix,
-        //               L_d, Nx, Ny, Nz, h, kappa); // Apply the linked-list algorithm
+        findNeighbours(cell_matrix, neighbours_matrix, pos_array, L_d,
+                       nb_moving_part, Nx, Ny, Nz, h, kappa); // Apply the linked-list algorithm
 
-        naiveAlgo(nb_tot_part, pos_array, neighbours_matrix, h, kappa);
+
+        //naiveAlgo(neighbours_matrix, pos_array, nb_moving_part, h, kappa);
 
         if (PRINT)
         {
@@ -234,10 +229,10 @@ int main(int argc, char *argv[])
         }
 
         // Compute ∇_a(W_ab) for all particles
-        gradW(nb_moving_part, 
-              gradW_matrix, 
-              pos_array,
+        gradW(gradW_matrix, 
               neighbours_matrix, 
+              pos_array,
+              nb_moving_part, 
               h, Nx, Ny, Nz); 
 
         if (PRINT)
@@ -246,16 +241,16 @@ int main(int argc, char *argv[])
         }
 
         // Compute D(rho)/Dt for all particles
-        continuityEquation(nb_moving_part, pos_array, u_arr, neighbours_matrix,
-                           gradW_matrix, drhodt_arr, rho_arr,
-                           mass_array, h); 
+        continuityEquation(neighbours_matrix, gradW_matrix, pos_array, u_array, drhodt_array,
+                           rho_array, mass_array,
+                           nb_moving_part, h); 
         if (PRINT)
         {
             cout << "continuityEquation passed" << endl;
         }
 
         // Compute pressure for all particles
-        setPressure(nb_moving_part, p_array, rho_arr, rho_0, c_0, R, T, M,
+        setPressure(p_array, rho_array, nb_moving_part, rho_0, c_0, R, T, M,
                     gamma, state_equation_chosen); 
         if (PRINT)
         {
@@ -263,25 +258,24 @@ int main(int argc, char *argv[])
         }
 
         // Compute artificial viscosity Π_ab for all particles
-        setArtificialViscosity(t, artificial_visc_matrix, nb_moving_part,
-                               pos_array, neighbours_matrix, rho_arr, u_arr,
+        setArtificialViscosity(artificial_visc_matrix, neighbours_matrix, pos_array,
+                               rho_array, u_array, nb_moving_part, t,
                                alpha, beta, rho_0, c_0, gamma, R, T, M, h,
                                state_equation_chosen); 
         if (PRINT)
         {
             cout << "setArtificialViscosity passed" << endl;
         }
-        
 
         // Compute D(u)/Dt for all particles
-        momentumEquation(nb_moving_part, 
-                         neighbours_matrix,
-                         mass_array,
-                         gradW_matrix, 
-                         dudt_arr,
-                         artificial_visc_matrix, 
-                         rho_arr,
+        momentumEquation(neighbours_matrix, 
+                         gradW_matrix,
+                         artificial_visc_matrix,
+                         mass_array, 
+                         dudt_array,
+                         rho_array, 
                          p_array,
+                         nb_moving_part,
                          rho_0, c_0, 
                          gamma,
                          R, T, M,
@@ -293,20 +287,20 @@ int main(int argc, char *argv[])
             cout << "momentumEquation passed" << endl;
         }
 
-        // printArray(rho_arr, nb_moving_part, "rho_arr");
-        // printArray(dudt_arr, nb_moving_part, "dudt_arr");
+        // printArray(rho_array, nb_moving_part, "rho_array");
+        // printArray(dudt_array, nb_moving_part, "dudt_array");
 
         // Update density, velocity and position for each particle (Euler explicit scheme)
         for (size_t pos = 0; pos < nb_particles; pos++)
         {
 
-            rho_arr[pos] = rho_arr[pos] + dt * drhodt_arr[pos];
+            rho_array[pos] = rho_array[pos] + dt * drhodt_array[pos];
 
             for (size_t cord = 0; cord < 3; cord++)
             {
 
-                pos_array[3 * pos + cord] += dt * u_arr[3 * pos + cord];
-                u_arr[3 * pos + cord] += dt * dudt_arr[3 * pos + cord];
+                pos_array[3 * pos + cord] += dt * u_array[3 * pos + cord];
+                u_array[3 * pos + cord] += dt * dudt_array[3 * pos + cord];
             }
         }
 

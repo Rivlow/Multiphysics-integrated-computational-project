@@ -13,21 +13,22 @@
 
 using namespace std;
 
-void findNeighbours(size_t nb_moving_part, vector<double> &pos_arr,
-                    vector<vector<int>> &cell_matrix,
+void findNeighbours(vector<vector<int>> &cell_matrix,
                     vector<vector<int>> &neighbours_matrix,
-                    vector<double> &L_d, const int &Nx,
-                    const int &Ny, const int &Nz,
-                    const double &h, const int &kappa)
+                    vector<double> &pos_array,
+                    vector<double> &L_d,
+                    size_t nb_moving_part, 
+                    int Nx, int Ny, int Nz,
+                    double h, int kappa)
 {
 
     // Sort all particles in their corresponding cell
-    for (size_t pos = 0; pos < pos_arr.size() / 3; pos++)
+    for (size_t pos = 0; pos < pos_array.size() / 3; pos++)
     {
 
-        int idx_i = pos_arr[3 * pos + 0] / (L_d[0] / Nx);
-        int idx_j = pos_arr[3 * pos + 1] / (L_d[1] / Ny);
-        int idx_k = pos_arr[3 * pos + 2] / (L_d[2] / Nz);
+        int idx_i = pos_array[3 * pos + 0] / (L_d[0] / Nx);
+        int idx_j = pos_array[3 * pos + 1] / (L_d[1] / Ny);
+        int idx_k = pos_array[3 * pos + 2] / (L_d[2] / Nz);
 
         idx_i = (idx_i == Nx) ? idx_i - 1 : idx_i;
         idx_j = (idx_j == Ny) ? idx_j - 1 : idx_j;
@@ -42,9 +43,9 @@ void findNeighbours(size_t nb_moving_part, vector<double> &pos_arr,
     {
 
         // Determine in which cell the particle is
-        int i_cell = pos_arr[3 * pos + 0] / (L_d[0] / Nx);
-        int j_cell = pos_arr[3 * pos + 1] / (L_d[1] / Ny);
-        int k_cell = pos_arr[3 * pos + 2] / (L_d[2] / Nz);
+        int i_cell = pos_array[3 * pos + 0] / (L_d[0] / Nx);
+        int j_cell = pos_array[3 * pos + 1] / (L_d[1] / Ny);
+        int k_cell = pos_array[3 * pos + 2] / (L_d[2] / Nz);
 
         // cout << "cell's indices computed" << endl;
 
@@ -86,9 +87,9 @@ void findNeighbours(size_t nb_moving_part, vector<double> &pos_arr,
                             if (actual_cell_value != pos)
                             {
                                 double rx, ry, rz, r2;
-                                rx = (pos_arr[3 * pos] - pos_arr[3 * actual_cell_value]) * (pos_arr[3 * pos] - pos_arr[3 * actual_cell_value]);
-                                ry = (pos_arr[3 * pos + 1] - pos_arr[3 * actual_cell_value + 1]) * (pos_arr[3 * pos + 1] - pos_arr[3 * actual_cell_value + 1]);
-                                rz = (pos_arr[3 * pos + 2] - pos_arr[3 * actual_cell_value + 2]) * (pos_arr[3 * pos + 2] - pos_arr[3 * actual_cell_value + 2]);
+                                rx = (pos_array[3 * pos] - pos_array[3 * actual_cell_value]) * (pos_array[3 * pos] - pos_array[3 * actual_cell_value]);
+                                ry = (pos_array[3 * pos + 1] - pos_array[3 * actual_cell_value + 1]) * (pos_array[3 * pos + 1] - pos_array[3 * actual_cell_value + 1]);
+                                rz = (pos_array[3 * pos + 2] - pos_array[3 * actual_cell_value + 2]) * (pos_array[3 * pos + 2] - pos_array[3 * actual_cell_value + 2]);
                                 r2 = rx + ry + rz;
 
                                 if (r2 <= kappa * kappa * h * h)
@@ -113,7 +114,11 @@ void findNeighbours(size_t nb_moving_part, vector<double> &pos_arr,
     }
 }
 
-void naiveAlgo(size_t nb_moving_part, vector<double> &pos_arr, vector<vector<int>> &neighbours_matrix, const double &h, const int &kappa)
+void naiveAlgo(vector<vector<int>> &neighbours_matrix,
+               vector<double> &pos_array,
+               size_t nb_moving_part,
+               double h, 
+               int kappa)
 {
     // added by RB
     for (int i = 0; i < nb_moving_part; i++)
@@ -129,9 +134,9 @@ void naiveAlgo(size_t nb_moving_part, vector<double> &pos_arr, vector<vector<int
         for (int j = i + 1; j < nb_moving_part; j++)
         {
             double rx, ry, rz, r2;
-            rx = (pos_arr[3 * i] - pos_arr[3 * j]) * (pos_arr[3 * i] - pos_arr[3 * j]);
-            ry = (pos_arr[3 * i + 1] - pos_arr[3 * j + 1]) * (pos_arr[3 * i + 1] - pos_arr[3 * j + 1]);
-            rz = (pos_arr[3 * i + 2] - pos_arr[3 * j + 2]) * (pos_arr[3 * i + 2] - pos_arr[3 * j + 2]);
+            rx = (pos_array[3 * i] - pos_array[3 * j]) * (pos_array[3 * i] - pos_array[3 * j]);
+            ry = (pos_array[3 * i + 1] - pos_array[3 * j + 1]) * (pos_array[3 * i + 1] - pos_array[3 * j + 1]);
+            rz = (pos_array[3 * i + 2] - pos_array[3 * j + 2]) * (pos_array[3 * i + 2] - pos_array[3 * j + 2]);
             r2 = rx + ry + rz;
             if (r2 <= kappa * kappa * h * h)
             {
@@ -142,28 +147,65 @@ void naiveAlgo(size_t nb_moving_part, vector<double> &pos_arr, vector<vector<int
     }
 }
 
-void printNeighbours(vector<vector<int>> &neighbours_matrix_1, vector<vector<int>> &neighbours_matrix_2)
+void printNeighbours(vector<vector<int>> &neighbours_matrix_linked,
+                     vector<vector<int>> &neighbours_matrix_naive)
 {
-    for (int i = 0; i < neighbours_matrix_1.size(); i++)
+    for (int i = 0; i < neighbours_matrix_linked.size(); i++)
     {
         std::cout << "Particle " << i << " : ";
 
         std::cout << "{";
-        for (int j = 0; j < neighbours_matrix_1[i].size(); j++)
+        for (int j = 0; j < neighbours_matrix_linked[i].size(); j++)
         {
-            std::cout << neighbours_matrix_1[i][j];
-            if (j != neighbours_matrix_1[i].size() - 1)
+            std::cout << neighbours_matrix_linked[i][j];
+            if (j != neighbours_matrix_linked[i].size() - 1)
             {
                 std::cout << ", ";
             }
         }
         std::cout << "} (Linked-list) VS {";
 
-        for (int j = 0; j < neighbours_matrix_2[i].size(); j++)
+        for (int j = 0; j < neighbours_matrix_naive[i].size(); j++)
         {
-            std::cout << neighbours_matrix_2[i][j];
-            if (j != neighbours_matrix_2[i].size() - 1)
+            std::cout << neighbours_matrix_naive[i][j];
+            if (j != neighbours_matrix_naive[i].size() - 1)
             {
+                std::cout << ", ";
+            }
+        }
+        std::cout << "} (naive)\n \n";
+    }
+}
+
+void CompareNeighbours(const std::vector<std::vector<int>> &neighbours_matrix_linked,
+                     const std::vector<std::vector<int>> &neighbours_matrix_naive) {
+    for (int i = 0; i < neighbours_matrix_linked.size(); i++) {
+        std::cout << "Particle " << i << " : ";
+
+        std::cout << "{";
+        for (int j = 0; j < neighbours_matrix_linked[i].size(); j++) {
+            if (j < neighbours_matrix_naive[i].size()) {
+                if (neighbours_matrix_linked[i][j] == neighbours_matrix_naive[i][j]) {
+                    std::cout << neighbours_matrix_linked[i][j];
+                } else {
+                    std::cout << "[" << neighbours_matrix_linked[i][j] << "-" << neighbours_matrix_naive[i][j] << "]";
+                }
+            } else {
+                std::cout << "[" << neighbours_matrix_linked[i][j] << "-N/A]";
+            }
+
+            if (j != neighbours_matrix_linked[i].size() - 1) {
+                std::cout << ", ";
+            }
+        }
+        std::cout << "} (Linked-list) VS {";
+
+        for (int j = 0; j < neighbours_matrix_naive[i].size(); j++) {
+            if (j >= neighbours_matrix_linked[i].size()) {
+                std::cout << "[" << neighbours_matrix_naive[i][j] << "-N/A]";
+            }
+
+            if (j != neighbours_matrix_naive[i].size() - 1) {
                 std::cout << ", ";
             }
         }

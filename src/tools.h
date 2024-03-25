@@ -5,8 +5,6 @@
 
 using namespace std;
 
-void deletePreviousOutputFiles();
-
 template <typename T>
 void printMatrix(vector<vector<T>> &matrix, size_t size, string name);
 

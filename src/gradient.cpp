@@ -5,51 +5,51 @@
 #include "Kernel_functions.h"
 using namespace std;
 
-void gradW(size_t nb_moving_part,
-           vector<vector<double>> &gradW_matrix,
-           vector<double> &pos_arr,
+void gradW(vector<vector<double>> &gradW_matrix,
            vector<vector<int>> &neighbours_matrix,
+           vector<double> &pos_array,
+           size_t nb_moving_part,
            double h, int Nx, int Ny, int Nz)
 {
 
     // Iterations over each particle
     for (size_t pos = 0; pos < nb_moving_part; pos++)
     {
-        vector<int> &neighbours_list = neighbours_matrix[pos];
+        vector<int> &neighbours_array = neighbours_matrix[pos];
         // cout << "len(neighbour_list) : " << neighbours_list.size() << endl;
 
         // Iterations over each associated neighbours of prescribed particles
-        for (size_t idx = 0; idx < neighbours_list.size(); idx++)
+        for (size_t idx = 0; idx < neighbours_array.size(); idx++)
         {
 
-            size_t idx_neighbour = neighbours_list[idx];
+            size_t idx_neighbour = neighbours_array[idx];
             double rx, ry, rz, r_ab;
             // cout << "entrance in neighbour loop (before rx, ry, rz) \n";
-            rx = (pos_arr[3 * pos + 0] - pos_arr[3 * idx_neighbour + 0]) * (pos_arr[3 * pos + 0] - pos_arr[3 * idx_neighbour + 0]);
-            ry = (pos_arr[3 * pos + 1] - pos_arr[3 * idx_neighbour + 1]) * (pos_arr[3 * pos + 1] - pos_arr[3 * idx_neighbour + 1]);
-            rz = (pos_arr[3 * pos + 2] - pos_arr[3 * idx_neighbour + 2]) * (pos_arr[3 * pos + 2] - pos_arr[3 * idx_neighbour + 2]);
+            rx = (pos_array[3 * pos + 0] - pos_array[3 * idx_neighbour + 0]) * (pos_array[3 * pos + 0] - pos_array[3 * idx_neighbour + 0]);
+            ry = (pos_array[3 * pos + 1] - pos_array[3 * idx_neighbour + 1]) * (pos_array[3 * pos + 1] - pos_array[3 * idx_neighbour + 1]);
+            rz = (pos_array[3 * pos + 2] - pos_array[3 * idx_neighbour + 2]) * (pos_array[3 * pos + 2] - pos_array[3 * idx_neighbour + 2]);
             r_ab = sqrt(rx + ry + rz);
 
             // cout << "entrance in neighbour loop (after rx, ry, rz) \n";
             // cout << "Val in neighbour list : (";
-            for (size_t idxx = 0; idxx < neighbours_list.size(); idxx++)
+            for (size_t idxx = 0; idxx < neighbours_array.size(); idxx++)
             {
                 // cout << neighbours_list[idxx] << " , ";
             }
 
             // cout << ")" << endl;
-            // cout << "val1 : " << (pos_arr[3*pos+0] - pos_arr[3*idx_neighbour+0])/r_ab * derive_cubic_spline(r_ab, h)<< endl;
-            // cout <<  "val2 : " << (pos_arr[3*pos+1] - pos_arr[3*idx_neighbour+1])/r_ab * derive_cubic_spline(r_ab, h)<< endl;
-            // cout << "val3 : " << (pos_arr[3*pos+2] - pos_arr[3*idx_neighbour+2])/r_ab * derive_cubic_spline(r_ab, h)<< endl;
+            // cout << "val1 : " << (pos_array[3*pos+0] - pos_array[3*idx_neighbour+0])/r_ab * derive_cubic_spline(r_ab, h)<< endl;
+            // cout <<  "val2 : " << (pos_array[3*pos+1] - pos_array[3*idx_neighbour+1])/r_ab * derive_cubic_spline(r_ab, h)<< endl;
+            // cout << "val3 : " << (pos_array[3*pos+2] - pos_array[3*idx_neighbour+2])/r_ab * derive_cubic_spline(r_ab, h)<< endl;
             // cout << "pos used : " << pos << " and idx_neighbour used : " << idx_neighbour << endl;
-            // cout << "len (pos_arr) : " << pos_arr.size() << endl;
+            // cout << "len (pos_array) : " << pos_array.size() << endl;
             // cout << "len (neighbour_list) : " << neighbours_list.size() << endl;
-            // cout << "pos_arr associated : " << pos_arr[3*pos+0] << endl;
-            // cout << "idx_neighbour associated : " << pos_arr[3*idx_neighbour+0] << endl;
+            // cout << "pos_array associated : " << pos_array[3*pos+0] << endl;
+            // cout << "idx_neighbour associated : " << pos_array[3*idx_neighbour+0] << endl;
 
-            double val_0 = abs(pos_arr[3 * pos + 0] - pos_arr[3 * idx_neighbour + 0]) / r_ab * derive_cubic_spline(r_ab, h);
-            double val_1 = abs(pos_arr[3 * pos + 1] - pos_arr[3 * idx_neighbour + 1]) / r_ab * derive_cubic_spline(r_ab, h);
-            double val_2 = abs(pos_arr[3 * pos + 2] - pos_arr[3 * idx_neighbour + 2]) / r_ab * derive_cubic_spline(r_ab, h);
+            double val_0 = abs(pos_array[3 * pos + 0] - pos_array[3 * idx_neighbour + 0]) / r_ab * derive_cubic_spline(r_ab, h);
+            double val_1 = abs(pos_array[3 * pos + 1] - pos_array[3 * idx_neighbour + 1]) / r_ab * derive_cubic_spline(r_ab, h);
+            double val_2 = abs(pos_array[3 * pos + 2] - pos_array[3 * idx_neighbour + 2]) / r_ab * derive_cubic_spline(r_ab, h);
 
             gradW_matrix[pos].push_back(val_0);
             // cout << "after first push_back"<<endl;
@@ -79,9 +79,9 @@ double setSpeedOfSound(double rho, double rho_0, double c_0,
     return c;
 }
 
-void setPressure(size_t nb_moving_part, 
-                 vector<double> &p_arr,
-                 vector<double> &rho_arr, 
+void setPressure(vector<double> &p_array,
+                 vector<double> &rho_array, 
+                 size_t nb_moving_part,
                  double rho_0, double c_0, 
                  double R, double T, double M,
                  double gamma,
@@ -93,24 +93,24 @@ void setPressure(size_t nb_moving_part,
 
         if (state_equation_chosen == "Ideal gaz law")
         {
-            p_arr[pos] = (rho_arr[pos] / rho_0 - 1) * (R * T) / M;
+            p_array[pos] = (rho_array[pos] / rho_0 - 1) * (R * T) / M;
         }
 
         if (state_equation_chosen == "Quasi incompresible fluid")
         {
             double B = c_0 * c_0 * rho_0 / gamma;
-            p_arr[pos] = B * (pow(rho_arr[pos] / rho_0, gamma) - 1);
+            p_array[pos] = B * (pow(rho_array[pos] / rho_0, gamma) - 1);
         }
     }
 }
 
-void setArtificialViscosity(int t, 
-                            vector<vector<double>> &artificial_visc,
-                            size_t nb_moving_part,
-                            vector<double> &pos_arr,
+void setArtificialViscosity(vector<vector<double>> &artificial_visc_matrix,
                             vector<vector<int>> &neighbours_matrix,
-                            vector<double> &rho_arr,
-                            vector<double> &u_arr, 
+                            vector<double> &pos_array,
+                            vector<double> &rho_array,
+                            vector<double> &u_array, 
+                            size_t nb_moving_part,
+                            int t, 
                             double alpha, double beta, double gamma,
                             double c_0, double rho_0,
                             double R, double T,double M, 
@@ -127,7 +127,7 @@ void setArtificialViscosity(int t,
 
             for (size_t idx_neighbour = 0; idx_neighbour < neighbours_list.size(); idx_neighbour++)
             {
-                artificial_visc[pos].push_back(0.0);
+                artificial_visc_matrix[pos].push_back(0.0);
             }
         }
     }
@@ -149,13 +149,13 @@ void setArtificialViscosity(int t,
 
                 int neighbour_value = neighbours_arr[idx_neighbour];
 
-                rel_displ[0] = (pos_arr[3 * pos + 0] - pos_arr[3 * neighbour_value + 0]);
-                rel_displ[1] = (pos_arr[3 * pos + 1] - pos_arr[3 * neighbour_value + 1]);
-                rel_displ[2] = (pos_arr[3 * pos + 2] - pos_arr[3 * neighbour_value + 2]);
+                rel_displ[0] = (pos_array[3 * pos + 0] - pos_array[3 * neighbour_value + 0]);
+                rel_displ[1] = (pos_array[3 * pos + 1] - pos_array[3 * neighbour_value + 1]);
+                rel_displ[2] = (pos_array[3 * pos + 2] - pos_array[3 * neighbour_value + 2]);
 
-                rel_vel[0] = (u_arr[3 * pos + 0] - u_arr[3 * neighbour_value + 0]);
-                rel_vel[1] = (u_arr[3 * pos + 1] - u_arr[3 * neighbour_value + 1]);
-                rel_vel[2] = (u_arr[3 * pos + 2] - u_arr[3 * neighbour_value + 2]);
+                rel_vel[0] = (u_array[3 * pos + 0] - u_array[3 * neighbour_value + 0]);
+                rel_vel[1] = (u_array[3 * pos + 1] - u_array[3 * neighbour_value + 1]);
+                rel_vel[2] = (u_array[3 * pos + 2] - u_array[3 * neighbour_value + 2]);
 
                 double res = 0, xa_xb = 0;
 
@@ -170,14 +170,14 @@ void setArtificialViscosity(int t,
                 // cout << "xa_xb (z): " << xa_xb << endl;
 
                 double c_a, c_b;
-                c_a = setSpeedOfSound(rho_arr[pos], rho_0, c_0, gamma, state_equation_chosen);
-                c_b = setSpeedOfSound(rho_arr[neighbour_value], rho_0, c_0, gamma, state_equation_chosen);
+                c_a = setSpeedOfSound(rho_array[pos], rho_0, c_0, gamma, state_equation_chosen);
+                c_b = setSpeedOfSound(rho_array[neighbour_value], rho_0, c_0, gamma, state_equation_chosen);
 
                 // cout << "c_a: " << c_a;
                 // cout << " c_b: " << c_b << endl;
 
                 double c_ab = 0.5 * (c_a + c_b);
-                double rho_ab = 0.5 * (rho_arr[pos] + rho_arr[neighbour_value]);
+                double rho_ab = 0.5 * (rho_array[pos] + rho_array[neighbour_value]);
                 double nu_2 = 0.01 * h * h;
                 double mu_ab = (h * res) / (xa_xb + nu_2);
 
@@ -186,21 +186,21 @@ void setArtificialViscosity(int t,
                 // cout << " nu_2: " << nu_2;
                 // cout << " mu_ab: " << mu_ab << "\n " <<endl;
 
-                artificial_visc[pos].push_back((res < 0) ? (-alpha * c_ab * mu_ab + beta * mu_ab * mu_ab) / rho_ab : 0);
+                artificial_visc_matrix[pos].push_back((res < 0) ? (-alpha * c_ab * mu_ab + beta * mu_ab * mu_ab) / rho_ab : 0);
             }
         }
     }
     */
 }
 
-void continuityEquation(size_t nb_moving_part,
-                        vector<double> &pos_arr,
-                        vector<double> &u_arr,
-                        vector<vector<int>> &neighbours_matrix,
+void continuityEquation(vector<vector<int>> &neighbours_matrix,
                         vector<vector<double>> &gradW_matrix,
-                        vector<double> &drhodt_arr,
-                        vector<double> &rho_arr,
-                        vector<double> &mass_arr, 
+                        vector<double> &pos_array,
+                        vector<double> &u_array,
+                        vector<double> &drhodt_array,
+                        vector<double> &rho_array,
+                        vector<double> &mass_array, 
+                        size_t nb_moving_part,
                         double h)
 {
 
@@ -208,42 +208,42 @@ void continuityEquation(size_t nb_moving_part,
     for (size_t pos = 0; pos < nb_moving_part; pos++)
     {
 
-        vector<int> neighbours_list = neighbours_matrix[pos];
-        vector<double> gradW_list = gradW_matrix[pos];
+        vector<int> neighbours_array = neighbours_matrix[pos];
+        vector<double> gradW_array = gradW_matrix[pos];
 
         double drhodt = 0;
 
         // Summation over b = 1 -> nb_neighbours
-        for (size_t idx_neighbour = 0; idx_neighbour < neighbours_list.size(); idx_neighbour++)
+        for (size_t idx_neighbour = 0; idx_neighbour < neighbours_array.size(); idx_neighbour++)
         {
 
             // Dot product of u_ab with grad_a(W_ab)
             double dot_product = 0;
-            double m_b = mass_arr[neighbours_list[idx_neighbour]];
+            double m_b = mass_array[neighbours_array[idx_neighbour]];
             for (size_t x = 0; x < 3; x++)
             {
 
-                double u_a = u_arr[3 * pos + x], u_b = u_arr[3 * neighbours_list[idx_neighbour] + x];
-                dot_product += (u_a - u_b) * gradW_list[3*idx_neighbour + x];
+                double u_a = u_array[3 * pos + x], u_b = u_array[3 * neighbours_array[idx_neighbour] + x];
+                dot_product += (u_a - u_b) * gradW_array[3*idx_neighbour + x];
             }
 
             drhodt += m_b * dot_product;
 
-            // cout << "mass used : " << mass_arr[neighbours_list[idx_neighbour]] << " and dot product : " << dot_product << endl;
+            // cout << "mass used : " << mass_array[neighbours_list[idx_neighbour]] << " and dot product : " << dot_product << endl;
         }
 
-        drhodt_arr[pos] = drhodt;
+        drhodt_array[pos] = drhodt;
     }
 }
 
-void momentumEquation(size_t nb_moving_part,
-                      vector<vector<int>> &neighbours_matrix,
-                      vector<double> &mass_arr,
+void momentumEquation(vector<vector<int>> &neighbours_matrix,
                       vector<vector<double>> &gradW_matrix,
-                      vector<double> &dudt_arr,
                       vector<vector<double>> &artificial_visc_matrix,
-                      vector<double> &rho_arr,
-                      vector<double> &p_arr, 
+                      vector<double> &mass_array,
+                      vector<double> &dudt_array,
+                      vector<double> &rho_array,
+                      vector<double> &p_array, 
+                      size_t nb_moving_part,
                       double rho_0, double c_0,
                       double gamma,
                       double R, double T, double M,
@@ -254,24 +254,24 @@ void momentumEquation(size_t nb_moving_part,
     // Iterations over each particle
     for (size_t pos = 0; pos < nb_moving_part; pos++)
     {
-        vector<int> &neighbours_arr = neighbours_matrix[pos];
-        vector<double> &gradW_arr = gradW_matrix[pos];
-        vector<double> &artificial_visc_arr = artificial_visc_matrix[pos];
+        vector<int> &neighbours_array = neighbours_matrix[pos];
+        vector<double> &gradW_array = gradW_matrix[pos];
+        vector<double> &artificial_visc_array = artificial_visc_matrix[pos];
         vector<double> F_vol = {0.0, 0.0, g};
-        double rho_a = rho_arr[pos];
-        double p_a = p_arr[pos];
+        double rho_a = rho_array[pos];
+        double p_a = p_array[pos];
 
         for (size_t cord = 0; cord < 3; cord++)
         {
             // Summation over b = 1 -> nb_neighbours
-            for (size_t idx_neighbour = 0; idx_neighbour < neighbours_arr.size(); idx_neighbour++)
+            for (size_t idx_neighbour = 0; idx_neighbour < neighbours_array.size(); idx_neighbour++)
             {
                 double pi_ab = 0; // artificial_visc_arr[idx_neighbour];
-                double rho_b = rho_arr[neighbours_arr[idx_neighbour]];
-                double m_b = mass_arr[neighbours_arr[idx_neighbour]];
-                double p_b = p_arr[neighbours_arr[idx_neighbour]];
+                double rho_b = rho_array[neighbours_array[idx_neighbour]];
+                double m_b = mass_array[neighbours_array[idx_neighbour]];
+                double p_b = p_array[neighbours_array[idx_neighbour]];
 
-                dudt_arr[3 * pos + cord] += m_b * (p_b / (rho_b * rho_b) + p_a / (rho_a * rho_a) + pi_ab) * gradW_arr[3*idx_neighbour + cord];
+                dudt_array[3 * pos + cord] += m_b * (p_b / (rho_b * rho_b) + p_a / (rho_a * rho_a) + pi_ab) * gradW_array[3*idx_neighbour + cord];
                 // cout << "p_a" << p_a << endl;
                 // cout << "p_b" << p_b << endl;
                 // cout << "rho_b" << rho_b << endl;
@@ -280,8 +280,8 @@ void momentumEquation(size_t nb_moving_part,
                 // cout << "\n " <<endl;
             }
 
-            dudt_arr[3 * pos + cord] *= -1;
-            dudt_arr[3 * pos + cord] += F_vol[cord];
+            dudt_array[3 * pos + cord] *= -1;
+            dudt_array[3 * pos + cord] += F_vol[cord];
         }
     }
 }
