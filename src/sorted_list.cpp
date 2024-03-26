@@ -40,7 +40,7 @@ void findNeighbours(size_t nb_moving_part, vector<double> &pos_arr,
 
         //cout << "For part : " << pos ;
     }
-    cout << "apres 1ere boucke" << endl;
+    //cout << "apres 1ere boucke" << endl;
     // Find neighbours for each particle
     for (size_t pos = 0; pos < nb_moving_part; pos++)
     {

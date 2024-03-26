@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 
     for (auto &it : data["stateEquation"].items())
     {
-        if (it.value() == 1)
+        if (it.value() == 0)
         {
             state_equation_chosen = it.key();
         }
@@ -292,7 +292,7 @@ int main(int argc, char *argv[])
         {
             cout << "momentumEquation passed" << endl;
         }
-
+       
         // printArray(rho_arr, nb_moving_part, "rho_arr");
         // printArray(dudt_arr, nb_moving_part, "dudt_arr");
 
@@ -328,8 +328,14 @@ int main(int argc, char *argv[])
         }
 
 
-        if(t % nsave == 0)
+        if(t % nsave == 0){
             export_particles("sph", t, pos_array, scalars, vectors);
+            /* if(t > 4000){
+            printArray(rho_arr, nb_moving_part, "rho_arr");
+            printArray(dudt_arr, nb_moving_part, "dudt_arr");
+        }*/
+        }
+            
     }
 
     std::cout << "\nSimulation done." << std::endl;

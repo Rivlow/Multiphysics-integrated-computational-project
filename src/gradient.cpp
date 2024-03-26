@@ -52,9 +52,9 @@ void gradW(size_t nb_moving_part,
             // cout << "pos_arr associated : " << pos_arr[3*pos+0] << endl;
             // cout << "idx_neighbour associated : " << pos_arr[3*idx_neighbour+0] << endl;
 
-            double val_0 = abs(pos_arr[3 * pos + 0] - pos_arr[3 * idx_neighbour + 0]) / r_ab * derive_cubic_spline(r_ab, h);
-            double val_1 = abs(pos_arr[3 * pos + 1] - pos_arr[3 * idx_neighbour + 1]) / r_ab * derive_cubic_spline(r_ab, h);
-            double val_2 = abs(pos_arr[3 * pos + 2] - pos_arr[3 * idx_neighbour + 2]) / r_ab * derive_cubic_spline(r_ab, h);
+            double val_0 = pos_arr[3 * pos + 0] - pos_arr[3 * idx_neighbour + 0] / r_ab * derive_cubic_spline(r_ab, h);
+            double val_1 = pos_arr[3 * pos + 1] - pos_arr[3 * idx_neighbour + 1] / r_ab * derive_cubic_spline(r_ab, h);
+            double val_2 = pos_arr[3 * pos + 2] - pos_arr[3 * idx_neighbour + 2] / r_ab * derive_cubic_spline(r_ab, h);
 
             gradW_matrix[pos].push_back(val_0);
             // cout << "after first push_back"<<endl;
@@ -211,7 +211,7 @@ void continuityEquation(size_t nb_moving_part,
     auto t0 = std::chrono::high_resolution_clock::now();
     // Iterations over each particle
     //cout << "avant pragma " << endl;
-    #pragma omp parallel for
+    //  #pragma omp parallel for
     for (size_t pos = 0; pos < nb_moving_part; pos++)
     {
 
@@ -240,8 +240,9 @@ void continuityEquation(size_t nb_moving_part,
         }
 
         drhodt_arr[pos] = drhodt;
-
+        //cout << " drhodt : " << drhodt << endl;
     }
+
     //cout << "arpes pragma"<< endl;
     auto t1 = std::chrono::high_resolution_clock::now();
     auto delta_t = std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0).count();
