@@ -211,7 +211,7 @@ void continuityEquation(size_t nb_moving_part,
     auto t0 = std::chrono::high_resolution_clock::now();
     // Iterations over each particle
     //cout << "avant pragma " << endl;
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (size_t pos = 0; pos < nb_moving_part; pos++)
     {
 
@@ -245,7 +245,7 @@ void continuityEquation(size_t nb_moving_part,
     //cout << "arpes pragma"<< endl;
     auto t1 = std::chrono::high_resolution_clock::now();
     auto delta_t = std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0).count();
-    std::cout << "duration contininty : " << delta_t << "s.\n";
+    //std::cout << "duration contininty : " << delta_t << "s.\n";
 
 }
 
@@ -300,5 +300,5 @@ void momentumEquation(size_t nb_moving_part,
     }
     auto t1 = std::chrono::high_resolution_clock::now();
     auto delta_t = std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0).count();
-    std::cout << "duration momentum : " << delta_t << "s.\n";
+    //std::cout << "duration momentum : " << delta_t << "s.\n";
 }

@@ -297,6 +297,8 @@ int main(int argc, char *argv[])
         // printArray(dudt_arr, nb_moving_part, "dudt_arr");
 
         // Update density, velocity and position for each particle (Euler explicit scheme)
+        auto t0 = std::chrono::high_resolution_clock::now();
+        //#pragma omp parallel for
         for (size_t pos = 0; pos < nb_particles; pos++)
         {
 
@@ -309,6 +311,9 @@ int main(int argc, char *argv[])
                 u_arr[3 * pos + cord] += dt * dudt_arr[3 * pos + cord];
             }
         }
+        auto t1 = std::chrono::high_resolution_clock::now();
+        auto delta_t = std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0).count();
+        //std::cout << "duration update : " << delta_t << "s.\n";
 
         // RB: count number of neighbours
         for(int i=0; i<nb_tot_part; i++){
