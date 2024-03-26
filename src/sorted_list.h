@@ -9,9 +9,23 @@
 #include <iostream>
 using namespace std;
 
-void findNeighbours(size_t nb_moving_part, vector<double> &pos_arr, vector<vector<int>> &cell_matrix, vector<vector<int>> &neighbours_matrix,
-                    vector<double> &L_d, const int &Nx, const int &Ny, const int &Nz, const double &h, const int &kappa);
+void findNeighbours(vector<vector<int>> &cell_matrix,
+                    vector<vector<int>> &neighbours_matrix,
+                    vector<double> &pos_array,
+                    vector<double> &L_d,
+                    size_t nb_moving_part, 
+                    int Nx, int Ny, int Nz,
+                    double h, int kappa,
+                    const bool PRINT);
 
-void naiveAlgo(size_t nb_moving_part, vector<double> &pos_arr, vector<vector<int>> &neighbours_matrix, const double &h, const int &kappa);
+void naiveAlgo(vector<vector<int>> &neighbours_matrix,
+               vector<double> &pos_array,
+               size_t nb_moving_part,
+               double h, 
+               int kappa);
 
-void printNeighbours(vector<vector<int>> &neighbours_matrix_1, vector<vector<int>> &neighbours_matrix_2);
+void printNeighbours(vector<vector<int>> &neighbours_matrix_linked, 
+                     vector<vector<int>> &neighbours_matrix_naive);
+
+void CompareNeighbours(const std::vector<std::vector<int>> &neighbours_matrix_linked,
+                     const std::vector<std::vector<int>> &neighbours_matrix_naive);

@@ -12,27 +12,6 @@
 using namespace std;
 namespace fs = std::filesystem;
 
-void deletePreviousOutputFiles()
-{
-    std::filesystem::path outputPath = std::filesystem::current_path().parent_path().parent_path();
-
-    cout << outputPath << endl;
-
-    // Vérifie si le répertoire "output" existe
-    if (std::filesystem::exists(outputPath) && std::filesystem::is_directory(outputPath))
-    {
-        // Parcours de tous les fichiers dans le répertoire "output" et suppression
-        for (const auto &entry : std::filesystem::directory_iterator(outputPath))
-        {
-            std::filesystem::remove(entry.path());
-        }
-        std::cout << "Tous les fichiers dans le répertoire 'output' ont été supprimés." << std::endl;
-    }
-    else
-    {
-        std::cerr << "Le répertoire 'output' n'existe pas ou n'est pas accessible." << std::endl;
-    }
-}
 
 template <typename T>
 void printMatrix(vector<vector<T>> &matrix, size_t size, string name)
@@ -134,7 +113,8 @@ void clearOutputFiles(){
 void clearAllVectors(vector<vector<double>> &artificial_visc_matrix,
                      vector<vector<int>> &neighbours_matrix,
                      vector<vector<int>> &cell_matrix,
-                     vector<vector<double>> &gradW_matrix)
+                     vector<vector<double>> &gradW_matrix, 
+                     const bool PRINT)
 {
 
     for (size_t i = 0; i < artificial_visc_matrix.size(); i++)
@@ -166,4 +146,8 @@ void clearAllVectors(vector<vector<double>> &artificial_visc_matrix,
     // gradW_matrix.clear();
 
     // cout << "after clear, gradW_matrix : " << endl;
+
+    if (PRINT){
+            cout << "clearAllVectors passed" << endl;
+    }
 }

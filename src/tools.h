@@ -5,8 +5,6 @@
 
 using namespace std;
 
-void deletePreviousOutputFiles();
-
 template <typename T>
 void printMatrix(vector<vector<T>> &matrix, size_t size, string name);
 
@@ -19,4 +17,5 @@ void clearOutputFiles();
 void clearAllVectors(vector<vector<double>> &artificial_visc_matrix,
                      vector<vector<int>> &neighbours_matrix,
                      vector<vector<int>> &cell_matrix,
-                     vector<vector<double>> &gradW_matrix);
+                     vector<vector<double>> &gradW_matrix, 
+                     const bool PRINT);
