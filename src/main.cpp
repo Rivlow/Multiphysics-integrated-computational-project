@@ -180,34 +180,15 @@ int main(int argc, char *argv[])
                   nb_moving_part,
                   rho_init, rho_fixed, rho_0,
                   c_0, M, g, R, T, gamma,
-                  state_equation_chosen, state_initial_condition);
-
-    if (PRINT)
-    {
-        cout << "initializeRho passed" << endl;
-    }
-
-    initializeMass(rho_array, mass_array, s);
-    if (PRINT)
-    {
-        cout << "initializeMass passed" << endl;
-    }
-
-    initializeVelocity(u_array, u_init, nb_moving_part);
-    if (PRINT)
-    {
-        cout << "initializeVelocity passed" << endl;
-    }
-
-    initializeViscosity(artificial_visc_matrix);
-    if (PRINT)
-    {
-        cout << "initializeViscosity passed" << endl;
-    }
+                  state_equation_chosen, state_initial_condition, PRINT);
+    initializeMass(rho_array, mass_array, s, PRINT);
+    initializeVelocity(u_array, u_init, nb_moving_part, PRINT);
+    initializeViscosity(artificial_visc_matrix, PRINT);
 
 
     for (int t = 0; t < nstepT; t++)
     {
+
         // compute dt_max = min_a h_a/F
 
         // double dt_max = sqrt(kappa * h / abs(g)); // CFL condition
@@ -215,80 +196,41 @@ int main(int argc, char *argv[])
 
         vector<double> drhodt_array(nb_tot_part, 0.0), dudt_array(3 * nb_tot_part, 0.0);
 
-        // printArray(pos_array, nb_moving_part, "pos_array");
-
-        findNeighbours(cell_matrix, neighbours_matrix, pos_array, L_d,
-                       nb_moving_part, Nx, Ny, Nz, h, kappa); // Apply the linked-list algorithm
-
-
-        //naiveAlgo(neighbours_matrix, pos_array, nb_moving_part, h, kappa);
-
-        if (PRINT)
-        {
-            cout << "findNeighbours passed" << endl;
-        }
+        findNeighbours(cell_matrix, neighbours_matrix,
+                       pos_array, L_d,
+                       nb_moving_part, Nx, Ny, Nz, h, kappa, 
+                       PRINT); // Apply the linked-list algorithm
 
         // Compute ∇_a(W_ab) for all particles
-        gradW(gradW_matrix, 
-              neighbours_matrix, 
+        gradW(gradW_matrix, neighbours_matrix, 
               pos_array,
-              nb_moving_part, 
-              h, Nx, Ny, Nz); 
-
-        if (PRINT)
-        {
-            cout << "gradW passed" << endl;
-        }
-
-        // Compute D(rho)/Dt for all particles
-        continuityEquation(neighbours_matrix, gradW_matrix, pos_array, u_array, drhodt_array,
-                           rho_array, mass_array,
-                           nb_moving_part, h); 
-        if (PRINT)
-        {
-            cout << "continuityEquation passed" << endl;
-        }
+              nb_moving_part, h, Nx, Ny, Nz,
+              PRINT); 
 
         // Compute pressure for all particles
-        setPressure(p_array, rho_array, nb_moving_part, rho_0, c_0, R, T, M,
-                    gamma, state_equation_chosen); 
-        if (PRINT)
-        {
-            cout << "setPressure passed" << endl;
-        }
+        setPressure(p_array, rho_array, 
+                    nb_moving_part, rho_0, c_0, R, T, M, gamma, 
+                    state_equation_chosen, PRINT); 
+
+        // Compute D(rho)/Dt for all particles
+        continuityEquation(neighbours_matrix, gradW_matrix, 
+                           pos_array, u_array, drhodt_array, rho_array, mass_array,
+                           nb_moving_part, h,
+                           PRINT); 
+
 
         // Compute artificial viscosity Π_ab for all particles
-        setArtificialViscosity(artificial_visc_matrix, neighbours_matrix, pos_array,
-                               rho_array, u_array, nb_moving_part, t,
-                               alpha, beta, rho_0, c_0, gamma, R, T, M, h,
-                               state_equation_chosen); 
-        if (PRINT)
-        {
-            cout << "setArtificialViscosity passed" << endl;
-        }
-
+        setArtificialViscosity(artificial_visc_matrix, neighbours_matrix, 
+                               pos_array, rho_array, u_array, 
+                               nb_moving_part, t, alpha, beta, rho_0, c_0, gamma, R, T, M, h,
+                               state_equation_chosen, PRINT); 
+ 
         // Compute D(u)/Dt for all particles
-        momentumEquation(neighbours_matrix, 
-                         gradW_matrix,
-                         artificial_visc_matrix,
-                         mass_array, 
-                         dudt_array,
-                         rho_array, 
-                         p_array,
+        momentumEquation(neighbours_matrix, gradW_matrix, artificial_visc_matrix,
+                         mass_array, dudt_array, rho_array, p_array,
                          nb_moving_part,
-                         rho_0, c_0, 
-                         gamma,
-                         R, T, M,
-                         g, 
-                         state_equation_chosen); 
-
-        if (PRINT)
-        {
-            cout << "momentumEquation passed" << endl;
-        }
-
-        // printArray(rho_array, nb_moving_part, "rho_array");
-        // printArray(dudt_array, nb_moving_part, "dudt_array");
+                         rho_0, c_0, gamma, R, T, M, g, 
+                         state_equation_chosen, PRINT); 
 
         // Update density, velocity and position for each particle (Euler explicit scheme)
         for (size_t pos = 0; pos < nb_particles; pos++)
@@ -300,22 +242,19 @@ int main(int argc, char *argv[])
             {
 
                 pos_array[3 * pos + cord] += dt * u_array[3 * pos + cord];
+
+                if (pos_array[3 * pos + cord] <= 0){
+                cout << "Particles out of the domain. Simulation done";
+                return 0;
+                }
+
                 u_array[3 * pos + cord] += dt * dudt_array[3 * pos + cord];
             }
         }
 
-        // RB: count number of neighbours
-        for(int i=0; i<nb_tot_part; i++){
-            nvoisins[i] = neighbours_matrix[i].size();
-        }
-
         clearAllVectors(artificial_visc_matrix, neighbours_matrix,
-                        cell_matrix, gradW_matrix);
-        if (PRINT)
-        {
-            cout << "clearAllVectors passed" << endl;
-        }
-
+                        cell_matrix, gradW_matrix,
+                        PRINT);
 
         if(t % nsave == 0)
             export_particles("sph", t, pos_array, scalars, vectors);

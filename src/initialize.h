@@ -5,7 +5,8 @@ using namespace std;
 
 void initializeMass(vector<double> &rho_array,
                     vector<double> &mass_array,
-                    double s);
+                    double s,
+                    const bool PRINT);
 
 void initializeRho(vector<double> &pos_array,
                    vector<double> &rho_array, 
@@ -16,10 +17,13 @@ void initializeRho(vector<double> &pos_array,
                    double M, double g, double R,
                    double T, double gamma,
                    std::string state_equation_chosen,
-                   std::string state_initial_condition);
+                   std::string state_initial_condition,
+                   const bool PRINT);
 
 void initializeVelocity(vector<double> &u_array,
                         vector<double> &u_init,
-                        size_t nb_moving_part);
+                        size_t nb_moving_part,
+                        const bool PRINT);
 
-void initializeViscosity(vector<vector<double>> &artificial_visc_matrix);
+void initializeViscosity(vector<vector<double>> &artificial_visc_matrix,
+                         const bool PRINT);

@@ -19,7 +19,8 @@ void findNeighbours(vector<vector<int>> &cell_matrix,
                     vector<double> &L_d,
                     size_t nb_moving_part, 
                     int Nx, int Ny, int Nz,
-                    double h, int kappa)
+                    double h, int kappa,
+                    const bool PRINT)
 {
 
     // Sort all particles in their corresponding cell
@@ -39,7 +40,7 @@ void findNeighbours(vector<vector<int>> &cell_matrix,
     }
 
     // Find neighbours for each particle
-    for (int pos = 0; pos < nb_moving_part; pos++)
+    for (size_t pos = 0; pos < nb_moving_part; pos++)
     {
 
         // Determine in which cell the particle is
@@ -112,6 +113,11 @@ void findNeighbours(vector<vector<int>> &cell_matrix,
 
         cell_matrix[i_cell + j_cell * Nx + k_cell * Nx * Ny].erase(cell_matrix[i_cell + j_cell * Nx + k_cell * Nx * Ny].begin());
     }
+
+    if (PRINT){
+        cout << "findNeighbours passed" << endl;
+    }
+
 }
 
 void naiveAlgo(vector<vector<int>> &neighbours_matrix,
@@ -121,7 +127,7 @@ void naiveAlgo(vector<vector<int>> &neighbours_matrix,
                int kappa)
 {
     // added by RB
-    for (int i = 0; i < nb_moving_part; i++)
+    for (size_t i = 0; i < nb_moving_part; i++)
         neighbours_matrix[i].resize(0);
 
     // std::cout << "naiveAlgo: kappa=" << kappa << std::endl;
@@ -129,9 +135,9 @@ void naiveAlgo(vector<vector<int>> &neighbours_matrix,
 
 
     // Find neighbours for each particle
-    for (int i = 0; i < nb_moving_part; i++)
+    for (size_t i = 0; i < nb_moving_part; i++)
     {
-        for (int j = i + 1; j < nb_moving_part; j++)
+        for (size_t j = i + 1; j < nb_moving_part; j++)
         {
             double rx, ry, rz, r2;
             rx = (pos_array[3 * i] - pos_array[3 * j]) * (pos_array[3 * i] - pos_array[3 * j]);
@@ -150,12 +156,12 @@ void naiveAlgo(vector<vector<int>> &neighbours_matrix,
 void printNeighbours(vector<vector<int>> &neighbours_matrix_linked,
                      vector<vector<int>> &neighbours_matrix_naive)
 {
-    for (int i = 0; i < neighbours_matrix_linked.size(); i++)
+    for (size_t i = 0; i < neighbours_matrix_linked.size(); i++)
     {
         std::cout << "Particle " << i << " : ";
 
         std::cout << "{";
-        for (int j = 0; j < neighbours_matrix_linked[i].size(); j++)
+        for (size_t j = 0; j < neighbours_matrix_linked[i].size(); j++)
         {
             std::cout << neighbours_matrix_linked[i][j];
             if (j != neighbours_matrix_linked[i].size() - 1)
@@ -165,7 +171,7 @@ void printNeighbours(vector<vector<int>> &neighbours_matrix_linked,
         }
         std::cout << "} (Linked-list) VS {";
 
-        for (int j = 0; j < neighbours_matrix_naive[i].size(); j++)
+        for (size_t j = 0; j < neighbours_matrix_naive[i].size(); j++)
         {
             std::cout << neighbours_matrix_naive[i][j];
             if (j != neighbours_matrix_naive[i].size() - 1)
@@ -179,11 +185,11 @@ void printNeighbours(vector<vector<int>> &neighbours_matrix_linked,
 
 void CompareNeighbours(const std::vector<std::vector<int>> &neighbours_matrix_linked,
                      const std::vector<std::vector<int>> &neighbours_matrix_naive) {
-    for (int i = 0; i < neighbours_matrix_linked.size(); i++) {
+    for (size_t i = 0; i < neighbours_matrix_linked.size(); i++) {
         std::cout << "Particle " << i << " : ";
 
         std::cout << "{";
-        for (int j = 0; j < neighbours_matrix_linked[i].size(); j++) {
+        for (size_t j = 0; j < neighbours_matrix_linked[i].size(); j++) {
             if (j < neighbours_matrix_naive[i].size()) {
                 if (neighbours_matrix_linked[i][j] == neighbours_matrix_naive[i][j]) {
                     std::cout << neighbours_matrix_linked[i][j];
@@ -200,7 +206,7 @@ void CompareNeighbours(const std::vector<std::vector<int>> &neighbours_matrix_li
         }
         std::cout << "} (Linked-list) VS {";
 
-        for (int j = 0; j < neighbours_matrix_naive[i].size(); j++) {
+        for (size_t j = 0; j < neighbours_matrix_naive[i].size(); j++) {
             if (j >= neighbours_matrix_linked[i].size()) {
                 std::cout << "[" << neighbours_matrix_naive[i][j] << "-N/A]";
             }

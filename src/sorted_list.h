@@ -15,7 +15,8 @@ void findNeighbours(vector<vector<int>> &cell_matrix,
                     vector<double> &L_d,
                     size_t nb_moving_part, 
                     int Nx, int Ny, int Nz,
-                    double h, int kappa);
+                    double h, int kappa,
+                    const bool PRINT);
 
 void naiveAlgo(vector<vector<int>> &neighbours_matrix,
                vector<double> &pos_array,

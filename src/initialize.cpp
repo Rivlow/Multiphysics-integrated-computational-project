@@ -2,16 +2,22 @@
 #include <vector>
 #include <string>
 #include "initialize.h"
+#include <iostream>
 
 using namespace std;
 
 void initializeMass(vector<double> &rho_array,
                     vector<double> &mass_array,
-                    double s){
+                    double s,
+                    const bool PRINT){
     double V = s * s * s;
     for (size_t i = 0; i < rho_array.size(); i++)
     {
         mass_array[i] = rho_array[i] * V;
+    }
+
+    if (PRINT){
+        cout << "initializeMass passed" << endl;
     }
 }
 
@@ -24,7 +30,8 @@ void initializeRho(vector<double> &pos_array,
                    double M, double g, double R,
                    double T, double gamma,
                    std::string state_equation_chosen,
-                   std::string state_initial_condition){
+                   std::string state_initial_condition,
+                   const bool PRINT){
 
     if (state_initial_condition == "Hydrostatic")
     {
@@ -52,11 +59,17 @@ void initializeRho(vector<double> &pos_array,
             rho_array[i] = (i < nb_moving_part) ? rho_moving : rho_fixed;
         }
     }
+
+    if (PRINT){
+        
+        cout << "initializeRho passed" << endl;
+    }
 }
 
 void initializeVelocity(vector<double> &u_array,
                         vector<double> &u_init,
-                        size_t nb_moving_part){
+                        size_t nb_moving_part, 
+                        const bool PRINT){
 
     for (size_t i = 0; i < u_array.size() / 3; i++){
 
@@ -71,14 +84,22 @@ void initializeVelocity(vector<double> &u_array,
             u_array[3 * i + 2] = 0;
         }
     }
+
+    if (PRINT){
+       cout << "initializeVelocity passed" << endl;
+    }
 }
 
-void initializeViscosity(vector<vector<double>> &artificial_visc_matrix)
+void initializeViscosity(vector<vector<double>> &artificial_visc_matrix, const bool PRINT)
 {
     for (size_t i = 0; i < artificial_visc_matrix.size(); i++){
         for (size_t j = 0; j < artificial_visc_matrix[i].size(); j++)
         {
             artificial_visc_matrix[i][j] = 0.0;
         }
+    }
+
+    if (PRINT){
+        cout << "initializeViscosity passed" << endl;
     }
 }

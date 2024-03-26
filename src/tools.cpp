@@ -113,7 +113,8 @@ void clearOutputFiles(){
 void clearAllVectors(vector<vector<double>> &artificial_visc_matrix,
                      vector<vector<int>> &neighbours_matrix,
                      vector<vector<int>> &cell_matrix,
-                     vector<vector<double>> &gradW_matrix)
+                     vector<vector<double>> &gradW_matrix, 
+                     const bool PRINT)
 {
 
     for (size_t i = 0; i < artificial_visc_matrix.size(); i++)
@@ -145,4 +146,8 @@ void clearAllVectors(vector<vector<double>> &artificial_visc_matrix,
     // gradW_matrix.clear();
 
     // cout << "after clear, gradW_matrix : " << endl;
+
+    if (PRINT){
+            cout << "clearAllVectors passed" << endl;
+    }
 }

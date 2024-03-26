@@ -7,7 +7,8 @@ void gradW(vector<vector<double>> &gradW_matrix,
            vector<vector<int>> &neighbours_matrix,
            vector<double> &pos_array,
            size_t nb_moving_part,
-           double h, int Nx, int Ny, int Nz);
+           double h, int Nx, int Ny, int Nz, 
+           const bool PRINT);
 
 void setArtificialViscosity(vector<vector<double>> &artificial_visc_matrix,
                             vector<vector<int>> &neighbours_matrix,
@@ -20,7 +21,8 @@ void setArtificialViscosity(vector<vector<double>> &artificial_visc_matrix,
                             double c_0, double rho_0,
                             double R, double T,double M, 
                             double h,
-                            string state_equation_chosen);
+                            string state_equation_chosen, 
+                            const bool PRINT);
 
 void continuityEquation(vector<vector<int>> &neighbours_matrix,
                         vector<vector<double>> &gradW_matrix,
@@ -30,7 +32,8 @@ void continuityEquation(vector<vector<int>> &neighbours_matrix,
                         vector<double> &rho_array,
                         vector<double> &mass_array, 
                         size_t nb_moving_part,
-                        double h);
+                        double h, 
+                        const bool PRINT);
 
 void momentumEquation(vector<vector<int>> &neighbours_matrix,
                       vector<vector<double>> &gradW_matrix,
@@ -44,7 +47,8 @@ void momentumEquation(vector<vector<int>> &neighbours_matrix,
                       double gamma,
                       double R, double T, double M,
                       double g,
-                      string state_equation_chosen);
+                      string state_equation_chosen, 
+                      const bool PRINT);
 
 double setSpeedOfSound(double rho, double rho_0, double c_0,
                        double gamma, 
@@ -56,4 +60,5 @@ void setPressure(vector<double> &p_array,
                  double rho_0, double c_0, 
                  double R, double T, double M,
                  double gamma,
-                 string state_equation_chosen);
+                 string state_equation_chosen, 
+                 const bool PRINT);
