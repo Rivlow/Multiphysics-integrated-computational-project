@@ -94,7 +94,6 @@ int main(int argc, char *argv[])
     double alpha = data["alpha"];
     double beta = data["beta"];
     double c_0 = data["c_0"];
-
     double rho_init = data["rho_moving"];
     double rho_fixed = data["rho_fixed"];
     double rho_0 = data["rho_0"];
@@ -179,7 +178,7 @@ int main(int argc, char *argv[])
                   rho_init, rho_fixed, rho_0,
                   c_0, M, g, R, T, gamma,
                   state_equation_chosen, state_initial_condition, PRINT);
-                  
+
     initializeMass(rho_array, mass_array, s, PRINT);
     initializeVelocity(u_array, u_init, nb_moving_part, PRINT);
     initializeViscosity(artificial_visc_matrix, PRINT);
@@ -251,14 +250,12 @@ int main(int argc, char *argv[])
             }
         }
 
-        
-
         clearAllVectors(artificial_visc_matrix, neighbours_matrix,
                         cell_matrix, gradW_matrix,
                         PRINT);
 
         if(t % nsave == 0){
-            export_particles("sph", t, pos_array, scalars, vectors);
+            export_particles("../../output/sph", t, pos_array, scalars, vectors);
         }
     }
 

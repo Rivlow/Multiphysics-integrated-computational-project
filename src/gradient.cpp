@@ -1,6 +1,8 @@
-#include "gradient.h"
 #include <stdio.h>
 #include <vector>
+#include <omp.h>
+
+#include "gradient.h"
 #include "sorted_list.h"
 #include "Kernel_functions.h"
 #include "tools.h"
@@ -16,6 +18,7 @@ void gradW(vector<vector<double>> &gradW_matrix,
            const bool PRINT){
 
     // Iterations over each particle
+    #pragma omp parallel for
     for (size_t pos = 0; pos < pos_array.size()/3; pos++)
     {
         vector<int> &neighbours_array = neighbours_matrix[pos];
@@ -90,7 +93,7 @@ void setPressure(vector<double> &p_array,
                  string state_equation_chosen, 
                  const bool PRINT)
 {
-
+    #pragma omp parallel for
     for (size_t pos = 0; pos < nb_moving_part; pos++)
     {
 
@@ -127,6 +130,7 @@ void setArtificialViscosity(vector<vector<double>> &artificial_visc_matrix,
 
     if (t == 0)
     {
+        #pragma omp parallel for
         for (size_t pos = 0; pos < nb_moving_part; pos++)
         {
 
@@ -145,6 +149,7 @@ void setArtificialViscosity(vector<vector<double>> &artificial_visc_matrix,
         vector<double> rel_displ(3), rel_vel(3);
 
         // Iterations over each particle
+        #pragma omp parallel for
         for (size_t pos = 0; pos < nb_moving_part; pos++)
         {
 
@@ -216,15 +221,11 @@ void continuityEquation(vector<vector<int>> &neighbours_matrix,
                         const bool PRINT){
 
     // Iterations over each particle
+    #pragma omp parallel for
     for (size_t pos = 0; pos < pos_array.size()/3; pos++){
-        //cout << "Pos : " << pos << endl;
+
         vector<int> &neighbours_array = neighbours_matrix[pos];
         vector<double> &gradW_array = gradW_matrix[pos];
-
-        //printArray(neighbours_array, neighbours_array.size(), "neighbours_array");
-        //cout << "\n"<< endl;
-        //printArray(gradW_array, gradW_array.size(), "gradW_array");
-
 
         // Summation over b = 1 -> nb_neighbours
         for (size_t idx = 0; idx < neighbours_array.size(); idx++){
@@ -266,6 +267,7 @@ void momentumEquation(vector<vector<int>> &neighbours_matrix,
                       const bool PRINT){
 
     // Iterations over each particle
+    #pragma omp parallel for
     for (size_t pos = 0; pos < nb_moving_part; pos++)
     {
         vector<int> &neighbours_array = neighbours_matrix[pos];
