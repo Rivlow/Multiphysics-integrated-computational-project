@@ -35,3 +35,14 @@ build/
 
 # Vscode data
 .vscode/
+!.vscode/launch.json
+
+output/
+
+# Pictures
+*.PDF
+*.vtp
+
+# Text files
+*.txt
+
