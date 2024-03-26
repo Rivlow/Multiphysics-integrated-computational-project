@@ -120,8 +120,7 @@ void setArtificialViscosity(vector<vector<double>> &artificial_visc_matrix,
                             double R, double T,double M, 
                             double h,
                             string state_equation_chosen, 
-                            const bool PRINT)
-{
+                            const bool PRINT){
 
     if (t == 0)
     {
@@ -211,8 +210,7 @@ void continuityEquation(vector<vector<int>> &neighbours_matrix,
                         vector<double> &mass_array, 
                         size_t nb_moving_part,
                         double h, 
-                        const bool PRINT)
-{
+                        const bool PRINT){
 
     // Iterations over each particle
     for (size_t pos = 0; pos < nb_moving_part; pos++)
@@ -220,8 +218,6 @@ void continuityEquation(vector<vector<int>> &neighbours_matrix,
 
         vector<int> neighbours_array = neighbours_matrix[pos];
         vector<double> gradW_array = gradW_matrix[pos];
-
-        double drhodt = 0;
 
         // Summation over b = 1 -> nb_neighbours
         for (size_t idx = 0; idx < neighbours_array.size(); idx++)
@@ -237,11 +233,10 @@ void continuityEquation(vector<vector<int>> &neighbours_matrix,
                 double u_b = u_array[3 * idx_neighbour + cord];
                 dot_product += (u_a - u_b) * gradW_array[3*idx + cord];
             }
-
-            drhodt += m_b * dot_product;
+            
+            drhodt_array[pos] += m_b * dot_product;
         }
 
-        drhodt_array[pos] = drhodt;
     }
 
     if (PRINT){
@@ -262,8 +257,7 @@ void momentumEquation(vector<vector<int>> &neighbours_matrix,
                       double R, double T, double M,
                       double g,
                       string state_equation_chosen, 
-                      const bool PRINT)
-{
+                      const bool PRINT){
 
     // Iterations over each particle
     for (size_t pos = 0; pos < nb_moving_part; pos++)

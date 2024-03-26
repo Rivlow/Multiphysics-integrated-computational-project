@@ -114,7 +114,6 @@ int main(int argc, char *argv[])
     double h = 1.2 * s;                    
     double R = 8.314; // [J/(K.mol)]
     double g = -9.81; // [m/s²]
-    //double dt = 0.005;
 
     // Number of cells (in each direction)
     int Nx, Ny, Nz;
@@ -190,16 +189,16 @@ int main(int argc, char *argv[])
     {
 
         // compute dt_max = min_a h_a/F
-
         // double dt_max = sqrt(kappa * h / abs(g)); // CFL condition
         // std::cout << "dt_max = " << dt_max << "    dt = " << dt << std::endl;
 
         vector<double> drhodt_array(nb_tot_part, 0.0), dudt_array(3 * nb_tot_part, 0.0);
 
+        // Apply the linked-list algorithm
         findNeighbours(cell_matrix, neighbours_matrix,
                        pos_array, L_d,
                        nb_moving_part, Nx, Ny, Nz, h, kappa, 
-                       PRINT); // Apply the linked-list algorithm
+                       PRINT); 
 
         // Compute ∇_a(W_ab) for all particles
         gradW(gradW_matrix, neighbours_matrix, 
@@ -252,12 +251,16 @@ int main(int argc, char *argv[])
             }
         }
 
+        
+
         clearAllVectors(artificial_visc_matrix, neighbours_matrix,
                         cell_matrix, gradW_matrix,
                         PRINT);
 
-        if(t % nsave == 0)
+        if(t % nsave == 0){
             export_particles("sph", t, pos_array, scalars, vectors);
+            printArray(dudt_array, nb_moving_part, "dudt_array");
+        }
     }
 
     std::cout << "\nSimulation done." << std::endl;
