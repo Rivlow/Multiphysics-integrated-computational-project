@@ -3,6 +3,10 @@
 #include <vector>
 #include "sorted_list.h"
 #include "Kernel_functions.h"
+#include <chrono>
+#include <iostream>
+#include <omp.h>
+
 using namespace std;
 
 void gradW(size_t nb_moving_part,
@@ -13,6 +17,7 @@ void gradW(size_t nb_moving_part,
 {
 
     // Iterations over each particle
+    
     for (size_t pos = 0; pos < nb_moving_part; pos++)
     {
         vector<int> &neighbours_list = neighbours_matrix[pos];
@@ -203,8 +208,10 @@ void continuityEquation(size_t nb_moving_part,
                         vector<double> &mass_arr, 
                         double h)
 {
-
+    auto t0 = std::chrono::high_resolution_clock::now();
     // Iterations over each particle
+    //cout << "avant pragma " << endl;
+    //#pragma omp parallel for
     for (size_t pos = 0; pos < nb_moving_part; pos++)
     {
 
@@ -233,7 +240,13 @@ void continuityEquation(size_t nb_moving_part,
         }
 
         drhodt_arr[pos] = drhodt;
+
     }
+    //cout << "arpes pragma"<< endl;
+    auto t1 = std::chrono::high_resolution_clock::now();
+    auto delta_t = std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0).count();
+    std::cout << "duration contininty : " << delta_t << "s.\n";
+
 }
 
 void momentumEquation(size_t nb_moving_part,
@@ -250,8 +263,9 @@ void momentumEquation(size_t nb_moving_part,
                       double g,
                       string state_equation_chosen)
 {
-
+    auto t0 = std::chrono::high_resolution_clock::now();
     // Iterations over each particle
+    //#pragma omp parallel for
     for (size_t pos = 0; pos < nb_moving_part; pos++)
     {
         vector<int> &neighbours_arr = neighbours_matrix[pos];
@@ -284,4 +298,7 @@ void momentumEquation(size_t nb_moving_part,
             dudt_arr[3 * pos + cord] += F_vol[cord];
         }
     }
+    auto t1 = std::chrono::high_resolution_clock::now();
+    auto delta_t = std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0).count();
+    std::cout << "duration momentum : " << delta_t << "s.\n";
 }

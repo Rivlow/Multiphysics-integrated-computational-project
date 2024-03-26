@@ -223,10 +223,10 @@ int main(int argc, char *argv[])
 
         // printArray(pos_array, nb_moving_part, "pos_array");
 
-        //findNeighbours(nb_moving_part, pos_array, cell_matrix, neighbours_matrix,
-        //               L_d, Nx, Ny, Nz, h, kappa); // Apply the linked-list algorithm
+        findNeighbours(nb_moving_part, pos_array, cell_matrix, neighbours_matrix,
+                      L_d, Nx, Ny, Nz, h, kappa); // Apply the linked-list algorithm
 
-        naiveAlgo(nb_tot_part, pos_array, neighbours_matrix, h, kappa);
+       // naiveAlgo(nb_tot_part, pos_array, neighbours_matrix, h, kappa);
 
         if (PRINT)
         {
