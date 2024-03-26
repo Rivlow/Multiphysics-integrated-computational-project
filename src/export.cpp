@@ -206,7 +206,7 @@ void export_particles(std::string const &filename,
     assert(pos.size() == (size_t)nbp * 3); // should be multiple of 3
 
 
-    std::string outputDirectory = "../../output/"; // Chemin vers le répertoire de sortie
+    std::string outputDirectory = "../../output/"; // Chemin vers le répertoire de sortie // [RB] NON!!
 
 
     // build file name + stepno + vtk extension

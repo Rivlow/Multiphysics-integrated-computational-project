@@ -3,23 +3,62 @@
 #include "sorted_list.h"
 using namespace std;
 
-void gradW( vector<double> &part_pos,  vector<vector<unsigned>> &neighbours_matrix, vector<vector<double>> &gradW_matrix, 
-            double &h,  unsigned &Nx,  unsigned &Ny,  unsigned &Nz);
+void gradW(vector<vector<double>> &gradW_matrix,
+           vector<vector<int>> &neighbours_matrix,
+           vector<double> &pos_array,
+           size_t nb_moving_part,
+           double h, int Nx, int Ny, int Nz, 
+           const bool PRINT);
 
-double setArtificialViscosity(int &t, vector<vector<double>> &artificial_visc, vector<double> &pos_arr, vector<vector<unsigned>> &neighbours_matrix, vector<double> &rho_arr, 
-                            vector<double> &u_arr, double &alpha,  double &beta,  double &rho_0, double &c_0, double &gamma, double &R, double &T, double &M, double &h, string &state_equation_chosen);
+void setArtificialViscosity(vector<vector<double>> &artificial_visc_matrix,
+                            vector<vector<int>> &neighbours_matrix,
+                            vector<double> &pos_array,
+                            vector<double> &rho_array,
+                            vector<double> &u_array, 
+                            size_t nb_moving_part,
+                            int t, 
+                            double alpha, double beta, double gamma,
+                            double c_0, double rho_0,
+                            double R, double T,double M, 
+                            double h,
+                            string state_equation_chosen, 
+                            const bool PRINT);
 
-void continuityEquation(vector<double> &pos_arr,  vector<double> &u_arr,  vector<vector<unsigned>> &neighbours_matrix, 
-                         vector<vector<double>> &gradW_matrix, vector<double> &drhodt_arr, vector<double> &rho_arr,  vector<double> &mass_arr,  double &h);
+void continuityEquation(vector<vector<int>> &neighbours_matrix,
+                        vector<vector<double>> &gradW_matrix,
+                        vector<double> &pos_array,
+                        vector<double> &u_array,
+                        vector<double> &drhodt_array,
+                        vector<double> &rho_array,
+                        vector<double> &mass_array, 
+                        size_t nb_moving_part,
+                        double h, 
+                        const bool PRINT);
 
+void momentumEquation(vector<vector<int>> &neighbours_matrix,
+                      vector<vector<double>> &gradW_matrix,
+                      vector<vector<double>> &artificial_visc_matrix,
+                      vector<double> &mass_array,
+                      vector<double> &dudt_array,
+                      vector<double> &rho_array,
+                      vector<double> &p_array, 
+                      size_t nb_moving_part,
+                      double rho_0, double c_0,
+                      double gamma,
+                      double R, double T, double M,
+                      double g,
+                      string state_equation_chosen, 
+                      const bool PRINT);
 
-void momentumEquation(vector<vector<unsigned>> &neighbours_matrix,  vector<double> &mass_arr,  vector<vector<double>> &gradW_matrix, 
-                      vector<double> &dudt_arr, vector<vector<double>> &artificial_visc,  vector<double> &rho_arr,  double &rho_0,  double &c_0,
-                      vector<double> &p_arr,  double &R,  double &T,  double &M,  double &gamma, double &g, string &state_equation_chosen);
+double setSpeedOfSound(double rho, double rho_0, double c_0,
+                       double gamma, 
+                       string state_equation_chosen);
 
-
-double setSpeedOfSound(double &rho,  double &rho_0,  double &c_0, double &gamma, string &state_equation_chosen);
-
-
-double setPressure(vector<double> &p_arr, vector<double> &rho_arr,  double &rho_0,  double &c_0,  double &R,  double &T,
-                   double &M,  double &gamma,  string &state_equation_chosen);
+void setPressure(vector<double> &p_array,
+                 vector<double> &rho_array, 
+                 size_t nb_moving_part,
+                 double rho_0, double c_0, 
+                 double R, double T, double M,
+                 double gamma,
+                 string state_equation_chosen, 
+                 const bool PRINT);
