@@ -3,6 +3,9 @@
 #include <vector>
 #include "sorted_list.h"
 #include "Kernel_functions.h"
+#include "tools.h"
+
+
 using namespace std;
 
 void gradW(vector<vector<double>> &gradW_matrix,
@@ -13,7 +16,7 @@ void gradW(vector<vector<double>> &gradW_matrix,
            const bool PRINT){
 
     // Iterations over each particle
-    for (size_t pos = 0; pos < nb_moving_part; pos++)
+    for (size_t pos = 0; pos < pos_array.size()/3; pos++)
     {
         vector<int> &neighbours_array = neighbours_matrix[pos];
         // cout << "len(neighbour_list) : " << neighbours_list.size() << endl;
@@ -135,7 +138,7 @@ void setArtificialViscosity(vector<vector<double>> &artificial_visc_matrix,
             }
         }
     }
-/*
+
     else
     {
 
@@ -194,7 +197,7 @@ void setArtificialViscosity(vector<vector<double>> &artificial_visc_matrix,
             }
         }
     }
-    */
+    
 
    if (PRINT){
             cout << "setArtificialViscosity passed" << endl;
@@ -213,15 +216,18 @@ void continuityEquation(vector<vector<int>> &neighbours_matrix,
                         const bool PRINT){
 
     // Iterations over each particle
-    for (size_t pos = 0; pos < nb_moving_part; pos++)
-    {
+    for (size_t pos = 0; pos < pos_array.size()/3; pos++){
+        //cout << "Pos : " << pos << endl;
+        vector<int> &neighbours_array = neighbours_matrix[pos];
+        vector<double> &gradW_array = gradW_matrix[pos];
 
-        vector<int> neighbours_array = neighbours_matrix[pos];
-        vector<double> gradW_array = gradW_matrix[pos];
+        //printArray(neighbours_array, neighbours_array.size(), "neighbours_array");
+        //cout << "\n"<< endl;
+        //printArray(gradW_array, gradW_array.size(), "gradW_array");
+
 
         // Summation over b = 1 -> nb_neighbours
-        for (size_t idx = 0; idx < neighbours_array.size(); idx++)
-        {
+        for (size_t idx = 0; idx < neighbours_array.size(); idx++){
 
             // Dot product of u_ab with grad_a(W_ab)
             double dot_product = 0;
@@ -274,7 +280,7 @@ void momentumEquation(vector<vector<int>> &neighbours_matrix,
             // Summation over b = 1 -> nb_neighbours
             for (size_t idx_neighbour = 0; idx_neighbour < neighbours_array.size(); idx_neighbour++)
             {
-                double pi_ab = 0; // artificial_visc_arr[idx_neighbour];
+                double pi_ab = artificial_visc_array[idx_neighbour];
                 double rho_b = rho_array[neighbours_array[idx_neighbour]];
                 double m_b = mass_array[neighbours_array[idx_neighbour]];
                 double p_b = p_array[neighbours_array[idx_neighbour]];

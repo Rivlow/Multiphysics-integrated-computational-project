@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 
     for (auto &it : data["stateEquation"].items())
     {
-        if (it.value() == 1)
+        if (it.value() == true)
         {
             state_equation_chosen = it.key();
         }
@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
 
     for (auto &it : data["initialCondition"].items())
     {
-        if (it.value() == 1)
+        if (it.value() == true)
         {
             state_initial_condition = it.key();
         }
@@ -117,9 +117,9 @@ int main(int argc, char *argv[])
 
     // Number of cells (in each direction)
     int Nx, Ny, Nz;
-    Nx = (int)L_d[0] / (kappa * h);
-    Ny = (int)L_d[1] / (kappa * h);
-    Nz = (int)L_d[2] / (kappa * h);
+    Nx = L_d[0] / (kappa * h);
+    Ny = L_d[1] / (kappa * h);
+    Nz = L_d[2] / (kappa * h);
 
     cout << " kappa * h =" << kappa * h << endl;
     printf("(Nx, Ny, Nz) = (%d, %d, %d) \n", Nx, Ny, Nz);
@@ -146,6 +146,7 @@ int main(int argc, char *argv[])
 
     std::cout << "nb_moving_part = " << nb_moving_part << std::endl;
     std::cout << "nb_tot_part = " << nb_tot_part << std::endl;
+
     std::cout << "s=" << s << std::endl;
     std::cout << "kappa=" << kappa << std::endl;
     std::cout << "h=" << h << std::endl;
@@ -172,14 +173,13 @@ int main(int argc, char *argv[])
     vectors["u_array"] = &u_array;
     vectors["dudt_array"] = &dudt_array;
 
-    cout << "len(u_array) : " << pos_array.size() << endl;
-    cout << "len(pos_array) : " << u_array.size() << endl;
 
     initializeRho(pos_array, rho_array,
                   nb_moving_part,
                   rho_init, rho_fixed, rho_0,
                   c_0, M, g, R, T, gamma,
                   state_equation_chosen, state_initial_condition, PRINT);
+                  
     initializeMass(rho_array, mass_array, s, PRINT);
     initializeVelocity(u_array, u_init, nb_moving_part, PRINT);
     initializeViscosity(artificial_visc_matrix, PRINT);
@@ -232,20 +232,20 @@ int main(int argc, char *argv[])
                          state_equation_chosen, PRINT); 
 
         // Update density, velocity and position for each particle (Euler explicit scheme)
-        for (size_t pos = 0; pos < nb_particles; pos++)
-        {
+        for (size_t pos = 0; pos < nb_tot_part; pos++){
 
-            rho_array[pos] = rho_array[pos] + dt * drhodt_array[pos];
+            rho_array[pos] += dt * drhodt_array[pos];
 
-            for (size_t cord = 0; cord < 3; cord++)
-            {
+            for (size_t cord = 0; cord < 3; cord++){
 
                 pos_array[3 * pos + cord] += dt * u_array[3 * pos + cord];
 
+                /*
                 if (pos_array[3 * pos + cord] <= 0){
                 cout << "Particles out of the domain. Simulation done";
                 return 0;
                 }
+                */
 
                 u_array[3 * pos + cord] += dt * dudt_array[3 * pos + cord];
             }
@@ -259,7 +259,6 @@ int main(int argc, char *argv[])
 
         if(t % nsave == 0){
             export_particles("sph", t, pos_array, scalars, vectors);
-            printArray(dudt_array, nb_moving_part, "dudt_array");
         }
     }
 

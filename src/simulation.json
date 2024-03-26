@@ -1,12 +1,12 @@
 {
-    "s": 0.1,
+    "s": 0.25,
     "nstepT": 20000,
     "dt": 0.00005,
     "nsave": 100,
 
-    "o": [0.3, 0.3, 0.6],
-    "L": [0.6, 0.6, 0.6],
-    "L_d": [1.2, 1.2 , 1.2],
+    "o": [2, 2, 2],
+    "L": [1, 1, 1],
+    "L_d": [5, 5 , 5],
     "o_d": [0.0, 0.0, 0.0],
 
     "kappa": 2,
@@ -21,8 +21,8 @@
     "beta": 0,
     "M": 18e-3, 
 
-    "print_debug":false,
-    "stateEquation" : {"Ideal gaz law":1, "Quasi incompresible fluid":0},
-    "initialCondition" : {"Hydrostatic":0, "Constant":1}
+    "print_debug":true,
+    "stateEquation" : {"Ideal gaz law":true, "Quasi incompresible fluid":false},
+    "initialCondition" : {"Hydrostatic":false, "Constant":true}
 }
 

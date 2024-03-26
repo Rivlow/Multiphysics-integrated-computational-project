@@ -113,6 +113,8 @@ void meshBoundary(vector<double> &o_d,
         }
     }
 
+  
+
     // Shift the center and origin to a get "en quiconce" boundaries
     for (size_t i = 0; i < 3; i++)
     {
@@ -121,11 +123,21 @@ void meshBoundary(vector<double> &o_d,
         // cout << " le centre et longueur de l'axe " << i << "est "<< o_d[i] << " et  " << L_d[i] << endl;
     }
 
+    ni = int(ceil(L_d[0] / s));
+    dx = L_d[0] / ni;
+    ++ni;
+    nj = int(ceil(L_d[1] / s));
+    dy = L_d[1] / nj;
+    ++nj;
+    nk= int(ceil(L_d[2] / s));
+    dz = L_d[2] / nk;
+    ++nk;
+
     // Apply the second layer of FP
     for (int i = 0; i < ni ; ++i) // along x
     {
         double x = o_d[0] + i * dx;
-        for (int j = 1; j < nj; ++j) // along y
+        for (int j = 0; j < nj; ++j) // along y
         {
             double y = o_d[1] + j * dy;
             bound_arr.push_back(x);
