@@ -42,9 +42,9 @@ void gradW(vector<vector<double>> &gradW_matrix,
             // cout << "pos_array associated : " << pos_array[3*pos+0] << endl;
             // cout << "idx_neighbour associated : " << pos_array[3*idx_neighbour+0] << endl;
 
-            double val_0 = abs(pos_array[3 * pos + 0] - pos_array[3 * idx_neighbour + 0]) / r_ab * derive_cubic_spline(r_ab, h);
-            double val_1 = abs(pos_array[3 * pos + 1] - pos_array[3 * idx_neighbour + 1]) / r_ab * derive_cubic_spline(r_ab, h);
-            double val_2 = abs(pos_array[3 * pos + 2] - pos_array[3 * idx_neighbour + 2]) / r_ab * derive_cubic_spline(r_ab, h);
+            double val_0 = (pos_array[3 * pos + 0] - pos_array[3 * idx_neighbour + 0]) / r_ab * derive_cubic_spline(r_ab, h);
+            double val_1 = (pos_array[3 * pos + 1] - pos_array[3 * idx_neighbour + 1]) / r_ab * derive_cubic_spline(r_ab, h);
+            double val_2 = (pos_array[3 * pos + 2] - pos_array[3 * idx_neighbour + 2]) / r_ab * derive_cubic_spline(r_ab, h);
 
             gradW_matrix[pos].push_back(val_0);
             // cout << "after first push_back"<<endl;
@@ -262,9 +262,9 @@ void momentumEquation(vector<vector<int>> &neighbours_matrix,
     // Iterations over each particle
     for (size_t pos = 0; pos < nb_moving_part; pos++)
     {
-        vector<int> neighbours_array = neighbours_matrix[pos];
-        vector<double> gradW_array = gradW_matrix[pos];
-        vector<double> artificial_visc_array = artificial_visc_matrix[pos];
+        vector<int> &neighbours_array = neighbours_matrix[pos];
+        vector<double> &gradW_array = gradW_matrix[pos];
+        vector<double> &artificial_visc_array = artificial_visc_matrix[pos];
         vector<double> F_vol = {0.0, 0.0, g};
         double rho_a = rho_array[pos];
         double p_a = p_array[pos];
@@ -279,13 +279,9 @@ void momentumEquation(vector<vector<int>> &neighbours_matrix,
                 double m_b = mass_array[neighbours_array[idx_neighbour]];
                 double p_b = p_array[neighbours_array[idx_neighbour]];
 
-                dudt_array[3 * pos + cord] += m_b * (p_b / (rho_b * rho_b) + p_a / (rho_a * rho_a) + pi_ab) * gradW_array[3*idx_neighbour + cord];
-                // cout << "p_a" << p_a << endl;
-                // cout << "p_b" << p_b << endl;
-                // cout << "rho_b" << rho_b << endl;
-                // cout << "rho_a" << rho_a << endl;
-                // cout << "m_b" << m_b << endl;
-                // cout << "\n " <<endl;
+                dudt_array[3 * pos + cord] += m_b * (p_b / (rho_b * rho_b) + p_a / (rho_a * rho_a) + pi_ab) 
+                                            * gradW_array[3*idx_neighbour + cord];
+
             }
 
             dudt_array[3 * pos + cord] *= -1;
