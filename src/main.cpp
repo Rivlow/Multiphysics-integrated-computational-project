@@ -244,7 +244,8 @@ auto t0 = std::chrono::high_resolution_clock::now();
 
             rho_array[pos] += dt * drhodt_array[pos];
 
-            for (size_t cord = 0; cord < 3; cord++){
+            for (size_t cord = 0; cord < 3; cord++)
+            {
 
                 pos_array[3 * pos + cord] += dt * u_array[3 * pos + cord];
                 u_array[3 * pos + cord] += dt * dudt_array[3 * pos + cord];

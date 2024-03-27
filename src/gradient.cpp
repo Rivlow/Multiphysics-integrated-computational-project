@@ -85,6 +85,10 @@ void setSpeedOfSound(vector<double> &c_array,
             c_array[pos] = c_0 * pow(rho_array[pos] / rho_0, 0.5 * (gamma - 1));
         }
     }
+
+    if (PRINT){
+            cout << "gradW passed" << endl;
+    }
 }
 
 void setPressure(vector<double> &p_array,

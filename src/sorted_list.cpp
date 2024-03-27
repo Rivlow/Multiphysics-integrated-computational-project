@@ -13,7 +13,6 @@
 #include "sorted_list.h"
 #include <omp.h>
 
-
 using namespace std;
 
 void findNeighbours(vector<vector<int>> &cell_matrix,
@@ -68,7 +67,7 @@ void findNeighbours(vector<vector<int>> &cell_matrix,
             continue;
         }
 
-        //cout << "cell's indices computed" << endl;
+        // cout << "cell's indices computed" << endl;
 
         i_cell = (i_cell >= Nx) ? Nx - 1 : i_cell;
         j_cell = (j_cell >= Ny) ? Ny - 1 : j_cell;
