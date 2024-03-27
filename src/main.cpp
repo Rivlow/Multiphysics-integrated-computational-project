@@ -18,6 +18,7 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
+#include <chrono>
 
 #include "nlohmann/json.hpp"
 using json = nlohmann::json;
@@ -28,6 +29,7 @@ int main(int argc, char *argv[])
 {
 
     /*------------- SETTING COMPILATION PARAMETERS/Folders needed ---------------------------*/
+auto t0 = std::chrono::high_resolution_clock::now();
 
 #ifdef _OPENMP
     std::cout << "OpenMP available: OMP_NUM_THREADS=" << omp_get_max_threads() << "\n";
@@ -155,7 +157,8 @@ int main(int argc, char *argv[])
                    rho_array(nb_tot_part),
                    dudt_array(3 * nb_tot_part, 0.0),
                    p_array(nb_tot_part),
-                   c_array(nb_tot_part);
+                   c_array(nb_tot_part),
+                   grad_sum(nb_tot_part);
 
     vector<vector<double>> artificial_visc_matrix(nb_tot_part),
                            gradW_matrix(nb_tot_part);
@@ -169,6 +172,7 @@ int main(int argc, char *argv[])
     scalars["p_array"] = &p_array;
     scalars["drhodt_array"] = &drhodt_array;
     scalars["nvoisins"] = &nvoisins;
+    scalars["grad_sum"] = &grad_sum;
     vectors["position"] = &pos_array;
     vectors["u_array"] = &u_array;
     vectors["dudt_array"] = &dudt_array;
@@ -192,7 +196,7 @@ int main(int argc, char *argv[])
         // double dt_max = sqrt(kappa * h / abs(g)); // CFL condition
         // std::cout << "dt_max = " << dt_max << "    dt = " << dt << std::endl;
 
-        vector<double> drhodt_array(nb_tot_part, 0.0), dudt_array(3 * nb_tot_part, 0.0);
+        //vector<double> drhodt_array(nb_tot_part, 0.0), dudt_array(3 * nb_tot_part, 0.0);
 
         // Apply the linked-list algorithm
         findNeighbours(cell_matrix, neighbours_matrix,
@@ -246,7 +250,12 @@ int main(int argc, char *argv[])
                 u_array[3 * pos + cord] += dt * dudt_array[3 * pos + cord];
             }
         }
-
+        for(size_t i = 0 ; i < gradW_matrix.size(); i++){
+            for(size_t j = 0 ; j < gradW_matrix[i].size(); j ++){
+                grad_sum[i] += abs(gradW_matrix[i][j]);
+            }
+        }
+        
         clearAllVectors(artificial_visc_matrix, neighbours_matrix,
                         cell_matrix, gradW_matrix,
                         PRINT);
@@ -254,7 +263,19 @@ int main(int argc, char *argv[])
         if(t % nsave == 0){
             export_particles("../../output/sph", t, pos_array, scalars, vectors);
         }
+        for(size_t i = 0 ; i<drhodt_array.size(); i ++ )
+        {
+            drhodt_array[i] = 0.0;
+        }
+        for(size_t i = 0 ; i<dudt_array.size(); i ++ )
+        {
+            dudt_array[i] = 0.0;
+        }
     }
+
+    auto t1 = std::chrono::high_resolution_clock::now();
+    auto delta_t = std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0).count();
+    std::cout << "duration: " << delta_t << "s.\n";
 
     std::cout << "\nSimulation done." << std::endl;
     return 0;

@@ -18,7 +18,7 @@ void gradW(vector<vector<double>> &gradW_matrix,
            const bool PRINT){
 
     // Iterations over each particle
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for (size_t pos = 0; pos < pos_array.size()/3; pos++)
     {
         vector<int> &neighbours_array = neighbours_matrix[pos];
@@ -72,7 +72,7 @@ void setSpeedOfSound(vector<double> &c_array,
                      double gamma, 
                      string state_equation_chosen){
 
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for (size_t pos = 0; pos < rho_array.size(); pos++)
     {
 
@@ -95,7 +95,7 @@ void setPressure(vector<double> &p_array,
                  double gamma,
                  string state_equation_chosen, 
                  const bool PRINT){
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for (size_t pos = 0; pos < nb_moving_part; pos++)
     {
 
@@ -133,7 +133,7 @@ void setArtificialViscosity(vector<vector<double>> &artificial_visc_matrix,
 
     if (t == 0)
     {
-        #pragma omp parallel for
+        //#pragma omp parallel for
         for (size_t pos = 0; pos < nb_moving_part; pos++)
         {
 
@@ -152,7 +152,7 @@ void setArtificialViscosity(vector<vector<double>> &artificial_visc_matrix,
         vector<double> rel_displ(3), rel_vel(3);
 
         // Iterations over each particle
-        #pragma omp parallel for
+        //#pragma omp parallel for
         for (size_t pos = 0; pos < pos_array.size()/3; pos++)
         {
 
@@ -283,7 +283,7 @@ void momentumEquation(vector<vector<int>> &neighbours_matrix,
             // Summation over b = 1 -> nb_neighbours
             for (size_t idx_neighbour = 0; idx_neighbour < neighbours_array.size(); idx_neighbour++)
             {
-                double pi_ab = artificial_visc_array[idx_neighbour];
+                double pi_ab = 0; //artificial_visc_array[idx_neighbour];
                 double rho_b = rho_array[neighbours_array[idx_neighbour]];
                 double m_b = mass_array[neighbours_array[idx_neighbour]];
                 double p_b = p_array[neighbours_array[idx_neighbour]];

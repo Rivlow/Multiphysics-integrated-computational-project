@@ -36,12 +36,12 @@ void findNeighbours(vector<vector<int>> &cell_matrix,
         int idx_j = pos_array[3 * pos + 1] / (L_d[1] / Ny);
         int idx_k = pos_array[3 * pos + 2] / (L_d[2] / Nz);
 
-        /*
-        if (idx_i < 0 || idx_j < 0 || idx_k < 0){
+        
+        if (idx_i < 0 || idx_j < 0 || idx_k < 0 || idx_i > Nx || idx_j > Ny || idx_k > Ny){
             //cout << "val negative" << endl;
             continue;
         }
-        */
+        
         //else{
         
             idx_i = (idx_i == Nx) ? idx_i - 1 : idx_i;
@@ -63,8 +63,8 @@ void findNeighbours(vector<vector<int>> &cell_matrix,
         int j_cell = pos_array[3 * pos + 1] / (L_d[1] / Ny);
         int k_cell = pos_array[3 * pos + 2] / (L_d[2] / Nz);
 
-        if (i_cell < 0 || j_cell < 0 || k_cell < 0){
-            cout << "val negative" << endl;
+        if (i_cell < 0 || j_cell < 0 || k_cell < 0 || i_cell > Nx || j_cell > Ny || k_cell > Ny){
+            //cout << "val negative" << endl;
             continue;
         }
 
