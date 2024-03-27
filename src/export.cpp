@@ -218,7 +218,7 @@ void export_particles(std::string const &filename,
     // open file
     if (verb)
         std::cout << "writing results to " << s.str() << " (compression:" <<  (usez? "on" : "off") << ")\n";
-    std::ofstream f(outputDirectory+s.str().c_str(), std::ios::binary | std::ios::out);
+    std::ofstream f(s.str().c_str(), std::ios::binary | std::ios::out);
     std::ofstream f2(s2.str().c_str(), std::ios::binary | std::ios::out); // temp binary file
     f << std::scientific;
 

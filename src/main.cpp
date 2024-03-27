@@ -18,6 +18,7 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
+#include <chrono>
 
 #include "nlohmann/json.hpp"
 using json = nlohmann::json;
@@ -28,6 +29,7 @@ int main(int argc, char *argv[])
 {
 
     /*------------- SETTING COMPILATION PARAMETERS/Folders needed ---------------------------*/
+auto t0 = std::chrono::high_resolution_clock::now();
 
 #ifdef _OPENMP
     std::cout << "OpenMP available: OMP_NUM_THREADS=" << omp_get_max_threads() << "\n";
@@ -70,7 +72,7 @@ int main(int argc, char *argv[])
 
     for (auto &it : data["stateEquation"].items())
     {
-        if (it.value() == 1)
+        if (it.value() == true)
         {
             state_equation_chosen = it.key();
         }
@@ -78,7 +80,7 @@ int main(int argc, char *argv[])
 
     for (auto &it : data["initialCondition"].items())
     {
-        if (it.value() == 1)
+        if (it.value() == true)
         {
             state_initial_condition = it.key();
         }
@@ -94,7 +96,6 @@ int main(int argc, char *argv[])
     double alpha = data["alpha"];
     double beta = data["beta"];
     double c_0 = data["c_0"];
-
     double rho_init = data["rho_moving"];
     double rho_fixed = data["rho_fixed"];
     double rho_0 = data["rho_0"];
@@ -117,9 +118,9 @@ int main(int argc, char *argv[])
 
     // Number of cells (in each direction)
     int Nx, Ny, Nz;
-    Nx = (int)L_d[0] / (kappa * h);
-    Ny = (int)L_d[1] / (kappa * h);
-    Nz = (int)L_d[2] / (kappa * h);
+    Nx = L_d[0] / (kappa * h);
+    Ny = L_d[1] / (kappa * h);
+    Nz = L_d[2] / (kappa * h);
 
     cout << " kappa * h =" << kappa * h << endl;
     printf("(Nx, Ny, Nz) = (%d, %d, %d) \n", Nx, Ny, Nz);
@@ -155,7 +156,10 @@ int main(int argc, char *argv[])
                    drhodt_array(nb_tot_part),
                    rho_array(nb_tot_part),
                    dudt_array(3 * nb_tot_part, 0.0),
-                   p_array(nb_tot_part);
+                   p_array(nb_tot_part),
+                   c_array(nb_tot_part),
+                   grad_sum(nb_tot_part);
+
     vector<vector<double>> artificial_visc_matrix(nb_tot_part),
                            gradW_matrix(nb_tot_part);
     vector<vector<int>> neighbours_matrix(nb_tot_part);
@@ -168,18 +172,18 @@ int main(int argc, char *argv[])
     scalars["p_array"] = &p_array;
     scalars["drhodt_array"] = &drhodt_array;
     scalars["nvoisins"] = &nvoisins;
+    scalars["grad_sum"] = &grad_sum;
     vectors["position"] = &pos_array;
     vectors["u_array"] = &u_array;
     vectors["dudt_array"] = &dudt_array;
 
-    cout << "len(u_array) : " << pos_array.size() << endl;
-    cout << "len(pos_array) : " << u_array.size() << endl;
 
     initializeRho(pos_array, rho_array,
                   nb_moving_part,
                   rho_init, rho_fixed, rho_0,
                   c_0, M, g, R, T, gamma,
                   state_equation_chosen, state_initial_condition, PRINT);
+
     initializeMass(rho_array, mass_array, s, PRINT);
     initializeVelocity(u_array, u_init, nb_moving_part, PRINT);
     initializeViscosity(artificial_visc_matrix, PRINT);
@@ -192,7 +196,7 @@ int main(int argc, char *argv[])
         // double dt_max = sqrt(kappa * h / abs(g)); // CFL condition
         // std::cout << "dt_max = " << dt_max << "    dt = " << dt << std::endl;
 
-        vector<double> drhodt_array(nb_tot_part, 0.0), dudt_array(3 * nb_tot_part, 0.0);
+        //vector<double> drhodt_array(nb_tot_part, 0.0), dudt_array(3 * nb_tot_part, 0.0);
 
         // Apply the linked-list algorithm
         findNeighbours(cell_matrix, neighbours_matrix,
@@ -211,19 +215,23 @@ int main(int argc, char *argv[])
                     nb_moving_part, rho_0, c_0, R, T, M, gamma, 
                     state_equation_chosen, PRINT); 
 
+        // Compute speed of sound for all particles
+        setSpeedOfSound(c_array,rho_array,
+                        rho_0, c_0, gamma, 
+                        state_equation_chosen);
+
+        // Compute artificial viscosity Π_ab for all particles
+        setArtificialViscosity(artificial_visc_matrix, neighbours_matrix,
+                               c_array, pos_array, rho_array, u_array, 
+                               nb_moving_part, t, alpha, beta, rho_0, c_0, gamma, R, T, M, h,
+                               state_equation_chosen, PRINT); 
+
         // Compute D(rho)/Dt for all particles
         continuityEquation(neighbours_matrix, gradW_matrix, 
                            pos_array, u_array, drhodt_array, rho_array, mass_array,
                            nb_moving_part, h,
                            PRINT); 
 
-
-        // Compute artificial viscosity Π_ab for all particles
-        setArtificialViscosity(artificial_visc_matrix, neighbours_matrix, 
-                               pos_array, rho_array, u_array, 
-                               nb_moving_part, t, alpha, beta, rho_0, c_0, gamma, R, T, M, h,
-                               state_equation_chosen, PRINT); 
- 
         // Compute D(u)/Dt for all particles
         momentumEquation(neighbours_matrix, gradW_matrix, artificial_visc_matrix,
                          mass_array, dudt_array, rho_array, p_array,
@@ -232,36 +240,43 @@ int main(int argc, char *argv[])
                          state_equation_chosen, PRINT); 
 
         // Update density, velocity and position for each particle (Euler explicit scheme)
-        for (size_t pos = 0; pos < nb_particles; pos++)
-        {
+        for (size_t pos = 0; pos < nb_tot_part; pos++){
 
-            rho_array[pos] = rho_array[pos] + dt * drhodt_array[pos];
+            rho_array[pos] += dt * drhodt_array[pos];
 
             for (size_t cord = 0; cord < 3; cord++)
             {
 
                 pos_array[3 * pos + cord] += dt * u_array[3 * pos + cord];
-
-                if (pos_array[3 * pos + cord] <= 0){
-                cout << "Particles out of the domain. Simulation done";
-                return 0;
-                }
-
                 u_array[3 * pos + cord] += dt * dudt_array[3 * pos + cord];
             }
         }
-
+        for(size_t i = 0 ; i < gradW_matrix.size(); i++){
+            for(size_t j = 0 ; j < gradW_matrix[i].size(); j ++){
+                grad_sum[i] += abs(gradW_matrix[i][j]);
+            }
+        }
         
-
         clearAllVectors(artificial_visc_matrix, neighbours_matrix,
                         cell_matrix, gradW_matrix,
                         PRINT);
 
         if(t % nsave == 0){
-            export_particles("sph", t, pos_array, scalars, vectors);
-            printArray(dudt_array, nb_moving_part, "dudt_array");
+            export_particles("../../output/sph", t, pos_array, scalars, vectors);
+        }
+        for(size_t i = 0 ; i<drhodt_array.size(); i ++ )
+        {
+            drhodt_array[i] = 0.0;
+        }
+        for(size_t i = 0 ; i<dudt_array.size(); i ++ )
+        {
+            dudt_array[i] = 0.0;
         }
     }
+
+    auto t1 = std::chrono::high_resolution_clock::now();
+    auto delta_t = std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0).count();
+    std::cout << "duration: " << delta_t << "s.\n";
 
     std::cout << "\nSimulation done." << std::endl;
     return 0;
