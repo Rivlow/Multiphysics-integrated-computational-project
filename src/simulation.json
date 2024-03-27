@@ -21,7 +21,7 @@
     "beta": 0,
     "M": 18e-3, 
 
-    "print_debug":true,
+    "print_debug":false,
     "stateEquation" : {"Ideal gaz law":true, "Quasi incompresible fluid":false},
     "initialCondition" : {"Hydrostatic":false, "Constant":true}
 }

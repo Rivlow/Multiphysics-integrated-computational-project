@@ -14,7 +14,7 @@
 #include "export.h"
 #include "Kernel_functions.h"
 #include "tools.h"
-
+#include <chrono>
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 
     for (auto &it : data["stateEquation"].items())
     {
-        if (it.value() == true)
+        if (it.value() == false)
         {
             state_equation_chosen = it.key();
         }
@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
     initializeVelocity(u_array, u_init, nb_moving_part, PRINT);
     initializeViscosity(artificial_visc_matrix, PRINT);
 
-
+  
     for (int t = 0; t < nstepT; t++)
     {
 
@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
                         PRINT);
 
         if(t % nsave == 0){
-            export_particles("sph", t, pos_array, scalars, vectors);
+            export_particles("quasi", t, pos_array, scalars, vectors);
         }
     }
 
