@@ -57,7 +57,6 @@ void meshcube(vector<double> &o,
     pos_arr.reserve(pos_arr.size() + ni * nj * nk * 3);
 
     // particle generation
-    //#pragma omp parallel for
     for (int i = 0; i < ni; ++i)
     {
         double x = o[0] + i * dx;
@@ -67,14 +66,11 @@ void meshcube(vector<double> &o,
             for (int k = 0; k < nk; ++k)
             {
                 double z = o[2] + k * dz;
-                
-                    pos_arr.push_back(x);
-                    pos_arr.push_back(y);
-                    pos_arr.push_back(z);
+                pos_arr.push_back(x);
+                pos_arr.push_back(y);
+                pos_arr.push_back(z);
 
-                    type_arr.push_back(1.0);
-                
-                
+                type_arr.push_back(1.0);
             }
         }
     }
@@ -117,40 +113,7 @@ void meshBoundary(vector<double> &o_d,
         }
     }
 
-    for (int j = 0; j < nj; ++j) // along y
-    {
-        double y = o_d[1] + j * dy;
-        for (int k = 1; k < nk-1; ++k) // along z
-        {
-         double z = o_d[2] + k * dz;
-        bound_arr.push_back(o_d[0]);
-        bound_arr.push_back(y);
-        bound_arr.push_back(z);
-        type_arr.push_back(0.0);
-        bound_arr.push_back(L_d[0] + o_d[0]);
-        bound_arr.push_back(y);
-        bound_arr.push_back(z);
-        type_arr.push_back(0.0);
-
-        }
-    }
-    for (int i = 1; i < ni-1; ++i) // along x
-    {
-        double x = o_d[0] + i * dx;
-        for (int k = 1; k < nk-1; ++k) // along z
-        {
-         double z = o_d[2] + k * dz;
-        bound_arr.push_back(x);
-        bound_arr.push_back(o_d[1]);
-        bound_arr.push_back(z);
-        type_arr.push_back(0.0);
-        bound_arr.push_back(x);
-        bound_arr.push_back(L_d[1]+ o_d[1]);
-        bound_arr.push_back(z);
-        type_arr.push_back(0.0);
-
-        }
-    }
+  
 
     // Shift the center and origin to a get "en quiconce" boundaries
     for (size_t i = 0; i < 3; i++)
@@ -181,13 +144,18 @@ void meshBoundary(vector<double> &o_d,
             bound_arr.push_back(y);
             bound_arr.push_back(o_d[2]);
             type_arr.push_back(0.0);
-            bound_arr.push_back(x);
-            bound_arr.push_back(y);
-            bound_arr.push_back(L_d[2] + o_d[2]);
-            type_arr.push_back(0.0);
+            // bound_arr.push_back(x);
+            // bound_arr.push_back(y);
+            // bound_arr.push_back(L_d[2] + o_d[2]);
+            // type_arr.push_back(0.0);
         }
     }
 
+
+
+
+
+    /*
     for (int j = 0; j < nj; ++j) // along y
     {
         double y = o_d[1] + j * dy;
@@ -223,5 +191,5 @@ void meshBoundary(vector<double> &o_d,
         }
     }
     cout <<" longueur de bound_arr :"<< bound_arr.size()/3 << endl;
-    
+    */
 }

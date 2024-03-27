@@ -14,7 +14,7 @@
 #include "export.h"
 #include "Kernel_functions.h"
 #include "tools.h"
-#include <chrono>
+
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 
     for (auto &it : data["stateEquation"].items())
     {
-        if (it.value() == false)
+        if (it.value() == true)
         {
             state_equation_chosen = it.key();
         }
@@ -94,7 +94,6 @@ int main(int argc, char *argv[])
     double alpha = data["alpha"];
     double beta = data["beta"];
     double c_0 = data["c_0"];
-
     double rho_init = data["rho_moving"];
     double rho_fixed = data["rho_fixed"];
     double rho_0 = data["rho_0"];
@@ -146,7 +145,6 @@ int main(int argc, char *argv[])
 
     std::cout << "nb_moving_part = " << nb_moving_part << std::endl;
     std::cout << "nb_tot_part = " << nb_tot_part << std::endl;
-
     std::cout << "s=" << s << std::endl;
     std::cout << "kappa=" << kappa << std::endl;
     std::cout << "h=" << h << std::endl;
@@ -156,7 +154,9 @@ int main(int argc, char *argv[])
                    drhodt_array(nb_tot_part),
                    rho_array(nb_tot_part),
                    dudt_array(3 * nb_tot_part, 0.0),
-                   p_array(nb_tot_part);
+                   p_array(nb_tot_part),
+                   c_array(nb_tot_part);
+
     vector<vector<double>> artificial_visc_matrix(nb_tot_part),
                            gradW_matrix(nb_tot_part);
     vector<vector<int>> neighbours_matrix(nb_tot_part);
@@ -179,12 +179,12 @@ int main(int argc, char *argv[])
                   rho_init, rho_fixed, rho_0,
                   c_0, M, g, R, T, gamma,
                   state_equation_chosen, state_initial_condition, PRINT);
-                  
+
     initializeMass(rho_array, mass_array, s, PRINT);
     initializeVelocity(u_array, u_init, nb_moving_part, PRINT);
     initializeViscosity(artificial_visc_matrix, PRINT);
 
-  
+
     for (int t = 0; t < nstepT; t++)
     {
 
@@ -211,19 +211,23 @@ int main(int argc, char *argv[])
                     nb_moving_part, rho_0, c_0, R, T, M, gamma, 
                     state_equation_chosen, PRINT); 
 
+        // Compute speed of sound for all particles
+        setSpeedOfSound(c_array,rho_array,
+                        rho_0, c_0, gamma, 
+                        state_equation_chosen);
+
+        // Compute artificial viscosity Π_ab for all particles
+        setArtificialViscosity(artificial_visc_matrix, neighbours_matrix,
+                               c_array, pos_array, rho_array, u_array, 
+                               nb_moving_part, t, alpha, beta, rho_0, c_0, gamma, R, T, M, h,
+                               state_equation_chosen, PRINT); 
+
         // Compute D(rho)/Dt for all particles
         continuityEquation(neighbours_matrix, gradW_matrix, 
                            pos_array, u_array, drhodt_array, rho_array, mass_array,
                            nb_moving_part, h,
                            PRINT); 
 
-
-        // Compute artificial viscosity Π_ab for all particles
-        setArtificialViscosity(artificial_visc_matrix, neighbours_matrix, 
-                               pos_array, rho_array, u_array, 
-                               nb_moving_part, t, alpha, beta, rho_0, c_0, gamma, R, T, M, h,
-                               state_equation_chosen, PRINT); 
- 
         // Compute D(u)/Dt for all particles
         momentumEquation(neighbours_matrix, gradW_matrix, artificial_visc_matrix,
                          mass_array, dudt_array, rho_array, p_array,
@@ -239,26 +243,16 @@ int main(int argc, char *argv[])
             for (size_t cord = 0; cord < 3; cord++){
 
                 pos_array[3 * pos + cord] += dt * u_array[3 * pos + cord];
-
-                /*
-                if (pos_array[3 * pos + cord] <= 0){
-                cout << "Particles out of the domain. Simulation done";
-                return 0;
-                }
-                */
-
                 u_array[3 * pos + cord] += dt * dudt_array[3 * pos + cord];
             }
         }
-
-        
 
         clearAllVectors(artificial_visc_matrix, neighbours_matrix,
                         cell_matrix, gradW_matrix,
                         PRINT);
 
         if(t % nsave == 0){
-            export_particles("quasi", t, pos_array, scalars, vectors);
+            export_particles("../../output/sph", t, pos_array, scalars, vectors);
         }
     }
 

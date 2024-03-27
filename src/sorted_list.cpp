@@ -9,8 +9,10 @@
 #include <iostream>
 #include <chrono>
 #include <algorithm>
+
 #include "sorted_list.h"
 #include <omp.h>
+
 
 using namespace std;
 
@@ -24,9 +26,9 @@ void findNeighbours(vector<vector<int>> &cell_matrix,
                     const bool PRINT)
 {
 
-    // Sort all particles in their corresponding cell
+    //cout << "debut findNeighbours " <<endl;
 
-    //#pragma omp parallel for
+    // Sort all particles in their corresponding cell
     for (size_t pos = 0; pos < pos_array.size() / 3; pos++)
     {
 
@@ -34,26 +36,24 @@ void findNeighbours(vector<vector<int>> &cell_matrix,
         int idx_j = pos_array[3 * pos + 1] / (L_d[1] / Ny);
         int idx_k = pos_array[3 * pos + 2] / (L_d[2] / Nz);
 
-        
+        /*
         if (idx_i < 0 || idx_j < 0 || idx_k < 0){
-           //cout << "val negative" << endl;
+            //cout << "val negative" << endl;
             continue;
         }
+        */
+        //else{
         
-
-        idx_i = (idx_i == Nx) ? idx_i - 1 : idx_i;
-        idx_j = (idx_j == Ny) ? idx_j - 1 : idx_j;
-        idx_k = (idx_k == Nz) ? idx_k - 1 : idx_k;
-        
+            idx_i = (idx_i == Nx) ? idx_i - 1 : idx_i;
+            idx_j = (idx_j == Ny) ? idx_j - 1 : idx_j;
+            idx_k = (idx_k == Nz) ? idx_k - 1 : idx_k;
             cell_matrix[idx_i + Nx * idx_j + Ny * Nx * idx_k].push_back(pos);
-        
-        
+        //}
 
         // cout << "For part : " << pos << ", cell's index = (" << idx_i << ", " << idx_j << ", " << idx_k << ")" << endl;
     }
 
     // Find neighbours for each particle
-    //#pragma omp parallel for
     for (size_t pos = 0; pos < pos_array.size() / 3; pos++)
     {
         //cout << "Pos : " << pos <<endl;
@@ -62,6 +62,11 @@ void findNeighbours(vector<vector<int>> &cell_matrix,
         int i_cell = pos_array[3 * pos + 0] / (L_d[0] / Nx);
         int j_cell = pos_array[3 * pos + 1] / (L_d[1] / Ny);
         int k_cell = pos_array[3 * pos + 2] / (L_d[2] / Nz);
+
+        if (i_cell < 0 || j_cell < 0 || k_cell < 0){
+            cout << "val negative" << endl;
+            continue;
+        }
 
         //cout << "cell's indices computed" << endl;
 
@@ -115,16 +120,10 @@ void findNeighbours(vector<vector<int>> &cell_matrix,
                                 {
                                     //cout << "neighbour founded (before push)" << endl;
                                     //cout << "actual_cell_value : " << actual_cell_value << endl;
-                                    
-                                        neighbours_matrix[pos].push_back(actual_cell_value);
-                                        neighbours_matrix[actual_cell_value].push_back(pos);
-                                    
-                                        
-                                    
-                                    
+                                    neighbours_matrix[pos].push_back(actual_cell_value);
                                     //cout << "after first push_back" << endl;
                                     //cout << "len(neighbour_matrix) = " << neighbours_matrix.size() << endl;
-                                    
+                                    neighbours_matrix[actual_cell_value].push_back(pos);
                                     //cout << "neighbour founded (after push)" << "\n"<<endl;
                                 }
                             }

@@ -12,6 +12,7 @@ void gradW(vector<vector<double>> &gradW_matrix,
 
 void setArtificialViscosity(vector<vector<double>> &artificial_visc_matrix,
                             vector<vector<int>> &neighbours_matrix,
+                            vector<double> &c_array,
                             vector<double> &pos_array,
                             vector<double> &rho_array,
                             vector<double> &u_array, 
@@ -50,9 +51,11 @@ void momentumEquation(vector<vector<int>> &neighbours_matrix,
                       string state_equation_chosen, 
                       const bool PRINT);
 
-double setSpeedOfSound(double rho, double rho_0, double c_0,
-                       double gamma, 
-                       string state_equation_chosen);
+void setSpeedOfSound(vector<double> &c_array,
+                     vector<double> &rho_array,
+                     double rho_0, double c_0,
+                     double gamma, 
+                     string state_equation_chosen);
 
 void setPressure(vector<double> &p_array,
                  vector<double> &rho_array, 

@@ -1,10 +1,12 @@
-#include "gradient.h"
 #include <stdio.h>
 #include <vector>
+#include <omp.h>
+
+#include "gradient.h"
 #include "sorted_list.h"
 #include "Kernel_functions.h"
 #include "tools.h"
-#include <omp.h>
+
 
 using namespace std;
 
@@ -16,6 +18,7 @@ void gradW(vector<vector<double>> &gradW_matrix,
            const bool PRINT){
 
     // Iterations over each particle
+    #pragma omp parallel for
     for (size_t pos = 0; pos < pos_array.size()/3; pos++)
     {
         vector<int> &neighbours_array = neighbours_matrix[pos];
@@ -63,22 +66,25 @@ void gradW(vector<vector<double>> &gradW_matrix,
     }
 }
 
-double setSpeedOfSound(double rho, double rho_0, double c_0,
-                       double gamma, 
-                       string state_equation_chosen)
-{
+void setSpeedOfSound(vector<double> &c_array,
+                     vector<double> &rho_array,
+                     double rho_0, double c_0,
+                     double gamma, 
+                     string state_equation_chosen){
 
-    double c = 0;
+    #pragma omp parallel for
+    for (size_t pos = 0; pos < rho_array.size(); pos++)
+    {
 
-    if (state_equation_chosen == "Ideal gaz law")
-    {
-        c = c_0;
+        if (state_equation_chosen == "Ideal gaz law")
+        {
+            c_array[pos] = c_0;
+        }
+        if (state_equation_chosen == "Quasi incompresible fluid")
+        {
+            c_array[pos] = c_0 * pow(rho_array[pos] / rho_0, 0.5 * (gamma - 1));
+        }
     }
-    if (state_equation_chosen == "Quasi incompresible fluid")
-    {
-        c = c_0 * pow(rho / rho_0, 0.5 * (gamma - 1));
-    }
-    return c;
 }
 
 void setPressure(vector<double> &p_array,
@@ -88,9 +94,8 @@ void setPressure(vector<double> &p_array,
                  double R, double T, double M,
                  double gamma,
                  string state_equation_chosen, 
-                 const bool PRINT)
-{
-
+                 const bool PRINT){
+    #pragma omp parallel for
     for (size_t pos = 0; pos < nb_moving_part; pos++)
     {
 
@@ -113,6 +118,7 @@ void setPressure(vector<double> &p_array,
 
 void setArtificialViscosity(vector<vector<double>> &artificial_visc_matrix,
                             vector<vector<int>> &neighbours_matrix,
+                            vector<double> &c_array,
                             vector<double> &pos_array,
                             vector<double> &rho_array,
                             vector<double> &u_array, 
@@ -127,6 +133,7 @@ void setArtificialViscosity(vector<vector<double>> &artificial_visc_matrix,
 
     if (t == 0)
     {
+        #pragma omp parallel for
         for (size_t pos = 0; pos < nb_moving_part; pos++)
         {
 
@@ -145,7 +152,8 @@ void setArtificialViscosity(vector<vector<double>> &artificial_visc_matrix,
         vector<double> rel_displ(3), rel_vel(3);
 
         // Iterations over each particle
-        for (size_t pos = 0; pos < nb_moving_part; pos++)
+        #pragma omp parallel for
+        for (size_t pos = 0; pos < pos_array.size()/3; pos++)
         {
 
             vector<int> &neighbours_arr = neighbours_matrix[pos];
@@ -164,36 +172,34 @@ void setArtificialViscosity(vector<vector<double>> &artificial_visc_matrix,
                 rel_vel[1] = (u_array[3 * pos + 1] - u_array[3 * neighbour_value + 1]);
                 rel_vel[2] = (u_array[3 * pos + 2] - u_array[3 * neighbour_value + 2]);
 
-                double res = 0, xa_xb = 0;
+                double u_ab_x_ab = 0, x_ab_2 = 0;
 
                 // Dot product
                 for (size_t cord = 0; cord < 3; cord++)
                 {
-                    res += rel_vel[cord] * rel_displ[cord];
-                    xa_xb += rel_displ[cord] * rel_displ[cord];
+                    u_ab_x_ab += rel_vel[cord] * rel_displ[cord];
+                    x_ab_2 += rel_displ[cord] * rel_displ[cord];
                 }
 
-                // cout << "res (y): " << res;
-                // cout << "xa_xb (z): " << xa_xb << endl;
-
-                double c_a, c_b;
-                c_a = setSpeedOfSound(rho_array[pos], rho_0, c_0, gamma, state_equation_chosen);
-                c_b = setSpeedOfSound(rho_array[neighbour_value], rho_0, c_0, gamma, state_equation_chosen);
+                double c_a = c_array[pos];
+                double c_b = c_array[neighbour_value];
+                double rho_a = rho_array[pos];
+                double rho_b = rho_array[neighbour_value];
 
                 // cout << "c_a: " << c_a;
                 // cout << " c_b: " << c_b << endl;
 
                 double c_ab = 0.5 * (c_a + c_b);
-                double rho_ab = 0.5 * (rho_array[pos] + rho_array[neighbour_value]);
+                double rho_ab = 0.5 * (rho_a + rho_b);
                 double nu_2 = 0.01 * h * h;
-                double mu_ab = (h * res) / (xa_xb + nu_2);
+                double mu_ab = (h * u_ab_x_ab) / (x_ab_2 + nu_2);
 
                 // cout << "c_ab: " << c_ab;
                 // cout << " rho_ab: " << rho_ab;
                 // cout << " nu_2: " << nu_2;
                 // cout << " mu_ab: " << mu_ab << "\n " <<endl;
 
-                artificial_visc_matrix[pos].push_back((res < 0) ? (-alpha * c_ab * mu_ab + beta * mu_ab * mu_ab) / rho_ab : 0);
+                artificial_visc_matrix[pos].push_back((u_ab_x_ab < 0) ? (-alpha * c_ab * mu_ab + beta * mu_ab * mu_ab) / rho_ab : 0);
             }
         }
     }
@@ -218,17 +224,11 @@ void continuityEquation(vector<vector<int>> &neighbours_matrix,
     // Iterations over each particle
     #pragma omp parallel for
     for (size_t pos = 0; pos < pos_array.size()/3; pos++){
-        //cout << "Pos : " << pos << endl;
+
         vector<int> &neighbours_array = neighbours_matrix[pos];
         vector<double> &gradW_array = gradW_matrix[pos];
 
-        //printArray(neighbours_array, neighbours_array.size(), "neighbours_array");
-        //cout << "\n"<< endl;
-        //printArray(gradW_array, gradW_array.size(), "gradW_array");
-
-
         // Summation over b = 1 -> nb_neighbours
-        
         for (size_t idx = 0; idx < neighbours_array.size(); idx++){
 
             // Dot product of u_ab with grad_a(W_ab)
@@ -283,7 +283,7 @@ void momentumEquation(vector<vector<int>> &neighbours_matrix,
             // Summation over b = 1 -> nb_neighbours
             for (size_t idx_neighbour = 0; idx_neighbour < neighbours_array.size(); idx_neighbour++)
             {
-                double pi_ab = 0; //  artificial_visc_array[idx_neighbour];
+                double pi_ab = artificial_visc_array[idx_neighbour];
                 double rho_b = rho_array[neighbours_array[idx_neighbour]];
                 double m_b = mass_array[neighbours_array[idx_neighbour]];
                 double p_b = p_array[neighbours_array[idx_neighbour]];
