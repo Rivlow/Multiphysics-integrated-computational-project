@@ -150,10 +150,29 @@ void meshBoundary(vector<double> &o_d,
             // type_arr.push_back(0.0);
         }
     }
-
-
-
-
+    for (size_t i = 0; i < 3; i++)
+    {
+        o_d[i] = o_d[i] - s * 0.5;
+        L_d[i] = L_d[i] + s;
+        // 
+    }
+    o_d[2] = o_d[2] + s;
+    for (int i = 0; i < ni ; ++i) // along x
+    {
+        double x = o_d[0] + i * dx;
+        for (int j = 0; j < nj; ++j) // along y
+        {
+            double y = o_d[1] + j * dy;
+            bound_arr.push_back(x);
+            bound_arr.push_back(y);
+            bound_arr.push_back(o_d[2]);
+            type_arr.push_back(0.0);
+            // bound_arr.push_back(x);
+            // bound_arr.push_back(y);
+            // bound_arr.push_back(L_d[2] + o_d[2]);
+            // type_arr.push_back(0.0);
+        }
+    }
 
     /*
     for (int j = 0; j < nj; ++j) // along y

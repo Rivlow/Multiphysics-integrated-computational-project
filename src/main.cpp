@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 
     for (auto &it : data["stateEquation"].items())
     {
-        if (it.value() == true)
+        if (it.value() == false)
         {
             state_equation_chosen = it.key();
         }
