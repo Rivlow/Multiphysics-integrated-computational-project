@@ -86,9 +86,6 @@ void setSpeedOfSound(vector<double> &c_array,
         }
     }
 
-    if (PRINT){
-            cout << "gradW passed" << endl;
-    }
 }
 
 void setPressure(vector<double> &p_array,
@@ -287,7 +284,7 @@ void momentumEquation(vector<vector<int>> &neighbours_matrix,
             // Summation over b = 1 -> nb_neighbours
             for (size_t idx_neighbour = 0; idx_neighbour < neighbours_array.size(); idx_neighbour++)
             {
-                double pi_ab = 0; //artificial_visc_array[idx_neighbour];
+                double pi_ab = artificial_visc_array[idx_neighbour];
                 double rho_b = rho_array[neighbours_array[idx_neighbour]];
                 double m_b = mass_array[neighbours_array[idx_neighbour]];
                 double p_b = p_array[neighbours_array[idx_neighbour]];

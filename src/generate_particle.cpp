@@ -113,37 +113,6 @@ void meshBoundary(vector<double> &o_d,
         }
     }
 
-    // Shift the center and origin to a get "en quiconce" boundaries
-    for (size_t i = 0; i < 3; i++)
-    {
-        o_d[i] = o_d[i] + s * 0.5;
-        L_d[i] = L_d[i] - s;
-        // cout << " le centre et longueur de l'axe " << i << "est "<< o_d[i] << " et  " << L_d[i] << endl;
-    }
-
-    // Apply the second layer of FP
-    for (int i = 0; i < ni ; ++i) // along x
-    {
-        double x = o_d[0] + i * dx;
-        for (int j = 1; j < nj; ++j) // along y
-        {
-            double y = o_d[1] + j * dy;
-            bound_arr.push_back(x);
-            bound_arr.push_back(y);
-            bound_arr.push_back(o_d[2]);
-            type_arr.push_back(0.0);
-            // bound_arr.push_back(x);
-            // bound_arr.push_back(y);
-            // bound_arr.push_back(L_d[2] + o_d[2]);
-            // type_arr.push_back(0.0);
-        }
-    }
-
-
-
-
-
-    /*
     for (int j = 0; j < nj; ++j) // along y
     {
         double y = o_d[1] + j * dy;
@@ -215,11 +184,6 @@ void meshBoundary(vector<double> &o_d,
         }
     }
 
-
-
-
-
-    
     for (int j = 0; j < nj; ++j) // along y
     {
         double y = o_d[1] + j * dy;
@@ -254,6 +218,4 @@ void meshBoundary(vector<double> &o_d,
 
         }
     }
-    //cout <<" longueur de bound_arr :"<< bound_arr.size()/3 << endl;
-    
 }
