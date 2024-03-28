@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <vector>
 #include "sorted_list.h"
+#include "tools.h"
+
 using namespace std;
 
 void gradW(vector<vector<double>> &gradW_matrix,

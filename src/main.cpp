@@ -60,12 +60,6 @@ auto t0 = std::chrono::high_resolution_clock::now();
     std::cout << argv[1] << ":\n"
               << data.dump(4) << std::endl; // Print input data to screen
 
-    std::vector<double> o = data["o"];
-    std::vector<double> L = data["L"];
-    double s = data["s"];
-    int nstepT = data["nstepT"];
-    std::vector<double> o_d = data["o_d"];
-    std::vector<double> L_d = data["L_d"];
 
     std::string state_equation_chosen; /// p expl "Ideal gaz law"
     std::string state_initial_condition;
@@ -89,42 +83,53 @@ auto t0 = std::chrono::high_resolution_clock::now();
     createOutputFolder();
     clearOutputFiles();
 
+
+    SimulationData params;
+    params.kappa = data["kappa"];
+    params.dt = data["dt"];
+    params.s = data["s"];
+    params.h = 1.2 * params.s; 
+    params.nstepT = data["nstepT"]; 
+    params.o = data["o"].get<vector<double>>();
+    params.L = data["L"].get<vector<double>>();
+    params.o_d = data["o_d"].get<vector<double>>();
+    params.L_d = data["L_d"].get<vector<double>>();
+    params.u_init = data["u_init"].get<vector<double>>();
+    params.alpha = data["alpha"];
+    params.beta = data["beta"];
+    params.c_0 = data["c_0"];
+    params.rho_moving = data["rho_moving"];
+    params.rho_fixed = data["rho_fixed"];
+    params.rho_0 = data["rho_0"];
+    params.M = data["M"];
+    params.T = data["T"];
+    params.gamma = data["gamma"];
+    params.nsave = data["nsave"];
+    params.state_equation = state_equation_chosen; 
+    params.PRINT = data["print_debug"];
+    std::string state_initial_condition;
     
-    int kappa = data["kappa"];
-    double alpha = data["alpha"];
-    double beta = data["beta"];
-    double c_0 = data["c_0"];
-    double rho_init = data["rho_moving"];
-    double rho_fixed = data["rho_fixed"];
-    double rho_0 = data["rho_0"];
-    double M = data["M"];
-    double T = data["T"];
-    double gamma = data["gamma"];
-    double dt = data["dt"]; // RB
-    int nsave = data["nsave"]; // RB
-    vector<double> u_init = data["u"];         // RB: inutile
+  
 
     /*---------------------------- INITIALIZATION OF VARIABLES USED ----------*/
 
-    // Debug variable
-    const bool PRINT = data["print_debug"];
+
 
     // Constants
-    double h = 1.2 * s; // [m]              
-    double R = 8.314; // [J/(K.mol)]
-    double g = -9.81; // [m/s²]
+                 
+   
 
     // Number of cells 
-    int Nx = L_d[0] / (kappa * h);
-    int Ny = L_d[1] / (kappa * h);
-    int Nz = L_d[2] / (kappa * h);
+    int Nx = params.L_d[0] / (params.kappa * params.h);
+    int Ny = params.L_d[1] / (params.kappa * params.h);
+    int Nz = params.L_d[2] / (params.kappa * params.h);
 
     cout << "state equation chosen : " << state_equation_chosen << " \n" << endl;
-    cout << " kappa * h =" << kappa * h << endl;
+    cout << " kappa * h =" << params.kappa * params.h << endl;
     printf("(Nx, Ny, Nz) = (%d, %d, %d) \n", Nx, Ny, Nz);
 
     // Nb of particles along each direction from target size "s"
-    size_t nb_particles = evaluateNumberParticles(L, s);
+    size_t nb_particles = evaluateNumberParticles(params);
 
     // Vector used (and labelled w.r.t particles location)
     vector<double> pos_array, type_arr;
@@ -137,17 +142,17 @@ auto t0 = std::chrono::high_resolution_clock::now();
     /*---------------------------- SPH ALGORITHM  ----------------------------*/
 
     // Initialization of the problem (moving particles and fixed particles)
-    meshcube(o, L, pos_array, type_arr, s);
+    meshcube(params, pos_array, type_arr);
     size_t nb_moving_part = pos_array.size() / 3;
-    meshBoundary(o_d, L_d, pos_array, type_arr, s);
+    meshBoundary(params, pos_array, type_arr);
 
     int nb_tot_part = pos_array.size()/3;
 
     std::cout << "nb_moving_part = " << nb_moving_part << std::endl;
     std::cout << "nb_tot_part = " << nb_tot_part << std::endl;
-    std::cout << "s=" << s << std::endl;
-    std::cout << "kappa=" << kappa << std::endl;
-    std::cout << "h=" << h << std::endl;
+    std::cout << "s=" << params.s << std::endl;
+    std::cout << "kappa=" << params.kappa << std::endl;
+    std::cout << "h=" << params.h << std::endl;
 
     vector<double> mass_array(nb_tot_part),
                    u_array(3 * nb_tot_part),
@@ -176,15 +181,13 @@ auto t0 = std::chrono::high_resolution_clock::now();
     vectors["dudt_array"] = &dudt_array;
 
 
-    initializeRho(pos_array, rho_array,
+    initializeRho(params, pos_array, rho_array,
                   nb_moving_part,
-                  rho_init, rho_fixed, rho_0,
-                  c_0, M, g, R, T, gamma,
-                  state_equation_chosen, state_initial_condition, PRINT);
+                  state_equation_chosen, state_initial_condition);
 
-    initializeMass(rho_array, mass_array, s, PRINT);
-    initializeVelocity(u_array, u_init, nb_moving_part, PRINT);
-    initializeViscosity(artificial_visc_matrix, PRINT);
+    initializeMass(params, rho_array, mass_array);
+    initializeVelocity(params, u_array, nb_moving_part);
+    initializeViscosity(params, artificial_visc_matrix);
 
 
     for (int t = 0; t < nstepT; t++)

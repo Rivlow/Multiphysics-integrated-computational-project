@@ -21,3 +21,36 @@ void clearAllVectors(vector<vector<double>> &artificial_visc_matrix,
                      vector<double> &drhodt_array,
                      vector<double> &dudt_array,
                      const bool PRINT);
+
+struct SimulationData {
+
+    int kappa;
+    int nstepT;
+    int nsave;
+    double dt; // RB
+    double h; // [m] 
+    double s;
+    vector<double> o;
+    vector<double> L;
+    vector<double> o_d;
+    vector<double> L_d;
+    vector<double> u_init;
+
+    double alpha;
+    double beta;
+
+    double c_0;
+    double rho_moving;
+    double rho_fixed;
+    double rho_0;
+    double M;
+    double T;
+    double gamma;
+    static const double R = 8.314; // [J/(K.mol)]
+    static const double g = -9.81; // [m/s²]
+
+    string state_equation; 
+    string state_initial_condition;
+    bool PRINT;
+};
+

@@ -1,6 +1,8 @@
 #include "generate_particle.h"
 #include <iostream>
 #include <cmath> // ceil
+#include "tools.h"
+
 using namespace std;
 
 /**

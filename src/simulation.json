@@ -4,6 +4,12 @@
     "dt": 0.00005,
     "nsave": 100,
 
+    "domain": {
+        "shape": "square",
+        "walls_used": ["floor", "left_wall", "right_wall", "front_wall", "back_wall"]
+      },
+      "particle_layers": 2,
+
     "o": [0.3, 0.3, 0.6],
     "L": [0.6, 0.6, 0.6],
     "L_d": [1.2, 1.2, 1.4],
@@ -14,7 +20,7 @@
     "rho_moving": 1000,
     "rho_fixed" : 1000,
     "T": 298.15,
-    "u": [0.0, 0.0, 0.0],
+    "u_init": [0.0, 0.0, 0.0],
     "c_0": 30, 
     "gamma": 7, 
     "alpha": 0.5,
@@ -22,7 +28,7 @@
     "M": 18e-3, 
 
     "print_debug":false,
-    "stateEquation" : {"Ideal gaz law":false, "Quasi incompresible fluid":true},
+    "stateEquation" : {"Ideal gaz law":true, "Quasi incompresible fluid":false},
     "initialCondition" : {"Hydrostatic":false, "Constant":true}
 }
 

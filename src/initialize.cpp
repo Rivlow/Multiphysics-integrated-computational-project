@@ -6,49 +6,40 @@
 
 using namespace std;
 
-void initializeMass(vector<double> &rho_array,
-                    vector<double> &mass_array,
-                    double s,
-                    const bool PRINT){
-    double V = s * s * s;
+void initializeMass(const SimulationData& params, vector<double> &rho_array,
+                    vector<double> &mass_array){
+    double V = params.s * params.s * params.s;
     for (size_t i = 0; i < rho_array.size(); i++)
     {
         mass_array[i] = rho_array[i] * V;
     }
 
-    if (PRINT){
+    if (params.PRINT){
         cout << "initializeMass passed" << endl;
     }
 }
 
-void initializeRho(vector<double> &pos_array,
+void initializeRho(const SimulationData& params,
+                   vector<double> &pos_array,
                    vector<double> &rho_array, 
-                   size_t nb_moving_part,
-                   double rho_moving,
-                   double rho_fixed,
-                   double rho_0, double c_0,
-                   double M, double g, double R,
-                   double T, double gamma,
-                   std::string state_equation_chosen,
-                   std::string state_initial_condition,
-                   const bool PRINT){
+                   size_t nb_moving_part){
 
-    if (state_initial_condition == "Hydrostatic")
+    if (params.state_initial_condition == "Hydrostatic")
     {
-        if (state_equation_chosen == "Ideal gaz law")
+        if (params.state_equation == "Ideal gaz law")
         {
             for (size_t i = 0; i < rho_array.size(); i++)
             {
-                rho_array[i] = (i < nb_moving_part) ? rho_0 * (1 + M * rho_0 * g * pos_array[3 * i + 2] / (R * T)) : rho_fixed;
+                rho_array[i] = (i < nb_moving_part) ? params.rho_0 * (1 + params.M * params.rho_0 * params.g * pos_array[3 * i + 2] / (params.R * params.T)) : params.rho_fixed;
             }
         }
-        if (state_equation_chosen == "Quasi incompresible fluid")
+        if (params.state_equation == "Quasi incompresible fluid")
         {
 
-            double B = c_0 * c_0 * rho_0 / gamma;
+            double B = params.c_0 * params.c_0 * params.rho_0 / params.gamma;
             for (size_t i = 0; i < rho_array.size(); i++)
             {
-                rho_array[i] = (i < nb_moving_part) ? rho_0 * (1 + rho_0 * g * pos_array[3 * i + 2] / B) : rho_fixed;
+                rho_array[i] = (i < nb_moving_part) ? params.rho_0 * (1 + params.rho_0 * params.g * pos_array[3 * i + 2] / B) : params.rho_fixed;
             }
         }
     }
@@ -56,20 +47,19 @@ void initializeRho(vector<double> &pos_array,
     {
         for (size_t i = 0; i < rho_array.size(); i++)
         {
-            rho_array[i] = (i < nb_moving_part) ? rho_moving : rho_fixed;
+            rho_array[i] = (i < nb_moving_part) ? params.rho_moving : params.rho_fixed;
         }
     }
 
-    if (PRINT){
+    if (params.PRINT){
         
         cout << "initializeRho passed" << endl;
     }
 }
 
-void initializeVelocity(vector<double> &u_array,
+void initializeVelocity(const SimulationData& params, vector<double> &u_array,
                         vector<double> &u_init,
-                        size_t nb_moving_part, 
-                        const bool PRINT){
+                        size_t nb_moving_part){
 
     for (size_t i = 0; i < u_array.size() / 3; i++){
 
@@ -85,12 +75,12 @@ void initializeVelocity(vector<double> &u_array,
         }
     }
 
-    if (PRINT){
+    if (params.PRINT){
        cout << "initializeVelocity passed" << endl;
     }
 }
 
-void initializeViscosity(vector<vector<double>> &artificial_visc_matrix, const bool PRINT)
+void initializeViscosity(const SimulationData& params, vector<vector<double>> &artificial_visc_matrix)
 {
     for (size_t i = 0; i < artificial_visc_matrix.size(); i++){
         for (size_t j = 0; j < artificial_visc_matrix[i].size(); j++)
@@ -99,7 +89,7 @@ void initializeViscosity(vector<vector<double>> &artificial_visc_matrix, const b
         }
     }
 
-    if (PRINT){
+    if (params.PRINT){
         cout << "initializeViscosity passed" << endl;
     }
 }
