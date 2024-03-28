@@ -86,9 +86,6 @@ void setSpeedOfSound(vector<double> &c_array,
         }
     }
 
-    if (PRINT){
-            cout << "gradW passed" << endl;
-    }
 }
 
 void setPressure(vector<double> &p_array,
