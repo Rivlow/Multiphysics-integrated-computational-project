@@ -260,13 +260,34 @@ void momentumEquation(vector<vector<int>> &neighbours_matrix,
                       vector<double> &dudt_array,
                       vector<double> &rho_array,
                       vector<double> &p_array, 
+                      vector<double> &c_array,
+                      vector<double> &pos_array,
+                      vector<double> &u_array,
                       size_t nb_moving_part,
                       double rho_0, double c_0,
                       double gamma,
                       double R, double T, double M,
                       double g,
+                      int t,
+                      double alpha, double beta, double h,
                       string state_equation_chosen, 
                       const bool PRINT){
+
+    // Compute pressure for all particles
+    setPressure(p_array, rho_array, 
+                nb_moving_part, rho_0, c_0, R, T, M, gamma, 
+                state_equation_chosen, PRINT); 
+
+    // Compute speed of sound for all particles
+    setSpeedOfSound(c_array,rho_array,
+                    rho_0, c_0, gamma, 
+                    state_equation_chosen);
+
+    // Compute artificial viscosity Π_ab for all particles
+    setArtificialViscosity(artificial_visc_matrix, neighbours_matrix,
+                            c_array, pos_array, rho_array, u_array, 
+                            nb_moving_part, t, alpha, beta, rho_0, c_0, gamma, R, T, M, h,
+                            state_equation_chosen, PRINT); 
 
     // Iterations over each particle
     #pragma omp parallel for
@@ -300,6 +321,30 @@ void momentumEquation(vector<vector<int>> &neighbours_matrix,
     }
 
     if (PRINT){
-            cout << "momentumEquation passed" << endl;
+        cout << "momentumEquation passed" << endl;
+    }
+}
+
+void update(vector<double> &pos_array,
+            vector<double> &u_array,
+            vector<double> &rho_array,
+            vector<double> &drhodt_array,
+            vector<double> &dudt_array,
+            double dt,
+            const bool PRINT){
+    
+    for (size_t pos = 0; pos < pos_array.size()/3; pos++){
+
+        rho_array[pos] += dt * drhodt_array[pos];
+
+        for (size_t cord = 0; cord < 3; cord++){
+
+            pos_array[3 * pos + cord] += dt * u_array[3 * pos + cord];
+            u_array[3 * pos + cord] += dt * dudt_array[3 * pos + cord];
+        }
+    }
+
+    if (PRINT){
+        cout << "update passed" << endl;
     }
 }

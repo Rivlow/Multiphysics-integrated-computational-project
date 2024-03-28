@@ -89,9 +89,7 @@ auto t0 = std::chrono::high_resolution_clock::now();
     createOutputFolder();
     clearOutputFiles();
 
-    cout << "state equation chosen : " << state_equation_chosen << " \n"
-         << endl;
-
+    
     int kappa = data["kappa"];
     double alpha = data["alpha"];
     double beta = data["beta"];
@@ -112,16 +110,16 @@ auto t0 = std::chrono::high_resolution_clock::now();
     const bool PRINT = data["print_debug"];
 
     // Constants
-    double h = 1.2 * s;                    
+    double h = 1.2 * s; // [m]              
     double R = 8.314; // [J/(K.mol)]
     double g = -9.81; // [m/s²]
 
-    // Number of cells (in each direction)
-    int Nx, Ny, Nz;
-    Nx = L_d[0] / (kappa * h);
-    Ny = L_d[1] / (kappa * h);
-    Nz = L_d[2] / (kappa * h);
+    // Number of cells 
+    int Nx = L_d[0] / (kappa * h);
+    int Ny = L_d[1] / (kappa * h);
+    int Nz = L_d[2] / (kappa * h);
 
+    cout << "state equation chosen : " << state_equation_chosen << " \n" << endl;
     cout << " kappa * h =" << kappa * h << endl;
     printf("(Nx, Ny, Nz) = (%d, %d, %d) \n", Nx, Ny, Nz);
 
@@ -196,13 +194,12 @@ auto t0 = std::chrono::high_resolution_clock::now();
         // double dt_max = sqrt(kappa * h / abs(g)); // CFL condition
         // std::cout << "dt_max = " << dt_max << "    dt = " << dt << std::endl;
 
-        //vector<double> drhodt_array(nb_tot_part, 0.0), dudt_array(3 * nb_tot_part, 0.0);
-
         // Apply the linked-list algorithm
         findNeighbours(cell_matrix, neighbours_matrix,
                        pos_array, L_d,
                        nb_moving_part, Nx, Ny, Nz, h, kappa, 
                        PRINT); 
+
 
         // Compute ∇_a(W_ab) for all particles
         gradW(gradW_matrix, neighbours_matrix, 
@@ -210,21 +207,6 @@ auto t0 = std::chrono::high_resolution_clock::now();
               nb_moving_part, h, Nx, Ny, Nz,
               PRINT); 
 
-        // Compute pressure for all particles
-        setPressure(p_array, rho_array, 
-                    nb_moving_part, rho_0, c_0, R, T, M, gamma, 
-                    state_equation_chosen, PRINT); 
-
-        // Compute speed of sound for all particles
-        setSpeedOfSound(c_array,rho_array,
-                        rho_0, c_0, gamma, 
-                        state_equation_chosen);
-
-        // Compute artificial viscosity Π_ab for all particles
-        setArtificialViscosity(artificial_visc_matrix, neighbours_matrix,
-                               c_array, pos_array, rho_array, u_array, 
-                               nb_moving_part, t, alpha, beta, rho_0, c_0, gamma, R, T, M, h,
-                               state_equation_chosen, PRINT); 
 
         // Compute D(rho)/Dt for all particles
         continuityEquation(neighbours_matrix, gradW_matrix, 
@@ -232,52 +214,33 @@ auto t0 = std::chrono::high_resolution_clock::now();
                            nb_moving_part, h,
                            PRINT); 
 
+
         // Compute D(u)/Dt for all particles
         momentumEquation(neighbours_matrix, gradW_matrix, artificial_visc_matrix,
-                         mass_array, dudt_array, rho_array, p_array,
+                         mass_array, dudt_array, rho_array, p_array, c_array, pos_array, u_array,
                          nb_moving_part,
-                         rho_0, c_0, gamma, R, T, M, g, 
+                         rho_0, c_0, gamma, R, T, M, g, t, alpha, beta, h,
                          state_equation_chosen, PRINT); 
+        
 
         // Update density, velocity and position for each particle (Euler explicit scheme)
-        for (size_t pos = 0; pos < nb_tot_part; pos++){
-
-            rho_array[pos] += dt * drhodt_array[pos];
-
-            for (size_t cord = 0; cord < 3; cord++)
-            {
-
-                pos_array[3 * pos + cord] += dt * u_array[3 * pos + cord];
-                u_array[3 * pos + cord] += dt * dudt_array[3 * pos + cord];
-            }
-        }
-        for(size_t i = 0 ; i < gradW_matrix.size(); i++){
-            for(size_t j = 0 ; j < gradW_matrix[i].size(); j ++){
-                grad_sum[i] += abs(gradW_matrix[i][j]);
-            }
-        }
+        update(pos_array, u_array, rho_array, drhodt_array, dudt_array, dt, PRINT);
         
-        clearAllVectors(artificial_visc_matrix, neighbours_matrix,
-                        cell_matrix, gradW_matrix,
+        // Clear matrices and reset to 0 arrays
+        clearAllVectors(artificial_visc_matrix, neighbours_matrix, cell_matrix, gradW_matrix,
+                        drhodt_array, dudt_array,
                         PRINT);
 
         if(t % nsave == 0){
             export_particles("../../output/sph", t, pos_array, scalars, vectors);
         }
-        for(size_t i = 0 ; i<drhodt_array.size(); i ++ )
-        {
-            drhodt_array[i] = 0.0;
-        }
-        for(size_t i = 0 ; i<dudt_array.size(); i ++ )
-        {
-            dudt_array[i] = 0.0;
-        }
+
     }
 
     auto t1 = std::chrono::high_resolution_clock::now();
     auto delta_t = std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0).count();
     std::cout << "duration: " << delta_t << "s.\n";
 
-    std::cout << "\nSimulation done." << std::endl;
+    std::cout << "\n Simulation done." << std::endl;
     return 0;
 }

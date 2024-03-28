@@ -43,11 +43,16 @@ void momentumEquation(vector<vector<int>> &neighbours_matrix,
                       vector<double> &dudt_array,
                       vector<double> &rho_array,
                       vector<double> &p_array, 
+                      vector<double> &c_array,
+                      vector<double> &pos_array,
+                      vector<double> &u_array,
                       size_t nb_moving_part,
                       double rho_0, double c_0,
                       double gamma,
                       double R, double T, double M,
                       double g,
+                      int t,
+                      double alpha, double beta, double h,
                       string state_equation_chosen, 
                       const bool PRINT);
 
@@ -65,3 +70,11 @@ void setPressure(vector<double> &p_array,
                  double gamma,
                  string state_equation_chosen, 
                  const bool PRINT);
+
+void update(vector<double> &pos_array,
+            vector<double> &u_array,
+            vector<double> &rho_array,
+            vector<double> &drhodt_array,
+            vector<double> &dudt_array,
+            double dt,
+            const bool PRINT);

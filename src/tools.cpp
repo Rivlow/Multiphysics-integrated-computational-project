@@ -114,40 +114,44 @@ void clearAllVectors(vector<vector<double>> &artificial_visc_matrix,
                      vector<vector<int>> &neighbours_matrix,
                      vector<vector<int>> &cell_matrix,
                      vector<vector<double>> &gradW_matrix, 
-                     const bool PRINT)
-{
+                     vector<double> &drhodt_array,
+                     vector<double> &dudt_array,
+                     const bool PRINT){
 
-    for (size_t i = 0; i < artificial_visc_matrix.size(); i++)
-    {
+    for (size_t i = 0; i < artificial_visc_matrix.size(); i++){
         artificial_visc_matrix[i].clear();
     }
-    // artificial_visc_matrix.clear();
+    // cout << "after clear, artificial_visc_matrix : " << endl;
 
-    for (size_t i = 0; i < neighbours_matrix.size(); i++)
-    {
+    for (size_t i = 0; i < neighbours_matrix.size(); i++){
         neighbours_matrix[i].clear();
     }
-    // neighbours_matrix.clear();
-
     // cout << "after clear, neighbours_matrix : " << endl;
 
-    for (size_t i = 0; i < cell_matrix.size(); i++)
-    {
+    for (size_t i = 0; i < cell_matrix.size(); i++){
         cell_matrix[i].clear();
     }
-    // cell_matrix.clear();
-
     // cout << "after clear, cell_matrix : " << endl;
 
-    for (size_t i = 0; i < gradW_matrix.size(); i++)
-    {
+    for (size_t i = 0; i < gradW_matrix.size(); i++){
         gradW_matrix[i].clear();
     }
-    // gradW_matrix.clear();
-
     // cout << "after clear, gradW_matrix : " << endl;
 
-    if (PRINT){
-            cout << "clearAllVectors passed" << endl;
+    for(size_t i = 0 ; i<drhodt_array.size(); i ++ ){
+        drhodt_array[i] = 0.0;
     }
+    // cout << "after reset, drhodt_array : " << endl;
+
+    for(size_t i = 0 ; i<dudt_array.size(); i ++ ){
+        dudt_array[i] = 0.0;
+    }
+    // cout << "after reset, dudt_array : " << endl;
+
+
+    if (PRINT){
+        cout << "clearAllVectors passed" << endl;
+    }
+
+
 }

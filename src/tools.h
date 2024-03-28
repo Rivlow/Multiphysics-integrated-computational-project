@@ -18,4 +18,6 @@ void clearAllVectors(vector<vector<double>> &artificial_visc_matrix,
                      vector<vector<int>> &neighbours_matrix,
                      vector<vector<int>> &cell_matrix,
                      vector<vector<double>> &gradW_matrix, 
+                     vector<double> &drhodt_array,
+                     vector<double> &dudt_array,
                      const bool PRINT);
