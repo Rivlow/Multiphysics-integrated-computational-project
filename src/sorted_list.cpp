@@ -13,7 +13,6 @@
 #include "sorted_list.h"
 #include <omp.h>
 
-
 using namespace std;
 
 void findNeighbours(vector<vector<int>> &cell_matrix,
@@ -37,18 +36,18 @@ void findNeighbours(vector<vector<int>> &cell_matrix,
         int idx_k = pos_array[3 * pos + 2] / (L_d[2] / Nz);
 
         
-        if (idx_i < 0 || idx_j < 0 || idx_k < 0 || idx_i > Nx || idx_j > Ny || idx_k > Nz){
+        if (idx_i < 0 || idx_j < 0 || idx_k < 0 || idx_i > Nx || idx_j > Ny || idx_k > Ny){
             //cout << "val negative" << endl;
             continue;
-        
         }
-        else{
+        
+        //else{
         
             idx_i = (idx_i == Nx) ? idx_i - 1 : idx_i;
             idx_j = (idx_j == Ny) ? idx_j - 1 : idx_j;
             idx_k = (idx_k == Nz) ? idx_k - 1 : idx_k;
             cell_matrix[idx_i + Nx * idx_j + Ny * Nx * idx_k].push_back(pos);
-        }
+        //}
 
         // cout << "For part : " << pos << ", cell's index = (" << idx_i << ", " << idx_j << ", " << idx_k << ")" << endl;
     }
@@ -63,12 +62,12 @@ void findNeighbours(vector<vector<int>> &cell_matrix,
         int j_cell = pos_array[3 * pos + 1] / (L_d[1] / Ny);
         int k_cell = pos_array[3 * pos + 2] / (L_d[2] / Nz);
 
-        if (i_cell < 0 || j_cell < 0 || k_cell < 0){
-            cout << "val negative" << endl;
+        if (i_cell < 0 || j_cell < 0 || k_cell < 0 || i_cell > Nx || j_cell > Ny || k_cell > Ny){
+            //cout << "val negative" << endl;
             continue;
         }
 
-        //cout << "cell's indices computed" << endl;
+        // cout << "cell's indices computed" << endl;
 
         i_cell = (i_cell >= Nx) ? Nx - 1 : i_cell;
         j_cell = (j_cell >= Ny) ? Ny - 1 : j_cell;
