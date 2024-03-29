@@ -199,17 +199,19 @@ auto t0 = std::chrono::high_resolution_clock::now();
         //vector<double> drhodt_array(nb_tot_part, 0.0), dudt_array(3 * nb_tot_part, 0.0);
 
         // Apply the linked-list algorithm
+        auto t0_nei = std::chrono::high_resolution_clock::now();
         findNeighbours(cell_matrix, neighbours_matrix,
                        pos_array, L_d,
                        nb_moving_part, Nx, Ny, Nz, h, kappa, 
                        PRINT); 
-
+        auto t1_nei = std::chrono::high_resolution_clock::now();
         // Compute ∇_a(W_ab) for all particles
+        auto t0_grad = std::chrono::high_resolution_clock::now();
         gradW(gradW_matrix, neighbours_matrix, 
               pos_array,
               nb_moving_part, h, Nx, Ny, Nz,
               PRINT); 
-
+        auto t1_grad = std::chrono::high_resolution_clock::now();
         // Compute pressure for all particles
         setPressure(p_array, rho_array, 
                     nb_moving_part, rho_0, c_0, R, T, M, gamma, 
@@ -227,18 +229,20 @@ auto t0 = std::chrono::high_resolution_clock::now();
                                state_equation_chosen, PRINT); 
 
         // Compute D(rho)/Dt for all particles
+        auto t0_conti = std::chrono::high_resolution_clock::now();
         continuityEquation(neighbours_matrix, gradW_matrix, 
                            pos_array, u_array, drhodt_array, rho_array, mass_array,
                            nb_moving_part, h,
                            PRINT); 
-
+        auto t1_conti = std::chrono::high_resolution_clock::now();
         // Compute D(u)/Dt for all particles
+        auto t0_mom = std::chrono::high_resolution_clock::now();
         momentumEquation(neighbours_matrix, gradW_matrix, artificial_visc_matrix,
                          mass_array, dudt_array, rho_array, p_array,
                          nb_moving_part,
                          rho_0, c_0, gamma, R, T, M, g, 
                          state_equation_chosen, PRINT); 
-
+        auto t1_mom = std::chrono::high_resolution_clock::now();
         // Update density, velocity and position for each particle (Euler explicit scheme)
         for (size_t pos = 0; pos < nb_tot_part; pos++){
 
@@ -263,6 +267,14 @@ auto t0 = std::chrono::high_resolution_clock::now();
 
         if(t % nsave == 0){
             export_particles("../../output/sph", t, pos_array, scalars, vectors);
+            auto delta_t_nei = std::chrono::duration_cast<std::chrono::duration<double>>(t1_nei - t0_nei).count();
+            std::cout << "duration nei:  " << delta_t_nei << "s.\n";
+            auto delta_t_grad = std::chrono::duration_cast<std::chrono::duration<double>>(t1_grad - t0_grad).count();
+            std::cout << "duration grad: " << delta_t_grad << "s.\n";
+            auto delta_t_conti = std::chrono::duration_cast<std::chrono::duration<double>>(t1_conti - t0_conti).count();
+            std::cout << "duration conti: " << delta_t_conti << "s.\n";
+            auto delta_t_mom = std::chrono::duration_cast<std::chrono::duration<double>>(t1_mom - t0_mom).count();
+            std::cout << "duration mom: " << delta_t_mom << "s.\n";
         }
         for(size_t i = 0 ; i<drhodt_array.size(); i ++ )
         {

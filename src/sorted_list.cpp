@@ -28,6 +28,7 @@ void findNeighbours(vector<vector<int>> &cell_matrix,
     //cout << "debut findNeighbours " <<endl;
 
     // Sort all particles in their corresponding cell
+    //#pragma omp parallel for
     for (size_t pos = 0; pos < pos_array.size() / 3; pos++)
     {
 
@@ -46,13 +47,17 @@ void findNeighbours(vector<vector<int>> &cell_matrix,
             idx_i = (idx_i == Nx) ? idx_i - 1 : idx_i;
             idx_j = (idx_j == Ny) ? idx_j - 1 : idx_j;
             idx_k = (idx_k == Nz) ? idx_k - 1 : idx_k;
-            cell_matrix[idx_i + Nx * idx_j + Ny * Nx * idx_k].push_back(pos);
+            
+                cell_matrix[idx_i + Nx * idx_j + Ny * Nx * idx_k].push_back(pos);
+            
+            
         //}
 
         // cout << "For part : " << pos << ", cell's index = (" << idx_i << ", " << idx_j << ", " << idx_k << ")" << endl;
     }
 
     // Find neighbours for each particle
+    //#pragma omp parallel for
     for (size_t pos = 0; pos < pos_array.size() / 3; pos++)
     {
         //cout << "Pos : " << pos <<endl;
@@ -119,11 +124,16 @@ void findNeighbours(vector<vector<int>> &cell_matrix,
                                 {
                                     //cout << "neighbour founded (before push)" << endl;
                                     //cout << "actual_cell_value : " << actual_cell_value << endl;
-                                    neighbours_matrix[pos].push_back(actual_cell_value);
+                                    
                                     //cout << "after first push_back" << endl;
                                     //cout << "len(neighbour_matrix) = " << neighbours_matrix.size() << endl;
-                                    neighbours_matrix[actual_cell_value].push_back(pos);
+                                    
                                     //cout << "neighbour founded (after push)" << "\n"<<endl;
+                                    
+                                        neighbours_matrix[pos].push_back(actual_cell_value);
+                                        neighbours_matrix[actual_cell_value].push_back(pos);
+                                    
+                                    
                                 }
                             }
                         }
@@ -132,7 +142,10 @@ void findNeighbours(vector<vector<int>> &cell_matrix,
             }
         }
 
+        #pragma omp critical 
+        {
         cell_matrix[i_cell + j_cell * Nx + k_cell * Nx * Ny].erase(cell_matrix[i_cell + j_cell * Nx + k_cell * Nx * Ny].begin());
+        }
     }
 
     if (PRINT){

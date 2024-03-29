@@ -58,7 +58,7 @@ void printArray(vector<T> &array, size_t size, string name)
     for (size_t i = 0; i <= size; ++i)
     {
         std::cout << array[i];
-        if (i != array.size() - 1)
+        if (i != array.size() )
         {
             std::cout << ", ";
         }
