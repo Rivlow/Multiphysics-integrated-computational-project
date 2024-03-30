@@ -30,31 +30,32 @@ using namespace std;
 int main(int argc, char *argv[])
 {
 
-    /*------------- SETTING COMPILATION PARAMETERS/Folders needed ---------------------------*/
-auto t0 = std::chrono::high_resolution_clock::now();
+    /*---------------- SETTING COMPILATION PARAMETERS/FOLDER NEEDED --------------------*/
 
-#ifdef _OPENMP
-    std::cout << "OpenMP available: OMP_NUM_THREADS=" << omp_get_max_threads() << "\n";
-#else
-    std::cout << "OpenMP not available.\n";
-#endif
+    auto t0 = std::chrono::high_resolution_clock::now();
 
-#ifdef NDEBUG
-    // code has been configured with "cmake -DCMAKE_BUILD_TYPE=Release .."
-    std::cout << "code built in RELEASE mode.\n";
-#else
-    // code has been configured with "cmake .."
-    std::cout << "code built in DEBUG mode.\n";
-#endif
+    #ifdef _OPENMP
+        std::cout << "OpenMP available: OMP_NUM_THREADS=" << omp_get_max_threads() << "\n";
+    #else
+        std::cout << "OpenMP not available.\n";
+    #endif
 
-    if (argc != 2)
-    {
-        std::cout << "\nusage: " << argv[0] << " <param.json>\n\n";
-        return EXIT_FAILURE;
-    }
+    #ifdef NDEBUG
+        // code has been configured with "cmake -DCMAKE_BUILD_TYPE=Release .."
+        std::cout << "code built in RELEASE mode.\n";
+    #else
+        // code has been configured with "cmake .."
+        std::cout << "code built in DEBUG mode.\n";
+    #endif
+
+        if (argc != 2)
+        {
+            std::cout << "\nusage: " << argv[0] << " <param.json>\n\n";
+            return EXIT_FAILURE;
+        }
 
 
-    /*------------------INPUT PARAMETERS FROM JSON FILES ---------------*/
+    /*---------------------- INPUT PARAMETERS FROM JSON FILES --------------------------*/
 
     std::ifstream inputf(argv[1]);
     json data = json::parse(inputf);
@@ -86,7 +87,7 @@ auto t0 = std::chrono::high_resolution_clock::now();
     clearOutputFiles();
 
 
-
+    // Structure to store all parameters used later 
     const SimulationData params = {
 
         data["kappa"],
@@ -100,9 +101,9 @@ auto t0 = std::chrono::high_resolution_clock::now();
         data["o_d"],
         data["L_d"],
         data["u_init"],
-        params.L_d[0] / (params.kappa * params.h),
-        params.L_d[1] / (params.kappa * params.h),
-        params.L_d[2] / (params.kappa * params.h),
+        int(params.L_d[0] / (params.kappa * params.h)),
+        int(params.L_d[1] / (params.kappa * params.h)),
+        int(params.L_d[2] / (params.kappa * params.h)),
 
         data["alpha"],
         data["beta"],
@@ -123,39 +124,16 @@ auto t0 = std::chrono::high_resolution_clock::now();
     };
 
 
-  
-
-    /*---------------------------- INITIALIZATION OF VARIABLES USED ----------*/
-
-    // Number of cells 
-
-    cout << "state equation chosen : " << state_equation << " \n" << endl;
-    cout << " kappa * h =" << params.kappa * params.h << endl;
-    printf("(Nx, Ny, Nz) = (%d, %d, %d) \n", params.Nx, params.Ny, params.Nz);
-
-    // Nb of particles along each direction from target size "s"
+    /*------------------- INITIALIZATION OF VARIABLES USED -------------------*/
 
     // Vector used (and labelled w.r.t particles location)
     vector<double> pos_array, type_arr;
     vector<vector<int>> cell_matrix(params.Nx * params.Ny * params.Nz);
 
-    // Variables defined to used "export.cpp"
-    std::map<std::string, std::vector<double> *> scalars;
-    std::map<std::string, std::vector<double> *> vectors;
-
-    /*---------------------------- SPH ALGORITHM  ----------------------------*/
-
-    // Initialization of the problem (moving particles and fixed particles)
+    // Initialization of the particles (moving and fixed)
     meshcube(params, pos_array, type_arr);
     meshBoundary(params, pos_array, type_arr);
-
     int nb_tot_part = pos_array.size()/3;
-
-    std::cout << "nb_moving_part = " << params.nb_moving_part << std::endl;
-    std::cout << "nb_tot_part = " << nb_tot_part << std::endl;
-    std::cout << "s=" << params.s << std::endl;
-    std::cout << "kappa=" << params.kappa << std::endl;
-    std::cout << "h=" << params.h << std::endl;
 
     vector<double> mass_array(nb_tot_part),
                    u_array(3 * nb_tot_part),
@@ -169,7 +147,11 @@ auto t0 = std::chrono::high_resolution_clock::now();
     vector<vector<double>> artificial_visc_matrix(nb_tot_part),
                            gradW_matrix(nb_tot_part);
     vector<vector<int>> neighbours_matrix(nb_tot_part);
-    std::vector<double> nvoisins(nb_tot_part, 0.0); //RB
+    std::vector<double> nvoisins(nb_tot_part, 0.0); 
+
+    // Variables defined to used "export.cpp"
+    std::map<std::string, std::vector<double> *> scalars;
+    std::map<std::string, std::vector<double> *> vectors;
 
 
     scalars["type"] = &type_arr;
@@ -183,6 +165,20 @@ auto t0 = std::chrono::high_resolution_clock::now();
     vectors["u_array"] = &u_array;
     vectors["dudt_array"] = &dudt_array;
 
+
+
+    /*---------------------------- SPH ALGORITHM  ----------------------------*/
+
+    cout << "state equation chosen : " << state_equation << " \n" << endl;
+    cout << "kappa * h =" << params.kappa * params.h << endl;
+    cout << "(Nx, Ny, Nz) = (" << params.Nx << ", " << params.Ny << ", " << params.Nz << ")" << std::endl;
+    cout << "b_moving_part = " << params.nb_moving_part << std::endl;
+    cout << "nb_tot_part = " << nb_tot_part << std::endl;
+    cout << "s=" << params.s << std::endl;
+    cout << "kappa=" << params.kappa << std::endl;
+    cout << "h=" << params.h << std::endl;
+
+    
 
     initializeRho(params, pos_array, rho_array);
     initializeMass(params, rho_array, mass_array);
@@ -219,7 +215,7 @@ auto t0 = std::chrono::high_resolution_clock::now();
         // Update density, velocity and position for each particle (Euler explicit scheme)
         update(params, pos_array, u_array, rho_array, drhodt_array, dudt_array);
         
-        // Clear matrices and reset to 0 arrays
+        // Clear matrices and reset arrays to 0
         clearAllVectors(params, artificial_visc_matrix, neighbours_matrix, cell_matrix, gradW_matrix,
                         drhodt_array, dudt_array);
 
