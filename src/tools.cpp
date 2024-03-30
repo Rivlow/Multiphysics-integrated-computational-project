@@ -30,10 +30,10 @@ void printMatrix(vector<vector<T>> &matrix, int size, string name)
     {
 
         cout << "For lign " << i << " : (";
-        for (int j = 0; j < matrix[i].size(); ++j)
+        for (int j = 0; j < int(matrix[i].size()); ++j)
         {
             cout << matrix[i][j];
-            if (j != matrix[i].size() - 1)
+            if (j != int(matrix[i].size() - 1))
             {
                 cout << ", ";
             }
@@ -61,7 +61,7 @@ void printArray(vector<T> &array, int size, string name)
     for (int i = 0; i <= size; ++i)
     {
         std::cout << array[i];
-        if (i != array.size() - 1)
+        if (i != int(array.size() - 1))
         {
             std::cout << ", ";
         }
@@ -123,32 +123,32 @@ void clearAllVectors(const SimulationData &params,
 
     bool PRINT = params.PRINT;
 
-    for (int i = 0; i < artificial_visc_matrix.size(); i++){
+    for (int i = 0; i < int(artificial_visc_matrix.size()); i++){
         artificial_visc_matrix[i].clear();
     }
     // cout << "after clear, artificial_visc_matrix : " << endl;
 
-    for (int i = 0; i < neighbours_matrix.size(); i++){
+    for (int i = 0; i < int(neighbours_matrix.size()); i++){
         neighbours_matrix[i].clear();
     }
     // cout << "after clear, neighbours_matrix : " << endl;
 
-    for (int i = 0; i < cell_matrix.size(); i++){
+    for (int i = 0; i < int(cell_matrix.size()); i++){
         cell_matrix[i].clear();
     }
     // cout << "after clear, cell_matrix : " << endl;
 
-    for (int i = 0; i < gradW_matrix.size(); i++){
+    for (int i = 0; i < int(gradW_matrix.size()); i++){
         gradW_matrix[i].clear();
     }
     // cout << "after clear, gradW_matrix : " << endl;
 
-    for(int i = 0 ; i<drhodt_array.size(); i ++ ){
+    for(int i = 0 ; i < int(drhodt_array.size()); i ++ ){
         drhodt_array[i] = 0.0;
     }
     // cout << "after reset, drhodt_array : " << endl;
 
-    for(int i = 0 ; i<dudt_array.size(); i ++ ){
+    for(int i = 0 ; i < int(dudt_array.size()); i ++ ){
         dudt_array[i] = 0.0;
     }
     // cout << "after reset, dudt_array : " << endl;

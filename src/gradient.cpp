@@ -14,11 +14,11 @@ using namespace std;
 void gradW(const SimulationData& params, 
            vector<vector<double>> &gradW_matrix,
            vector<vector<int>> &neighbours_matrix,
-           vector<double> &pos_array,
-           int nb_moving_part,
-           int Nx, int Ny, int Nz){
+           vector<double> &pos_array){
 
     double h = params.h;
+    int nb_moving_part = params.nb_moving_part;
+
 
     // Iterations over each particle
     //#pragma omp parallel for
@@ -96,8 +96,7 @@ void setSpeedOfSound(const SimulationData& params,
 
 void setPressure(const SimulationData& params,
                  vector<double> &p_array,
-                 vector<double> &rho_array, 
-                 int nb_moving_part){
+                 vector<double> &rho_array){
 
 
     string state_equation = params.state_equation;
@@ -108,6 +107,7 @@ void setPressure(const SimulationData& params,
     double T = params.T;
     double M = params.M;
     bool PRINT = params.PRINT;
+    int nb_moving_part = params.nb_moving_part;
 
     //#pragma omp parallel for
     for (int pos = 0; pos < nb_moving_part; pos++)
@@ -137,13 +137,13 @@ void setArtificialViscosity(const SimulationData& params,
                             vector<double> &c_array,
                             vector<double> &pos_array,
                             vector<double> &rho_array,
-                            vector<double> &u_array, 
-                            int nb_moving_part){
+                            vector<double> &u_array){
 
     double beta = params.beta;
     double alpha = params.alpha;
     double h = params.h;
     bool PRINT = params.PRINT;
+    int nb_moving_part = params.nb_moving_part;
 
 
     if (t == 0)
@@ -231,10 +231,10 @@ void continuityEquation(const SimulationData& params,
                         vector<double> &u_array,
                         vector<double> &drhodt_array,
                         vector<double> &rho_array,
-                        vector<double> &mass_array, 
-                        int nb_moving_part){
+                        vector<double> &mass_array){
 
     bool PRINT = params.PRINT;
+    int nb_moving_part = params.nb_moving_part;
              
     // Iterations over each particle
     #pragma omp parallel for
@@ -278,25 +278,23 @@ void momentumEquation(const SimulationData& params,
                       vector<double> &p_array, 
                       vector<double> &c_array,
                       vector<double> &pos_array,
-                      vector<double> &u_array,
-                      int nb_moving_part){
+                      vector<double> &u_array){
 
 
     double g = params.g;
     bool PRINT = params.PRINT;
+    int nb_moving_part = params.nb_moving_part;
 
 
     // Compute pressure for all particles
-    setPressure(params, p_array, rho_array, 
-                nb_moving_part); 
+    setPressure(params, p_array, rho_array); 
 
     // Compute speed of sound for all particles
     setSpeedOfSound(params, c_array, rho_array);
 
     // Compute artificial viscosity Π_ab for all particles
     setArtificialViscosity(params, t, artificial_visc_matrix, neighbours_matrix,
-                            c_array, pos_array, rho_array, u_array, 
-                            nb_moving_part); 
+                            c_array, pos_array, rho_array, u_array); 
 
     // Iterations over each particle
     #pragma omp parallel for

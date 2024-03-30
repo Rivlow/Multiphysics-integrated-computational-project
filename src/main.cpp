@@ -100,6 +100,9 @@ auto t0 = std::chrono::high_resolution_clock::now();
         data["o_d"],
         data["L_d"],
         data["u_init"],
+        params.L_d[0] / (params.kappa * params.h),
+        params.L_d[1] / (params.kappa * params.h),
+        params.L_d[2] / (params.kappa * params.h),
 
         data["alpha"],
         data["beta"],
@@ -116,6 +119,7 @@ auto t0 = std::chrono::high_resolution_clock::now();
         state_equation,
         state_initial_condition,
         data["print_debug"],
+        evaluateNumberParticles(params),
     };
 
 
@@ -124,20 +128,16 @@ auto t0 = std::chrono::high_resolution_clock::now();
     /*---------------------------- INITIALIZATION OF VARIABLES USED ----------*/
 
     // Number of cells 
-    int Nx = params.L_d[0] / (params.kappa * params.h);
-    int Ny = params.L_d[1] / (params.kappa * params.h);
-    int Nz = params.L_d[2] / (params.kappa * params.h);
 
     cout << "state equation chosen : " << state_equation << " \n" << endl;
     cout << " kappa * h =" << params.kappa * params.h << endl;
-    printf("(Nx, Ny, Nz) = (%d, %d, %d) \n", Nx, Ny, Nz);
+    printf("(Nx, Ny, Nz) = (%d, %d, %d) \n", params.Nx, params.Ny, params.Nz);
 
     // Nb of particles along each direction from target size "s"
-    int nb_particles = evaluateNumberParticles(params);
 
     // Vector used (and labelled w.r.t particles location)
     vector<double> pos_array, type_arr;
-    vector<vector<int>> cell_matrix(Nx * Ny * Nz);
+    vector<vector<int>> cell_matrix(params.Nx * params.Ny * params.Nz);
 
     // Variables defined to used "export.cpp"
     std::map<std::string, std::vector<double> *> scalars;
@@ -147,12 +147,11 @@ auto t0 = std::chrono::high_resolution_clock::now();
 
     // Initialization of the problem (moving particles and fixed particles)
     meshcube(params, pos_array, type_arr);
-    size_t nb_moving_part = pos_array.size() / 3;
     meshBoundary(params, pos_array, type_arr);
 
     int nb_tot_part = pos_array.size()/3;
 
-    std::cout << "nb_moving_part = " << nb_moving_part << std::endl;
+    std::cout << "nb_moving_part = " << params.nb_moving_part << std::endl;
     std::cout << "nb_tot_part = " << nb_tot_part << std::endl;
     std::cout << "s=" << params.s << std::endl;
     std::cout << "kappa=" << params.kappa << std::endl;
@@ -185,9 +184,9 @@ auto t0 = std::chrono::high_resolution_clock::now();
     vectors["dudt_array"] = &dudt_array;
 
 
-    initializeRho(params, pos_array, rho_array, nb_moving_part);
+    initializeRho(params, pos_array, rho_array);
     initializeMass(params, rho_array, mass_array);
-    initializeVelocity(params, u_array, nb_moving_part);
+    initializeVelocity(params, u_array);
     initializeViscosity(params, artificial_visc_matrix);
 
 
@@ -199,27 +198,22 @@ auto t0 = std::chrono::high_resolution_clock::now();
         // std::cout << "dt_max = " << dt_max << "    dt = " << dt << std::endl;
 
         // Apply the linked-list algorithm
-        sorted_list(params, cell_matrix, neighbours_matrix,
-                       pos_array,
-                       nb_moving_part, Nx, Ny, Nz); 
+        sorted_list(params, cell_matrix, neighbours_matrix, pos_array); 
 
 
         // Compute ∇_a(W_ab) for all particles
         gradW(params, gradW_matrix, neighbours_matrix, 
-              pos_array,
-              nb_moving_part, Nx, Ny, Nz); 
+              pos_array); 
 
 
         // Compute D(rho)/Dt for all particles
         continuityEquation(params, neighbours_matrix, gradW_matrix, 
-                           pos_array, u_array, drhodt_array, rho_array, mass_array,
-                           nb_moving_part); 
+                           pos_array, u_array, drhodt_array, rho_array, mass_array); 
 
 
         // Compute D(u)/Dt for all particles
         momentumEquation(params, t, neighbours_matrix, gradW_matrix, artificial_visc_matrix,
-                         mass_array, dudt_array, rho_array, p_array, c_array, pos_array, u_array,
-                         nb_moving_part); 
+                         mass_array, dudt_array, rho_array, p_array, c_array, pos_array, u_array); 
         
 
         // Update density, velocity and position for each particle (Euler explicit scheme)

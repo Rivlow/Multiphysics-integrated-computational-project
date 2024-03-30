@@ -20,10 +20,12 @@ using namespace std;
 void sorted_list(const SimulationData& params, 
                  vector<vector<int>> &cell_matrix,
                  vector<vector<int>> &neighbours_matrix,
-                 vector<double> &pos_array,
-                 int nb_moving_part, 
-                 int Nx, int Ny, int Nz)
-{
+                 vector<double> &pos_array){
+
+    int Nx = params.Nx;
+    int Ny = params.Ny;
+    int Nz = params.Nz;
+    int nb_moving_part = params.nb_moving_part;
 
     //cout << "debut findNeighbours " <<endl;
 
@@ -143,9 +145,10 @@ void sorted_list(const SimulationData& params,
 
 void naiveAlgo(const SimulationData& params, 
                vector<vector<int>> &neighbours_matrix,
-               vector<double> &pos_array,
-               int nb_moving_part)
-{
+               vector<double> &pos_array){
+
+    int nb_moving_part = params.nb_moving_part;
+
     // added by RB
     for (int i = 0; i < nb_moving_part; i++)
         neighbours_matrix[i].resize(0);

@@ -11,9 +11,7 @@ using namespace std;
 void gradW(const SimulationData& params, 
            vector<vector<double>> &gradW_matrix,
            vector<vector<int>> &neighbours_matrix,
-           vector<double> &pos_array,
-           int nb_moving_part,
-           int Nx, int Ny, int Nz);
+           vector<double> &pos_array);
 
 void setSpeedOfSound(const SimulationData& params,
                      vector<double> &c_array,
@@ -21,8 +19,7 @@ void setSpeedOfSound(const SimulationData& params,
 
 void setPressure(const SimulationData& params,
                  vector<double> &p_array,
-                 vector<double> &rho_array, 
-                 int nb_moving_part);
+                 vector<double> &rho_array);
 
 void setArtificialViscosity(const SimulationData& params,
                             int t,
@@ -31,8 +28,7 @@ void setArtificialViscosity(const SimulationData& params,
                             vector<double> &c_array,
                             vector<double> &pos_array,
                             vector<double> &rho_array,
-                            vector<double> &u_array, 
-                            int nb_moving_part);
+                            vector<double> &u_array);
 
 void continuityEquation(const SimulationData& params,
                         vector<vector<int>> &neighbours_matrix,
@@ -41,8 +37,7 @@ void continuityEquation(const SimulationData& params,
                         vector<double> &u_array,
                         vector<double> &drhodt_array,
                         vector<double> &rho_array,
-                        vector<double> &mass_array, 
-                        int nb_moving_part);
+                        vector<double> &mass_array);
 
 void momentumEquation(const SimulationData& params,
                       int t,
@@ -55,8 +50,7 @@ void momentumEquation(const SimulationData& params,
                       vector<double> &p_array, 
                       vector<double> &c_array,
                       vector<double> &pos_array,
-                      vector<double> &u_array,
-                      int nb_moving_part);
+                      vector<double> &u_array);
 
 
 

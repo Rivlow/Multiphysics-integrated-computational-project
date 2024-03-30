@@ -21,6 +21,9 @@ struct SimulationData {
     vector<double> o_d;
     vector<double> L_d;
     vector<double> u_init;
+    int Nx;
+    int Ny;
+    int Nz;
 
     double alpha;
     double beta;
@@ -38,6 +41,9 @@ struct SimulationData {
     string state_equation; 
     string state_initial_condition;
     bool PRINT;
+
+    int nb_moving_part;
+
 };
 
 #endif // STRUCTURE_H

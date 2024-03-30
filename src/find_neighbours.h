@@ -18,14 +18,11 @@ using namespace std;
 void sorted_list(const SimulationData& params, 
                  vector<vector<int>> &cell_matrix,
                  vector<vector<int>> &neighbours_matrix,
-                 vector<double> &pos_array,
-                 int nb_moving_part, 
-                 int Nx, int Ny, int Nz);
+                 vector<double> &pos_array);
 
 void naiveAlgo(const SimulationData& params, 
                vector<vector<int>> &neighbours_matrix,
-               vector<double> &pos_array,
-               int nb_moving_part);
+               vector<double> &pos_array);
 
 void printNeighbours(vector<vector<int>> &neighbours_matrix_linked, 
                      vector<vector<int>> &neighbours_matrix_naive);

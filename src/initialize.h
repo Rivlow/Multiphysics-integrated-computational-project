@@ -17,12 +17,10 @@ void initializeMass(const SimulationData& params,
 
 void initializeRho(const SimulationData& params,
                    vector<double> &pos_array,
-                   vector<double> &rho_array, 
-                   int nb_moving_part);
+                   vector<double> &rho_array);
 
 void initializeVelocity(const SimulationData& params, 
-                        vector<double> &u_array,
-                        int nb_moving_part);
+                        vector<double> &u_array);
 
 void initializeViscosity(const SimulationData& params, 
                          vector<vector<double>> &artificial_visc_matrix);
