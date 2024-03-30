@@ -57,7 +57,7 @@ void findNeighbours(vector<vector<int>> &cell_matrix,
     }
 
     // Find neighbours for each particle
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (size_t pos = 0; pos < pos_array.size() / 3; pos++)
     {
         //cout << "Pos : " << pos <<endl;
@@ -131,7 +131,7 @@ void findNeighbours(vector<vector<int>> &cell_matrix,
                                     //cout << "neighbour founded (after push)" << "\n"<<endl;
                                     
                                         neighbours_matrix[pos].push_back(actual_cell_value);
-                                        neighbours_matrix[actual_cell_value].push_back(pos);
+                                        //neighbours_matrix[actual_cell_value].push_back(pos);
                                     
                                     
                                 }
@@ -142,10 +142,9 @@ void findNeighbours(vector<vector<int>> &cell_matrix,
             }
         }
 
-        #pragma omp critical 
-        {
-        cell_matrix[i_cell + j_cell * Nx + k_cell * Nx * Ny].erase(cell_matrix[i_cell + j_cell * Nx + k_cell * Nx * Ny].begin());
-        }
+        
+        //cell_matrix[i_cell + j_cell * Nx + k_cell * Nx * Ny].erase(cell_matrix[i_cell + j_cell * Nx + k_cell * Nx * Ny].begin());
+        
     }
 
     if (PRINT){

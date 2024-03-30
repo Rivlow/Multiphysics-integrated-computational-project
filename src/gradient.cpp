@@ -18,7 +18,7 @@ void gradW(vector<vector<double>> &gradW_matrix,
            const bool PRINT){
 
     // Iterations over each particle
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (size_t pos = 0; pos < pos_array.size()/3; pos++)
     {
         vector<int> &neighbours_array = neighbours_matrix[pos];
@@ -48,16 +48,20 @@ void gradW(vector<vector<double>> &gradW_matrix,
             // cout << "pos_array associated : " << pos_array[3*pos+0] << endl;
             // cout << "idx_neighbour associated : " << pos_array[3*idx_neighbour+0] << endl;
 
-            double val_0 = (pos_array[3 * pos + 0] - pos_array[3 * idx_neighbour + 0]) / r_ab * derive_cubic_spline(r_ab, h);
-            double val_1 = (pos_array[3 * pos + 1] - pos_array[3 * idx_neighbour + 1]) / r_ab * derive_cubic_spline(r_ab, h);
-            double val_2 = (pos_array[3 * pos + 2] - pos_array[3 * idx_neighbour + 2]) / r_ab * derive_cubic_spline(r_ab, h);
+            double deriv_kernel = derive_cubic_spline(r_ab, h);
+            double val_0 = (pos_array[3 * pos + 0] - pos_array[3 * idx_neighbour + 0]) / r_ab * deriv_kernel;
+            double val_1 = (pos_array[3 * pos + 1] - pos_array[3 * idx_neighbour + 1]) / r_ab * deriv_kernel;
+            double val_2 = (pos_array[3 * pos + 2] - pos_array[3 * idx_neighbour + 2]) / r_ab * deriv_kernel;
 
+            
             gradW_matrix[pos].push_back(val_0);
             // cout << "after first push_back"<<endl;
             gradW_matrix[pos].push_back(val_1);
             // cout << "after second push_back"<<endl;
             gradW_matrix[pos].push_back(val_2);
             // cout << "after third push_back"<<endl;
+            
+           
         }
     }
 
@@ -134,7 +138,7 @@ void setArtificialViscosity(vector<vector<double>> &artificial_visc_matrix,
 
     if (t == 0)
     {
-        //#pragma omp parallel for
+        #pragma omp parallel for
         for (size_t pos = 0; pos < nb_moving_part; pos++)
         {
 
@@ -153,7 +157,7 @@ void setArtificialViscosity(vector<vector<double>> &artificial_visc_matrix,
         vector<double> rel_displ(3), rel_vel(3);
 
         // Iterations over each particle
-        //#pragma omp parallel for
+        #pragma omp parallel for
         for (size_t pos = 0; pos < pos_array.size()/3; pos++)
         {
 
