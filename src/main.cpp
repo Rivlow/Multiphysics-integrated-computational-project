@@ -127,21 +127,21 @@ int main(int argc, char *argv[])
     /*------------------- INITIALIZATION OF VARIABLES USED -------------------*/
 
     // Vector used (and labelled w.r.t particles location)
-    vector<double> pos_array, type_arr;
+    vector<double> pos, type;
     vector<vector<int>> cell_matrix(params.Nx * params.Ny * params.Nz);
 
     // Initialization of the particles (moving and fixed)
-    meshcube(params, pos_array, type_arr);
-    meshBoundary(params, pos_array, type_arr);
-    int nb_tot_part = pos_array.size()/3;
+    meshcube(params, pos, type);
+    meshBoundary(params, pos, type);
+    int nb_tot_part = pos.size()/3;
 
-    vector<double> mass_array(nb_tot_part),
-                   u_array(3 * nb_tot_part),
-                   drhodt_array(nb_tot_part),
-                   rho_array(nb_tot_part),
-                   dudt_array(3 * nb_tot_part, 0.0),
-                   p_array(nb_tot_part),
-                   c_array(nb_tot_part),
+    vector<double> mass(nb_tot_part),
+                   u(3 * nb_tot_part),
+                   drhodt(nb_tot_part),
+                   rho(nb_tot_part),
+                   dudt(3 * nb_tot_part, 0.0),
+                   p(nb_tot_part),
+                   c(nb_tot_part),
                    grad_sum(nb_tot_part);
 
     vector<vector<double>> artificial_visc_matrix(nb_tot_part),
@@ -154,16 +154,16 @@ int main(int argc, char *argv[])
     std::map<std::string, std::vector<double> *> vectors;
 
 
-    scalars["type"] = &type_arr;
-    scalars["mass_array"] = &mass_array;
-    scalars["rho_array"] = &rho_array;
-    scalars["p_array"] = &p_array;
-    scalars["drhodt_array"] = &drhodt_array;
+    scalars["type"] = &type;
+    scalars["mass"] = &mass;
+    scalars["rho"] = &rho;
+    scalars["p"] = &p;
+    scalars["drhodt"] = &drhodt;
     scalars["nvoisins"] = &nvoisins;
     scalars["grad_sum"] = &grad_sum;
-    vectors["position"] = &pos_array;
-    vectors["u_array"] = &u_array;
-    vectors["dudt_array"] = &dudt_array;
+    vectors["position"] = &pos;
+    vectors["u"] = &u;
+    vectors["dudt"] = &dudt;
 
 
 
@@ -180,9 +180,9 @@ int main(int argc, char *argv[])
 
     
 
-    initializeRho(params, pos_array, rho_array);
-    initializeMass(params, rho_array, mass_array);
-    initializeVelocity(params, u_array);
+    initializeRho(params, pos, rho);
+    initializeMass(params, rho, mass);
+    initializeVelocity(params, u);
     initializeViscosity(params, artificial_visc_matrix);
 
 
@@ -194,34 +194,33 @@ int main(int argc, char *argv[])
         // std::cout << "dt_max = " << dt_max << "    dt = " << dt << std::endl;
 
         // Apply the linked-list algorithm
-        sorted_list(params, cell_matrix, neighbours_matrix, pos_array); 
+        sorted_list(params, cell_matrix, neighbours_matrix, pos); 
 
 
         // Compute ∇_a(W_ab) for all particles
-        gradW(params, gradW_matrix, neighbours_matrix, 
-              pos_array); 
+        gradW(params, gradW_matrix, neighbours_matrix, pos); 
 
 
         // Compute D(rho)/Dt for all particles
         continuityEquation(params, neighbours_matrix, gradW_matrix, 
-                           pos_array, u_array, drhodt_array, rho_array, mass_array); 
+                           pos, u, drhodt, rho, mass); 
 
 
         // Compute D(u)/Dt for all particles
         momentumEquation(params, t, neighbours_matrix, gradW_matrix, artificial_visc_matrix,
-                         mass_array, dudt_array, rho_array, p_array, c_array, pos_array, u_array); 
+                         mass, dudt, rho, p, c, pos, u); 
         
 
         // Update density, velocity and position for each particle (Euler explicit scheme)
-        update(params, pos_array, u_array, rho_array, drhodt_array, dudt_array);
+        update(params, pos, u, rho, drhodt, dudt);
         
         // Clear matrices and reset arrays to 0
         clearAllVectors(params, artificial_visc_matrix, neighbours_matrix, cell_matrix, gradW_matrix,
-                        drhodt_array, dudt_array);
+                        drhodt, dudt);
 
 
         if(t % params.nsave == 0){
-            export_particles("../../output/sph", t, pos_array, scalars, vectors);
+            export_particles("../../output/sph", t, pos, scalars, vectors);
         }
 
     }
