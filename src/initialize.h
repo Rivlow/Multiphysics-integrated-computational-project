@@ -1,7 +1,14 @@
+#ifndef INITIALIZE_H
+#define INITIALIZE_H
+
 #include <stdio.h>
 #include <vector>
 #include <string>
+
 #include "tools.h"
+#include "structure.h"
+
+
 using namespace std;
 
 void initializeMass(const SimulationData& params, 
@@ -11,12 +18,13 @@ void initializeMass(const SimulationData& params,
 void initializeRho(const SimulationData& params,
                    vector<double> &pos_array,
                    vector<double> &rho_array, 
-                   size_t nb_moving_part);
+                   int nb_moving_part);
 
 void initializeVelocity(const SimulationData& params, 
                         vector<double> &u_array,
-                        vector<double> &u_init,
-                        size_t nb_moving_part);
+                        int nb_moving_part);
 
 void initializeViscosity(const SimulationData& params, 
                          vector<vector<double>> &artificial_visc_matrix);
+
+#endif // INITIALIZE_H

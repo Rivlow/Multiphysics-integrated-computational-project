@@ -3,32 +3,35 @@
 #include <omp.h>
 
 #include "gradient.h"
-#include "sorted_list.h"
+#include "find_neighbours.h"
 #include "Kernel_functions.h"
 #include "tools.h"
+#include "structure.h"
 
 
 using namespace std;
 
-void gradW(vector<vector<double>> &gradW_matrix,
+void gradW(const SimulationData& params, 
+           vector<vector<double>> &gradW_matrix,
            vector<vector<int>> &neighbours_matrix,
            vector<double> &pos_array,
-           size_t nb_moving_part,
-           double h, int Nx, int Ny, int Nz,
-           const bool PRINT){
+           int nb_moving_part,
+           int Nx, int Ny, int Nz){
+
+    double h = params.h;
 
     // Iterations over each particle
     //#pragma omp parallel for
-    for (size_t pos = 0; pos < pos_array.size()/3; pos++)
+    for (int pos = 0; pos < int(pos_array.size()/3); pos++)
     {
         vector<int> &neighbours_array = neighbours_matrix[pos];
         // cout << "len(neighbour_list) : " << neighbours_list.size() << endl;
 
         // Iterations over each associated neighbours of prescribed particles
-        for (size_t idx = 0; idx < neighbours_array.size(); idx++)
+        for (int idx = 0; idx < int(neighbours_array.size()); idx++)
         {
 
-            size_t idx_neighbour = neighbours_array[idx];
+            int idx_neighbour = neighbours_array[idx];
             double rx, ry, rz, r_ab;
             // cout << "entrance in neighbour loop (before rx, ry, rz) \n";
             rx = (pos_array[3 * pos + 0] - pos_array[3 * idx_neighbour + 0]) * (pos_array[3 * pos + 0] - pos_array[3 * idx_neighbour + 0]);
@@ -61,26 +64,29 @@ void gradW(vector<vector<double>> &gradW_matrix,
         }
     }
 
-    if (PRINT){
+    if (params.PRINT){
             cout << "gradW passed" << endl;
     }
 }
 
-void setSpeedOfSound(vector<double> &c_array,
-                     vector<double> &rho_array,
-                     double rho_0, double c_0,
-                     double gamma, 
-                     string state_equation_chosen){
+void setSpeedOfSound(const SimulationData& params,
+                     vector<double> &c_array,
+                     vector<double> &rho_array){
+
+    string state_equation = params.state_equation;
+    double c_0 = params.c_0;
+    double rho_0 = params.rho_0;
+    double gamma = params.gamma;
 
     //#pragma omp parallel for
-    for (size_t pos = 0; pos < rho_array.size(); pos++)
+    for (int pos = 0; pos < int(rho_array.size()); pos++)
     {
 
-        if (state_equation_chosen == "Ideal gaz law")
+        if (state_equation == "Ideal gaz law")
         {
             c_array[pos] = c_0;
         }
-        if (state_equation_chosen == "Quasi incompresible fluid")
+        if (state_equation == "Quasi incompresible fluid")
         {
             c_array[pos] = c_0 * pow(rho_array[pos] / rho_0, 0.5 * (gamma - 1));
         }
@@ -88,24 +94,31 @@ void setSpeedOfSound(vector<double> &c_array,
 
 }
 
-void setPressure(vector<double> &p_array,
+void setPressure(const SimulationData& params,
+                 vector<double> &p_array,
                  vector<double> &rho_array, 
-                 size_t nb_moving_part,
-                 double rho_0, double c_0, 
-                 double R, double T, double M,
-                 double gamma,
-                 string state_equation_chosen, 
-                 const bool PRINT){
+                 int nb_moving_part){
+
+
+    string state_equation = params.state_equation;
+    double c_0 = params.c_0;
+    double rho_0 = params.rho_0;
+    double gamma = params.gamma;
+    double R = params.R;
+    double T = params.T;
+    double M = params.M;
+    bool PRINT = params.PRINT;
+
     //#pragma omp parallel for
-    for (size_t pos = 0; pos < nb_moving_part; pos++)
+    for (int pos = 0; pos < nb_moving_part; pos++)
     {
 
-        if (state_equation_chosen == "Ideal gaz law")
+        if (state_equation == "Ideal gaz law")
         {
             p_array[pos] = (rho_array[pos] / rho_0 - 1) * (R * T) / M;
         }
 
-        if (state_equation_chosen == "Quasi incompresible fluid")
+        if (state_equation == "Quasi incompresible fluid")
         {
             double B = c_0 * c_0 * rho_0 / gamma;
             p_array[pos] = B * (pow(rho_array[pos] / rho_0, gamma) - 1);
@@ -117,30 +130,31 @@ void setPressure(vector<double> &p_array,
     }
 }
 
-void setArtificialViscosity(vector<vector<double>> &artificial_visc_matrix,
+void setArtificialViscosity(const SimulationData& params,
+                            int t,
+                            vector<vector<double>> &artificial_visc_matrix,
                             vector<vector<int>> &neighbours_matrix,
                             vector<double> &c_array,
                             vector<double> &pos_array,
                             vector<double> &rho_array,
                             vector<double> &u_array, 
-                            size_t nb_moving_part,
-                            int t, 
-                            double alpha, double beta, double gamma,
-                            double c_0, double rho_0,
-                            double R, double T,double M, 
-                            double h,
-                            string state_equation_chosen, 
-                            const bool PRINT){
+                            int nb_moving_part){
+
+    double beta = params.beta;
+    double alpha = params.alpha;
+    double h = params.h;
+    bool PRINT = params.PRINT;
+
 
     if (t == 0)
     {
         //#pragma omp parallel for
-        for (size_t pos = 0; pos < nb_moving_part; pos++)
+        for (int pos = 0; pos < nb_moving_part; pos++)
         {
 
             vector<int> &neighbours_array = neighbours_matrix[pos];
 
-            for (size_t idx_neighbour = 0; idx_neighbour < neighbours_array.size(); idx_neighbour++)
+            for (int idx_neighbour = 0; idx_neighbour < int(neighbours_array.size()); idx_neighbour++)
             {
                 artificial_visc_matrix[pos].push_back(0.0);
             }
@@ -154,13 +168,13 @@ void setArtificialViscosity(vector<vector<double>> &artificial_visc_matrix,
 
         // Iterations over each particle
         //#pragma omp parallel for
-        for (size_t pos = 0; pos < pos_array.size()/3; pos++)
+        for (int pos = 0; pos < int(pos_array.size()/3); pos++)
         {
 
             vector<int> &neighbours_arr = neighbours_matrix[pos];
 
             // Iteration over each associated neighbours
-            for (size_t idx_neighbour = 0; idx_neighbour < neighbours_arr.size(); idx_neighbour++)
+            for (int idx_neighbour = 0; idx_neighbour < int(neighbours_arr.size()); idx_neighbour++)
             {
 
                 int neighbour_value = neighbours_arr[idx_neighbour];
@@ -176,7 +190,7 @@ void setArtificialViscosity(vector<vector<double>> &artificial_visc_matrix,
                 double u_ab_x_ab = 0, x_ab_2 = 0;
 
                 // Dot product
-                for (size_t cord = 0; cord < 3; cord++)
+                for (int cord = 0; cord < 3; cord++)
                 {
                     u_ab_x_ab += rel_vel[cord] * rel_displ[cord];
                     x_ab_2 += rel_displ[cord] * rel_displ[cord];
@@ -205,38 +219,38 @@ void setArtificialViscosity(vector<vector<double>> &artificial_visc_matrix,
         }
     }
     
-
-   if (PRINT){
+    if (PRINT){
             cout << "setArtificialViscosity passed" << endl;
     }
 }
 
-void continuityEquation(vector<vector<int>> &neighbours_matrix,
+void continuityEquation(const SimulationData& params,
+                        vector<vector<int>> &neighbours_matrix,
                         vector<vector<double>> &gradW_matrix,
                         vector<double> &pos_array,
                         vector<double> &u_array,
                         vector<double> &drhodt_array,
                         vector<double> &rho_array,
                         vector<double> &mass_array, 
-                        size_t nb_moving_part,
-                        double h, 
-                        const bool PRINT){
+                        int nb_moving_part){
 
+    bool PRINT = params.PRINT;
+             
     // Iterations over each particle
     #pragma omp parallel for
-    for (size_t pos = 0; pos < pos_array.size()/3; pos++){
+    for (int pos = 0; pos < int(pos_array.size()/3); pos++){
 
         vector<int> &neighbours_array = neighbours_matrix[pos];
         vector<double> &gradW_array = gradW_matrix[pos];
 
         // Summation over b = 1 -> nb_neighbours
-        for (size_t idx = 0; idx < neighbours_array.size(); idx++){
+        for (int idx = 0; idx < int(neighbours_array.size()); idx++){
 
             // Dot product of u_ab with grad_a(W_ab)
             double dot_product = 0;
-            size_t idx_neighbour = neighbours_array[idx];
+            int idx_neighbour = neighbours_array[idx];
             double m_b = mass_array[idx_neighbour];
-            for (size_t cord = 0; cord < 3; cord++){
+            for (int cord = 0; cord < 3; cord++){
 
                 double u_a = u_array[3 * pos + cord];
                 double u_b = u_array[3 * idx_neighbour + cord];
@@ -253,7 +267,9 @@ void continuityEquation(vector<vector<int>> &neighbours_matrix,
     }
 }
 
-void momentumEquation(vector<vector<int>> &neighbours_matrix,
+void momentumEquation(const SimulationData& params,
+                      int t,
+                      vector<vector<int>> &neighbours_matrix,
                       vector<vector<double>> &gradW_matrix,
                       vector<vector<double>> &artificial_visc_matrix,
                       vector<double> &mass_array,
@@ -263,35 +279,28 @@ void momentumEquation(vector<vector<int>> &neighbours_matrix,
                       vector<double> &c_array,
                       vector<double> &pos_array,
                       vector<double> &u_array,
-                      size_t nb_moving_part,
-                      double rho_0, double c_0,
-                      double gamma,
-                      double R, double T, double M,
-                      double g,
-                      int t,
-                      double alpha, double beta, double h,
-                      string state_equation_chosen, 
-                      const bool PRINT){
+                      int nb_moving_part){
+
+
+    double g = params.g;
+    bool PRINT = params.PRINT;
+
 
     // Compute pressure for all particles
-    setPressure(p_array, rho_array, 
-                nb_moving_part, rho_0, c_0, R, T, M, gamma, 
-                state_equation_chosen, PRINT); 
+    setPressure(params, p_array, rho_array, 
+                nb_moving_part); 
 
     // Compute speed of sound for all particles
-    setSpeedOfSound(c_array,rho_array,
-                    rho_0, c_0, gamma, 
-                    state_equation_chosen);
+    setSpeedOfSound(params, c_array, rho_array);
 
     // Compute artificial viscosity Π_ab for all particles
-    setArtificialViscosity(artificial_visc_matrix, neighbours_matrix,
+    setArtificialViscosity(params, t, artificial_visc_matrix, neighbours_matrix,
                             c_array, pos_array, rho_array, u_array, 
-                            nb_moving_part, t, alpha, beta, rho_0, c_0, gamma, R, T, M, h,
-                            state_equation_chosen, PRINT); 
+                            nb_moving_part); 
 
     // Iterations over each particle
     #pragma omp parallel for
-    for (size_t pos = 0; pos < nb_moving_part; pos++)
+    for (int pos = 0; pos < nb_moving_part; pos++)
     {
         vector<int> &neighbours_array = neighbours_matrix[pos];
         vector<double> &gradW_array = gradW_matrix[pos];
@@ -300,10 +309,10 @@ void momentumEquation(vector<vector<int>> &neighbours_matrix,
         double rho_a = rho_array[pos];
         double p_a = p_array[pos];
 
-        for (size_t cord = 0; cord < 3; cord++)
+        for (int cord = 0; cord < 3; cord++)
         {
             // Summation over b = 1 -> nb_neighbours
-            for (size_t idx_neighbour = 0; idx_neighbour < neighbours_array.size(); idx_neighbour++)
+            for (int idx_neighbour = 0; idx_neighbour < int(neighbours_array.size()); idx_neighbour++)
             {
                 double pi_ab = artificial_visc_array[idx_neighbour];
                 double rho_b = rho_array[neighbours_array[idx_neighbour]];
@@ -325,19 +334,21 @@ void momentumEquation(vector<vector<int>> &neighbours_matrix,
     }
 }
 
-void update(vector<double> &pos_array,
+void update(const SimulationData& params,
+            vector<double> &pos_array,
             vector<double> &u_array,
             vector<double> &rho_array,
             vector<double> &drhodt_array,
-            vector<double> &dudt_array,
-            double dt,
-            const bool PRINT){
+            vector<double> &dudt_array){
+
+    double dt = params.dt;
+    bool PRINT = params.PRINT;
     
-    for (size_t pos = 0; pos < pos_array.size()/3; pos++){
+    for (int pos = 0; pos < int(pos_array.size()/3); pos++){
 
         rho_array[pos] += dt * drhodt_array[pos];
 
-        for (size_t cord = 0; cord < 3; cord++){
+        for (int cord = 0; cord < 3; cord++){
 
             pos_array[3 * pos + cord] += dt * u_array[3 * pos + cord];
             u_array[3 * pos + cord] += dt * dudt_array[3 * pos + cord];

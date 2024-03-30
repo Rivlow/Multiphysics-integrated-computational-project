@@ -1,44 +1,52 @@
+#ifndef GRADIENT_H
+#define GRADIENT_H
+
 #include <stdio.h>
 #include <vector>
-#include "sorted_list.h"
-#include "tools.h"
+#include "structure.h"
+
 
 using namespace std;
 
-void gradW(vector<vector<double>> &gradW_matrix,
+void gradW(const SimulationData& params, 
+           vector<vector<double>> &gradW_matrix,
            vector<vector<int>> &neighbours_matrix,
            vector<double> &pos_array,
-           size_t nb_moving_part,
-           double h, int Nx, int Ny, int Nz, 
-           const bool PRINT);
+           int nb_moving_part,
+           int Nx, int Ny, int Nz);
 
-void setArtificialViscosity(vector<vector<double>> &artificial_visc_matrix,
+void setSpeedOfSound(const SimulationData& params,
+                     vector<double> &c_array,
+                     vector<double> &rho_array);
+
+void setPressure(const SimulationData& params,
+                 vector<double> &p_array,
+                 vector<double> &rho_array, 
+                 int nb_moving_part);
+
+void setArtificialViscosity(const SimulationData& params,
+                            int t,
+                            vector<vector<double>> &artificial_visc_matrix,
                             vector<vector<int>> &neighbours_matrix,
                             vector<double> &c_array,
                             vector<double> &pos_array,
                             vector<double> &rho_array,
                             vector<double> &u_array, 
-                            size_t nb_moving_part,
-                            int t, 
-                            double alpha, double beta, double gamma,
-                            double c_0, double rho_0,
-                            double R, double T,double M, 
-                            double h,
-                            string state_equation_chosen, 
-                            const bool PRINT);
+                            int nb_moving_part);
 
-void continuityEquation(vector<vector<int>> &neighbours_matrix,
+void continuityEquation(const SimulationData& params,
+                        vector<vector<int>> &neighbours_matrix,
                         vector<vector<double>> &gradW_matrix,
                         vector<double> &pos_array,
                         vector<double> &u_array,
                         vector<double> &drhodt_array,
                         vector<double> &rho_array,
                         vector<double> &mass_array, 
-                        size_t nb_moving_part,
-                        double h, 
-                        const bool PRINT);
+                        int nb_moving_part);
 
-void momentumEquation(vector<vector<int>> &neighbours_matrix,
+void momentumEquation(const SimulationData& params,
+                      int t,
+                      vector<vector<int>> &neighbours_matrix,
                       vector<vector<double>> &gradW_matrix,
                       vector<vector<double>> &artificial_visc_matrix,
                       vector<double> &mass_array,
@@ -48,35 +56,17 @@ void momentumEquation(vector<vector<int>> &neighbours_matrix,
                       vector<double> &c_array,
                       vector<double> &pos_array,
                       vector<double> &u_array,
-                      size_t nb_moving_part,
-                      double rho_0, double c_0,
-                      double gamma,
-                      double R, double T, double M,
-                      double g,
-                      int t,
-                      double alpha, double beta, double h,
-                      string state_equation_chosen, 
-                      const bool PRINT);
+                      int nb_moving_part);
 
-void setSpeedOfSound(vector<double> &c_array,
-                     vector<double> &rho_array,
-                     double rho_0, double c_0,
-                     double gamma, 
-                     string state_equation_chosen);
 
-void setPressure(vector<double> &p_array,
-                 vector<double> &rho_array, 
-                 size_t nb_moving_part,
-                 double rho_0, double c_0, 
-                 double R, double T, double M,
-                 double gamma,
-                 string state_equation_chosen, 
-                 const bool PRINT);
 
-void update(vector<double> &pos_array,
+
+
+void update(const SimulationData& params,
+            vector<double> &pos_array,
             vector<double> &u_array,
             vector<double> &rho_array,
             vector<double> &drhodt_array,
-            vector<double> &dudt_array,
-            double dt,
-            const bool PRINT);
+            vector<double> &dudt_array);
+
+#endif // GRADIENT_H

@@ -8,12 +8,14 @@
 #include <cstdlib>
 
 #include "generate_particle.h"
-#include "sorted_list.h"
+#include "find_neighbours.h"
 #include "gradient.h"
 #include "initialize.h"
 #include "export.h"
 #include "Kernel_functions.h"
 #include "tools.h"
+#include "structure.h"
+
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -52,23 +54,23 @@ auto t0 = std::chrono::high_resolution_clock::now();
     }
 
 
-    /*---------------------------- INPUT PARAMETERS FROM JSON FILES ----------*/
+    /*------------------INPUT PARAMETERS FROM JSON FILES ---------------*/
 
     std::ifstream inputf(argv[1]);
     json data = json::parse(inputf);
 
     std::cout << argv[1] << ":\n"
-              << data.dump(4) << std::endl; // Print input data to screen
+              << data.dump(4) << std::endl; // print input data to screen
 
 
-    std::string state_equation_chosen; /// p expl "Ideal gaz law"
+    std::string state_equation;
     std::string state_initial_condition;
 
     for (auto &it : data["stateEquation"].items())
     {
         if (it.value() == true)
         {
-            state_equation_chosen = it.key();
+            state_equation = it.key();
         }
     }
 
@@ -84,52 +86,54 @@ auto t0 = std::chrono::high_resolution_clock::now();
     clearOutputFiles();
 
 
-    SimulationData params;
-    params.kappa = data["kappa"];
-    params.dt = data["dt"];
-    params.s = data["s"];
-    params.h = 1.2 * params.s; 
-    params.nstepT = data["nstepT"]; 
-    params.o = data["o"].get<vector<double>>();
-    params.L = data["L"].get<vector<double>>();
-    params.o_d = data["o_d"].get<vector<double>>();
-    params.L_d = data["L_d"].get<vector<double>>();
-    params.u_init = data["u_init"].get<vector<double>>();
-    params.alpha = data["alpha"];
-    params.beta = data["beta"];
-    params.c_0 = data["c_0"];
-    params.rho_moving = data["rho_moving"];
-    params.rho_fixed = data["rho_fixed"];
-    params.rho_0 = data["rho_0"];
-    params.M = data["M"];
-    params.T = data["T"];
-    params.gamma = data["gamma"];
-    params.nsave = data["nsave"];
-    params.state_equation = state_equation_chosen; 
-    params.PRINT = data["print_debug"];
-    std::string state_initial_condition;
-    
+
+    const SimulationData params = {
+
+        data["kappa"],
+        data["nstepT"],
+        data["nsave"],
+        data["dt"],
+        data["s"],
+        1.2 * params.s,
+        data["o"],
+        data["L"],
+        data["o_d"],
+        data["L_d"],
+        data["u_init"],
+
+        data["alpha"],
+        data["beta"],
+
+        data["c_0"],
+        data["rho_moving"],
+        data["rho_fixed"],
+        data["rho_0"],
+        data["M"],
+        data["T"],
+        data["gamma"],
+        8.314, // [J/(K.mol)]
+        -9.81, // [m/s²]
+        state_equation,
+        state_initial_condition,
+        data["print_debug"],
+    };
+
+
   
 
     /*---------------------------- INITIALIZATION OF VARIABLES USED ----------*/
-
-
-
-    // Constants
-                 
-   
 
     // Number of cells 
     int Nx = params.L_d[0] / (params.kappa * params.h);
     int Ny = params.L_d[1] / (params.kappa * params.h);
     int Nz = params.L_d[2] / (params.kappa * params.h);
 
-    cout << "state equation chosen : " << state_equation_chosen << " \n" << endl;
+    cout << "state equation chosen : " << state_equation << " \n" << endl;
     cout << " kappa * h =" << params.kappa * params.h << endl;
     printf("(Nx, Ny, Nz) = (%d, %d, %d) \n", Nx, Ny, Nz);
 
     // Nb of particles along each direction from target size "s"
-    size_t nb_particles = evaluateNumberParticles(params);
+    int nb_particles = evaluateNumberParticles(params);
 
     // Vector used (and labelled w.r.t particles location)
     vector<double> pos_array, type_arr;
@@ -181,16 +185,13 @@ auto t0 = std::chrono::high_resolution_clock::now();
     vectors["dudt_array"] = &dudt_array;
 
 
-    initializeRho(params, pos_array, rho_array,
-                  nb_moving_part,
-                  state_equation_chosen, state_initial_condition);
-
+    initializeRho(params, pos_array, rho_array, nb_moving_part);
     initializeMass(params, rho_array, mass_array);
     initializeVelocity(params, u_array, nb_moving_part);
     initializeViscosity(params, artificial_visc_matrix);
 
 
-    for (int t = 0; t < nstepT; t++)
+    for (int t = 0; t < params.nstepT; t++)
     {
 
         // compute dt_max = min_a h_a/F
@@ -198,43 +199,38 @@ auto t0 = std::chrono::high_resolution_clock::now();
         // std::cout << "dt_max = " << dt_max << "    dt = " << dt << std::endl;
 
         // Apply the linked-list algorithm
-        findNeighbours(cell_matrix, neighbours_matrix,
-                       pos_array, L_d,
-                       nb_moving_part, Nx, Ny, Nz, h, kappa, 
-                       PRINT); 
+        sorted_list(params, cell_matrix, neighbours_matrix,
+                       pos_array,
+                       nb_moving_part, Nx, Ny, Nz); 
 
 
         // Compute ∇_a(W_ab) for all particles
-        gradW(gradW_matrix, neighbours_matrix, 
+        gradW(params, gradW_matrix, neighbours_matrix, 
               pos_array,
-              nb_moving_part, h, Nx, Ny, Nz,
-              PRINT); 
+              nb_moving_part, Nx, Ny, Nz); 
 
 
         // Compute D(rho)/Dt for all particles
-        continuityEquation(neighbours_matrix, gradW_matrix, 
+        continuityEquation(params, neighbours_matrix, gradW_matrix, 
                            pos_array, u_array, drhodt_array, rho_array, mass_array,
-                           nb_moving_part, h,
-                           PRINT); 
+                           nb_moving_part); 
 
 
         // Compute D(u)/Dt for all particles
-        momentumEquation(neighbours_matrix, gradW_matrix, artificial_visc_matrix,
+        momentumEquation(params, t, neighbours_matrix, gradW_matrix, artificial_visc_matrix,
                          mass_array, dudt_array, rho_array, p_array, c_array, pos_array, u_array,
-                         nb_moving_part,
-                         rho_0, c_0, gamma, R, T, M, g, t, alpha, beta, h,
-                         state_equation_chosen, PRINT); 
+                         nb_moving_part); 
         
 
         // Update density, velocity and position for each particle (Euler explicit scheme)
-        update(pos_array, u_array, rho_array, drhodt_array, dudt_array, dt, PRINT);
+        update(params, pos_array, u_array, rho_array, drhodt_array, dudt_array);
         
         // Clear matrices and reset to 0 arrays
-        clearAllVectors(artificial_visc_matrix, neighbours_matrix, cell_matrix, gradW_matrix,
-                        drhodt_array, dudt_array,
-                        PRINT);
+        clearAllVectors(params, artificial_visc_matrix, neighbours_matrix, cell_matrix, gradW_matrix,
+                        drhodt_array, dudt_array);
 
-        if(t % nsave == 0){
+
+        if(t % params.nsave == 0){
             export_particles("../../output/sph", t, pos_array, scalars, vectors);
         }
 
