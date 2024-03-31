@@ -5,11 +5,20 @@
 #include <vector>
 #include <string>
 #include <filesystem>
+#include <fstream>
+#include "nlohmann/json.hpp"
 
 using namespace std;
 
-struct SimulationData {
 
+struct DomainParams {
+    string shape;
+    vector<string> walls_used;
+    double particle_layers;
+
+};
+
+struct SimulationData {
     int kappa;
     int nstepT;
     int nsave;
@@ -44,6 +53,11 @@ struct SimulationData {
 
     int nb_moving_part;
 
+    DomainParams domainParams;
+
+    bool walls_used(const string& wall) const {
+        return find(domainParams.walls_used.begin(), domainParams.walls_used.end(), wall) != domainParams.walls_used.end();
+    }
 };
 
 #endif // STRUCTURE_H

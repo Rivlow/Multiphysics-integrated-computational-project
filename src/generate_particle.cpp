@@ -83,142 +83,137 @@ void meshBoundary(const SimulationData &params,
                   vector<double> &bound_arr, 
                   vector<double> &type_arr){
 
-    int ni = int(ceil(params.L_d[0] / params.s));
-    double dx = params.L_d[0] / ni;
+    vector<double> L = params.L;
+    vector<double> o = params.o;
+    vector<double> L_d = params.L_d;
+    vector<double> o_d = params.o_d;
+    double s = params.s;
+    double layer_max = params.domainParams.particle_layers;
+
+
+    int ni = int(ceil(L_d[0] / s));
+    double dx = L_d[0] / ni;
     ++ni;
-    int nj = int(ceil(params.L_d[1] / params.s));
-    double dy = params.L_d[1] / nj;
+    int nj = int(ceil(L_d[1] / s));
+    double dy = L_d[1] / nj;
     ++nj;
-    int nk = int(ceil(params.L_d[2] / params.s));
-    double dz = params.L_d[2] / nk;
+    int nk = int(ceil(L_d[2] / s));
+    double dz = L_d[2] / nk;
     ++nk;
     cout << "ni, nj, nk = " << ni << nj << nk << endl;
 
     bound_arr.reserve(bound_arr.size() + 6 * (ni * nj + (nk - 2) * nj + (ni - 2) * (nk - 2)));
+    int isOdd;
 
-    // Apply first layer of FP
-    for (int i = 0; i < ni ; ++i) // along x
-    {
-        double x = params.o_d[0] + i * dx;
-        for (int j = 0 ; j < nj ; ++j) // along y
-        {
-            double y = params.o_d[1] + j * dy;
-            bound_arr.push_back(x);
-            bound_arr.push_back(y);
-            bound_arr.push_back(params.o_d[2]);
-            type_arr.push_back(0.0);
-            // bound_arr.push_back(x);
-            // bound_arr.push_back(y);
-            // bound_arr.push_back(L_d[2] + o_d[2]);
-            // type_arr.push_back(0.0);
-        }
-    }
-
-    for (int j = 0; j < nj; ++j) // along y
-    {
-        double y = params.o_d[1] + j * dy;
-        for (int k = 1; k < nk-1; ++k) // along z
-        {
-         double z = params.o_d[2] + k * dz;
-        bound_arr.push_back(params.o_d[0]);
-        bound_arr.push_back(y);
-        bound_arr.push_back(z);
-        type_arr.push_back(0.0);
-        bound_arr.push_back(params.L_d[0] + params.o_d[0]);
-        bound_arr.push_back(y);
-        bound_arr.push_back(z);
-        type_arr.push_back(0.0);
-
-        }
-    }
-    for (int i = 1; i < ni-1; ++i) // along x
-    {
-        double x = params.o_d[0] + i * dx;
-        for (int k = 1; k < nk-1; ++k) // along z
-        {
-         double z = params.o_d[2] + k * dz;
-        bound_arr.push_back(x);
-        bound_arr.push_back(params.o_d[1]);
-        bound_arr.push_back(z);
-        type_arr.push_back(0.0);
-        bound_arr.push_back(x);
-        bound_arr.push_back(params.L_d[1]+ params.o_d[1]);
-        bound_arr.push_back(z);
-        type_arr.push_back(0.0);
-
-        }
-    }
-
-    vector<double> o_d = params.o_d, L_d = params.L_d;
-    // Shift the center and origin to a get "en quiconce" boundaries
-    for (int i = 0; i < 3; i++)
-    {
-        o_d[i] = params.o_d[i] + params.s * 0.5;
-        L_d[i] = params.L_d[i] - params.s;
-        // cout << " le centre et longueur de l'axe " << i << "est "<< o_d[i] << " et  " << L_d[i] << endl;
-    }
-
-    ni = int(ceil(L_d[0] / params.s));
-    dx = params.L_d[0] / ni;
-    ++ni;
-    nj = int(ceil(L_d[1] / params.s));
-    dy = params.L_d[1] / nj;
-    ++nj;
-    nk= int(ceil(L_d[2] / params.s));
-    dz = L_d[2] / nk;
-    ++nk;
-
-    // Apply the second layer of FP
-    for (int i = 0; i < ni ; ++i) // along x
-    {
-        double x = o_d[0] + i * dx;
-        for (int j = 0; j < nj; ++j) // along y
-        {
-            double y = params.o_d[1] + j * dy;
-            bound_arr.push_back(x);
-            bound_arr.push_back(y);
-            bound_arr.push_back(params.o_d[2]);
-            type_arr.push_back(0.0);
-            // bound_arr.push_back(x);
-            // bound_arr.push_back(y);
-            // bound_arr.push_back(L_d[2] + o_d[2]);
-            // type_arr.push_back(0.0);
-        }
-    }
-
-    for (int j = 0; j < nj; ++j) // along y
-    {
-        double y = o_d[1] + j * dy;
-        for (int k = 1; k < nk-1; ++k) // along z
-        {
+    for (int actual_layer = 0; actual_layer < layer_max; actual_layer++){
         
-        double z = o_d[2] + k * dz;
-        bound_arr.push_back(o_d[0]);
-        bound_arr.push_back(y);
-        bound_arr.push_back(z);
-        type_arr.push_back(0.0);
-        bound_arr.push_back(L_d[0] + o_d[0]);
-        bound_arr.push_back(y);
-        bound_arr.push_back(z);
-        type_arr.push_back(0.0);
-
+        if (actual_layer == 0){
+            isOdd = 0;
         }
-    }
-    for (int i = 1; i < ni-1; ++i) // along x
-    {
-        double x = o_d[0] + i * dx;
-        for (int k = 1; k < nk-1; ++k) // along z
-        {
-         double z = o_d[2] + k * dz;
-        bound_arr.push_back(x);
-        bound_arr.push_back(o_d[1]);
-        bound_arr.push_back(z);
-        type_arr.push_back(0.0);
-        bound_arr.push_back(x);
-        bound_arr.push_back(L_d[1]+ o_d[1]);
-        bound_arr.push_back(z);
-        type_arr.push_back(0.0);
+        else{
+            isOdd = (actual_layer%2 != 0) ? -1 : 0;
+        }
 
+        cout<< "isOdd = " << isOdd << endl;
+
+        if (params.walls_used("floor")){
+
+            for (int i = 0; i < ni ; ++i){ // along x
+                double x = o_d[0] + i * dx + isOdd*0.5*s;
+                for (int j = 0 ; j < nj ; ++j){ // along y
+ 
+                    double y = o_d[1] + j * dy+ isOdd*0.5*s;
+                    if (i == 0 && j == 0){
+                        cout << "(x,y) : " << "(" << x << "," << y << ")" <<endl;
+                    }
+                    bound_arr.push_back(x);
+                    bound_arr.push_back(y);
+                    bound_arr.push_back(o_d[2]- 0.5*s*actual_layer);
+                    type_arr.push_back(0.0);
+                }
+            }
+        }
+
+
+        if (params.walls_used("roof")){
+
+            for (int i = 0; i < ni ; ++i){ // along x
+                double x = o_d[0] + i * dx+ isOdd*0.5*s;
+                for (int j = 0 ; j < nj ; ++j){ // along y
+        
+                    double y = o_d[1] + j * dy+ isOdd*0.5*s;
+                    bound_arr.push_back(x);
+                    bound_arr.push_back(y);
+                    bound_arr.push_back(L_d[2] + o_d[2]+ 0.5*s*actual_layer);
+                    type_arr.push_back(0.0);
+                }
+            }
+        }
+
+
+        if (params.walls_used("left_wall")){
+
+            for (int i = 0; i < ni; ++i){ // along x
+                double x = o_d[0] + i *dx + isOdd*0.5*s;
+                for (int k = 1; k < nk-1; ++k){ // along z
+                
+                    double z = o_d[2] + k*dz + isOdd*0.5*s;
+                    bound_arr.push_back(x);
+                    bound_arr.push_back(o_d[1]- 0.5*s*actual_layer);
+                    bound_arr.push_back(z);
+                    type_arr.push_back(0.0);
+
+                }
+            }
+        }
+
+
+        if (params.walls_used("right_wall")){
+
+            for (int i = 0; i < ni; ++i){ // along x
+                double x = o_d[0] + i*dx+ isOdd*0.5*s;
+                for (int k = 1; k < nk-1; ++k){ // along z
+                
+                    double z = o_d[2] + k*dz+ isOdd*0.5*s;
+                    bound_arr.push_back(x);
+                    bound_arr.push_back(L_d[1]+ o_d[1]+ 0.5*s*actual_layer);
+                    bound_arr.push_back(z);
+                    type_arr.push_back(0.0);
+                    
+                }
+            }
+        }
+
+
+        if (params.walls_used("front_wall")){
+
+            for (int j = 0; j < nj; ++j){ // along y
+                double y = o_d[1] + j * dy+ isOdd*0.5*s;
+                for (int k = 1; k < nk-1; ++k){ // along z
+                
+                    double z = o_d[2] + k * dz+ isOdd*0.5*s;
+                    bound_arr.push_back(o_d[0]- 0.5*s*actual_layer);
+                    bound_arr.push_back(y);
+                    bound_arr.push_back(z);
+                    type_arr.push_back(0.0);
+                }
+            }
+        }
+
+
+        if (params.walls_used("back_wall")){
+            for (int j = 0; j < nj; ++j){ // along y
+                double y = o_d[1] + j*dy + isOdd*0.5*s;
+                for (int k = 1; k < nk-1; ++k){ // along z
+                
+                    double z = o_d[2] + k * dz+ isOdd*0.5*s;
+                    bound_arr.push_back(L_d[0] + o_d[0]+ 0.5*s*actual_layer);
+                    bound_arr.push_back(y);
+                    bound_arr.push_back(z);
+                    type_arr.push_back(0.0);
+
+                }
+            }
         }
     }
 }

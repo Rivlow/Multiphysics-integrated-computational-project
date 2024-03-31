@@ -88,6 +88,20 @@ int main(int argc, char *argv[])
 
 
     // Structure to store all parameters used later 
+
+    DomainParams domainParams = {
+        data["domain"]["shape"],
+        {},
+        data["domain"]["particle_layers"],
+
+    };
+
+    for (auto& wall : data["domain"]["walls_used"].items()) {
+        if (wall.value().get<bool>()) {
+            domainParams.walls_used.push_back(wall.key());
+        }
+    }
+
     const SimulationData params = {
 
         data["kappa"],
@@ -121,6 +135,8 @@ int main(int argc, char *argv[])
         state_initial_condition,
         data["print_debug"],
         evaluateNumberParticles(params),
+        domainParams,
+
     };
 
 
@@ -165,7 +181,7 @@ int main(int argc, char *argv[])
     vectors["u"] = &u;
     vectors["dudt"] = &dudt;
 
-    cout << "state equation chosen : " << state_equation << " \n" << endl;
+        cout << "state equation chosen : " << state_equation << " \n" << endl;
     cout << "kappa * h =" << params.kappa * params.h << endl;
     cout << "(Nx, Ny, Nz) = (" << params.Nx << ", " << params.Ny << ", " << params.Nz << ")" << std::endl;
     cout << "b_moving_part = " << params.nb_moving_part << std::endl;

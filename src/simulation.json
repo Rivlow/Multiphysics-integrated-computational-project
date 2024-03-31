@@ -1,14 +1,25 @@
 {
 
-    "domain": {
-        "shape": "square",
-        "walls_used": ["floor", "left_wall", "right_wall", "front_wall", "back_wall"]
-      },
-      "particle_layers": 2,
+  "domain": {
+    "shape": "square",
+    
+    "walls_used": {
+        "floor": true,
+        "roof": false,
+        "left_wall": true,
+        "right_wall": true,
+        "front_wall": true,
+        "back_wall": true
+    },
 
-    "o": [0.3, 0.3, 0.6],
-    "L": [0.6, 0.6, 0.6],
-    "L_d": [1.2, 1.2, 1.4],
+    "particle_layers": 5
+  },
+
+    
+
+    "o": [1, 1, 1],
+    "L": [0.5, 0.5, 0.5],
+    "L_d": [2, 2, 2],
     "o_d": [0.0, 0.0, 0.0],
 
     "s": 0.25,
