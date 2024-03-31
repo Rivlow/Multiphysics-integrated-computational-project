@@ -267,14 +267,14 @@ auto t0 = std::chrono::high_resolution_clock::now();
 
         if(t % nsave == 0){
             export_particles("../../output/sph", t, pos_array, scalars, vectors);
-            auto delta_t_nei = std::chrono::duration_cast<std::chrono::duration<double>>(t1_nei - t0_nei).count();
+            /*auto delta_t_nei = std::chrono::duration_cast<std::chrono::duration<double>>(t1_nei - t0_nei).count();
             std::cout << "duration nei:  " << delta_t_nei << "s.\n";
             auto delta_t_grad = std::chrono::duration_cast<std::chrono::duration<double>>(t1_grad - t0_grad).count();
             std::cout << "duration grad: " << delta_t_grad << "s.\n";
             auto delta_t_conti = std::chrono::duration_cast<std::chrono::duration<double>>(t1_conti - t0_conti).count();
             std::cout << "duration conti: " << delta_t_conti << "s.\n";
             auto delta_t_mom = std::chrono::duration_cast<std::chrono::duration<double>>(t1_mom - t0_mom).count();
-            std::cout << "duration mom: " << delta_t_mom << "s.\n";
+            std::cout << "duration mom: " << delta_t_mom << "s.\n";*/
         }
         for(size_t i = 0 ; i<drhodt_array.size(); i ++ )
         {

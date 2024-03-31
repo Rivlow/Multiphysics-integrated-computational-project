@@ -218,7 +218,7 @@ void meshBoundary(vector<double> &o_d,
 
         }
     }
-   /* for (size_t i = 0; i < 3; i++)
+    for (size_t i = 0; i < 3; i++)
     {
         o_d[i] = o_d[i] + s * 0.5;
         L_d[i] = L_d[i] - s;
@@ -286,5 +286,5 @@ void meshBoundary(vector<double> &o_d,
         type_arr.push_back(0.0);
 
         }
-    }*/
+    }
 }
