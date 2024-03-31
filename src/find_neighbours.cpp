@@ -25,7 +25,6 @@ void sorted_list(const SimulationData& params,
     int Nx = params.Nx;
     int Ny = params.Ny;
     int Nz = params.Nz;
-    int nb_moving_part = params.nb_moving_part;
 
     //cout << "debut findNeighbours " <<endl;
 

@@ -15,6 +15,8 @@
 #include "Kernel_functions.h"
 #include "tools.h"
 #include "structure.h"
+#include "integration.h"
+
 
 
 #ifdef _OPENMP
@@ -108,6 +110,8 @@ int main(int argc, char *argv[])
         data["nstepT"],
         data["nsave"],
         data["dt"],
+        data["theta"],
+        data["schemeIntegration"],
         data["s"],
         1.2 * params.s,
         data["o"],
@@ -181,7 +185,7 @@ int main(int argc, char *argv[])
     vectors["u"] = &u;
     vectors["dudt"] = &dudt;
 
-        cout << "state equation chosen : " << state_equation << " \n" << endl;
+    cout << "state equation chosen : " << state_equation << " \n" << endl;
     cout << "kappa * h =" << params.kappa * params.h << endl;
     cout << "(Nx, Ny, Nz) = (" << params.Nx << ", " << params.Ny << ", " << params.Nz << ")" << std::endl;
     cout << "b_moving_part = " << params.nb_moving_part << std::endl;
@@ -215,20 +219,9 @@ int main(int argc, char *argv[])
         // Compute ∇_a(W_ab) for all particles
         gradW(params, gradW_matrix, neighbours_matrix, pos); 
 
+        // Update density, velocity and position for each particle (Euler explicit or RK22 scheme)
+        updateVariables(params, t, pos, u, rho, drhodt, c, p, dudt, mass, artificial_visc_matrix, gradW_matrix, neighbours_matrix);
 
-        // Compute D(rho)/Dt for all particles
-        continuityEquation(params, neighbours_matrix, gradW_matrix, 
-                           pos, u, drhodt, rho, mass); 
-
-
-        // Compute D(u)/Dt for all particles
-        momentumEquation(params, t, neighbours_matrix, gradW_matrix, artificial_visc_matrix,
-                         mass, dudt, rho, p, c, pos, u); 
-        
-
-        // Update density, velocity and position for each particle (Euler explicit scheme)
-        update(params, pos, u, rho, drhodt, dudt);
-        
         // Clear matrices and reset arrays to 0
         clearAllVectors(params, artificial_visc_matrix, neighbours_matrix, cell_matrix, gradW_matrix,
                         drhodt, dudt);

@@ -17,11 +17,9 @@ void gradW(const SimulationData& params,
            vector<double> &pos_array){
 
     double h = params.h;
-    int nb_moving_part = params.nb_moving_part;
-
 
     // Iterations over each particle
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (int pos = 0; pos < int(pos_array.size()/3); pos++)
     {
         vector<int> &neighbours_array = neighbours_matrix[pos];
@@ -38,18 +36,6 @@ void gradW(const SimulationData& params,
             ry = (pos_array[3 * pos + 1] - pos_array[3 * idx_neighbour + 1]) * (pos_array[3 * pos + 1] - pos_array[3 * idx_neighbour + 1]);
             rz = (pos_array[3 * pos + 2] - pos_array[3 * idx_neighbour + 2]) * (pos_array[3 * pos + 2] - pos_array[3 * idx_neighbour + 2]);
             r_ab = sqrt(rx + ry + rz);
-
-            // cout << "entrance in neighbour loop (after rx, ry, rz) \n";
-            // cout << "Val in neighbour list : (";
-            // cout << ")" << endl;
-            // cout << "val1 : " << (pos_array[3*pos+0] - pos_array[3*idx_neighbour+0])/r_ab * derive_cubic_spline(r_ab, h)<< endl;
-            // cout <<  "val2 : " << (pos_array[3*pos+1] - pos_array[3*idx_neighbour+1])/r_ab * derive_cubic_spline(r_ab, h)<< endl;
-            // cout << "val3 : " << (pos_array[3*pos+2] - pos_array[3*idx_neighbour+2])/r_ab * derive_cubic_spline(r_ab, h)<< endl;
-            // cout << "pos used : " << pos << " and idx_neighbour used : " << idx_neighbour << endl;
-            // cout << "len (pos_array) : " << pos_array.size() << endl;
-            // cout << "len (neighbour_list) : " << neighbours_list.size() << endl;
-            // cout << "pos_array associated : " << pos_array[3*pos+0] << endl;
-            // cout << "idx_neighbour associated : " << pos_array[3*idx_neighbour+0] << endl;
 
             double val_0 = (pos_array[3 * pos + 0] - pos_array[3 * idx_neighbour + 0]) / r_ab * derive_cubic_spline(r_ab, h);
             double val_1 = (pos_array[3 * pos + 1] - pos_array[3 * idx_neighbour + 1]) / r_ab * derive_cubic_spline(r_ab, h);
@@ -78,7 +64,7 @@ void setSpeedOfSound(const SimulationData& params,
     double rho_0 = params.rho_0;
     double gamma = params.gamma;
 
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (int pos = 0; pos < int(rho_array.size()); pos++)
     {
 
@@ -109,7 +95,7 @@ void setPressure(const SimulationData& params,
     bool PRINT = params.PRINT;
     int nb_moving_part = params.nb_moving_part;
 
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (int pos = 0; pos < nb_moving_part; pos++)
     {
 
@@ -148,7 +134,7 @@ void setArtificialViscosity(const SimulationData& params,
 
     if (t == 0)
     {
-        //#pragma omp parallel for
+        #pragma omp parallel for
         for (int pos = 0; pos < nb_moving_part; pos++)
         {
 
@@ -167,7 +153,7 @@ void setArtificialViscosity(const SimulationData& params,
         vector<double> rel_displ(3), rel_vel(3);
 
         // Iterations over each particle
-        //#pragma omp parallel for
+        #pragma omp parallel for
         for (int pos = 0; pos < int(pos_array.size()/3); pos++)
         {
 
@@ -234,7 +220,6 @@ void continuityEquation(const SimulationData& params,
                         vector<double> &mass_array){
 
     bool PRINT = params.PRINT;
-    int nb_moving_part = params.nb_moving_part;
              
     // Iterations over each particle
     #pragma omp parallel for
@@ -332,28 +317,4 @@ void momentumEquation(const SimulationData& params,
     }
 }
 
-void update(const SimulationData& params,
-            vector<double> &pos_array,
-            vector<double> &u_array,
-            vector<double> &rho_array,
-            vector<double> &drhodt_array,
-            vector<double> &dudt_array){
 
-    double dt = params.dt;
-    bool PRINT = params.PRINT;
-    
-    for (int pos = 0; pos < int(pos_array.size()/3); pos++){
-
-        rho_array[pos] += dt * drhodt_array[pos];
-
-        for (int cord = 0; cord < 3; cord++){
-
-            pos_array[3 * pos + cord] += dt * u_array[3 * pos + cord];
-            u_array[3 * pos + cord] += dt * dudt_array[3 * pos + cord];
-        }
-    }
-
-    if (PRINT){
-        cout << "update passed" << endl;
-    }
-}

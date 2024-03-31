@@ -6,24 +6,26 @@
     "walls_used": {
         "floor": true,
         "roof": false,
-        "left_wall": true,
-        "right_wall": true,
-        "front_wall": true,
-        "back_wall": true
+        "left_wall": false,
+        "right_wall": false,
+        "front_wall": false,
+        "back_wall": false
     },
 
-    "particle_layers": 5
+    "particle_layers": 3
   },
 
     
 
-    "o": [1, 1, 1],
+    "o": [0.8, 0.8, 0.6],
     "L": [0.5, 0.5, 0.5],
     "L_d": [2, 2, 2],
     "o_d": [0.0, 0.0, 0.0],
 
-    "s": 0.25,
-    "nstepT": 20000,
+    "theta" :0.5,
+    "schemeIntegration": "RK22",
+    "s": 0.1,
+    "nstepT": 30000,
     "dt": 0.00005,
     "nsave": 100,
 
@@ -40,7 +42,7 @@
     "M": 18e-3, 
 
     "print_debug":false,
-    "stateEquation" : {"Ideal gaz law":true, "Quasi incompresible fluid":false},
+    "stateEquation" : {"Ideal gaz law":false, "Quasi incompresible fluid":true},
     "initialCondition" : {"Hydrostatic":false, "Constant":true}
 }
 

@@ -52,15 +52,4 @@ void momentumEquation(const SimulationData& params,
                       vector<double> &pos_array,
                       vector<double> &u_array);
 
-
-
-
-
-void update(const SimulationData& params,
-            vector<double> &pos_array,
-            vector<double> &u_array,
-            vector<double> &rho_array,
-            vector<double> &drhodt_array,
-            vector<double> &dudt_array);
-
 #endif // GRADIENT_H

@@ -23,6 +23,8 @@ struct SimulationData {
     int nstepT;
     int nsave;
     double dt; 
+    double theta;
+    string schemeIntegration;
     double s;
     double h; 
     vector<double> o;
