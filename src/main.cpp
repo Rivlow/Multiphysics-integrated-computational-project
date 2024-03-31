@@ -165,10 +165,6 @@ int main(int argc, char *argv[])
     vectors["u"] = &u;
     vectors["dudt"] = &dudt;
 
-
-
-    /*---------------------------- SPH ALGORITHM  ----------------------------*/
-
     cout << "state equation chosen : " << state_equation << " \n" << endl;
     cout << "kappa * h =" << params.kappa * params.h << endl;
     cout << "(Nx, Ny, Nz) = (" << params.Nx << ", " << params.Ny << ", " << params.Nz << ")" << std::endl;
@@ -178,7 +174,10 @@ int main(int argc, char *argv[])
     cout << "kappa=" << params.kappa << std::endl;
     cout << "h=" << params.h << std::endl;
 
-    
+
+
+
+    /*---------------------------- SPH ALGORITHM  ----------------------------*/
 
     initializeRho(params, pos, rho);
     initializeMass(params, rho, mass);
