@@ -14,6 +14,7 @@
 #include "export.h"
 #include "Kernel_functions.h"
 #include "tools.h"
+#include "integration.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -110,7 +111,8 @@ auto t0 = std::chrono::high_resolution_clock::now();
 
     // Debug variable
     const bool PRINT = data["print_debug"];
-
+    const int RunchKutta = 1;
+    const double theta = 0.5;
     // Constants
     double h = 1.2 * s;                    
     double R = 8.314; // [J/(K.mol)]
@@ -242,6 +244,7 @@ auto t0 = std::chrono::high_resolution_clock::now();
                          nb_moving_part,
                          rho_0, c_0, gamma, R, T, M, g, 
                          state_equation_chosen, PRINT); 
+        
         auto t1_mom = std::chrono::high_resolution_clock::now();
         // Update density, velocity and position for each particle (Euler explicit scheme)
         for (size_t pos = 0; pos < nb_tot_part; pos++){
@@ -255,6 +258,37 @@ auto t0 = std::chrono::high_resolution_clock::now();
                 u_array[3 * pos + cord] += dt * dudt_array[3 * pos + cord];
             }
         }
+
+        if(RunchKutta== 1 ){
+
+            //cout << "RK" << endl;
+            vector<double>  u_array_half = u_array,
+                            rho_array_half = rho_array,
+                            pos_array_half = pos_array,
+                            drhodt_half(nb_tot_part,0.0),
+                            dudt_half(3*nb_tot_part,0.0);
+            Euler( dt/theta, nb_tot_part, rho_array_half, pos_array_half, u_array_half,
+                   drhodt_array, dudt_array);
+
+            continuityEquation(neighbours_matrix, gradW_matrix, 
+                           pos_array_half, u_array_half, drhodt_half, rho_array_half, mass_array,
+                           nb_moving_part, h,
+                           PRINT); 
+
+            momentumEquation(neighbours_matrix, gradW_matrix, artificial_visc_matrix,
+                         mass_array, dudt_half, rho_array_half, p_array,
+                         nb_moving_part,
+                         rho_0, c_0, gamma, R, T, M, g, 
+                         state_equation_chosen, PRINT);
+            //printArray(dudt_half,dudt_half.size(),"dudt_half");
+            runchKutta( dt, nb_tot_part, theta, rho_array, pos_array, u_array,
+                        drhodt_array, drhodt_half, dudt_array, dudt_half);
+        }
+        else{
+            Euler( dt, nb_tot_part, rho_array, pos_array, u_array,
+                   drhodt_array, dudt_array);
+        }
+
         for(size_t i = 0 ; i < gradW_matrix.size(); i++){
             for(size_t j = 0 ; j < gradW_matrix[i].size(); j ++){
                 grad_sum[i] += abs(gradW_matrix[i][j]);
