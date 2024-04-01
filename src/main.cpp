@@ -8,13 +8,16 @@
 #include <cstdlib>
 
 #include "generate_particle.h"
-#include "sorted_list.h"
+#include "find_neighbours.h"
 #include "gradient.h"
 #include "initialize.h"
 #include "export.h"
 #include "Kernel_functions.h"
 #include "tools.h"
+#include "structure.h"
 #include "integration.h"
+
+
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -29,53 +32,48 @@ using namespace std;
 int main(int argc, char *argv[])
 {
 
-    /*------------- SETTING COMPILATION PARAMETERS/Folders needed ---------------------------*/
-auto t0 = std::chrono::high_resolution_clock::now();
+    /*---------------- SETTING COMPILATION PARAMETERS/FOLDER NEEDED --------------------*/
 
-#ifdef _OPENMP
-    std::cout << "OpenMP available: OMP_NUM_THREADS=" << omp_get_max_threads() << "\n";
-#else
-    std::cout << "OpenMP not available.\n";
-#endif
+    auto t0 = std::chrono::high_resolution_clock::now();
 
-#ifdef NDEBUG
-    // code has been configured with "cmake -DCMAKE_BUILD_TYPE=Release .."
-    std::cout << "code built in RELEASE mode.\n";
-#else
-    // code has been configured with "cmake .."
-    std::cout << "code built in DEBUG mode.\n";
-#endif
+    #ifdef _OPENMP
+        std::cout << "OpenMP available: OMP_NUM_THREADS=" << omp_get_max_threads() << "\n";
+    #else
+        std::cout << "OpenMP not available.\n";
+    #endif
 
-    if (argc != 2)
-    {
-        std::cout << "\nusage: " << argv[0] << " <param.json>\n\n";
-        return EXIT_FAILURE;
-    }
+    #ifdef NDEBUG
+        // code has been configured with "cmake -DCMAKE_BUILD_TYPE=Release .."
+        std::cout << "code built in RELEASE mode.\n";
+    #else
+        // code has been configured with "cmake .."
+        std::cout << "code built in DEBUG mode.\n";
+    #endif
+
+        if (argc != 2)
+        {
+            std::cout << "\nusage: " << argv[0] << " <param.json>\n\n";
+            return EXIT_FAILURE;
+        }
 
 
-    /*---------------------------- INPUT PARAMETERS FROM JSON FILES ----------*/
+    /*---------------------- INPUT PARAMETERS FROM JSON FILES --------------------------*/
 
     std::ifstream inputf(argv[1]);
     json data = json::parse(inputf);
 
     std::cout << argv[1] << ":\n"
-              << data.dump(4) << std::endl; // Print input data to screen
+              << data.dump(4) << std::endl; // print input data to screen
 
-    std::vector<double> o = data["o"];
-    std::vector<double> L = data["L"];
-    double s = data["s"];
-    int nstepT = data["nstepT"];
-    std::vector<double> o_d = data["o_d"];
-    std::vector<double> L_d = data["L_d"];
 
-    std::string state_equation_chosen; /// p expl "Ideal gaz law"
+    std::string state_equation;
     std::string state_initial_condition;
 
     for (auto &it : data["stateEquation"].items())
     {
         if (it.value() == true)
         {
-            state_equation_chosen = it.key();
+            state_equation = it.key();
         }
     }
 
@@ -90,240 +88,153 @@ auto t0 = std::chrono::high_resolution_clock::now();
     createOutputFolder();
     clearOutputFiles();
 
-    cout << "state equation chosen : " << state_equation_chosen << " \n"
-         << endl;
 
-    int kappa = data["kappa"];
-    double alpha = data["alpha"];
-    double beta = data["beta"];
-    double c_0 = data["c_0"];
-    double rho_init = data["rho_moving"];
-    double rho_fixed = data["rho_fixed"];
-    double rho_0 = data["rho_0"];
-    double M = data["M"];
-    double T = data["T"];
-    double gamma = data["gamma"];
-    double dt = data["dt"]; // RB
-    int nsave = data["nsave"]; // RB
-    vector<double> u_init = data["u"];         // RB: inutile
+    // Structure to store all parameters used later 
 
-    /*---------------------------- INITIALIZATION OF VARIABLES USED ----------*/
+    DomainParams domainParams = {
+        data["domain"]["shape"],
+        {},
+        data["domain"]["particle_layers"],
 
-    // Debug variable
-    const bool PRINT = data["print_debug"];
-    const int RunchKutta = 1;
-    const double theta = 0.5;
-    // Constants
-    double h = 1.2 * s;                    
-    double R = 8.314; // [J/(K.mol)]
-    double g = -9.81; // [m/s²]
+    };
 
-    // Number of cells (in each direction)
-    int Nx, Ny, Nz;
-    Nx = L_d[0] / (kappa * h);
-    Ny = L_d[1] / (kappa * h);
-    Nz = L_d[2] / (kappa * h);
+    for (auto& wall : data["domain"]["walls_used"].items()) {
+        if (wall.value().get<bool>()) {
+            domainParams.walls_used.push_back(wall.key());
+        }
+    }
 
-    cout << " kappa * h =" << kappa * h << endl;
-    printf("(Nx, Ny, Nz) = (%d, %d, %d) \n", Nx, Ny, Nz);
+    const SimulationData params = {
 
-    // Nb of particles along each direction from target size "s"
-    size_t nb_particles = evaluateNumberParticles(L, s);
+        data["kappa"],
+        data["nstepT"],
+        data["nsave"],
+        data["dt"],
+        data["theta"],
+        data["schemeIntegration"],
+        data["s"],
+        1.2 * params.s,
+        data["o"],
+        data["L"],
+        data["o_d"],
+        data["L_d"],
+        data["u_init"],
+        int(params.L_d[0] / (params.kappa * params.h)),
+        int(params.L_d[1] / (params.kappa * params.h)),
+        int(params.L_d[2] / (params.kappa * params.h)),
+
+        data["alpha"],
+        data["beta"],
+
+        data["c_0"],
+        data["rho_moving"],
+        data["rho_fixed"],
+        data["rho_0"],
+        data["M"],
+        data["T"],
+        data["gamma"],
+        8.314, // [J/(K.mol)]
+        -9.81, // [m/s²]
+        state_equation,
+        state_initial_condition,
+        data["print_debug"],
+        evaluateNumberParticles(params),
+        domainParams,
+
+    };
+
+
+    /*------------------- INITIALIZATION OF VARIABLES USED -------------------*/
 
     // Vector used (and labelled w.r.t particles location)
-    vector<double> pos_array, type_arr;
-    vector<vector<int>> cell_matrix(Nx * Ny * Nz);
+    vector<double> pos, type;
+    vector<vector<int>> cell_matrix(params.Nx * params.Ny * params.Nz);
 
-    // Variables defined to used "export.cpp"
-    std::map<std::string, std::vector<double> *> scalars;
-    std::map<std::string, std::vector<double> *> vectors;
+    // Initialization of the particles (moving and fixed)
+    meshcube(params, pos, type);
+    meshBoundary(params, pos, type);
+    int nb_tot_part = pos.size()/3;
 
-    /*---------------------------- SPH ALGORITHM  ----------------------------*/
-
-    // Initialization of the problem (moving particles and fixed particles)
-    meshcube(o, L, pos_array, type_arr, s);
-    size_t nb_moving_part = pos_array.size() / 3;
-    meshBoundary(o_d, L_d, pos_array, type_arr, s);
-
-    int nb_tot_part = pos_array.size()/3;
-
-    std::cout << "nb_moving_part = " << nb_moving_part << std::endl;
-    std::cout << "nb_tot_part = " << nb_tot_part << std::endl;
-    std::cout << "s=" << s << std::endl;
-    std::cout << "kappa=" << kappa << std::endl;
-    std::cout << "h=" << h << std::endl;
-
-    vector<double> mass_array(nb_tot_part),
-                   u_array(3 * nb_tot_part),
-                   drhodt_array(nb_tot_part),
-                   rho_array(nb_tot_part),
-                   dudt_array(3 * nb_tot_part, 0.0),
-                   p_array(nb_tot_part),
-                   c_array(nb_tot_part),
+    vector<double> mass(nb_tot_part),
+                   u(3 * nb_tot_part),
+                   drhodt(nb_tot_part),
+                   rho(nb_tot_part),
+                   dudt(3 * nb_tot_part, 0.0),
+                   p(nb_tot_part),
+                   c(nb_tot_part),
                    grad_sum(nb_tot_part);
 
     vector<vector<double>> artificial_visc_matrix(nb_tot_part),
                            gradW_matrix(nb_tot_part);
     vector<vector<int>> neighbours_matrix(nb_tot_part);
-    std::vector<double> nvoisins(nb_tot_part, 0.0); //RB
+    std::vector<double> nvoisins(nb_tot_part, 0.0); 
+
+    // Variables defined to used "export.cpp"
+    std::map<std::string, std::vector<double> *> scalars;
+    std::map<std::string, std::vector<double> *> vectors;
 
 
-    scalars["type"] = &type_arr;
-    scalars["mass_array"] = &mass_array;
-    scalars["rho_array"] = &rho_array;
-    scalars["p_array"] = &p_array;
-    scalars["drhodt_array"] = &drhodt_array;
+    scalars["type"] = &type;
+    scalars["mass"] = &mass;
+    scalars["rho"] = &rho;
+    scalars["p"] = &p;
+    scalars["drhodt"] = &drhodt;
     scalars["nvoisins"] = &nvoisins;
     scalars["grad_sum"] = &grad_sum;
-    vectors["position"] = &pos_array;
-    vectors["u_array"] = &u_array;
-    vectors["dudt_array"] = &dudt_array;
+    vectors["position"] = &pos;
+    vectors["u"] = &u;
+    vectors["dudt"] = &dudt;
+
+    cout << "state equation chosen : " << state_equation << " \n" << endl;
+    cout << "kappa * h =" << params.kappa * params.h << endl;
+    cout << "(Nx, Ny, Nz) = (" << params.Nx << ", " << params.Ny << ", " << params.Nz << ")" << std::endl;
+    cout << "b_moving_part = " << params.nb_moving_part << std::endl;
+    cout << "nb_tot_part = " << nb_tot_part << std::endl;
+    cout << "s=" << params.s << std::endl;
+    cout << "kappa=" << params.kappa << std::endl;
+    cout << "h=" << params.h << std::endl;
 
 
-    initializeRho(pos_array, rho_array,
-                  nb_moving_part,
-                  rho_init, rho_fixed, rho_0,
-                  c_0, M, g, R, T, gamma,
-                  state_equation_chosen, state_initial_condition, PRINT);
-
-    initializeMass(rho_array, mass_array, s, PRINT);
-    initializeVelocity(u_array, u_init, nb_moving_part, PRINT);
-    initializeViscosity(artificial_visc_matrix, PRINT);
 
 
-    for (int t = 0; t < nstepT; t++)
+    /*---------------------------- SPH ALGORITHM  ----------------------------*/
+
+    initializeRho(params, pos, rho);
+    initializeMass(params, rho, mass);
+    initializeVelocity(params, u);
+    initializeViscosity(params, artificial_visc_matrix);
+    string test;
+    for (int t = 0; t < params.nstepT; t++)
     {
 
         // compute dt_max = min_a h_a/F
         // double dt_max = sqrt(kappa * h / abs(g)); // CFL condition
         // std::cout << "dt_max = " << dt_max << "    dt = " << dt << std::endl;
 
-        //vector<double> drhodt_array(nb_tot_part, 0.0), dudt_array(3 * nb_tot_part, 0.0);
-
         // Apply the linked-list algorithm
-        auto t0_nei = std::chrono::high_resolution_clock::now();
-        findNeighbours(cell_matrix, neighbours_matrix,
-                       pos_array, L_d,
-                       nb_moving_part, Nx, Ny, Nz, h, kappa, 
-                       PRINT); 
-        auto t1_nei = std::chrono::high_resolution_clock::now();
+        sorted_list(params, cell_matrix, neighbours_matrix, pos); 
+
         // Compute ∇_a(W_ab) for all particles
-        auto t0_grad = std::chrono::high_resolution_clock::now();
-        gradW(gradW_matrix, neighbours_matrix, 
-              pos_array,
-              nb_moving_part, h, Nx, Ny, Nz,
-              PRINT); 
-        auto t1_grad = std::chrono::high_resolution_clock::now();
-        // Compute pressure for all particles
-        setPressure(p_array, rho_array, 
-                    nb_moving_part, rho_0, c_0, R, T, M, gamma, 
-                    state_equation_chosen, PRINT); 
+        gradW(params, gradW_matrix, neighbours_matrix, pos); 
 
-        // Compute speed of sound for all particles
-        setSpeedOfSound(c_array,rho_array,
-                        rho_0, c_0, gamma, 
-                        state_equation_chosen);
+        // Update density, velocity and position for each particle (Euler explicit or RK22 scheme)
+        updateVariables(params, t, pos, u, rho, drhodt, c, p, dudt, mass, artificial_visc_matrix, gradW_matrix, neighbours_matrix);
 
-        // Compute artificial viscosity Π_ab for all particles
-        setArtificialViscosity(artificial_visc_matrix, neighbours_matrix,
-                               c_array, pos_array, rho_array, u_array, 
-                               nb_moving_part, t, alpha, beta, rho_0, c_0, gamma, R, T, M, h,
-                               state_equation_chosen, PRINT); 
+        // Clear matrices and reset arrays to 0
+        clearAllVectors(params, artificial_visc_matrix, neighbours_matrix, cell_matrix, gradW_matrix,
+                        drhodt, dudt);
 
-        // Compute D(rho)/Dt for all particles
-        auto t0_conti = std::chrono::high_resolution_clock::now();
-        continuityEquation(neighbours_matrix, gradW_matrix, 
-                           pos_array, u_array, drhodt_array, rho_array, mass_array,
-                           nb_moving_part, h,
-                           PRINT); 
-        auto t1_conti = std::chrono::high_resolution_clock::now();
-        // Compute D(u)/Dt for all particles
-        auto t0_mom = std::chrono::high_resolution_clock::now();
-        momentumEquation(neighbours_matrix, gradW_matrix, artificial_visc_matrix,
-                         mass_array, dudt_array, rho_array, p_array,
-                         nb_moving_part,
-                         rho_0, c_0, gamma, R, T, M, g, 
-                         state_equation_chosen, PRINT); 
-        
-        auto t1_mom = std::chrono::high_resolution_clock::now();
-        // Update density, velocity and position for each particle (Euler explicit scheme)
-        for (size_t pos = 0; pos < nb_tot_part; pos++){
 
-            rho_array[pos] += dt * drhodt_array[pos];
-
-            for (size_t cord = 0; cord < 3; cord++)
-            {
-
-                pos_array[3 * pos + cord] += dt * u_array[3 * pos + cord];
-                u_array[3 * pos + cord] += dt * dudt_array[3 * pos + cord];
-            }
+        if(t % params.nsave == 0){
+            export_particles("../../output/sph", t, pos, scalars, vectors);
         }
 
-        if(RunchKutta== 1 ){
-
-            //cout << "RK" << endl;
-            vector<double>  u_array_half = u_array,
-                            rho_array_half = rho_array,
-                            pos_array_half = pos_array,
-                            drhodt_half(nb_tot_part,0.0),
-                            dudt_half(3*nb_tot_part,0.0);
-            Euler( dt/theta, nb_tot_part, rho_array_half, pos_array_half, u_array_half,
-                   drhodt_array, dudt_array);
-
-            continuityEquation(neighbours_matrix, gradW_matrix, 
-                           pos_array_half, u_array_half, drhodt_half, rho_array_half, mass_array,
-                           nb_moving_part, h,
-                           PRINT); 
-
-            momentumEquation(neighbours_matrix, gradW_matrix, artificial_visc_matrix,
-                         mass_array, dudt_half, rho_array_half, p_array,
-                         nb_moving_part,
-                         rho_0, c_0, gamma, R, T, M, g, 
-                         state_equation_chosen, PRINT);
-            //printArray(dudt_half,dudt_half.size(),"dudt_half");
-            runchKutta( dt, nb_tot_part, theta, rho_array, pos_array, u_array,
-                        drhodt_array, drhodt_half, dudt_array, dudt_half);
-        }
-        else{
-            Euler( dt, nb_tot_part, rho_array, pos_array, u_array,
-                   drhodt_array, dudt_array);
-        }
-
-        for(size_t i = 0 ; i < gradW_matrix.size(); i++){
-            for(size_t j = 0 ; j < gradW_matrix[i].size(); j ++){
-                grad_sum[i] += abs(gradW_matrix[i][j]);
-            }
-        }
-        
-        clearAllVectors(artificial_visc_matrix, neighbours_matrix,
-                        cell_matrix, gradW_matrix,
-                        PRINT);
-
-        if(t % nsave == 0){
-            export_particles("../../output/sph", t, pos_array, scalars, vectors);
-            /*auto delta_t_nei = std::chrono::duration_cast<std::chrono::duration<double>>(t1_nei - t0_nei).count();
-            std::cout << "duration nei:  " << delta_t_nei << "s.\n";
-            auto delta_t_grad = std::chrono::duration_cast<std::chrono::duration<double>>(t1_grad - t0_grad).count();
-            std::cout << "duration grad: " << delta_t_grad << "s.\n";
-            auto delta_t_conti = std::chrono::duration_cast<std::chrono::duration<double>>(t1_conti - t0_conti).count();
-            std::cout << "duration conti: " << delta_t_conti << "s.\n";
-            auto delta_t_mom = std::chrono::duration_cast<std::chrono::duration<double>>(t1_mom - t0_mom).count();
-            std::cout << "duration mom: " << delta_t_mom << "s.\n";*/
-        }
-        for(size_t i = 0 ; i<drhodt_array.size(); i ++ )
-        {
-            drhodt_array[i] = 0.0;
-        }
-        for(size_t i = 0 ; i<dudt_array.size(); i ++ )
-        {
-            dudt_array[i] = 0.0;
-        }
     }
 
     auto t1 = std::chrono::high_resolution_clock::now();
     auto delta_t = std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0).count();
     std::cout << "duration: " << delta_t << "s.\n";
 
-    std::cout << "\nSimulation done." << std::endl;
+    std::cout << "\n Simulation done." << std::endl;
     return 0;
 }
