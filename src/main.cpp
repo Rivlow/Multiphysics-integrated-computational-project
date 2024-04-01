@@ -203,7 +203,6 @@ int main(int argc, char *argv[])
     initializeMass(params, rho, mass);
     initializeVelocity(params, u);
     initializeViscosity(params, artificial_visc_matrix);
-    string test;
 
     for (int t = 0; t < params.nstepT; t++)
     {
@@ -214,7 +213,6 @@ int main(int argc, char *argv[])
 
         // Apply the linked-list algorithm
         sorted_list(params, cell_matrix, neighbours_matrix, pos); 
-
 
         // Compute ∇_a(W_ab) for all particles
         gradW(params, gradW_matrix, neighbours_matrix, pos); 
