@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
     initializeMass(params, rho, mass);
     initializeVelocity(params, u);
     initializeViscosity(params, artificial_visc_matrix);
-
+    string test;
     for (int t = 0; t < params.nstepT; t++)
     {
 
