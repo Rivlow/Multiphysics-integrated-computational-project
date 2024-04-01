@@ -1,40 +1,20 @@
 {
-
-  "domain": {
-    "shape": "square",
-    
-    "walls_used": {
-        "floor": true,
-        "roof": false,
-        "left_wall": false,
-        "right_wall": false,
-        "front_wall": false,
-        "back_wall": false
-    },
-
-    "particle_layers": 3
-  },
-
-    
-
-    "o": [0.8, 0.8, 0.6],
-    "L": [0.5, 0.5, 0.5],
-    "L_d": [2, 2, 2],
-    "o_d": [0.0, 0.0, 0.0],
-
-    "theta" :0.5,
-    "schemeIntegration": "RK22",
     "s": 0.1,
-    "nstepT": 30000,
+    "nstepT": 20000,
     "dt": 0.00005,
     "nsave": 100,
+
+    "o": [0.3, 0.3, 0.6],
+    "L": [0.6, 0.6, 0.6],
+    "L_d": [1.2, 1.2, 1.4],
+    "o_d": [0.0, 0.0, 0.0],
 
     "kappa": 2,
     "rho_0": 1000,
     "rho_moving": 1000,
     "rho_fixed" : 1000,
     "T": 298.15,
-    "u_init": [0.0, 0.0, 0.0],
+    "u": [0.0, 0.0, 0.0],
     "c_0": 30, 
     "gamma": 7, 
     "alpha": 0.5,

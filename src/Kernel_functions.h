@@ -1,6 +1,3 @@
-#ifndef KERNEL_FUNCTIONS_H
-#define KERNEL_FUNCTIONS_H
-
 #include <iostream>
 #include <cmath>
 
@@ -21,5 +18,3 @@ double derive_quintic(double r, double h);
 
 double f_quinitc_spline(double r, double h);
 double derive_quintic_spline(double r, double h);
-
-#endif // KERNEL_FUNCTIONS_H
