@@ -38,7 +38,7 @@ int evaluateNumberParticles(const SimulationData &params){
 void meshcube(const SimulationData &params,
               vector<double> &pos_arr,
               vector<double> &type_arr){
-
+                
     // calculate nb of particles along each direction from target size "s"
     int ni = int(ceil(params.L[0] / params.s));
     double dx = params.L[0] / ni;
@@ -55,20 +55,20 @@ void meshcube(const SimulationData &params,
     std::cout << "of size L=(" << params.L[0] << "," << params.L[1] << "," << params.L[2] << ")\n";
     std::cout << "\tparticle spacing s=(" << dx << "," << dy << "," << dz << ") [target was s=" << params.s << "]\n";
     // std::cout << "\t=> " << ni << "*" << nj << "*" << nk << " = " << ni * nj * nk << " particles to be generated\n";
-
+    double layer_max = params.domainParams.particle_layers;
     // memory allocation
     pos_arr.reserve(pos_arr.size() + ni * nj * nk * 3);
 
     // particle generation
     for (int i = 0; i < ni; ++i)
     {
-        double x = params.o[0] + i * dx;
+        double x = params.o[0] + (layer_max-1)*params.s/2 + i * dx;
         for (int j = 0; j < nj; ++j)
         {
-            double y = params.o[1] + j * dy;
+            double y = params.o[1] +(layer_max-1)*params.s/2 + j * dy;
             for (int k = 0; k < nk; ++k)
             {
-                double z = params.o[2] + k * dz;
+                double z = params.o[2] +(layer_max-1)*params.s/2+ k * dz;
                 pos_arr.push_back(x);
                 pos_arr.push_back(y);
                 pos_arr.push_back(z);
@@ -91,22 +91,43 @@ void meshBoundary(const SimulationData &params,
     double layer_max = params.domainParams.particle_layers;
 
 
-    int ni = int(ceil(L_d[0] / s));
-    double dx = L_d[0] / ni;
-    ++ni;
-    int nj = int(ceil(L_d[1] / s));
-    double dy = L_d[1] / nj;
-    ++nj;
-    int nk = int(ceil(L_d[2] / s));
-    double dz = L_d[2] / nk;
-    ++nk;
-    cout << "ni, nj, nk = " << ni << nj << nk << endl;
+    int ni;
+    double dx ;
+    
+    int nj ;
+    double dy ;
+    int nk ;
+    double dz ;
+    
+    //cout << "ni, nj, nk = " << ni << nj << nk << endl;
 
-    bound_arr.reserve(bound_arr.size() + 6 * (ni * nj + (nk - 2) * nj + (ni - 2) * (nk - 2)));
+    //bound_arr.reserve(bound_arr.size() + 6 * (ni * nj + (nk - 2) * nj + (ni - 2) * (nk - 2)));
     int isOdd;
+    
+    for (int actual_layer = layer_max; 0 < actual_layer; actual_layer--){
+        int ni;
+        double dx ;
+        int nj ;
+        double dy ;
+        int nk ;
+        double dz ;
 
-    for (int actual_layer = 0; actual_layer < layer_max; actual_layer++){
-        
+        double Lx = L_d[0] + (actual_layer-1)*s;
+        ni = int(ceil(Lx / s));
+        dx = Lx / ni;
+        ++ni;
+        double Ly = L_d[1] + (actual_layer-1)*s;
+        nj = int(ceil(Ly / s));
+        dy = Ly / nj;
+        ++nj;
+        double Lz = L_d[2] + (actual_layer-1)*s;
+        nk = int(ceil(Lz / s));
+        dz = Lz / nk;
+        ++nk;
+        double ox = o_d[0] + (layer_max-actual_layer)*s/2;
+        double oy = o_d[1] + (layer_max-actual_layer)*s/2;
+        double oz = o_d[2] + (layer_max-actual_layer)*s/2;
+
         if (actual_layer == 0){
             isOdd = 0;
         }
@@ -119,16 +140,16 @@ void meshBoundary(const SimulationData &params,
         if (params.walls_used("floor")){
 
             for (int i = 0; i < ni ; ++i){ // along x
-                double x = o_d[0] + i * dx + isOdd*0.5*s;
+                double x = ox + i * dx;
                 for (int j = 0 ; j < nj ; ++j){ // along y
  
-                    double y = o_d[1] + j * dy+ isOdd*0.5*s;
+                    double y = oy + j * dy;
                     if (i == 0 && j == 0){
                         cout << "(x,y) : " << "(" << x << "," << y << ")" <<endl;
                     }
                     bound_arr.push_back(x);
                     bound_arr.push_back(y);
-                    bound_arr.push_back(o_d[2]- 0.5*s*actual_layer);
+                    bound_arr.push_back(oz);
                     type_arr.push_back(0.0);
                 }
             }
@@ -138,13 +159,12 @@ void meshBoundary(const SimulationData &params,
         if (params.walls_used("roof")){
 
             for (int i = 0; i < ni ; ++i){ // along x
-                double x = o_d[0] + i * dx+ isOdd*0.5*s;
+                double x = ox + i * dx;
                 for (int j = 0 ; j < nj ; ++j){ // along y
-        
-                    double y = o_d[1] + j * dy+ isOdd*0.5*s;
+                    double y = oy + j * dy;
                     bound_arr.push_back(x);
                     bound_arr.push_back(y);
-                    bound_arr.push_back(L_d[2] + o_d[2]+ 0.5*s*actual_layer);
+                    bound_arr.push_back(Lz);
                     type_arr.push_back(0.0);
                 }
             }
@@ -154,12 +174,12 @@ void meshBoundary(const SimulationData &params,
         if (params.walls_used("left_wall")){
 
             for (int i = 0; i < ni; ++i){ // along x
-                double x = o_d[0] + i *dx + isOdd*0.5*s;
+                double x = ox + i *dx;
                 for (int k = 1; k < nk-1; ++k){ // along z
                 
-                    double z = o_d[2] + k*dz + isOdd*0.5*s;
+                    double z = oz + k*dz ;
                     bound_arr.push_back(x);
-                    bound_arr.push_back(o_d[1]- 0.5*s*actual_layer);
+                    bound_arr.push_back(oy);
                     bound_arr.push_back(z);
                     type_arr.push_back(0.0);
 
@@ -171,12 +191,12 @@ void meshBoundary(const SimulationData &params,
         if (params.walls_used("right_wall")){
 
             for (int i = 0; i < ni; ++i){ // along x
-                double x = o_d[0] + i*dx+ isOdd*0.5*s;
+                double x = ox + i*dx;
                 for (int k = 1; k < nk-1; ++k){ // along z
                 
-                    double z = o_d[2] + k*dz+ isOdd*0.5*s;
+                    double z = oz + k*dz;
                     bound_arr.push_back(x);
-                    bound_arr.push_back(L_d[1]+ o_d[1]+ 0.5*s*actual_layer);
+                    bound_arr.push_back(Ly);
                     bound_arr.push_back(z);
                     type_arr.push_back(0.0);
                     
@@ -188,11 +208,11 @@ void meshBoundary(const SimulationData &params,
         if (params.walls_used("front_wall")){
 
             for (int j = 0; j < nj; ++j){ // along y
-                double y = o_d[1] + j * dy+ isOdd*0.5*s;
+                double y = oy + j * dy;
                 for (int k = 1; k < nk-1; ++k){ // along z
                 
-                    double z = o_d[2] + k * dz+ isOdd*0.5*s;
-                    bound_arr.push_back(o_d[0]- 0.5*s*actual_layer);
+                    double z = oz + k * dz;
+                    bound_arr.push_back(ox);
                     bound_arr.push_back(y);
                     bound_arr.push_back(z);
                     type_arr.push_back(0.0);
@@ -203,11 +223,11 @@ void meshBoundary(const SimulationData &params,
 
         if (params.walls_used("back_wall")){
             for (int j = 0; j < nj; ++j){ // along y
-                double y = o_d[1] + j*dy + isOdd*0.5*s;
+                double y = oy + j*dy ;
                 for (int k = 1; k < nk-1; ++k){ // along z
                 
-                    double z = o_d[2] + k * dz+ isOdd*0.5*s;
-                    bound_arr.push_back(L_d[0] + o_d[0]+ 0.5*s*actual_layer);
+                    double z = oz + k * dz;
+                    bound_arr.push_back(Lx);
                     bound_arr.push_back(y);
                     bound_arr.push_back(z);
                     type_arr.push_back(0.0);

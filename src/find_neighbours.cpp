@@ -25,6 +25,10 @@ void sorted_list(const SimulationData& params,
     int Nx = params.Nx;
     int Ny = params.Ny;
     int Nz = params.Nz;
+    
+    double Lx = params.L_d[0] + (params.domainParams.particle_layers-1)*params.s;
+    double Ly = params.L_d[1] + (params.domainParams.particle_layers-1)*params.s;
+    double Lz = params.L_d[2] + (params.domainParams.particle_layers-1)*params.s;
 
     //cout << "debut findNeighbours " <<endl;
 
@@ -32,9 +36,9 @@ void sorted_list(const SimulationData& params,
     for (int pos = 0; pos < int(pos_array.size() / 3) ; pos++)
     {
 
-        int idx_i = pos_array[3 * pos + 0] / (params.L_d[0] / Nx);
-        int idx_j = pos_array[3 * pos + 1] / (params.L_d[1] / Ny);
-        int idx_k = pos_array[3 * pos + 2] / (params.L_d[2] / Nz);
+        int idx_i = pos_array[3 * pos + 0] / (Lx / Nx);
+        int idx_j = pos_array[3 * pos + 1] / (Ly / Ny);
+        int idx_k = pos_array[3 * pos + 2] / (Lz / Nz);
 
         
         if (idx_i < 0 || idx_j < 0 || idx_k < 0 || idx_i > Nx || idx_j > Ny || idx_k > Ny){
@@ -62,9 +66,9 @@ void sorted_list(const SimulationData& params,
         //cout << "Pos : " << pos <<endl;
         //cout << "Entry in loop"<<endl;
         // Determine in which cell the particle is
-        int i_cell = pos_array[3 * pos + 0] / (params.L_d[0] / Nx);
-        int j_cell = pos_array[3 * pos + 1] / (params.L_d[1] / Ny);
-        int k_cell = pos_array[3 * pos + 2] / (params.L_d[2] / Nz);
+        int i_cell = pos_array[3 * pos + 0] / (Lx / Nx);
+        int j_cell = pos_array[3 * pos + 1] / (Ly / Ny);
+        int k_cell = pos_array[3 * pos + 2] / (Lz / Nz);
 
         if (i_cell < 0 || j_cell < 0 || k_cell < 0 || i_cell > Nx || j_cell > Ny || k_cell > Ny){
             //cout << "val negative" << endl;
