@@ -6,9 +6,9 @@
     "walls_used": {
         "floor": true,
         "roof": false,
-        "left_wall": false,
+        "left_wall": true,
         "right_wall": false,
-        "front_wall": false,
+        "front_wall": true,
         "back_wall": false
     },
 
@@ -23,8 +23,8 @@
     "o_d": [0.0, 0.0, 0.0],
 
     "theta" :0.5,
-    "schemeIntegration": "RK22",
-    "s": 0.1,
+    "schemeIntegration": "Euler",
+    "s": 0.05,
     "nstepT": 30000,
     "dt": 0.00005,
     "nsave": 100,

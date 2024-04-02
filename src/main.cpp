@@ -203,10 +203,10 @@ int main(int argc, char *argv[])
     initializeMass(params, rho, mass);
     initializeVelocity(params, u);
     initializeViscosity(params, artificial_visc_matrix);
-    string test;
+
+
     for (int t = 0; t < params.nstepT; t++)
     {
-
         // compute dt_max = min_a h_a/F
         // double dt_max = sqrt(kappa * h / abs(g)); // CFL condition
         // std::cout << "dt_max = " << dt_max << "    dt = " << dt << std::endl;
