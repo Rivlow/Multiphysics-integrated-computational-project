@@ -41,7 +41,7 @@ void sorted_list(const SimulationData& params,
         int idx_k = pos_array[3 * pos + 2] / (Lz / Nz);
 
         
-        if (idx_i < 0 || idx_j < 0 || idx_k < 0 || idx_i > Nx || idx_j > Ny || idx_k > Ny){
+        if (idx_i < 0 || idx_j < 0 || idx_k < 0 || idx_i > Nx || idx_j > Ny || idx_k > Nz){
             //cout << "val negative" << endl;
             continue;
         }
@@ -70,7 +70,7 @@ void sorted_list(const SimulationData& params,
         int j_cell = pos_array[3 * pos + 1] / (Ly / Ny);
         int k_cell = pos_array[3 * pos + 2] / (Lz / Nz);
 
-        if (i_cell < 0 || j_cell < 0 || k_cell < 0 || i_cell > Nx || j_cell > Ny || k_cell > Ny){
+        if (i_cell < 0 || j_cell < 0 || k_cell < 0 || i_cell > Nx || j_cell > Ny || k_cell > Nz){
             //cout << "val negative" << endl;
             continue;
         }

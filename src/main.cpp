@@ -119,9 +119,9 @@ int main(int argc, char *argv[])
         data["o_d"],
         data["L_d"],
         data["u_init"],
-        int(params.L_d[0] / (params.kappa * params.h)),
-        int(params.L_d[1] / (params.kappa * params.h)),
-        int(params.L_d[2] / (params.kappa * params.h)),
+        int((params.L_d[0] + (params.domainParams.particle_layers-1)*params.s) / (params.kappa * params.h)),
+        int((params.L_d[1] + (params.domainParams.particle_layers-1)*params.s) / (params.kappa * params.h)),
+        int((params.L_d[2] + (params.domainParams.particle_layers-1)*params.s) / (params.kappa * params.h)),
 
         data["alpha"],
         data["beta"],
