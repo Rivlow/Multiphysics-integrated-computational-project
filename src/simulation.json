@@ -5,11 +5,11 @@
     
     "walls_used": {
         "floor": true,
-        "roof": false,
-        "left_wall": false,
-        "right_wall": false,
-        "front_wall": false,
-        "back_wall": false
+        "roof": true,
+        "left_wall": true,
+        "right_wall": true,
+        "front_wall": true,
+        "back_wall": true
     },
 
     "particle_layers": 3
@@ -17,15 +17,15 @@
 
     
 
-    "o": [0.3, 0.3, 2],
+    "o": [0.3, 0.3, 0.3],
     "L": [0.6, 0.6, 0.6],
-    "L_d": [1.2, 1.2, 3],
+    "L_d": [1.2, 1.2, 2],
     "o_d": [0, 0, 0],
 
     "theta" :0.5,
     "schemeIntegration": "Euler",
     "s": 0.1,
-    "nstepT": 60000,
+    "nstepT": 10000,
     "dt": 0.00005,
     "nsave": 100,
 

@@ -58,10 +58,10 @@ void printArray(vector<T> &array, int size, string name)
          << "\n"
          << endl;
 
-    for (int i = 0; i <= size; ++i)
+    for (int i = 0; i < size; ++i)
     {
         std::cout << array[i];
-        if (i != int(array.size() - 1))
+        if (i != int(array.size() - 2))
         {
             std::cout << ", ";
         }

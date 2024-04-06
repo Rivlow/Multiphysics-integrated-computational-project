@@ -162,9 +162,10 @@ void meshBoundary(const SimulationData &params,
                 double x = ox + i * dx;
                 for (int j = 0 ; j < nj ; ++j){ // along y
                     double y = oy + j * dy;
+                    double z = oz + Lz;
                     bound_arr.push_back(x);
                     bound_arr.push_back(y);
-                    bound_arr.push_back(Lz);
+                    bound_arr.push_back(z);
                     type_arr.push_back(0.0);
                 }
             }
@@ -195,8 +196,9 @@ void meshBoundary(const SimulationData &params,
                 for (int k = 1; k < nk-1; ++k){ // along z
                 
                     double z = oz + k*dz;
+                    double y = oy + Ly;
                     bound_arr.push_back(x);
-                    bound_arr.push_back(Ly);
+                    bound_arr.push_back(y);
                     bound_arr.push_back(z);
                     type_arr.push_back(0.0);
                     
@@ -207,7 +209,7 @@ void meshBoundary(const SimulationData &params,
 
         if (params.walls_used("front_wall")){
 
-            for (int j = 0; j < nj; ++j){ // along y
+            for (int j = 1; j < nj-1; ++j){ // along y
                 double y = oy + j * dy;
                 for (int k = 1; k < nk-1; ++k){ // along z
                 
@@ -222,12 +224,12 @@ void meshBoundary(const SimulationData &params,
 
 
         if (params.walls_used("back_wall")){
-            for (int j = 0; j < nj; ++j){ // along y
+            for (int j = 1; j < nj-1; ++j){ // along y
                 double y = oy + j*dy ;
                 for (int k = 1; k < nk-1; ++k){ // along z
-                
+                    double x = ox + Lx;
                     double z = oz + k * dz;
-                    bound_arr.push_back(Lx);
+                    bound_arr.push_back(x);
                     bound_arr.push_back(y);
                     bound_arr.push_back(z);
                     type_arr.push_back(0.0);

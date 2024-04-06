@@ -47,7 +47,7 @@ void gradW(const SimulationData& params,
             gradW_matrix[pos].push_back(val_1);
             // cout << "after second push_back"<<endl;
             gradW_matrix[pos].push_back(val_2);
-            // cout << "after third push_back"<<endl;
+            // cout << "after third push_back "<< val_2 <<endl;
             
            
         }

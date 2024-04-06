@@ -216,20 +216,34 @@ int main(int argc, char *argv[])
 
         // Compute ∇_a(W_ab) for all particles
         gradW(params, gradW_matrix, neighbours_matrix, pos); 
+        
 
         // Update density, velocity and position for each particle (Euler explicit or RK22 scheme)
         updateVariables(params, t, pos, u, rho, drhodt, c, p, dudt, mass, artificial_visc_matrix, gradW_matrix, neighbours_matrix);
 
         // Clear matrices and reset arrays to 0
-        clearAllVectors(params, artificial_visc_matrix, neighbours_matrix, cell_matrix, gradW_matrix,
-                        drhodt, dudt);
+        
 
 
         if(t % params.nsave == 0){
             export_particles("../../output/sph", t, pos, scalars, vectors);
-        }
+            if(t >= 5300){
+                /*printArray(u, 3*params.nb_moving_part, "u");
+                printArray(dudt, 3*params.nb_moving_part, "dudt");
+                printArray(pos, 3*params.nb_moving_part, "pos");
+                printArray(rho, params.nb_moving_part, "rho");
+                printArray(drhodt, params.nb_moving_part, "drhodt");
+                //printMatrix(gradW_matrix, params.nb_moving_part,"gradmatrix");
+            //printMatrix(gradW_matrix,params.nb_moving_part,"grad");
+            printMatrix(neighbours_matrix,params.nb_moving_part, "voisin");*/
+        
 
+            }
+        }
+        clearAllVectors(params, artificial_visc_matrix, neighbours_matrix, cell_matrix, gradW_matrix,
+                        drhodt, dudt);
     }
+    
 
     auto t1 = std::chrono::high_resolution_clock::now();
     auto delta_t = std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0).count();
