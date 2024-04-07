@@ -204,6 +204,7 @@ int main(int argc, char *argv[])
     initializeVelocity(params, u);
     initializeViscosity(params, artificial_visc_matrix);
     string test;
+    double time_sorted = 0, time_grad = 0, time_update = 0;
     for (int t = 0; t < params.nstepT; t++)
     {
 
@@ -212,17 +213,26 @@ int main(int argc, char *argv[])
         // std::cout << "dt_max = " << dt_max << "    dt = " << dt << std::endl;
 
         // Apply the linked-list algorithm
+        auto t0_sort = std::chrono::high_resolution_clock::now();
         sorted_list(params, cell_matrix, neighbours_matrix, pos); 
+        auto t1_sort = std::chrono::high_resolution_clock::now();
 
         // Compute ∇_a(W_ab) for all particles
+        auto t0_grad = std::chrono::high_resolution_clock::now();
         gradW(params, gradW_matrix, neighbours_matrix, pos); 
-        
+        auto t1_grad = std::chrono::high_resolution_clock::now();
 
         // Update density, velocity and position for each particle (Euler explicit or RK22 scheme)
+        auto t0_up = std::chrono::high_resolution_clock::now();
         updateVariables(params, t, pos, u, rho, drhodt, c, p, dudt, mass, artificial_visc_matrix, gradW_matrix, neighbours_matrix);
-
+        auto t1_up = std::chrono::high_resolution_clock::now();
         // Clear matrices and reset arrays to 0
-        
+        double delta_t_sort = std::chrono::duration_cast<std::chrono::duration<double>>(t1_sort - t0_sort).count();
+        double delta_t_grad = std::chrono::duration_cast<std::chrono::duration<double>>(t1_grad - t0_grad).count();
+        double delta_t_up = std::chrono::duration_cast<std::chrono::duration<double>>(t1_up- t0_up).count();
+        time_sorted += delta_t_sort;
+        time_grad += delta_t_grad;
+        time_update += delta_t_up;
 
 
         if(t % params.nsave == 0){
@@ -248,6 +258,14 @@ int main(int argc, char *argv[])
     auto t1 = std::chrono::high_resolution_clock::now();
     auto delta_t = std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0).count();
     std::cout << "duration: " << delta_t << "s.\n";
+    std::cout << "duration time sort/part: " << time_sorted/rho.size() << "s.\n";
+    std::cout << "duration time sort: " << time_sorted << "s.\n";
+
+    std::cout << "duration time grad/part: " << time_grad/rho.size() << "s.\n";
+    std::cout << "duration time grad: " << time_grad << "s.\n";
+
+    std::cout << "duration time up/part: " << time_update/rho.size() << "s.\n";
+    std::cout << "duration time up: " << time_update<< "s.\n";
 
     std::cout << "\n Simulation done." << std::endl;
     return 0;
