@@ -113,7 +113,7 @@ void clearOutputFiles(){
 }
 
 
-void clearAllVectors(const SimulationData &params,
+void clearAllVectors(SimulationData &params,
                      vector<vector<double>> &artificial_visc_matrix,
                      vector<vector<int>> &neighbours_matrix,
                      vector<vector<int>> &cell_matrix,

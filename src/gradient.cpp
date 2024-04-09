@@ -11,39 +11,46 @@
 
 using namespace std;
 
-void gradW(const SimulationData& params, 
+void gradW(SimulationData& params, 
            vector<vector<double>> &gradW_matrix,
            vector<vector<int>> &neighbours_matrix,
            vector<double> &pos){
 
     double h = params.h;
     int size_pos = pos.size()/3;
+    int nb_moving_part = params.nb_moving_part;
 
     // Iterations over each particle
     #pragma omp parallel for
-    for (int n = 0; n < size_pos; n++){
+    for (int n = 0; n < nb_moving_part; n++){
 
         vector<int> &neighbours = neighbours_matrix[n];
+        vector<double> &gradW = gradW_matrix[n];
         int size_neighbours = neighbours.size();
 
+        cout << "n : " << n << endl;
         // Iterations over each associated neighbours of prescribed particles
         for (int idx = 0; idx < size_neighbours; idx++){
 
             int i_neig = neighbours[idx];
-            double pos_x, pos_y, pos_z, r_ab;
+            double r_ab, r_val = 0;
+            vector<double> pos_val(3);
 
-            pos_x = (pos[3 * n + 0] - pos[3 * i_neig + 0]);
-            pos_y = (pos[3 * n + 1] - pos[3 * i_neig + 1]);
-            pos_z = (pos[3 * n + 2] - pos[3 * i_neig + 2]);
+            for (int coord = 0; coord < 3; coord++){
+            
+                pos_val[coord] = pos[3 * n + coord] - pos[3 * i_neig + coord];
+                r_val += pos_val[coord]*pos_val[coord];
+            }
 
-            r_ab = sqrt(pos_x*pos_x + pos_y*pos_y + pos_z*pos_z);
-
+            r_ab = sqrt(r_val);
             double deriv = derive_cubic_spline(r_ab, h);
-
-            gradW_matrix[n].push_back(pos_x/ r_ab * deriv);
-            gradW_matrix[n].push_back(pos_y / r_ab * deriv);
-            gradW_matrix[n].push_back(pos_z / r_ab * deriv);
-
+            cout << "idx : " << idx << endl;
+            cout << "going to insert into gradW" << endl;
+            
+            for (int coord = 0; coord < 3; coord++){
+                
+                gradW[3 * idx + coord] = pos_val[coord] / r_ab * deriv;
+            }
         }
     }
 
@@ -52,7 +59,7 @@ void gradW(const SimulationData& params,
     }
 }
 
-void setSpeedOfSound(const SimulationData& params,
+void setSpeedOfSound( SimulationData& params,
                      vector<double> &c,
                      vector<double> &rho){
 
@@ -76,7 +83,7 @@ void setSpeedOfSound(const SimulationData& params,
 
 }
 
-void setPressure(const SimulationData& params,
+void setPressure( SimulationData& params,
                  vector<double> &p,
                  vector<double> &rho){
 
@@ -111,7 +118,7 @@ void setPressure(const SimulationData& params,
     }
 }
 
-void setArtificialViscosity(const SimulationData& params,
+void setArtificialViscosity( SimulationData& params,
                             int t,
                             vector<vector<double>> &artificial_visc_matrix,
                             vector<vector<int>> &neighbours_matrix,
@@ -194,7 +201,7 @@ void setArtificialViscosity(const SimulationData& params,
     }
 }
 
-void continuityEquation(const SimulationData& params,
+void continuityEquation( SimulationData& params,
                         vector<vector<int>> &neighbours_matrix,
                         vector<vector<double>> &gradW_matrix,
                         vector<double> &pos,
@@ -240,7 +247,7 @@ void continuityEquation(const SimulationData& params,
     }
 }
 
-void momentumEquation(const SimulationData& params,
+void momentumEquation( SimulationData& params,
                       int t,
                       vector<vector<int>> &neighbours_matrix,
                       vector<vector<double>> &gradW_matrix,
@@ -286,7 +293,7 @@ void momentumEquation(const SimulationData& params,
             for (int idx = 0; idx < int(neighbours.size()); idx++){
 
                 int i_neig = neighbours[idx];
-                double pi_ab = 0; //artificial_visc_array[idx_neighbour];
+                double pi_ab = artificial_visc[idx];
                 double rho_b = rho[i_neig];
                 double m_b = mass[i_neig];
                 double p_b = p[i_neig];

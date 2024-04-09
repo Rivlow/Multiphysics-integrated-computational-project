@@ -10,13 +10,13 @@
 
 using namespace std;
 
-int evaluateNumberParticles(const SimulationData &params);
+int evaluateNumberParticles(SimulationData &params);
 
-void meshcube(const SimulationData &params,
+void meshcube(SimulationData &params,
               vector<double> &pos_arr,
               vector<double> &type_arr);
 
-void meshBoundary(const SimulationData &params,
+void meshBoundary(SimulationData &params,
                   vector<double> &bound_arr, 
                   vector<double> &type_arr);
 

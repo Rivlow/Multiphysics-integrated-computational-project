@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    const SimulationData params = {
+     SimulationData params = {
 
         data["kappa"],
         data["nstepT"],
@@ -199,26 +199,32 @@ int main(int argc, char *argv[])
 
     /*---------------------------- SPH ALGORITHM  ----------------------------*/
 
+    // Initialise variables of the problem
     initializeRho(params, pos, rho);
     initializeMass(params, rho, mass);
     initializeVelocity(params, u);
     initializeViscosity(params, artificial_visc_matrix);
+    setPressure(params, p, rho); 
+    setSpeedOfSound(params, c, rho);
 
+    // Check if the chose, timeStep is small enough
+    checkTimeStep(params, pos, c, neighbours_matrix, artificial_visc_matrix);
+    
 
-    for (int t = 0; t < params.nstepT; t++)
-    {
-        // compute dt_max = min_a h_a/F
-        // double dt_max = sqrt(kappa * h / abs(g)); // CFL condition
-        // std::cout << "dt_max = " << dt_max << "    dt = " << dt << std::endl;
+    for (int t = 0; t < params.nstepT; t++){
 
         // Apply the linked-list algorithm
-        sorted_list(params, cell_matrix, neighbours_matrix, pos); 
+        sorted_list(params, cell_matrix, neighbours_matrix, gradW_matrix, pos); 
 
         // Compute ∇_a(W_ab) for all particles
         gradW(params, gradW_matrix, neighbours_matrix, pos); 
 
         // Update density, velocity and position for each particle (Euler explicit or RK22 scheme)
         updateVariables(params, t, pos, u, rho, drhodt, c, p, dudt, mass, artificial_visc_matrix, gradW_matrix, neighbours_matrix);
+
+        // After updates, need to check if timeStep is still small enough
+        checkTimeStep(params, pos, c, neighbours_matrix, artificial_visc_matrix);
+
 
         // Clear matrices and reset arrays to 0
         clearAllVectors(params, artificial_visc_matrix, neighbours_matrix, cell_matrix, gradW_matrix,

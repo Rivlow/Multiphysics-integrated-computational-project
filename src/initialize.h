@@ -11,18 +11,24 @@
 
 using namespace std;
 
-void initializeMass(const SimulationData& params, 
+void initializeMass( SimulationData& params, 
                     vector<double> &rho_array,
                     vector<double> &mass_array);
 
-void initializeRho(const SimulationData& params,
+void initializeRho( SimulationData& params,
                    vector<double> &pos_array,
                    vector<double> &rho_array);
 
-void initializeVelocity(const SimulationData& params, 
+void initializeVelocity( SimulationData& params, 
                         vector<double> &u_array);
 
-void initializeViscosity(const SimulationData& params, 
+void initializeViscosity( SimulationData& params, 
                          vector<vector<double>> &artificial_visc_matrix);
+
+void checkTimeStep(SimulationData &params, 
+                   vector<double> pos,
+                   vector<double> c,
+                   vector<vector<int>> &neighbours_matrix,
+                   vector<vector<double>> &artificial_visc_matrix);
 
 #endif // INITIALIZE_H

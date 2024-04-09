@@ -24,8 +24,8 @@
 
     "theta" :0.5,
     "schemeIntegration": "Euler",
-    "s": 0.05,
-    "nstepT": 30000,
+    "s": 0.1,
+    "nstepT": 20000,
     "dt": 0.00005,
     "nsave": 100,
 
@@ -41,7 +41,7 @@
     "beta": 0,
     "M": 18e-3, 
 
-    "print_debug":false,
+    "print_debug":true,
     "stateEquation" : {"Ideal gaz law":false, "Quasi incompresible fluid":true},
     "initialCondition" : {"Hydrostatic":false, "Constant":true}
 }

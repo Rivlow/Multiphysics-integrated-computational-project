@@ -8,20 +8,20 @@
 
 using namespace std;
 
-void gradW(const SimulationData& params, 
+void gradW( SimulationData& params, 
            vector<vector<double>> &gradW_matrix,
            vector<vector<int>> &neighbours_matrix,
            vector<double> &pos_array);
 
-void setSpeedOfSound(const SimulationData& params,
+void setSpeedOfSound( SimulationData& params,
                      vector<double> &c_array,
                      vector<double> &rho_array);
 
-void setPressure(const SimulationData& params,
+void setPressure( SimulationData& params,
                  vector<double> &p_array,
                  vector<double> &rho_array);
 
-void setArtificialViscosity(const SimulationData& params,
+void setArtificialViscosity( SimulationData& params,
                             int t,
                             vector<vector<double>> &artificial_visc_matrix,
                             vector<vector<int>> &neighbours_matrix,
@@ -30,7 +30,7 @@ void setArtificialViscosity(const SimulationData& params,
                             vector<double> &rho_array,
                             vector<double> &u_array);
 
-void continuityEquation(const SimulationData& params,
+void continuityEquation( SimulationData& params,
                         vector<vector<int>> &neighbours_matrix,
                         vector<vector<double>> &gradW_matrix,
                         vector<double> &pos_array,
@@ -39,7 +39,7 @@ void continuityEquation(const SimulationData& params,
                         vector<double> &rho_array,
                         vector<double> &mass_array);
 
-void momentumEquation(const SimulationData& params,
+void momentumEquation( SimulationData& params,
                       int t,
                       vector<vector<int>> &neighbours_matrix,
                       vector<vector<double>> &gradW_matrix,

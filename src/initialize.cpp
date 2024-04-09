@@ -1,16 +1,18 @@
 #include <stdio.h>
 #include <vector>
 #include <string>
+#include <limits>
 #include <iostream>
 
 #include "initialize.h"
 #include "structure.h"
+#include "gradient.h"
 
 
 
 using namespace std;
 
-void initializeMass(const SimulationData& params, 
+void initializeMass( SimulationData &params, 
                     vector<double> &rho,
                     vector<double> &mass){
 
@@ -28,7 +30,7 @@ void initializeMass(const SimulationData& params,
     }
 }
 
-void initializeRho(const SimulationData& params,
+void initializeRho( SimulationData &params,
                    vector<double> &pos,
                    vector<double> &rho){
 
@@ -80,7 +82,7 @@ void initializeRho(const SimulationData& params,
     }
 }
 
-void initializeVelocity(const SimulationData& params, 
+void initializeVelocity( SimulationData &params, 
                         vector<double> &u){
 
 
@@ -107,7 +109,7 @@ void initializeVelocity(const SimulationData& params,
     }
 }
 
-void initializeViscosity(const SimulationData& params, 
+void initializeViscosity( SimulationData &params, 
                          vector<vector<double>> &artificial_visc_matrix){
 
     bool PRINT = params.PRINT;
@@ -124,5 +126,73 @@ void initializeViscosity(const SimulationData& params,
 
     if (PRINT){
         cout << "initializeViscosity passed" << endl;
+    }
+}
+
+void checkTimeStep(SimulationData &params, 
+                   vector<double> pos,
+                   vector<double> c,
+                   vector<vector<int>> &neighbours_matrix,
+                   vector<vector<double>> &artificial_visc_matrix){
+
+    int kappa = params.kappa;
+    double alpha = params.alpha;
+    double beta = params.beta;
+    double h = params.h;
+    double g = params.g;
+    int nb_moving_part = params.nb_moving_part;
+
+    double dt_f = h / abs(g);
+    double dt_cv;
+    double min_a = numeric_limits<double>::max();
+    double max_b = numeric_limits<double>::min();
+
+
+    for (int n = 0; n < nb_moving_part; n++){
+
+
+
+        vector<double> &artificial_visc = artificial_visc_matrix[n];
+        vector<int> &neighbours = neighbours_matrix[n];
+
+        double c_a = c[n];
+        int size_neighbours = neighbours.size();
+
+        for (int idx = 0; idx < size_neighbours; idx++){
+
+            double pi_ab = artificial_visc[idx];
+            max_b = (pi_ab > max_b) ? pi_ab: max_b;
+
+        }
+
+        double val = h/(c_a + 0.6*(alpha*c_a + beta*max_b));
+        min_a = (val < min_a) ? val : min_a;
+
+    }
+
+    dt_cv = min_a;
+    //cout <<"dt_cv : " << dt_cv << endl;
+    //cout <<"dt_f : " << dt_f << endl;
+
+    double dt_final = min(0.25*dt_f, 0.4*dt_cv);
+
+    //cout << "dt_final : " << dt_final << endl; 
+    string state_equation = params.state_equation;
+
+    if (state_equation == "Ideal gaz law"){
+        double prev_dt = params.dt;
+        params.dt = (dt_final < params.dt) ? dt_final : params.dt;
+        double next_dt = params.dt;
+        if (abs(prev_dt - next_dt) != 0){
+            cout << "dt has to be modified, was " << prev_dt << " and is now " << next_dt << endl;
+        }
+    }
+    else{
+        double prev_dt = params.dt;
+        params.dt = (dt_final < params.dt) ? dt_final : params.dt;
+        double next_dt = params.dt;
+        if (abs(prev_dt - next_dt) != 0){
+            cout << "dt has to be modified, was " << prev_dt << " and is now " << next_dt << endl;
+        }
     }
 }

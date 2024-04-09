@@ -17,16 +17,16 @@
 
 using namespace std;
 
-void sorted_list(const SimulationData& params, 
+void sorted_list(SimulationData& params, 
                  vector<vector<int>> &cell_matrix,
                  vector<vector<int>> &neighbours_matrix,
+                 vector<vector<double>> &gradW_matrix,
                  vector<double> &pos){
 
     int Nx = params.Nx;
     int Ny = params.Ny;
     int Nz = params.Nz;
     int size_pos = pos.size() / 3;
-
 
     // Sort all particles in their corresponding cell
     for (int n = 0; n < size_pos; n++){
@@ -78,25 +78,29 @@ void sorted_list(const SimulationData& params,
             for (int j = j_inf; j <= j_supp; j++){
                 for (int k = k_inf; k <= k_supp; k++){
 
-                    vector<int> &actual_cell = cell_matrix[i + j * Nx + k * Nx * Ny];
-                    int size_actuall_cell = actual_cell.size();
+                    vector<int> &cell = cell_matrix[i + j * Nx + k * Nx * Ny];
+                    int size_cell =cell.size();
 
                     // Iterate over neighbours
-                    for (int idx = 0; idx < size_actuall_cell; idx++){
+                    for (int idx = 0; idx < size_cell; idx++){
 
-                        int actual_cell_value = actual_cell[idx];
+                        int idx_cell = cell[idx];
 
-                        if (actual_cell_value != n){
+                        if (idx_cell != n){
 
                             double rx, ry, rz, r2;
-                            rx = (pos[3 * n] - pos[3 * actual_cell_value]) * (pos[3 * n] - pos[3 * actual_cell_value]);
-                            ry = (pos[3 * n + 1] - pos[3 * actual_cell_value + 1]) * (pos[3 * n + 1] - pos[3 * actual_cell_value + 1]);
-                            rz = (pos[3 * n + 2] - pos[3 * actual_cell_value + 2]) * (pos[3 * n + 2] - pos[3 * actual_cell_value + 2]);
-                            r2 = rx + ry + rz;
+                            rx = (pos[3 * n + 0] - pos[3 * idx_cell + 0]);
+                            ry = (pos[3 * n + 1] - pos[3 * idx_cell + 1]);
+                            rz = (pos[3 * n + 2] - pos[3 * idx_cell + 2]);
+                            r2 = rx*rx + ry*ry + rz*rz;
 
-                            if (r2 <= params.kappa * params.kappa * params.h * params.h){
+                            int kappa = params.kappa;
+                            double h = params.h;
+
+                            if (r2 <= kappa * kappa *h * h){
     
-                                neighbours_matrix[n].push_back(actual_cell_value);
+                                neighbours_matrix[n].push_back(idx_cell);
+                                gradW_matrix[n].push_back(0.0);
 
                             }
                         }
@@ -104,8 +108,6 @@ void sorted_list(const SimulationData& params,
                 }
             }
         }
-
-        //cell_matrix[i_cell + j_cell * Nx + k_cell * Nx * Ny].erase(cell_matrix[i_cell + j_cell * Nx + k_cell * Nx * Ny].begin());
     }
 
     if (params.PRINT){
@@ -114,7 +116,7 @@ void sorted_list(const SimulationData& params,
 
 }
 
-void naiveAlgo(const SimulationData& params, 
+void naiveAlgo(SimulationData& params, 
                vector<vector<int>> &neighbours_matrix,
                vector<double> &pos){
 
@@ -126,17 +128,21 @@ void naiveAlgo(const SimulationData& params,
 
 
     // Find neighbours for each particle
-    for (int i = 0; i < nb_moving_part; i++)
-    {
-        for (int j = i + 1; j < nb_moving_part; j++)
-        {
+    for (int i = 0; i < nb_moving_part; i++){
+
+        for (int j = i + 1; j < nb_moving_part; j++){
+
             double rx, ry, rz, r2;
-            rx = (pos[3 * i] - pos[3 * j]) * (pos[3 * i] - pos[3 * j]);
-            ry = (pos[3 * i + 1] - pos[3 * j + 1]) * (pos[3 * i + 1] - pos[3 * j + 1]);
-            rz = (pos[3 * i + 2] - pos[3 * j + 2]) * (pos[3 * i + 2] - pos[3 * j + 2]);
-            r2 = rx + ry + rz;
-            if (r2 <= params.kappa * params.kappa * params.h * params.h)
-            {
+            rx = (pos[3 * i] - pos[3 * j]);
+            ry = (pos[3 * i + 1] - pos[3 * j + 1]);
+            rz = (pos[3 * i + 2] - pos[3 * j + 2]);
+            r2 = rx*rx + ry*ry + rz*rz;
+
+            int kappa = params.kappa;
+            double h = params.h;
+
+            if (r2 <= kappa * kappa *h * h){
+
                 neighbours_matrix[i].push_back(j);
                 neighbours_matrix[j].push_back(i);
             }
@@ -145,28 +151,25 @@ void naiveAlgo(const SimulationData& params,
 }
 
 void printNeighbours(vector<vector<int>> &neighbours_matrix_linked,
-                     vector<vector<int>> &neighbours_matrix_naive)
-{
-    for (int i = 0; i < int(neighbours_matrix_linked.size()); i++)
-    {
+                     vector<vector<int>> &neighbours_matrix_naive){
+
+    for (int i = 0; i < int(neighbours_matrix_linked.size()); i++){
         std::cout << "Particle " << i << " : ";
 
         std::cout << "{";
-        for (int j = 0; j < int(neighbours_matrix_linked[i].size()); j++)
-        {
+        for (int j = 0; j < int(neighbours_matrix_linked[i].size()); j++){
+
             std::cout << neighbours_matrix_linked[i][j];
-            if (j != int(neighbours_matrix_linked[i].size() - 1))
-            {
+            if (j != int(neighbours_matrix_linked[i].size() - 1)){
                 std::cout << ", ";
             }
         }
         std::cout << "} (Linked-list) VS {";
 
-        for (int j = 0; j < int(neighbours_matrix_naive[i].size()); j++)
-        {
+        for (int j = 0; j < int(neighbours_matrix_naive[i].size()); j++){
+
             std::cout << neighbours_matrix_naive[i][j];
-            if (j != int(neighbours_matrix_naive[i].size() - 1))
-            {
+            if (j != int(neighbours_matrix_naive[i].size() - 1)){
                 std::cout << ", ";
             }
         }
@@ -174,16 +177,16 @@ void printNeighbours(vector<vector<int>> &neighbours_matrix_linked,
     }
 }
 
-void CompareNeighbours(const std::vector<std::vector<int>> &neighbours_matrix_linked,
-                     const std::vector<std::vector<int>> &neighbours_matrix_naive){
+void CompareNeighbours( std::vector<std::vector<int>> &neighbours_matrix_linked,
+                      std::vector<std::vector<int>> &neighbours_matrix_naive){
                         
-    for (int i = 0; i < int(neighbours_matrix_linked.size()); i++) {
+    for (int i = 0; i < int(neighbours_matrix_linked.size()); i++){
         std::cout << "Particle " << i << " : ";
 
         std::cout << "{";
         for (int j = 0; j < int(neighbours_matrix_linked[i].size()); j++) {
             if (j < int(neighbours_matrix_naive[i].size())) {
-                if (neighbours_matrix_linked[i][j] == neighbours_matrix_naive[i][j]) {
+                if (neighbours_matrix_linked[i][j] == neighbours_matrix_naive[i][j]){
                     std::cout << neighbours_matrix_linked[i][j];
                 } else {
                     std::cout << "[" << neighbours_matrix_linked[i][j] << "-" << neighbours_matrix_naive[i][j] << "]";

@@ -57,7 +57,7 @@ struct SimulationData {
 
     DomainParams domainParams;
 
-    bool walls_used(const string& wall) const {
+    bool walls_used(string wall)  {
         return find(domainParams.walls_used.begin(), domainParams.walls_used.end(), wall) != domainParams.walls_used.end();
     }
 };
