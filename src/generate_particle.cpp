@@ -16,7 +16,7 @@ using namespace std;
  * @param pos_arr pos_arritions of particles
  */
 
-int evaluateNumberParticles(const SimulationData &params){
+int evaluateNumberParticles(SimulationData &params){
 
     int ni = int(ceil(params.L[0] / params.s));
     // double dx = L[0] / ni;
@@ -33,7 +33,7 @@ int evaluateNumberParticles(const SimulationData &params){
     return ni * nj * nk;
 }
 
-void meshcube(const SimulationData &params,
+void meshcube(SimulationData &params,
               vector<double> &pos_arr,
               vector<double> &type_arr){
                 
@@ -89,14 +89,6 @@ void meshBoundary(SimulationData &params,
     double layer_max = params.domainParams.particle_layers;
 
 
-    int ni;
-    double dx ;
-    
-    int nj ;
-    double dy ;
-    int nk ;
-    double dz ;
-    
     //cout << "ni, nj, nk = " << ni << nj << nk << endl;
 
     //bound_arr.reserve(bound_arr.size() + 6 * (ni * nj + (nk - 2) * nj + (ni - 2) * (nk - 2)));
