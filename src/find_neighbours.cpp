@@ -50,7 +50,7 @@ void sorted_list(const SimulationData& params,
         
             idx_i = (idx_i == Nx) ? idx_i - 1 : idx_i;
             idx_j = (idx_j == Ny) ? idx_j - 1 : idx_j;
-            idx_k = (idx_k == Nz) ? idx_k - 1 : idx_k;
+            idx_k = (idx_k == Nz) ? idx_k - 1 : idx_k;  
             
                 cell_matrix[idx_i + Nx * idx_j + Ny * Nx * idx_k].push_back(pos);
             
@@ -61,6 +61,7 @@ void sorted_list(const SimulationData& params,
     }
 
     // Find neighbours for each particle
+    #pragma omp parallel for
     for (int pos = 0; pos < int(pos_array.size() / 3); pos++)
     {
         //cout << "Pos : " << pos <<endl;
