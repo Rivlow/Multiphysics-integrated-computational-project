@@ -3,9 +3,10 @@
 #include <omp.h>
 
 #include "gradient.h"
-#include "sorted_list.h"
+#include "find_neighbours.h"
 #include "Kernel_functions.h"
 #include "tools.h"
+#include "structure.h"
 
 
 using namespace std;
@@ -53,7 +54,7 @@ void gradW(SimulationData& params,
         }
     }
 
-    if (PRINT){
+    if (params.PRINT){
             cout << "gradW passed" << endl;
     }
 }
@@ -100,12 +101,12 @@ void setPressure( SimulationData& params,
     for (int n = 0; n < nb_moving_part; n++)
     {
 
-        if (state_equation_chosen == "Ideal gaz law")
+        if (state_equation == "Ideal gaz law")
         {
             p[n] = (rho[n] / rho_0 - 1) * (R * T) / M;
         }
 
-        if (state_equation_chosen == "Quasi incompresible fluid")
+        if (state_equation == "Quasi incompresible fluid")
         {
             double B = c_0 * c_0 * rho_0 / gamma;
             p[n] = B * (pow(rho[n] / rho_0, gamma) - 1);
@@ -195,8 +196,7 @@ void setArtificialViscosity( SimulationData& params,
         }
     }
     
-
-   if (PRINT){
+    if (PRINT){
             cout << "setArtificialViscosity passed" << endl;
     }
 }
@@ -308,6 +308,8 @@ void momentumEquation( SimulationData& params,
     }
 
     if (PRINT){
-            cout << "momentumEquation passed" << endl;
+        cout << "momentumEquation passed" << endl;
     }
 }
+
+

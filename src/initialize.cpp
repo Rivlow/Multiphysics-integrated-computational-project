@@ -77,7 +77,7 @@ void initializeRho( SimulationData &params,
     }
 
     if (PRINT){
-        
+
         cout << "initializeRho passed" << endl;
     }
 }
