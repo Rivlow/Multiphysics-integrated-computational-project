@@ -28,7 +28,7 @@ void gradW(SimulationData& params,
         vector<double> &gradW = gradW_matrix[n];
         int size_neighbours = neighbours.size();
 
-        cout << "n : " << n << endl;
+        //cout << "n : " << n << endl;
         // Iterations over each associated neighbours of prescribed particles
         for (int idx = 0; idx < size_neighbours; idx++){
 
@@ -44,8 +44,8 @@ void gradW(SimulationData& params,
 
             r_ab = sqrt(r_val);
             double deriv = derive_cubic_spline(r_ab, h);
-            cout << "idx : " << idx << endl;
-            cout << "going to insert into gradW" << endl;
+            /*cout << "idx : " << idx << endl;
+            cout << "going to insert into gradW" << endl;*/
             
             for (int coord = 0; coord < 3; coord++){
                 

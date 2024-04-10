@@ -35,7 +35,7 @@ void sorted_list(SimulationData& params,
         int j = pos[3 * n + 1] / (params.L_d[1] / Ny);
         int k = pos[3 * n + 2] / (params.L_d[2] / Nz);
 
-        if (i < 0 || j < 0 || k < 0 || i > Nx || j > Ny || k > Ny){
+        if (i < 0 || j < 0 || k < 0 || i > Nx || j > Ny || k > Nz){
             continue;
         }
         
@@ -54,7 +54,7 @@ void sorted_list(SimulationData& params,
         int j_cell = pos[3 * n + 1] / (params.L_d[1] / Ny);
         int k_cell = pos[3 * n + 2] / (params.L_d[2] / Nz);
 
-        if (i_cell < 0 || j_cell < 0 || k_cell < 0 || i_cell > Nx || j_cell > Ny || k_cell > Ny){
+        if (i_cell < 0 || j_cell < 0 || k_cell < 0 || i_cell > Nx || j_cell > Ny || k_cell > Nz){
             continue;
         }
 
@@ -100,11 +100,12 @@ void sorted_list(SimulationData& params,
                             if (r2 <= kappa * kappa *h * h){
     
                                 neighbours_matrix[n].push_back(idx_cell);
-                                gradW_matrix[n].push_back(0.0);
 
                             }
                         }
                     }
+                    gradW_matrix[n].resize(3*neighbours_matrix[n].size());
+
                 }
             }
         }
