@@ -45,14 +45,14 @@ double f_cubic_spline(double r, double h)
 {
     double alpha = 3 / (2 * M_PI * h * h * h);
     double W = 0;
-    if (r / h < 1)
+    if (r / h < 1.0)
     {
         W = alpha * (3 / 2 - r * r / (h * h) + 1 / 2 * r * r * r / (h * h * h));
     }
-    if (1 <= r / h && r / h < 2)
+    if (1.0 <= r / h && r / h < 2.0)
     {
 
-        W = alpha * 1 / 6 * ((1 - r / h) * (1 - r / h) * (1 - r / h));
+        W = alpha * 1 / 6 * ((2 - r / h) * (2 - r / h) * (2 - r / h));
     }
     return W;
 }
@@ -78,11 +78,11 @@ double derive_cubic_spline(double r, double h)
 
 double f_quadratic(double r, double h)
 {
-    double alpha = 5 / (4 * M_PI * h * h * h);
+    double alpha = 5.0 / (4.0 * M_PI * h * h * h);
     double W = 0;
-    if (r / h <= 2)
+    if (r / h <= 2.0)
     {
-        W = alpha * (3 / 16 * r * r / (h * h) - 3 / 4 * r / h + 3 / 4);
+        W = alpha * (3.0 / 16.0 * r * r / (h * h) - 3.0 / 4.0 * r / h + 3.0 / 4.0);
     }
     return W;
 }

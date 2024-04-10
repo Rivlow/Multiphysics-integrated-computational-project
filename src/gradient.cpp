@@ -7,6 +7,7 @@
 #include "Kernel_functions.h"
 #include "tools.h"
 #include "structure.h"
+#include "surface_tension.h"
 
 
 using namespace std;
@@ -264,7 +265,7 @@ void momentumEquation( SimulationData& params,
     double g = params.g;
     bool PRINT = params.PRINT;
     int nb_moving_part = params.nb_moving_part;
-
+    vector<double> F_vol(pos.size());
 
     // Compute pressure for all particles
     setPressure(params, p, rho); 
@@ -277,13 +278,18 @@ void momentumEquation( SimulationData& params,
                             c, pos, rho, u); 
 
     // Iterations over each particle
+    //printArray(F_vol,F_vol.size(), "F_vol");
+    surfaceTension( params, gradW_matrix, neighbours_matrix, mass, rho,
+                    pos, F_vol);
+    //printArray(F_vol,F_vol.size(), "F_vol");
+
     #pragma omp parallel for
     for (int n = 0; n < nb_moving_part; n++){
 
         vector<int> &neighbours = neighbours_matrix[n];
         vector<double> &gradW = gradW_matrix[n];
         vector<double> &artificial_visc = artificial_visc_matrix[n];
-        vector<double> F_vol = {0.0, 0.0, g};
+        
         double rho_a = rho[n];
         double p_a = p[n];
 
@@ -303,10 +309,10 @@ void momentumEquation( SimulationData& params,
             }
 
             dudt[3 * n + cord] *= -1;
-            dudt[3 * n + cord] += F_vol[cord];
+            dudt[3 * n + cord] += F_vol[3*n+cord];
         }
     }
-
+    
     if (PRINT){
         cout << "momentumEquation passed" << endl;
     }
