@@ -6,7 +6,7 @@ INCLUDE(CMakePrintHelpers)
 # ------------------------------------------------------------------------------
 # change "Debug" => "Release" for a faster executable (but less runtime checks)!
 IF(NOT CMAKE_BUILD_TYPE)
-    SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
+    SET(CMAKE_BUILD_TYPE "Debug" CACHE STRING "" FORCE)
 ENDIF()
 # enable C++17
 SET(CMAKE_CXX_STANDARD 17)
@@ -25,6 +25,7 @@ ENDIF()
 # find OpenMP
 FIND_PACKAGE(OpenMP)
 IF(OPENMP_FOUND)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
     MESSAGE (STATUS "OpenMP enabled (CXX_FLAGS=${OpenMP_CXX_FLAGS})")
 ELSE()
     MESSAGE (STATUS "OpenMP disabled.")
