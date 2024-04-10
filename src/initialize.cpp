@@ -1,26 +1,28 @@
 #include <stdio.h>
 #include <vector>
 #include <string>
+#include <limits>
 #include <iostream>
 
 #include "initialize.h"
 #include "structure.h"
+#include "gradient.h"
 
 
 
 using namespace std;
 
-void initializeMass(const SimulationData& params, 
-                    vector<double> &rho_array,
-                    vector<double> &mass_array){
+void initializeMass( SimulationData &params, 
+                    vector<double> &rho,
+                    vector<double> &mass){
 
     double s = params.s;  
     bool PRINT = params.PRINT;  
     double V = s * s * s;
+    int rho_size = rho.size();
 
-    for (int i = 0; i < int(rho_array.size()); i++)
-    {
-        mass_array[i] = rho_array[i] * V;
+    for (int i = 0; i < rho_size; i++){
+        mass[i] = rho[i] * V;
     }
 
     if (PRINT){
@@ -28,9 +30,9 @@ void initializeMass(const SimulationData& params,
     }
 }
 
-void initializeRho(const SimulationData& params,
-                   vector<double> &pos_array,
-                   vector<double> &rho_array){
+void initializeRho( SimulationData &params,
+                   vector<double> &pos,
+                   vector<double> &rho){
 
     string state_initial_condition = params.state_initial_condition;
     string state_equation = params.state_equation;
@@ -45,56 +47,60 @@ void initializeRho(const SimulationData& params,
     double g = params.g;
     bool PRINT = params.PRINT;
     int nb_moving_part = params.nb_moving_part;
-
+    int rho_size = rho.size();
 
 
     if (state_initial_condition == "Hydrostatic"){
         if (state_equation == "Ideal gaz law"){
-            for (int i = 0; i < int(rho_array.size()); i++){
-                rho_array[i] = (i < nb_moving_part) ? rho_0 * (1 + M * rho_0 
-                                * g * pos_array[3 * i + 2] / (R * T)) : rho_fixed;
+            for (int i = 0; i < rho_size; i++){
+
+                rho[i] = (i < nb_moving_part) ? rho_0 * (1 + M * rho_0 
+                                * g * pos[3 * i + 2] / (R * T)) : rho_fixed;
             }
         }
+
         if (params.state_equation == "Quasi incompresible fluid"){
 
             double B = c_0 * c_0 * rho_0 / gamma;
-            for (int i = 0; i < int(rho_array.size()); i++){
-                rho_array[i] = (i < nb_moving_part) ? rho_0 * (1 + rho_0 
-                                * g * pos_array[3 * i + 2] / B) : rho_fixed;
+            for (int i = 0; i < rho_size; i++){
+
+                rho[i] = (i < nb_moving_part) ? rho_0 * (1 + rho_0 
+                                * g * pos[3 * i + 2] / B) : rho_fixed;
             }
         }
     }
     else{
 
-        for (int i = 0; i < int(rho_array.size()); i++){
-            rho_array[i] = (i < nb_moving_part) ? rho_moving : rho_fixed;
+        for (int i = 0; i < rho_size; i++){
+            rho[i] = (i < nb_moving_part) ? rho_moving : rho_fixed;
         }
     }
 
     if (PRINT){
-
+        
         cout << "initializeRho passed" << endl;
     }
 }
 
-void initializeVelocity(const SimulationData& params, 
-                        vector<double> &u_array){
+void initializeVelocity( SimulationData &params, 
+                        vector<double> &u){
 
 
     bool PRINT = params.PRINT;
     int nb_moving_part = params.nb_moving_part;
+    int u_size = u.size();
 
-    for (int i = 0; i < int(u_array.size()) / 3; i++){
+    for (int i = 0; i < u_size / 3; i++){
 
         if (i < nb_moving_part){
-            u_array[3 * i] = params.u_init[0];
-            u_array[3 * i + 1] = params.u_init[1];
-            u_array[3 * i + 2] = params.u_init[2];
+            u[3 * i] = params.u_init[0];
+            u[3 * i + 1] = params.u_init[1];
+            u[3 * i + 2] = params.u_init[2];
         }
         else{
-            u_array[3 * i] = 0;
-            u_array[3 * i + 1] = 0;
-            u_array[3 * i + 2] = 0;
+            u[3 * i] = 0;
+            u[3 * i + 1] = 0;
+            u[3 * i + 2] = 0;
         }
     }
 
@@ -103,18 +109,90 @@ void initializeVelocity(const SimulationData& params,
     }
 }
 
-void initializeViscosity(const SimulationData& params, 
+void initializeViscosity( SimulationData &params, 
                          vector<vector<double>> &artificial_visc_matrix){
 
     bool PRINT = params.PRINT;
+    int size_artificial_visc_matrix = artificial_visc_matrix.size();
 
-    for (int i = 0; i < int(artificial_visc_matrix.size()); i++){
-        for (int j = 0; j < int(artificial_visc_matrix[i].size()); j++){
+    for (int i = 0; i < size_artificial_visc_matrix; i++){
+
+        int size_artificial_visc = artificial_visc_matrix[i].size();
+
+        for (int j = 0; j < size_artificial_visc; j++){
             artificial_visc_matrix[i][j] = 0.0;
         }
     }
 
     if (PRINT){
         cout << "initializeViscosity passed" << endl;
+    }
+}
+
+void checkTimeStep(SimulationData &params, 
+                   vector<double> pos,
+                   vector<double> c,
+                   vector<vector<int>> &neighbours_matrix,
+                   vector<vector<double>> &artificial_visc_matrix){
+
+    int kappa = params.kappa;
+    double alpha = params.alpha;
+    double beta = params.beta;
+    double h = params.h;
+    double g = params.g;
+    int nb_moving_part = params.nb_moving_part;
+
+    double dt_f = h / abs(g);
+    double dt_cv;
+    double min_a = numeric_limits<double>::max();
+    double max_b = numeric_limits<double>::min();
+
+
+    for (int n = 0; n < nb_moving_part; n++){
+
+
+
+        vector<double> &artificial_visc = artificial_visc_matrix[n];
+        vector<int> &neighbours = neighbours_matrix[n];
+
+        double c_a = c[n];
+        int size_neighbours = neighbours.size();
+
+        for (int idx = 0; idx < size_neighbours; idx++){
+
+            double pi_ab = artificial_visc[idx];
+            max_b = (pi_ab > max_b) ? pi_ab: max_b;
+
+        }
+
+        double val = h/(c_a + 0.6*(alpha*c_a + beta*max_b));
+        min_a = (val < min_a) ? val : min_a;
+
+    }
+
+    dt_cv = min_a;
+    //cout <<"dt_cv : " << dt_cv << endl;
+    //cout <<"dt_f : " << dt_f << endl;
+
+    double dt_final = min(0.25*dt_f, 0.4*dt_cv);
+
+    //cout << "dt_final : " << dt_final << endl; 
+    string state_equation = params.state_equation;
+
+    if (state_equation == "Ideal gaz law"){
+        double prev_dt = params.dt;
+        params.dt = (dt_final < params.dt) ? dt_final : params.dt;
+        double next_dt = params.dt;
+        if (abs(prev_dt - next_dt) != 0){
+            cout << "dt has to be modified, was " << prev_dt << " and is now " << next_dt << endl;
+        }
+    }
+    else{
+        double prev_dt = params.dt;
+        params.dt = (dt_final < params.dt) ? dt_final : params.dt;
+        double next_dt = params.dt;
+        if (abs(prev_dt - next_dt) != 0){
+            cout << "dt has to be modified, was " << prev_dt << " and is now " << next_dt << endl;
+        }
     }
 }

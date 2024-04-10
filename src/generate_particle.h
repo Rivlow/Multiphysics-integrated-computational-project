@@ -1,23 +1,24 @@
-#ifndef GENERATE_PARTICLE_H
-#define GENERATE_PARTICLE_H
-
+#ifndef CUBE_H
+#define CUBE_H
 #include <vector>
-#include "tools.h"
-#include "structure.h"
-
-
-
 
 using namespace std;
 
-int evaluateNumberParticles(const SimulationData &params);
+int evaluateNumberParticles(SimulationData &params);
 
-void meshcube(const SimulationData &params,
+void meshcube(SimulationData &params,
               vector<double> &pos_arr,
-              vector<double> &type_arr);
+              vector<double> &type_arr,
+              double s);
 
-void meshBoundary(const SimulationData &params,
+void meshBoundary(SimulationData &params,
                   vector<double> &bound_arr, 
-                  vector<double> &type_arr);
+                  vector<double> &type_arr,
+                  double s);
 
-#endif // GENERATE_PARTICLE_H
+void clearAllVectors(vector<vector<double>> &artificial_visc_matrix,
+                     vector<vector<unsigned>> &neighbours_matrix,
+                     vector<vector<unsigned>> &cell_matrix,
+                     vector<vector<double>> &gradW_matrix);
+
+#endif // CUBE_H
