@@ -30,6 +30,7 @@ vector<double> &F_vol
     double h = params.h;
     double sigma = 72.8;
 
+    #pragma omp parallel for
     for(int n=0; n<params.nb_moving_part ; n++){
 
         vector<double> &gradW = gradW_matrix[n];
@@ -57,7 +58,7 @@ vector<double> &F_vol
             }
     }
     //printArray(fprime, fprime.size(),"fprime");
-
+    #pragma omp parallel for
     for(int n=0; n<params.nb_moving_part ; n++){
         vector<double> &gradW = gradW_matrix[n];
         vector<int> &neighbours = neighbours_matrix[n];
@@ -92,7 +93,7 @@ vector<double> &F_vol
     //printArray(N, N.size(), "N");
     //printArray(normal, normal.size(),"normal");
 
-    /*for(int n=0; n<params.nb_moving_part ; n++){
+    for(int n=0; n<params.nb_moving_part ; n++){
         vector<double> &gradW = gradW_matrix[n];
         vector<int> &neighbours = neighbours_matrix[n];
         int size_neigbours = neighbours.size();
@@ -108,10 +109,10 @@ vector<double> &F_vol
             double v = mass[neighbours[idx]]/rho[neighbours[idx]];
             C[n] +=  v*N[n]*N[neighbours[idx]]*W;
         }
-    }*/
+    }
     //printArray(C, C.size(), "C");
 
-    
+    #pragma omp parallel for
     for(int n=0; n<params.nb_moving_part ; n++){
         vector<double> &gradW = gradW_matrix[n];
         vector<int> &neighbours = neighbours_matrix[n];
