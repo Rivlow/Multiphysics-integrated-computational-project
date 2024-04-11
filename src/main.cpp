@@ -154,22 +154,17 @@ int main(int argc, char *argv[])
     vector<double> pos, type;
     vector<vector<int>> cell_matrix(params.Nx * params.Ny * params.Nz);
 
-    // Initialization of the particles (moving and fixed)
-    meshcube(params, pos, type);
-    meshBoundary(params, pos, type);
+    // Initialization of the particles
+    meshcube(params, pos, type); // moving
+    meshBoundary(params, pos, type); // fixed
     int nb_tot_part = pos.size()/3;
 
-    vector<double> mass(nb_tot_part),
-                   u(3 * nb_tot_part),
-                   drhodt(nb_tot_part),
-                   rho(nb_tot_part),
-                   dudt(3 * nb_tot_part, 0.0),
-                   p(nb_tot_part),
-                   c(nb_tot_part),
-                   grad_sum(nb_tot_part);
+    vector<double> mass(nb_tot_part), u(3 * nb_tot_part),
+                   drhodt(nb_tot_part), rho(nb_tot_part),
+                   dudt(3 * nb_tot_part, 0.0), p(nb_tot_part),
+                   c(nb_tot_part), grad_sum(nb_tot_part);
 
-    vector<vector<double>> artificial_visc_matrix(nb_tot_part),
-                           gradW_matrix(nb_tot_part);
+    vector<vector<double>> pi_matrix(nb_tot_part), gradW_matrix(nb_tot_part);
     vector<vector<int>> neighbours_matrix(nb_tot_part);
     vector<double> nb_neighbours(nb_tot_part, 0.0); 
 
@@ -207,26 +202,25 @@ int main(int argc, char *argv[])
     initializeRho(params, pos, rho);
     initializeMass(params, rho, mass);
     initializeVelocity(params, u);
-    initializeViscosity(params, artificial_visc_matrix);
+    initializeViscosity(params, pi_matrix);
     setPressure(params, p, rho); 
     setSpeedOfSound(params, c, rho);
 
     for (int t = 0; t < params.nstepT; t++){
 
-
         // Check if timeStep is small enough
-        checkTimeStep(params, t, pos, c, neighbours_matrix, artificial_visc_matrix);
+        checkTimeStep(params, t, pos, c, neighbours_matrix, pi_matrix);
 
         // Apply the linked-list algorithm
         sorted_list(params, cell_matrix, neighbours_matrix, gradW_matrix, 
-                    artificial_visc_matrix, nb_neighbours, pos); 
+                    pi_matrix, nb_neighbours, pos); 
 
         // Compute ∇_a(W_ab) for all particles
         gradW(params, gradW_matrix, neighbours_matrix, pos); 
 
         // Update density, velocity and position (Euler explicit or RK22 scheme)
         updateVariables(params, t, pos, u, rho, drhodt, c, p, dudt, mass, 
-                        artificial_visc_matrix, gradW_matrix, neighbours_matrix);
+                        pi_matrix, gradW_matrix, neighbours_matrix);
 
         if(t % params.nsave == 0){
             export_particles("../../output/sph", t, pos, scalars, vectors);
@@ -235,7 +229,7 @@ int main(int argc, char *argv[])
         }
 
         // Clear matrices and reset arrays to 0
-        clearAllVectors(params, artificial_visc_matrix, neighbours_matrix,
+        clearAllVectors(params, pi_matrix, neighbours_matrix,
                         cell_matrix, gradW_matrix, drhodt, dudt);
 
 

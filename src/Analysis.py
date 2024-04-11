@@ -45,36 +45,44 @@ plt.show()
     
 def getData(directory):
     
-    df_files = []
+    df, name = [], []
     
     if os.path.exists(directory) and os.path.isdir(directory):
         for filename in os.listdir(directory):
             if filename.endswith('.csv'):
+                name.append(filename)
                 csv_file = os.path.join(directory, filename)  
                 if csv_file is not None:
-                    df_files.append(np.loadtxt(csv_file, delimiter=",", dtype=float))
+                    df.append(np.loadtxt(csv_file, delimiter=",", dtype=float))
         
-        return df_files 
+        return df, name
     else:
-        print(f"Aucun fichier CSV trouvé dans le répertoire {directory}.")
+        print(f"No csv. files in folder : {directory}.")
 
     
 path = os.getcwd()
 
-print(f" path = {path}")
 
 outputFile = "output/"
 
 
-rho_array = getData(outputFile)[0]
-t = np.arange(0, np.shape(rho_array)[0], 1)
-rho = np.zeros(len(t))
+all_data = getData(outputFile)
+data_tot = all_data[0]
+name = all_data[1]
+print(f"Data available : {name}")
 
-for i, rows in enumerate(rho_array):
-    rho[i] = rows[0]
+for data, name in zip(data_tot, name):
     
-plt.plot(t, rho)
-plt.show()
+    t = np.arange(0, np.shape(data)[0], 1)
+    var = np.zeros(len(t))
+
+    for i, rows in enumerate(data):
+        var[i] = rows[0]
+    
+    plt.figure()
+    plt.plot(t, var)
+    plt.title(f"{name[:-4]}")
+    plt.show()
 
 
 

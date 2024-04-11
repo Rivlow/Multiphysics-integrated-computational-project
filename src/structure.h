@@ -25,7 +25,7 @@ struct SimulationData {
     double dt; 
     double theta;
     string schemeIntegration;
-    string data_store;
+    vector<string> data_store;
     int data_init;
     int data_end;
     double s;

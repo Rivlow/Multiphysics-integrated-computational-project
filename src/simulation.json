@@ -16,7 +16,7 @@
   },
 
   "data_store": {
-    "name":"rho",
+    "name":["rho", "p", "u"],
     "init":0,
     "end":26
   },

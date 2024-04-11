@@ -115,7 +115,7 @@ void setPressure( SimulationData& params,
 
 void setArtificialViscosity( SimulationData& params,
                             int t,
-                            vector<vector<double>> &artificial_visc_matrix,
+                            vector<vector<double>> &pi_matrix,
                             vector<vector<int>> &neighbours_matrix,
                             vector<double> &c,
                             vector<double> &pos,
@@ -137,7 +137,7 @@ void setArtificialViscosity( SimulationData& params,
             int size_neighbours = neighbours.size();
 
             for (int idx = 0; idx < size_neighbours; idx++){
-                artificial_visc_matrix[n][idx] = 0;
+                pi_matrix[n][idx] = 0;
             }
         }
     }
@@ -186,7 +186,7 @@ void setArtificialViscosity( SimulationData& params,
                 double nu_2 = 0.01 * h * h;
                 double mu_ab = (h * u_ab_x_ab) / (x_ab_2 + nu_2);
 
-                artificial_visc_matrix[n][idx] = (u_ab_x_ab < 0) ? 
+                pi_matrix[n][idx] = (u_ab_x_ab < 0) ? 
                 (-alpha * c_ab * mu_ab + beta * mu_ab * mu_ab) / rho_ab : 0;
             }
         }
@@ -247,7 +247,7 @@ void momentumEquation( SimulationData& params,
                       int t,
                       vector<vector<int>> &neighbours_matrix,
                       vector<vector<double>> &gradW_matrix,
-                      vector<vector<double>> &artificial_visc_matrix,
+                      vector<vector<double>> &pi_matrix,
                       vector<double> &mass,
                       vector<double> &dudt,
                       vector<double> &rho,
@@ -269,7 +269,7 @@ void momentumEquation( SimulationData& params,
     setSpeedOfSound(params, c, rho);
 
     // Compute artificial viscosity Π_ab for all particles
-    setArtificialViscosity(params, t, artificial_visc_matrix, neighbours_matrix,
+    setArtificialViscosity(params, t, pi_matrix, neighbours_matrix,
                             c, pos, rho, u); 
 
     // Iterations over each particle
@@ -278,7 +278,7 @@ void momentumEquation( SimulationData& params,
 
         vector<int> &neighbours = neighbours_matrix[n];
         vector<double> &gradW = gradW_matrix[n];
-        vector<double> &artificial_visc = artificial_visc_matrix[n];
+        vector<double> &artificial_visc = pi_matrix[n];
         vector<double> F_vol = {0.0, 0.0, g};
         double rho_a = rho[n];
         double p_a = p[n];
