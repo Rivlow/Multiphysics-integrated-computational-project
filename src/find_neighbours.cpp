@@ -40,7 +40,7 @@ void sortedList(GeomData &geomParams,
         int j = pos[3 * n + 1] / (geomParams.L_d[1] / Ny);
         int k = pos[3 * n + 2] / (geomParams.L_d[2] / Nz);
 
-        if (i < 0 || j < 0 || k < 0 || i > Nx || j > Ny || k > Ny){
+        if (i < 0 || j < 0 || k < 0 || i > Nx || j > Ny || k > Nz){
             continue;
         }
         
