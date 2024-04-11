@@ -26,6 +26,7 @@ void initializeViscosity( SimulationData& params,
                          vector<vector<double>> &artificial_visc_matrix);
 
 void checkTimeStep(SimulationData &params, 
+                   int t,
                    vector<double> pos,
                    vector<double> c,
                    vector<vector<int>> &neighbours_matrix,

@@ -21,6 +21,8 @@ void sorted_list(SimulationData& params,
                  vector<vector<int>> &cell_matrix,
                  vector<vector<int>> &neighbours_matrix,
                  vector<vector<double>> &gradW_matrix,
+                 vector<vector<double>> &artificial_visc_matrix,
+                 vector<double> &nb_neighbours,
                  vector<double> &pos){
 
     int Nx = params.Nx;
@@ -100,11 +102,14 @@ void sorted_list(SimulationData& params,
                             if (r2 <= kappa * kappa *h * h){
     
                                 neighbours_matrix[n].push_back(idx_cell);
-                                gradW_matrix[n].push_back(0.0);
 
                             }
                         }
                     }
+                    gradW_matrix[n].resize(3*neighbours_matrix[n].size());
+                    artificial_visc_matrix[n].resize(neighbours_matrix[n].size());
+                    nb_neighbours[n] = neighbours_matrix[n].size();
+
                 }
             }
         }

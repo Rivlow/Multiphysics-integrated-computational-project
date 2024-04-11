@@ -19,7 +19,9 @@ void sorted_list(SimulationData& params,
                  vector<vector<int>> &cell_matrix,
                  vector<vector<int>> &neighbours_matrix,
                  vector<vector<double>> &gradW_matrix,
-                 vector<double> &pos_array);
+                 vector<vector<double>> &artificial_visc_matrix,
+                 vector<double> &nb_neighbours,
+                 vector<double> &pos);
 
 void naiveAlgo( SimulationData& params, 
                vector<vector<int>> &neighbours_matrix,

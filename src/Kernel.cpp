@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cmath>
 #include <stdio.h>
-#include "Kernel_functions.h"
+#include "Kernel.h"
 
 using namespace std;
 

@@ -12,10 +12,11 @@
 #include "gradient.h"
 #include "initialize.h"
 #include "export.h"
-#include "Kernel_functions.h"
+#include "Kernel.h"
 #include "tools.h"
 #include "structure.h"
 #include "integration.h"
+#include "data_store.h"
 
 
 
@@ -112,6 +113,9 @@ int main(int argc, char *argv[])
         data["dt"],
         data["theta"],
         data["schemeIntegration"],
+        data["data_store"]["name"],
+        data["data_store"]["init"],
+        data["data_store"]["end"],
         data["s"],
         1.2 * params.s,
         data["o"],
@@ -167,11 +171,11 @@ int main(int argc, char *argv[])
     vector<vector<double>> artificial_visc_matrix(nb_tot_part),
                            gradW_matrix(nb_tot_part);
     vector<vector<int>> neighbours_matrix(nb_tot_part);
-    std::vector<double> nvoisins(nb_tot_part, 0.0); 
+    vector<double> nb_neighbours(nb_tot_part, 0.0); 
 
     // Variables defined to used "export.cpp"
-    std::map<std::string, std::vector<double> *> scalars;
-    std::map<std::string, std::vector<double> *> vectors;
+    map<string, vector<double> *> scalars;
+    map<string, vector<double> *> vectors;
 
 
     scalars["type"] = &type;
@@ -179,7 +183,7 @@ int main(int argc, char *argv[])
     scalars["rho"] = &rho;
     scalars["p"] = &p;
     scalars["drhodt"] = &drhodt;
-    scalars["nvoisins"] = &nvoisins;
+    scalars["nb_neighbours"] = &nb_neighbours;
     scalars["grad_sum"] = &grad_sum;
     vectors["position"] = &pos;
     vectors["u"] = &u;
@@ -207,33 +211,33 @@ int main(int argc, char *argv[])
     setPressure(params, p, rho); 
     setSpeedOfSound(params, c, rho);
 
-    // Check if the chose, timeStep is small enough
-    checkTimeStep(params, pos, c, neighbours_matrix, artificial_visc_matrix);
-    
-
     for (int t = 0; t < params.nstepT; t++){
 
+
+        // Check if timeStep is small enough
+        checkTimeStep(params, t, pos, c, neighbours_matrix, artificial_visc_matrix);
+
         // Apply the linked-list algorithm
-        sorted_list(params, cell_matrix, neighbours_matrix, gradW_matrix, pos); 
+        sorted_list(params, cell_matrix, neighbours_matrix, gradW_matrix, 
+                    artificial_visc_matrix, nb_neighbours, pos); 
 
         // Compute ∇_a(W_ab) for all particles
         gradW(params, gradW_matrix, neighbours_matrix, pos); 
 
-        // Update density, velocity and position for each particle (Euler explicit or RK22 scheme)
-        updateVariables(params, t, pos, u, rho, drhodt, c, p, dudt, mass, artificial_visc_matrix, gradW_matrix, neighbours_matrix);
-
-        // After updates, need to check if timeStep is still small enough
-        checkTimeStep(params, pos, c, neighbours_matrix, artificial_visc_matrix);
-
-
-        // Clear matrices and reset arrays to 0
-        clearAllVectors(params, artificial_visc_matrix, neighbours_matrix, cell_matrix, gradW_matrix,
-                        drhodt, dudt);
-
+        // Update density, velocity and position (Euler explicit or RK22 scheme)
+        updateVariables(params, t, pos, u, rho, drhodt, c, p, dudt, mass, 
+                        artificial_visc_matrix, gradW_matrix, neighbours_matrix);
 
         if(t % params.nsave == 0){
             export_particles("../../output/sph", t, pos, scalars, vectors);
+            extractData(params, pos, u, dudt, rho, drhodt, c, p, mass);
+
         }
+
+        // Clear matrices and reset arrays to 0
+        clearAllVectors(params, artificial_visc_matrix, neighbours_matrix,
+                        cell_matrix, gradW_matrix, drhodt, dudt);
+
 
     }
 

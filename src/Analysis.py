@@ -2,7 +2,10 @@ import vtk
 from vtk.util.numpy_support import vtk_to_numpy
 import os
 from matplotlib import pyplot as plt
+import pandas as pd
+import numpy as np
 
+"""
 def read_vtp(path):
     reader = vtk.vtkXMLPolyDataReader()
     reader.SetFileName(path)
@@ -38,3 +41,41 @@ for i, array_data in enumerate(rho):
     
 plt.plot(val_rho)
 plt.show()
+    """
+    
+def getData(directory):
+    
+    df_files = []
+    
+    if os.path.exists(directory) and os.path.isdir(directory):
+        for filename in os.listdir(directory):
+            if filename.endswith('.csv'):
+                csv_file = os.path.join(directory, filename)  
+                if csv_file is not None:
+                    df_files.append(np.loadtxt(csv_file, delimiter=",", dtype=float))
+        
+        return df_files 
+    else:
+        print(f"Aucun fichier CSV trouvé dans le répertoire {directory}.")
+
+    
+path = os.getcwd()
+
+print(f" path = {path}")
+
+outputFile = "output/"
+
+
+rho_array = getData(outputFile)[0]
+t = np.arange(0, np.shape(rho_array)[0], 1)
+rho = np.zeros(len(t))
+
+for i, rows in enumerate(rho_array):
+    rho[i] = rows[0]
+    
+plt.plot(t, rho)
+plt.show()
+
+
+
+

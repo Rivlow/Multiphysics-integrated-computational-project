@@ -4,7 +4,7 @@
 
 #include "gradient.h"
 #include "find_neighbours.h"
-#include "Kernel_functions.h"
+#include "Kernel.h"
 #include "tools.h"
 #include "structure.h"
 
@@ -17,7 +17,6 @@ void gradW(SimulationData& params,
            vector<double> &pos){
 
     double h = params.h;
-    int size_pos = pos.size()/3;
     int nb_moving_part = params.nb_moving_part;
 
     // Iterations over each particle
@@ -28,8 +27,7 @@ void gradW(SimulationData& params,
         vector<double> &gradW = gradW_matrix[n];
         int size_neighbours = neighbours.size();
 
-        cout << "n : " << n << endl;
-        // Iterations over each associated neighbours of prescribed particles
+        // Iterations over each associated neighbours 
         for (int idx = 0; idx < size_neighbours; idx++){
 
             int i_neig = neighbours[idx];
@@ -44,11 +42,8 @@ void gradW(SimulationData& params,
 
             r_ab = sqrt(r_val);
             double deriv = derive_cubic_spline(r_ab, h);
-            cout << "idx : " << idx << endl;
-            cout << "going to insert into gradW" << endl;
-            
+
             for (int coord = 0; coord < 3; coord++){
-                
                 gradW[3 * idx + coord] = pos_val[coord] / r_ab * deriv;
             }
         }
@@ -141,8 +136,8 @@ void setArtificialViscosity( SimulationData& params,
             vector<int> &neighbours = neighbours_matrix[n];
             int size_neighbours = neighbours.size();
 
-            for (int idx_neighbour = 0; idx_neighbour < size_neighbours; idx_neighbour++){
-                artificial_visc_matrix[n].push_back(0.0);
+            for (int idx = 0; idx < size_neighbours; idx++){
+                artificial_visc_matrix[n][idx] = 0;
             }
         }
     }
@@ -191,7 +186,8 @@ void setArtificialViscosity( SimulationData& params,
                 double nu_2 = 0.01 * h * h;
                 double mu_ab = (h * u_ab_x_ab) / (x_ab_2 + nu_2);
 
-                artificial_visc_matrix[n].push_back((u_ab_x_ab < 0) ? (-alpha * c_ab * mu_ab + beta * mu_ab * mu_ab) / rho_ab : 0);
+                artificial_visc_matrix[n][idx] = (u_ab_x_ab < 0) ? 
+                (-alpha * c_ab * mu_ab + beta * mu_ab * mu_ab) / rho_ab : 0;
             }
         }
     }

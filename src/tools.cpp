@@ -100,7 +100,7 @@ void clearOutputFiles(){
     try {
 
         for (const auto& entry : fs::directory_iterator(outputPath)){
-            if (entry.is_regular_file() && entry.path().extension() == ".vtp") {
+                if (entry.path().extension() == ".vtp" || entry.path().extension() == ".csv") {
                 // Supprimer les fichiers avec l'extension .vtp
                 fs::remove(entry.path());
             }
