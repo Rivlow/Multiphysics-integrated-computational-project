@@ -47,6 +47,7 @@ def getData(directory):
     
     df, name = [], []
     
+    # Search all csv. files
     if os.path.exists(directory) and os.path.isdir(directory):
         for filename in os.listdir(directory):
             if filename.endswith('.csv'):
@@ -63,26 +64,43 @@ def getData(directory):
 path = os.getcwd()
 
 
-outputFile = "output/"
-
-
-all_data = getData(outputFile)
-data_tot = all_data[0]
-name = all_data[1]
-print(f"Data available : {name}")
-
-for data, name in zip(data_tot, name):
+def plotData(all_data, particle):
     
-    t = np.arange(0, np.shape(data)[0], 1)
-    var = np.zeros(len(t))
+    data_tot = all_data[0]
+    names = all_data[1]
+    print(f"Data available : {names}")
 
-    for i, rows in enumerate(data):
-        var[i] = rows[0]
+    for data, name in zip(data_tot, names):
+        
+        t = np.arange(0, np.shape(data)[0], 1)
+        var = np.zeros(len(t))
+
+        for i, rows in enumerate(data):
+            var[i] = rows[particle]
+        
+        plt.figure()
+        plt.scatter(t, var)
+        plt.xlabel("time [s]")
+        plt.ylabel(f"{name[:-4]}(t)")
+        plt.title(f"{name[:-4]}")
+        plt.tight_layout()
+        plt.show()
+        
     
-    plt.figure()
-    plt.plot(t, var)
-    plt.title(f"{name[:-4]}")
-    plt.show()
+    
+def main():
+    
+    outputFile = "output/"
+    particle = 5
+    
+    all_data = getData(outputFile)
+    plotData(all_data, particle)
+    
+    
+    
+    
+if __name__ == "__main__":
+    main()
 
 
 
