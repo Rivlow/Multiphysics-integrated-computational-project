@@ -30,6 +30,7 @@ void checkTimeStep(SimulationData &params,
                    vector<double> pos,
                    vector<double> c,
                    vector<vector<int>> &neighbours_matrix,
+                   vector<double> &nb_neighbours,
                    vector<vector<double>> &artificial_visc_matrix);
 
 #endif // INITIALIZE_H

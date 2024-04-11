@@ -52,6 +52,8 @@ void sorted_list(SimulationData& params,
     #pragma omp parallel for
     for (int n = 0; n < size_pos; n++){
 
+        int it = 0;
+
         int i_cell = pos[3 * n + 0] / (params.L_d[0] / Nx);
         int j_cell = pos[3 * n + 1] / (params.L_d[1] / Ny);
         int k_cell = pos[3 * n + 2] / (params.L_d[2] / Nz);
@@ -76,14 +78,15 @@ void sorted_list(SimulationData& params,
                                                                          : k_cell - 1;
 
         // Iterate over (max) 26 adjacents cells to find neighbours
-        for (int i = i_inf; i <= i_supp; i++){
+        
+        for (int k = k_inf; k <= k_supp; k++){
             for (int j = j_inf; j <= j_supp; j++){
-                for (int k = k_inf; k <= k_supp; k++){
+                for (int i = i_inf; i <= i_supp; i++){
 
                     vector<int> &cell = cell_matrix[i + j * Nx + k * Nx * Ny];
                     int size_cell =cell.size();
 
-                    // Iterate over neighbours
+                    // Iterate over particles in cell
                     for (int idx = 0; idx < size_cell; idx++){
 
                         int idx_cell = cell[idx];
@@ -101,14 +104,17 @@ void sorted_list(SimulationData& params,
 
                             if (r2 <= kappa * kappa *h * h){
     
-                                neighbours_matrix[n].push_back(idx_cell);
+                                //neighbours_matrix[n].push_back(idx_cell);
+                                neighbours_matrix[n][it++] = idx_cell;
 
                             }
                         }
                     }
-                    gradW_matrix[n].resize(3*neighbours_matrix[n].size());
-                    artificial_visc_matrix[n].resize(neighbours_matrix[n].size());
-                    nb_neighbours[n] = neighbours_matrix[n].size();
+                    //cout << "it : " << it << endl;
+                    //neighbours_matrix[n].resize(it);
+                    gradW_matrix[n].resize(3*it);
+                    artificial_visc_matrix[n].resize(it);
+                    nb_neighbours[n] = it;
 
                 }
             }

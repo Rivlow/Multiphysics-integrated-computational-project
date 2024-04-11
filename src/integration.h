@@ -16,7 +16,8 @@ void Euler( SimulationData& params,
             vector<double> &mass,
             vector<vector<double>> &artificial_visc_matrix,
             vector<vector<double>> &gradW_matrix,
-            vector<vector<int>> &neighbours_matrix);
+            vector<vector<int>> &neighbours_matrix,
+            vector<double> &nb_neighbours);
 
 void RK22( SimulationData& params,
           int t,
@@ -30,7 +31,8 @@ void RK22( SimulationData& params,
           vector<double> &mass,
           vector<vector<double>> &artificial_visc_matrix,
           vector<vector<double>> &gradW_matrix,
-          vector<vector<int>> &neighbours_matrix);
+          vector<vector<int>> &neighbours_matrix,
+          vector<double> &nb_neighbours);
 
 void updateVariables( SimulationData& params,
             int t,
@@ -44,4 +46,5 @@ void updateVariables( SimulationData& params,
             vector<double> &mass,
             vector<vector<double>> &artificial_visc_matrix,
             vector<vector<double>> &gradW_matrix,
-            vector<vector<int>> &neighbours_matrix);
+            vector<vector<int>> &neighbours_matrix,
+            vector<double> &nb_neighbours);

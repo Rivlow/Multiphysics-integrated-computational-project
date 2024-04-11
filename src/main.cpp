@@ -165,7 +165,9 @@ int main(int argc, char *argv[])
                    c(nb_tot_part), grad_sum(nb_tot_part);
 
     vector<vector<double>> pi_matrix(nb_tot_part), gradW_matrix(nb_tot_part);
-    vector<vector<int>> neighbours_matrix(nb_tot_part);
+    vector<vector<int>> neighbours_matrix(nb_tot_part, vector<int>(100));
+    //vector<vector<int>> neighbours_matrix(nb_tot_part);
+
     vector<double> nb_neighbours(nb_tot_part, 0.0); 
 
     // Variables defined to used "export.cpp"
@@ -209,18 +211,21 @@ int main(int argc, char *argv[])
     for (int t = 0; t < params.nstepT; t++){
 
         // Check if timeStep is small enough
-        checkTimeStep(params, t, pos, c, neighbours_matrix, pi_matrix);
+        checkTimeStep(params, t, pos, c, neighbours_matrix, nb_neighbours, pi_matrix);
 
         // Apply the linked-list algorithm
         sorted_list(params, cell_matrix, neighbours_matrix, gradW_matrix, 
                     pi_matrix, nb_neighbours, pos); 
 
+        //printMatrix(neighbours_matrix, nb_tot_part, "neighbours_matrix");
+        //printArray(nb_neighbours, nb_tot_part, "nb_neighbours");
+
         // Compute ∇_a(W_ab) for all particles
-        gradW(params, gradW_matrix, neighbours_matrix, pos); 
+        gradW(params, gradW_matrix, neighbours_matrix, nb_neighbours, pos); 
 
         // Update density, velocity and position (Euler explicit or RK22 scheme)
         updateVariables(params, t, pos, u, rho, drhodt, c, p, dudt, mass, 
-                        pi_matrix, gradW_matrix, neighbours_matrix);
+                        pi_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
 
         if(t % params.nsave == 0){
             export_particles("../../output/sph", t, pos, scalars, vectors);

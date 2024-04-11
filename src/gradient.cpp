@@ -14,6 +14,7 @@ using namespace std;
 void gradW(SimulationData& params, 
            vector<vector<double>> &gradW_matrix,
            vector<vector<int>> &neighbours_matrix,
+           vector<double> &nb_neighbours,
            vector<double> &pos){
 
     double h = params.h;
@@ -25,7 +26,7 @@ void gradW(SimulationData& params,
 
         vector<int> &neighbours = neighbours_matrix[n];
         vector<double> &gradW = gradW_matrix[n];
-        int size_neighbours = neighbours.size();
+        int size_neighbours = nb_neighbours[n];
 
         // Iterations over each associated neighbours 
         for (int idx = 0; idx < size_neighbours; idx++){
@@ -117,6 +118,7 @@ void setArtificialViscosity( SimulationData& params,
                             int t,
                             vector<vector<double>> &pi_matrix,
                             vector<vector<int>> &neighbours_matrix,
+                            vector<double> &nb_neighbours,
                             vector<double> &c,
                             vector<double> &pos,
                             vector<double> &rho,
@@ -133,8 +135,7 @@ void setArtificialViscosity( SimulationData& params,
         #pragma omp parallel for
         for (int n = 0; n < nb_moving_part; n++){
 
-            vector<int> &neighbours = neighbours_matrix[n];
-            int size_neighbours = neighbours.size();
+            int size_neighbours = nb_neighbours[n];
 
             for (int idx = 0; idx < size_neighbours; idx++){
                 pi_matrix[n][idx] = 0;
@@ -153,7 +154,7 @@ void setArtificialViscosity( SimulationData& params,
         for (int n = 0; n < size_pos; n++){
 
             vector<int> &neighbours = neighbours_matrix[n];
-            int size_neighbours = neighbours.size();
+            int size_neighbours = nb_neighbours[n];
 
             // Iteration over each associated neighbours
             for (int idx = 0; idx < size_neighbours; idx++){
@@ -199,6 +200,7 @@ void setArtificialViscosity( SimulationData& params,
 
 void continuityEquation( SimulationData& params,
                         vector<vector<int>> &neighbours_matrix,
+                        vector<double> &nb_neighbours,
                         vector<vector<double>> &gradW_matrix,
                         vector<double> &pos,
                         vector<double> &u,
@@ -215,7 +217,7 @@ void continuityEquation( SimulationData& params,
 
         vector<int> &neighbours = neighbours_matrix[n];
         vector<double> &gradW= gradW_matrix[n];
-        int size_neighbours =neighbours.size();
+        int size_neighbours = nb_neighbours[n];
 
         // Summation over b = 1 -> nb_neighbours
         for (int idx = 0; idx < size_neighbours; idx++){
@@ -246,6 +248,7 @@ void continuityEquation( SimulationData& params,
 void momentumEquation( SimulationData& params,
                       int t,
                       vector<vector<int>> &neighbours_matrix,
+                      vector<double> &nb_neighbours,
                       vector<vector<double>> &gradW_matrix,
                       vector<vector<double>> &pi_matrix,
                       vector<double> &mass,
@@ -269,7 +272,7 @@ void momentumEquation( SimulationData& params,
     setSpeedOfSound(params, c, rho);
 
     // Compute artificial viscosity Π_ab for all particles
-    setArtificialViscosity(params, t, pi_matrix, neighbours_matrix,
+    setArtificialViscosity(params, t, pi_matrix, neighbours_matrix, nb_neighbours,
                             c, pos, rho, u); 
 
     // Iterations over each particle
@@ -286,7 +289,7 @@ void momentumEquation( SimulationData& params,
         for (int cord = 0; cord < 3; cord++){
 
             // Summation over b = 1 -> nb_neighbours
-            for (int idx = 0; idx < int(neighbours.size()); idx++){
+            for (int idx = 0; idx < int(nb_neighbours[n]); idx++){
 
                 int i_neig = neighbours[idx];
                 double pi_ab = artificial_visc[idx];
