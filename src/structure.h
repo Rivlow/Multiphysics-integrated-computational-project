@@ -59,6 +59,7 @@ struct SimulationData {
     vector<string> data_store;
     int data_init;
     int data_end;
+    bool data_do;
     
     vector<double> u_init;
 

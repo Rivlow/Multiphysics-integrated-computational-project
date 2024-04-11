@@ -145,6 +145,7 @@ int main(int argc, char *argv[])
         data["data_store"]["name"],
         data["data_store"]["init"],
         data["data_store"]["end"],
+        data["data_store"]["do"],
         data["u_init"],
         state_equation,
         state_initial_condition,
@@ -235,8 +236,10 @@ int main(int argc, char *argv[])
                         pi_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
 
         if(t % simParams.nsave == 0){
+            if (simParams.data_do){            
+                extractData(simParams, pos, u, dudt, rho, drhodt, c, p, mass);
+            }
             export_particles("../../output/sph", t, pos, scalars, vectors);
-            extractData(simParams, pos, u, dudt, rho, drhodt, c, p, mass);
 
         }
 
