@@ -91,7 +91,7 @@ def plotData(all_data, particle):
 def main():
     
     outputFile = "output/"
-    particle = 5
+    particle = 20
     
     all_data = getData(outputFile)
     plotData(all_data, particle)

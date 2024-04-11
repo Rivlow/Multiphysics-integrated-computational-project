@@ -12,12 +12,13 @@
 
 using namespace std;
 
-void initializeMass( SimulationData &params, 
+void initializeMass(GeomData &geomParams,
+                    SimulationData &simParams, 
                     vector<double> &rho,
                     vector<double> &mass){
 
-    double s = params.s;  
-    bool PRINT = params.PRINT;  
+    double s = geomParams.s;  
+    bool PRINT = simParams.PRINT;  
     double V = s * s * s;
     int rho_size = rho.size();
 
@@ -30,23 +31,26 @@ void initializeMass( SimulationData &params,
     }
 }
 
-void initializeRho( SimulationData &params,
+void initializeRho(ThermoData &thermoParams,
+                   SimulationData &simParams,
                    vector<double> &pos,
                    vector<double> &rho){
 
-    string state_initial_condition = params.state_initial_condition;
-    string state_equation = params.state_equation;
-    double R = params.R;
-    double T = params.T;
-    double M = params.M;
-    double rho_0 = params.rho_0;
-    double rho_fixed = params.rho_fixed;
-    double rho_moving = params.rho_moving;
-    double c_0 = params.c_0;
-    double gamma = params.gamma;
-    double g = params.g;
-    bool PRINT = params.PRINT;
-    int nb_moving_part = params.nb_moving_part;
+    string state_initial_condition = simParams.state_initial_condition;
+    string state_equation = simParams.state_equation;
+    bool PRINT = simParams.PRINT;
+    int nb_moving_part = simParams.nb_moving_part;
+
+    double R = thermoParams.R;
+    double T = thermoParams.T;
+    double M = thermoParams.M;
+    double rho_0 = thermoParams.rho_0;
+    double rho_fixed = thermoParams.rho_fixed;
+    double rho_moving = thermoParams.rho_moving;
+    double c_0 = thermoParams.c_0;
+    double gamma = thermoParams.gamma;
+    double g = thermoParams.g;
+
     int rho_size = rho.size();
 
 
@@ -59,7 +63,7 @@ void initializeRho( SimulationData &params,
             }
         }
 
-        if (params.state_equation == "Quasi incompresible fluid"){
+        if (state_equation == "Quasi incompresible fluid"){
 
             double B = c_0 * c_0 * rho_0 / gamma;
             for (int i = 0; i < rho_size; i++){
@@ -82,20 +86,21 @@ void initializeRho( SimulationData &params,
     }
 }
 
-void initializeVelocity( SimulationData &params, 
+void initializeVelocity(ThermoData &thermoParams,
+                        SimulationData &simParams, 
                         vector<double> &u){
 
 
-    bool PRINT = params.PRINT;
-    int nb_moving_part = params.nb_moving_part;
+    bool PRINT = simParams.PRINT;
+    int nb_moving_part = simParams.nb_moving_part;
     int u_size = u.size();
 
     for (int i = 0; i < u_size / 3; i++){
 
         if (i < nb_moving_part){
-            u[3 * i] = params.u_init[0];
-            u[3 * i + 1] = params.u_init[1];
-            u[3 * i + 2] = params.u_init[2];
+            u[3 * i] = simParams.u_init[0];
+            u[3 * i + 1] = simParams.u_init[1];
+            u[3 * i + 2] = simParams.u_init[2];
         }
         else{
             u[3 * i] = 0;
@@ -109,18 +114,18 @@ void initializeVelocity( SimulationData &params,
     }
 }
 
-void initializeViscosity( SimulationData &params, 
-                         vector<vector<double>> &artificial_visc_matrix){
+void initializeViscosity(SimulationData &simParams, 
+                         vector<vector<double>> &pi_matrix){
 
-    bool PRINT = params.PRINT;
-    int size_artificial_visc_matrix = artificial_visc_matrix.size();
+    bool PRINT = simParams.PRINT;
+    int size_pi_matrix = pi_matrix.size();
 
-    for (int i = 0; i < size_artificial_visc_matrix; i++){
+    for (int i = 0; i < size_pi_matrix; i++){
 
-        int size_artificial_visc = artificial_visc_matrix[i].size();
+        int size_artificial_visc = pi_matrix[i].size();
 
         for (int j = 0; j < size_artificial_visc; j++){
-            artificial_visc_matrix[i][j] = 0.0;
+            pi_matrix[i][j] = 0.0;
         }
     }
 
@@ -129,19 +134,21 @@ void initializeViscosity( SimulationData &params,
     }
 }
 
-void checkTimeStep(SimulationData &params, 
+void checkTimeStep(GeomData &geomParams,    
+                   ThermoData &thermoParams,
+                   SimulationData &simParams, 
                    int t,
                    vector<double> pos,
                    vector<double> c,
                    vector<vector<int>> &neighbours_matrix,
                    vector<double> &nb_neighbours,
-                   vector<vector<double>> &artificial_visc_matrix){
+                   vector<vector<double>> &pi_matrix){
 
-    double alpha = params.alpha;
-    double beta = params.beta;
-    double h = params.h;
-    double g = params.g;
-    int nb_moving_part = params.nb_moving_part;
+    double alpha = thermoParams.alpha;
+    double beta = thermoParams.beta;
+    double h = geomParams.h;
+    double g = thermoParams.g;
+    int nb_moving_part = simParams.nb_moving_part;
 
     double dt_f = h / abs(g);
     double dt_cv;
@@ -150,10 +157,10 @@ void checkTimeStep(SimulationData &params,
 
     if (t == 0){
 
-        double prev_dt = params.dt;
+        double prev_dt = simParams.dt;
         double dt_f = h / abs(g);
-        params.dt = (params.dt > dt_f) ? dt_f : params.dt;
-        double next_dt = params.dt;
+        simParams.dt = (simParams.dt > dt_f) ? dt_f : simParams.dt;
+        double next_dt = simParams.dt;
 
         if (abs(prev_dt - next_dt) != 0){
             cout << "dt has to be modified, was : " << prev_dt << " and is now : " << next_dt << endl;
@@ -163,7 +170,7 @@ void checkTimeStep(SimulationData &params,
 
         for (int n = 0; n < nb_moving_part; n++){
 
-            vector<double> &artificial_visc = artificial_visc_matrix[n];
+            vector<double> &artificial_visc = pi_matrix[n];
             vector<int> &neighbours = neighbours_matrix[n];
 
             double c_a = c[n];
@@ -184,13 +191,13 @@ void checkTimeStep(SimulationData &params,
         dt_cv = min_a;
         double dt_final = min(0.25*dt_f, 0.4*dt_cv);
 
-        string state_equation = params.state_equation;
+        string state_equation = simParams.state_equation;
 
         if (state_equation == "Ideal gaz law"){
 
-            double prev_dt = params.dt;
-            params.dt = (dt_final < params.dt) ? dt_final : params.dt;
-            double next_dt = params.dt;
+            double prev_dt = simParams.dt;
+            simParams.dt = (dt_final < simParams.dt) ? dt_final : simParams.dt;
+            double next_dt = simParams.dt;
             
             if (abs(prev_dt - next_dt) != 0){
                 cout << "dt has to be modified, was " << prev_dt << " and is now " << next_dt << endl;
@@ -198,9 +205,9 @@ void checkTimeStep(SimulationData &params,
         }
         else{
 
-            double prev_dt = params.dt;
-            params.dt = (dt_final < params.dt) ? dt_final : params.dt;
-            double next_dt = params.dt;
+            double prev_dt = simParams.dt;
+            simParams.dt = (dt_final < simParams.dt) ? dt_final : simParams.dt;
+            double next_dt = simParams.dt;
 
             if (abs(prev_dt - next_dt) != 0){
                 cout << "dt has to be modified, was " << prev_dt << " and is now " << next_dt << endl;

@@ -11,7 +11,7 @@ using namespace std;
 namespace fs = std::filesystem;
 
 
-void extractData(SimulationData& params,
+void extractData(SimulationData& simParams,
                  vector<double> &pos, 
                  vector<double> &u, 
                  vector<double> &dudt, 
@@ -21,9 +21,9 @@ void extractData(SimulationData& params,
                  vector<double> &p, 
                  vector<double> &mass){
 
-    vector<string> data_store = params.data_store;
-    int init = params.data_init;
-    int end = params.data_end;
+    vector<string> data_store = simParams.data_store;
+    int init = simParams.data_init;
+    int end = simParams.data_end;
 
     string outputDir = "../../output";
 

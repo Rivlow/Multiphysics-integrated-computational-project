@@ -15,17 +15,19 @@
 
 using namespace std;
 
-void sorted_list(SimulationData& params, 
-                 vector<vector<int>> &cell_matrix,
-                 vector<vector<int>> &neighbours_matrix,
-                 vector<vector<double>> &gradW_matrix,
-                 vector<vector<double>> &artificial_visc_matrix,
-                 vector<double> &nb_neighbours,
-                 vector<double> &pos);
+void sortedList(GeomData &geomParams,
+                SimulationData &simParams, 
+                vector<vector<int>> &cell_matrix,
+                vector<vector<int>> &neighbours_matrix,
+                vector<vector<double>> &gradW_matrix,
+                vector<vector<double>> &artificial_visc_matrix,
+                vector<double> &nb_neighbours,
+                vector<double> &pos);
 
-void naiveAlgo( SimulationData& params, 
+void naiveAlgo(GeomData &geomParams,
+               SimulationData &simParams, 
                vector<vector<int>> &neighbours_matrix,
-               vector<double> &pos_array);
+               vector<double> &pos);
 
 void printNeighbours(vector<vector<int>> &neighbours_matrix_linked, 
                      vector<vector<int>> &neighbours_matrix_naive);

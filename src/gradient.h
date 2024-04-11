@@ -8,21 +8,28 @@
 
 using namespace std;
 
-void gradW(SimulationData &params, 
+void gradW(GeomData &geomParams,    
+           SimulationData &simParams, 
            vector<vector<double>> &gradW_matrix,
            vector<vector<int>> &neighbours_matrix,
            vector<double> &nb_neighbours,
            vector<double> &pos);
 
-void setSpeedOfSound(SimulationData &params,
+void setSpeedOfSound(GeomData &geomParams,    
+                     ThermoData &thermoParams,
+                     SimulationData &simParams, 
                      vector<double> &c,
                      vector<double> &rho);
 
-void setPressure(SimulationData &params,
+void setPressure(GeomData &geomParams,    
+                 ThermoData &thermoParams,
+                 SimulationData &simParams, 
                  vector<double> &p,
                  vector<double> &rho);
 
-void setArtificialViscosity(SimulationData &params,
+void setArtificialViscosity(GeomData &geomParams,    
+                            ThermoData &thermoParams,
+                            SimulationData &simParams, 
                             int t,
                             vector<vector<double>> &pi_matrix,
                             vector<vector<int>> &neighbours_matrix,
@@ -42,7 +49,9 @@ void continuityEquation(SimulationData &params,
                         vector<double> &rho,
                         vector<double> &mass);
 
-void momentumEquation(SimulationData &params,
+void momentumEquation(GeomData &geomParams,    
+                      ThermoData &thermoParams,
+                      SimulationData &simParams, 
                       int t,
                       vector<vector<int>> &neighbours_matrix,
                       vector<double> &nb_neighbours,

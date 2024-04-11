@@ -11,26 +11,31 @@
 
 using namespace std;
 
-void initializeMass( SimulationData& params, 
-                    vector<double> &rho_array,
-                    vector<double> &mass_array);
+void initializeMass(GeomData &geomParams,
+                    SimulationData &simParams, 
+                    vector<double> &rho,
+                    vector<double> &mass);
 
-void initializeRho( SimulationData& params,
-                   vector<double> &pos_array,
-                   vector<double> &rho_array);
+void initializeRho(ThermoData &thermoParams,
+                   SimulationData &simParams,
+                   vector<double> &pos,
+                   vector<double> &rho);
 
-void initializeVelocity( SimulationData& params, 
-                        vector<double> &u_array);
+void initializeVelocity(ThermoData &thermoParams,
+                        SimulationData &simParams, 
+                        vector<double> &u);
 
-void initializeViscosity( SimulationData& params, 
-                         vector<vector<double>> &artificial_visc_matrix);
+void initializeViscosity(SimulationData &simParams, 
+                         vector<vector<double>> &pi_matrix);
 
-void checkTimeStep(SimulationData &params, 
+void checkTimeStep(GeomData &geomParams,    
+                   ThermoData &thermoParams,
+                   SimulationData &simParams, 
                    int t,
                    vector<double> pos,
                    vector<double> c,
                    vector<vector<int>> &neighbours_matrix,
                    vector<double> &nb_neighbours,
-                   vector<vector<double>> &artificial_visc_matrix);
+                   vector<vector<double>> &pi_matrix);
 
 #endif // INITIALIZE_H
