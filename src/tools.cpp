@@ -58,7 +58,7 @@ void printArray(vector<T> &array, int size, string name)
          << "\n"
          << endl;
 
-    for (int i = 0; i <= size; ++i)
+    for (int i = 0; i < size; ++i)
     {
         std::cout << array[i];
         if (i != int(array.size() - 1))
@@ -100,7 +100,7 @@ void clearOutputFiles(){
     try {
 
         for (const auto& entry : fs::directory_iterator(outputPath)){
-            if (entry.is_regular_file() && entry.path().extension() == ".vtp") {
+                if (entry.path().extension() == ".vtp" || entry.path().extension() == ".csv") {
                 // Supprimer les fichiers avec l'extension .vtp
                 fs::remove(entry.path());
             }
@@ -113,7 +113,7 @@ void clearOutputFiles(){
 }
 
 
-void clearAllVectors(SimulationData &params,
+void clearAllVectors(SimulationData &simParams,
                      vector<vector<double>> &artificial_visc_matrix,
                      vector<vector<int>> &neighbours_matrix,
                      vector<vector<int>> &cell_matrix,
@@ -121,7 +121,7 @@ void clearAllVectors(SimulationData &params,
                      vector<double> &drhodt_array,
                      vector<double> &dudt_array){
 
-    bool PRINT = params.PRINT;
+    bool PRINT = simParams.PRINT;
 
     for (int i = 0; i < int(artificial_visc_matrix.size()); i++){
         artificial_visc_matrix[i].clear();

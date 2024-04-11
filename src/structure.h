@@ -11,34 +11,32 @@
 using namespace std;
 
 
-struct DomainParams {
-    string shape;
-    vector<string> walls_used;
-    double particle_layers;
-
-};
-
-struct SimulationData {
+struct GeomData {
+    
     int kappa;
-    int nstepT;
-    int nsave;
-    double dt; 
-    double theta;
-    string schemeIntegration;
     double s;
     double h; 
     vector<double> o;
     vector<double> L;
     vector<double> o_d;
     vector<double> L_d;
-    vector<double> u_init;
     int Nx;
     int Ny;
     int Nz;
+    
+    string shape;
+    vector<string> walls_chose;
+    double particle_layers;
 
+    bool walls_used(string wall)  {
+        return find(walls_chose.begin(), walls_chose.end(), wall) != walls_chose.end();
+    };
+};
+
+struct ThermoData {
+ 
     double alpha;
     double beta;
-
     double c_0;
     double rho_moving;
     double rho_fixed;
@@ -49,17 +47,29 @@ struct SimulationData {
     double R = 8.314; // [J/(K.mol)]
     double g = -9.81; // [m/s²]
 
+};
+
+struct SimulationData {
+
+    int nstepT;
+    int nsave;
+    double dt; 
+    double theta;
+    string schemeIntegration;
+    vector<string> data_store;
+    int data_init;
+    int data_end;
+    bool data_do;
+    
+    vector<double> u_init;
+
     string state_equation; 
     string state_initial_condition;
     bool PRINT;
 
     int nb_moving_part;
 
-    DomainParams domainParams;
-
-    bool walls_used(string wall)  {
-        return find(domainParams.walls_used.begin(), domainParams.walls_used.end(), wall) != domainParams.walls_used.end();
-    }
+ 
 };
 
 #endif // STRUCTURE_H

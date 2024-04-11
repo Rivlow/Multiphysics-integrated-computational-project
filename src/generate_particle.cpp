@@ -16,16 +16,17 @@ using namespace std;
  * @param pos_arr pos_arritions of particles
  */
 
-int evaluateNumberParticles(SimulationData &params){
+int evaluateNumberParticles(GeomData &geomParams){
 
-    int ni = int(ceil(params.L[0] / params.s));
-    // double dx = L[0] / ni;
+
+    vector<double> L = geomParams.L;
+    double s = geomParams.s;
+
+    int ni = int(ceil(L[0] / s));
     ++ni;
-    int nj = int(ceil(params.L[1] / params.s));
-    // double dy = L[1] / nj;
+    int nj = int(ceil(L[1] / s));
     ++nj;
-    int nk = int(ceil(params.L[2] / params.s));
-    // double dz = L[2] / nk;
+    int nk = int(ceil(L[2] / s));
     ++nk;
 
     std::cout << "\t=> " << ni << "*" << nj << "*" << nk << " = " << ni * nj * nk << " particles to be generated\n";
@@ -33,40 +34,47 @@ int evaluateNumberParticles(SimulationData &params){
     return ni * nj * nk;
 }
 
-void meshcube(SimulationData &params,
+void meshcube(GeomData &geomParams,
               vector<double> &pos_arr,
               vector<double> &type_arr){
+
+    vector<double> L = geomParams.L;
+    vector<double> o = geomParams.o;
+    vector<double> L_d = geomParams.L_d;
+    vector<double> o_d = geomParams.o_d;
+    double s = geomParams.s;
+    double layer_max = geomParams.particle_layers;
                 
     // calculate nb of particles along each direction from target size "s"
-    int ni = int(ceil(params.L[0] / params.s));
-    double dx = params.L[0] / ni;
+    int ni = int(ceil(L[0] / s));
+    double dx = L[0] / ni;
     ++ni;
-    int nj = int(ceil(params.L[1] / params.s));
-    double dy = params.L[1] / nj;
+    int nj = int(ceil(L[1] / s));
+    double dy = L[1] / nj;
     ++nj;
-    int nk = int(ceil(params.L[2] / params.s));
-    double dz = params.L[2] / nk;
+    int nk = int(ceil(L[2] / s));
+    double dz = L[2] / nk;
     ++nk;
 
     // output
-    std::cout << "meshing cube at o=(" << params.o[0] << "," << params.o[1] << "," << params.o[2] << ") ";
-    std::cout << "of size L=(" << params.L[0] << "," << params.L[1] << "," << params.L[2] << ")\n";
-    std::cout << "\tparticle spacing s=(" << dx << "," << dy << "," << dz << ") [target was s=" << params.s << "]\n";
+    std::cout << "meshing cube at o=(" << o[0] << "," << o[1] << "," << o[2] << ") ";
+    std::cout << "of size L=(" << L[0] << "," << L[1] << "," << L[2] << ")\n";
+    std::cout << "\tparticle spacing s=(" << dx << "," << dy << "," << dz << ") [target was s=" << s << "]\n";
     // std::cout << "\t=> " << ni << "*" << nj << "*" << nk << " = " << ni * nj * nk << " particles to be generated\n";
-    double layer_max = params.domainParams.particle_layers;
+
     // memory allocation
     pos_arr.reserve(pos_arr.size() + ni * nj * nk * 3);
 
     // particle generation
     for (int i = 0; i < ni; ++i)
     {
-        double x = params.o[0] + (layer_max-1)*params.s/2 + i * dx;
+        double x = o[0] + (layer_max-1)*s/2 + i * dx;
         for (int j = 0; j < nj; ++j)
         {
-            double y = params.o[1] +(layer_max-1)*params.s/2 + j * dy;
+            double y = o[1] +(layer_max-1)*s/2 + j * dy;
             for (int k = 0; k < nk; ++k)
             {
-                double z = params.o[2] +(layer_max-1)*params.s/2+ k * dz;
+                double z = o[2] +(layer_max-1)*s/2+ k * dz;
                 pos_arr.push_back(x);
                 pos_arr.push_back(y);
                 pos_arr.push_back(z);
@@ -77,16 +85,16 @@ void meshcube(SimulationData &params,
     }
 }
 
-void meshBoundary(SimulationData &params,
+void meshBoundary(GeomData &geomParams,
                   vector<double> &bound_arr, 
                   vector<double> &type_arr){
 
-    vector<double> L = params.L;
-    vector<double> o = params.o;
-    vector<double> L_d = params.L_d;
-    vector<double> o_d = params.o_d;
-    double s = params.s;
-    double layer_max = params.domainParams.particle_layers;
+    vector<double> L = geomParams.L;
+    vector<double> o = geomParams.o;
+    vector<double> L_d = geomParams.L_d;
+    vector<double> o_d = geomParams.o_d;
+    double s = geomParams.s;
+    double layer_max = geomParams.particle_layers;
 
 
     //cout << "ni, nj, nk = " << ni << nj << nk << endl;
@@ -127,7 +135,7 @@ void meshBoundary(SimulationData &params,
 
         cout<< "isOdd = " << isOdd << endl;
 
-        if (params.walls_used("floor")){
+        if (geomParams.walls_used("floor")){
 
             for (int i = 0; i < ni ; ++i){ // along x
                 double x = ox + i * dx;
@@ -146,7 +154,7 @@ void meshBoundary(SimulationData &params,
         }
 
 
-        if (params.walls_used("roof")){
+        if (geomParams.walls_used("roof")){
 
             for (int i = 0; i < ni ; ++i){ // along x
                 double x = ox + i * dx;
@@ -162,7 +170,7 @@ void meshBoundary(SimulationData &params,
         }
 
 
-        if (params.walls_used("left_wall")){
+        if (geomParams.walls_used("left_wall")){
 
             for (int i = 0; i < ni; ++i){ // along x
                 double x = ox + i *dx;
@@ -179,7 +187,7 @@ void meshBoundary(SimulationData &params,
         }
 
 
-        if (params.walls_used("right_wall")){
+        if (geomParams.walls_used("right_wall")){
 
             for (int i = 0; i < ni; ++i){ // along x
                 double x = ox + i*dx;
@@ -197,7 +205,7 @@ void meshBoundary(SimulationData &params,
         }
 
 
-        if (params.walls_used("front_wall")){
+        if (geomParams.walls_used("front_wall")){
 
             for (int j = 1; j < nj-1; ++j){ // along y
                 double y = oy + j * dy;
@@ -213,7 +221,7 @@ void meshBoundary(SimulationData &params,
         }
 
 
-        if (params.walls_used("back_wall")){
+        if (geomParams.walls_used("back_wall")){
             for (int j = 1; j < nj-1; ++j){ // along y
                 double y = oy + j*dy ;
                 for (int k = 1; k < nk-1; ++k){ // along z

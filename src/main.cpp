@@ -12,10 +12,11 @@
 #include "gradient.h"
 #include "initialize.h"
 #include "export.h"
-#include "Kernel_functions.h"
+#include "Kernel.h"
 #include "tools.h"
 #include "structure.h"
 #include "integration.h"
+#include "data_store.h"
 
 
 
@@ -68,6 +69,7 @@ int main(int argc, char *argv[])
 
     std::string state_equation;
     std::string state_initial_condition;
+    vector<string> walls_chose;
 
     for (auto &it : data["stateEquation"].items())
     {
@@ -89,43 +91,39 @@ int main(int argc, char *argv[])
     clearOutputFiles();
 
 
-    // Structure to store all parameters used later 
+    // Structure to store parameters
 
-    DomainParams domainParams = {
-        data["domain"]["shape"],
-        {},
-        data["domain"]["particle_layers"],
-
-    };
 
     for (auto& wall : data["domain"]["walls_used"].items()) {
         if (wall.value().get<bool>()) {
-            domainParams.walls_used.push_back(wall.key());
+            walls_chose.push_back(wall.key());
         }
-    }
+    };
 
-     SimulationData params = {
+
+    GeomData geomParams = {
 
         data["kappa"],
-        data["nstepT"],
-        data["nsave"],
-        data["dt"],
-        data["theta"],
-        data["schemeIntegration"],
         data["s"],
-        1.2 * params.s,
+        1.2 * geomParams.s,
         data["o"],
         data["L"],
         data["o_d"],
         data["L_d"],
-        data["u_init"],
-        int(params.L_d[0] / (params.kappa * params.h)),
-        int(params.L_d[1] / (params.kappa * params.h)),
-        int(params.L_d[2] / (params.kappa * params.h)),
+        int(geomParams.L_d[0] / (geomParams.kappa * geomParams.h)),
+        int(geomParams.L_d[1] / (geomParams.kappa * geomParams.h)),
+        int(geomParams.L_d[2] / (geomParams.kappa * geomParams.h)),
+
+        data["domain"]["shape"],
+        walls_chose,
+        data["domain"]["particle_layers"],
+
+    };
+
+    ThermoData thermoParams = {
 
         data["alpha"],
         data["beta"],
-
         data["c_0"],
         data["rho_moving"],
         data["rho_fixed"],
@@ -135,12 +133,24 @@ int main(int argc, char *argv[])
         data["gamma"],
         8.314, // [J/(K.mol)]
         -9.81, // [m/s²]
+    };
+
+    SimulationData simParams = {
+
+        data["nstepT"],
+        data["nsave"],
+        data["dt"],
+        data["theta"],
+        data["schemeIntegration"],
+        data["data_store"]["name"],
+        data["data_store"]["init"],
+        data["data_store"]["end"],
+        data["data_store"]["do"],
+        data["u_init"],
         state_equation,
         state_initial_condition,
         data["print_debug"],
-        evaluateNumberParticles(params),
-        domainParams,
-
+        evaluateNumberParticles(geomParams),
     };
 
 
@@ -148,30 +158,29 @@ int main(int argc, char *argv[])
 
     // Vector used (and labelled w.r.t particles location)
     vector<double> pos, type;
-    vector<vector<int>> cell_matrix(params.Nx * params.Ny * params.Nz);
 
-    // Initialization of the particles (moving and fixed)
-    meshcube(params, pos, type);
-    meshBoundary(params, pos, type);
+    int Nx = geomParams.Nx, Ny = geomParams.Ny, Nz = geomParams.Nz; 
+    vector<vector<int>> cell_matrix(Nx * Ny * Nz);
+
+    // Initialization of the particles
+    meshcube(geomParams, pos, type); // moving
+    meshBoundary(geomParams, pos, type); // fixed
     int nb_tot_part = pos.size()/3;
 
-    vector<double> mass(nb_tot_part),
-                   u(3 * nb_tot_part),
-                   drhodt(nb_tot_part),
-                   rho(nb_tot_part),
-                   dudt(3 * nb_tot_part, 0.0),
-                   p(nb_tot_part),
-                   c(nb_tot_part),
-                   grad_sum(nb_tot_part);
+    vector<double> mass(nb_tot_part), u(3 * nb_tot_part),
+                   drhodt(nb_tot_part), rho(nb_tot_part),
+                   dudt(3 * nb_tot_part, 0.0), p(nb_tot_part),
+                   c(nb_tot_part), grad_sum(nb_tot_part);
 
-    vector<vector<double>> artificial_visc_matrix(nb_tot_part),
-                           gradW_matrix(nb_tot_part);
-    vector<vector<int>> neighbours_matrix(nb_tot_part);
-    std::vector<double> nvoisins(nb_tot_part, 0.0); 
+    vector<vector<double>> pi_matrix(nb_tot_part), gradW_matrix(nb_tot_part);
+    vector<vector<int>> neighbours_matrix(nb_tot_part, vector<int>(100));
+    //vector<vector<int>> neighbours_matrix(nb_tot_part);
+
+    vector<double> nb_neighbours(nb_tot_part, 0.0); 
 
     // Variables defined to used "export.cpp"
-    std::map<std::string, std::vector<double> *> scalars;
-    std::map<std::string, std::vector<double> *> vectors;
+    map<string, vector<double> *> scalars;
+    map<string, vector<double> *> vectors;
 
 
     scalars["type"] = &type;
@@ -179,20 +188,20 @@ int main(int argc, char *argv[])
     scalars["rho"] = &rho;
     scalars["p"] = &p;
     scalars["drhodt"] = &drhodt;
-    scalars["nvoisins"] = &nvoisins;
+    scalars["nb_neighbours"] = &nb_neighbours;
     scalars["grad_sum"] = &grad_sum;
     vectors["position"] = &pos;
     vectors["u"] = &u;
     vectors["dudt"] = &dudt;
 
     cout << "state equation chosen : " << state_equation << " \n" << endl;
-    cout << "kappa * h =" << params.kappa * params.h << endl;
-    cout << "(Nx, Ny, Nz) = (" << params.Nx << ", " << params.Ny << ", " << params.Nz << ")" << std::endl;
-    cout << "b_moving_part = " << params.nb_moving_part << std::endl;
+    cout << "kappa * h =" << geomParams.kappa * geomParams.h << endl;
+    cout << "(Nx, Ny, Nz) = (" << geomParams.Nx << ", " << geomParams.Ny << ", " << geomParams.Nz << ")" << std::endl;
+    cout << "b_moving_part = " << simParams.nb_moving_part << std::endl;
     cout << "nb_tot_part = " << nb_tot_part << std::endl;
-    cout << "s=" << params.s << std::endl;
-    cout << "kappa=" << params.kappa << std::endl;
-    cout << "h=" << params.h << std::endl;
+    cout << "s=" << geomParams.s << std::endl;
+    cout << "kappa=" << geomParams.kappa << std::endl;
+    cout << "h=" << geomParams.h << std::endl;
 
 
 
@@ -200,40 +209,44 @@ int main(int argc, char *argv[])
     /*---------------------------- SPH ALGORITHM  ----------------------------*/
 
     // Initialise variables of the problem
-    initializeRho(params, pos, rho);
-    initializeMass(params, rho, mass);
-    initializeVelocity(params, u);
-    initializeViscosity(params, artificial_visc_matrix);
-    setPressure(params, p, rho); 
-    setSpeedOfSound(params, c, rho);
+    initializeRho(thermoParams, simParams, pos, rho);
+    initializeMass(geomParams, simParams, rho, mass);
+    initializeVelocity(thermoParams, simParams, u);
+    initializeViscosity(simParams, pi_matrix);
+    setPressure(geomParams, thermoParams, simParams, p, rho); 
+    setSpeedOfSound(geomParams, thermoParams, simParams, c, rho);
 
-    // Check if the chose, timeStep is small enough
-    checkTimeStep(params, pos, c, neighbours_matrix, artificial_visc_matrix);
-    
+    for (int t = 0; t < simParams.nstepT; t++){
 
-    for (int t = 0; t < params.nstepT; t++){
+        // Check if timeStep is small enough
+        checkTimeStep(geomParams, thermoParams, simParams, t, pos, c, neighbours_matrix, nb_neighbours, pi_matrix);
 
         // Apply the linked-list algorithm
-        sorted_list(params, cell_matrix, neighbours_matrix, gradW_matrix, pos); 
+        sortedList(geomParams, simParams, cell_matrix, neighbours_matrix, gradW_matrix, 
+                    pi_matrix, nb_neighbours, pos); 
+
+        //printMatrix(neighbours_matrix, nb_tot_part, "neighbours_matrix");
+        //printArray(nb_neighbours, nb_tot_part, "nb_neighbours");
 
         // Compute ∇_a(W_ab) for all particles
-        gradW(params, gradW_matrix, neighbours_matrix, pos); 
+        gradW(geomParams, simParams, gradW_matrix, neighbours_matrix, nb_neighbours, pos); 
 
-        // Update density, velocity and position for each particle (Euler explicit or RK22 scheme)
-        updateVariables(params, t, pos, u, rho, drhodt, c, p, dudt, mass, artificial_visc_matrix, gradW_matrix, neighbours_matrix);
+        // Update density, velocity and position (Euler explicit or RK22 scheme)
+        updateVariables(geomParams, thermoParams, simParams, t, pos, u, rho, drhodt, c, p, dudt, mass, 
+                        pi_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
 
-        // After updates, need to check if timeStep is still small enough
-        checkTimeStep(params, pos, c, neighbours_matrix, artificial_visc_matrix);
+        if(t % simParams.nsave == 0){
+            if (simParams.data_do){            
+                extractData(simParams, pos, u, dudt, rho, drhodt, c, p, mass);
+            }
+            export_particles("../../output/sph", t, pos, scalars, vectors);
 
+        }
 
         // Clear matrices and reset arrays to 0
-        clearAllVectors(params, artificial_visc_matrix, neighbours_matrix, cell_matrix, gradW_matrix,
-                        drhodt, dudt);
+        clearAllVectors(simParams, pi_matrix, neighbours_matrix,
+                        cell_matrix, gradW_matrix, drhodt, dudt);
 
-
-        if(t % params.nsave == 0){
-            export_particles("../../output/sph", t, pos, scalars, vectors);
-        }
 
     }
 
