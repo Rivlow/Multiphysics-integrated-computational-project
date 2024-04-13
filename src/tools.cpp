@@ -9,9 +9,7 @@
 
 #include "tools.h"
 #include "structure.h"
-
-
-
+using json = nlohmann::json;
 using namespace std;
 namespace fs = std::filesystem;
 
@@ -43,7 +41,7 @@ void printMatrix(vector<vector<T>> &matrix, int size, string name)
              << endl;
     }
 }
-// Explicit instantiation for types we might use
+// Explicit instantiation for types
 template void printMatrix<int>(vector<vector<int>> &, int, string);
 template void printMatrix<float>(vector<vector<float>> &, int, string);
 template void printMatrix<double>(vector<vector<double>> &, int, string);
@@ -70,25 +68,65 @@ void printArray(vector<T> &array, int size, string name)
               << "\n"
               << endl;
 }
-// Explicit instantiation for types we might use
+// Explicit instantiation for types
 template void printArray<int>(vector<int> &, int, string);
 template void printArray<float>(vector<float> &, int, string);
 template void printArray<double>(vector<double> &, int, string);
 
+
+
+void getKey(json data,
+            string &state_equation,
+            string &state_initial_condition,
+            string &schemeIntegration,
+            vector<string> &walls_chose){
+    
+    for (auto &it : data["stateEquation"].items())
+    {
+        if (it.value() == true)
+        {
+            state_equation = it.key();
+        }
+    };
+
+    for (auto &it : data["schemeIntegration"].items())
+    {
+        if (it.value() == true)
+        {
+            schemeIntegration = it.key();
+        }
+    };
+
+    for (auto &it : data["initialCondition"].items())
+    {
+        if (it.value() == true)
+        {
+            state_initial_condition = it.key();
+        }
+    };
+
+    for (auto& wall : data["domain"]["walls_used"].items()) {
+        if (wall.value().get<bool>()) {
+            walls_chose.push_back(wall.key());
+        }
+    };
+}
+
+
 void createOutputFolder() {
 
-    std::string outputPath = "../../output";
+    string outputPath = "../../output";
 
     if (fs::exists(outputPath)) {
-        std::cout << "Folder 'output' already exists.\n";
+        cout << "Folder 'output' already exists.\n";
         return; 
     }
 
     try {
         fs::create_directories(outputPath);
-        std::cout << "Folder 'output' has been successfully created.\n";
-    } catch (const std::exception& e) {
-        std::cerr << "Error while creating folder 'output': " << e.what() << '\n';
+        cout << "Folder 'output' has been successfully created.\n";
+    } catch (const exception& e) {
+        cerr << "Error while creating folder 'output': " << e.what() << '\n';
     }
 }
 
@@ -101,57 +139,41 @@ void clearOutputFiles(){
 
         for (const auto& entry : fs::directory_iterator(outputPath)){
                 if (entry.path().extension() == ".vtp" || entry.path().extension() == ".csv") {
-                // Supprimer les fichiers avec l'extension .vtp
                 fs::remove(entry.path());
             }
         }
-            std::cout << "All '.vtp' files have been successfully removed.\n";
-    } catch (const std::exception& e) {
-        std::cerr << "Error while removing '.vtp' files : " << e.what() << '\n';
+        cout << "All '.vtp' files have been successfully removed.\n";
+
+    } catch (const exception& e) {
+        cerr << "Error while removing '.vtp' files : " << e.what() << '\n';
     }
 
 }
 
 
 void clearAllVectors(SimulationData &simParams,
-                     vector<vector<double>> &artificial_visc_matrix,
+                     vector<vector<double>> &pi_matrix,
                      vector<vector<int>> &neighbours_matrix,
                      vector<vector<int>> &cell_matrix,
                      vector<vector<double>> &gradW_matrix, 
-                     vector<double> &drhodt_array,
-                     vector<double> &dudt_array){
+                     vector<double> &drhodt,
+                     vector<double> &dudt){
 
     bool PRINT = simParams.PRINT;
+    int nb_moving_part = simParams.nb_moving_part;
+    int cell_size = cell_matrix.size();
 
-    for (int i = 0; i < int(artificial_visc_matrix.size()); i++){
-        artificial_visc_matrix[i].clear();
-    }
-    // cout << "after clear, artificial_visc_matrix : " << endl;
-
-    for (int i = 0; i < int(neighbours_matrix.size()); i++){
-        neighbours_matrix[i].clear();
-    }
-    // cout << "after clear, neighbours_matrix : " << endl;
-
-    for (int i = 0; i < int(cell_matrix.size()); i++){
+    for (int i = 0; i < cell_size; i++){
         cell_matrix[i].clear();
     }
-    // cout << "after clear, cell_matrix : " << endl;
 
-    for (int i = 0; i < int(gradW_matrix.size()); i++){
+    for (int i = 0; i < nb_moving_part; i++){
         gradW_matrix[i].clear();
+        neighbours_matrix[i].clear();
+        pi_matrix[i].clear();
+        drhodt[i] = 0.0;
+        dudt[i] = 0.0;
     }
-    // cout << "after clear, gradW_matrix : " << endl;
-
-    for(int i = 0 ; i < int(drhodt_array.size()); i ++ ){
-        drhodt_array[i] = 0.0;
-    }
-    // cout << "after reset, drhodt_array : " << endl;
-
-    for(int i = 0 ; i < int(dudt_array.size()); i ++ ){
-        dudt_array[i] = 0.0;
-    }
-    // cout << "after reset, dudt_array : " << endl;
 
 
     if (PRINT){

@@ -6,6 +6,10 @@
 #include <fstream>
 #include <cassert>
 #include <cstdlib>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+#include <chrono>
 
 #include "generate_particle.h"
 #include "find_neighbours.h"
@@ -18,12 +22,6 @@
 #include "integration.h"
 #include "data_store.h"
 
-
-
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-#include <chrono>
 
 #include "nlohmann/json.hpp"
 using json = nlohmann::json;
@@ -60,45 +58,23 @@ int main(int argc, char *argv[])
 
     /*---------------------- INPUT PARAMETERS FROM JSON FILES --------------------------*/
 
-    std::ifstream inputf(argv[1]);
+    ifstream inputf(argv[1]);
     json data = json::parse(inputf);
 
     std::cout << argv[1] << ":\n"
               << data.dump(4) << std::endl; // print input data to screen
 
-
-    std::string state_equation;
-    std::string state_initial_condition;
-    vector<string> walls_chose;
-
-    for (auto &it : data["stateEquation"].items())
-    {
-        if (it.value() == true)
-        {
-            state_equation = it.key();
-        }
-    }
-
-    for (auto &it : data["initialCondition"].items())
-    {
-        if (it.value() == true)
-        {
-            state_initial_condition = it.key();
-        }
-    }
-
     createOutputFolder();
     clearOutputFiles();
 
+    string state_equation;
+    string state_initial_condition;
+    string schemeIntegration;
+    vector<string> walls_chose;
 
     // Structure to store parameters
-
-
-    for (auto& wall : data["domain"]["walls_used"].items()) {
-        if (wall.value().get<bool>()) {
-            walls_chose.push_back(wall.key());
-        }
-    };
+    getKey(data, state_equation, state_initial_condition, 
+           schemeIntegration, walls_chose);
 
 
     GeomData geomParams = {
@@ -117,7 +93,6 @@ int main(int argc, char *argv[])
         data["domain"]["shape"],
         walls_chose,
         data["domain"]["particle_layers"],
-
     };
 
     ThermoData thermoParams = {
@@ -141,7 +116,7 @@ int main(int argc, char *argv[])
         data["nsave"],
         data["dt"],
         data["theta"],
-        data["schemeIntegration"],
+        schemeIntegration,
         data["data_store"]["name"],
         data["data_store"]["init"],
         data["data_store"]["end"],
@@ -225,9 +200,6 @@ int main(int argc, char *argv[])
         sortedList(geomParams, simParams, cell_matrix, neighbours_matrix, gradW_matrix, 
                     pi_matrix, nb_neighbours, pos); 
 
-        //printMatrix(neighbours_matrix, nb_tot_part, "neighbours_matrix");
-        //printArray(nb_neighbours, nb_tot_part, "nb_neighbours");
-
         // Compute ∇_a(W_ab) for all particles
         gradW(geomParams, simParams, gradW_matrix, neighbours_matrix, nb_neighbours, pos); 
 
@@ -235,10 +207,10 @@ int main(int argc, char *argv[])
         updateVariables(geomParams, thermoParams, simParams, t, pos, u, rho, drhodt, c, p, dudt, mass, 
                         pi_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
 
+        // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){
-            if (simParams.data_do){            
-                extractData(simParams, pos, u, dudt, rho, drhodt, c, p, mass);
-            }
+
+            if (simParams.data_do){extractData(simParams, pos, u, dudt, rho, drhodt, c, p, mass);}
             export_particles("../../output/sph", t, pos, scalars, vectors);
 
         }
