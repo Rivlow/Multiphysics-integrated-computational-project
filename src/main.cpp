@@ -86,6 +86,8 @@ int main(int argc, char *argv[])
         data["L"],
         data["o_d"],
         data["L_d"],
+        data["post_process_in"],
+        data["post_process_out"],
         int(geomParams.L_d[0] / (geomParams.kappa * geomParams.h)),
         int(geomParams.L_d[1] / (geomParams.kappa * geomParams.h)),
         int(geomParams.L_d[2] / (geomParams.kappa * geomParams.h)),
@@ -126,6 +128,7 @@ int main(int argc, char *argv[])
         state_initial_condition,
         data["print_debug"],
         evaluateNumberParticles(geomParams),
+        0,
     };
 
 
@@ -141,12 +144,14 @@ int main(int argc, char *argv[])
     // Initialization of the particles
     meshcube(geomParams, pos, type); // moving
     meshBoundary(geomParams, pos, type); // fixed
+    simParams.nb_fixed_part = pos.size()/3;
+    meshPostProcess(geomParams, pos, type); // post process
     int nb_tot_part = pos.size()/3;
 
-    vector<double> mass(nb_tot_part), u(3 * nb_tot_part),
-                   drhodt(nb_tot_part), rho(nb_tot_part),
-                   dudt(3 * nb_tot_part, 0.0), p(nb_tot_part),
-                   c(nb_tot_part), grad_sum(nb_tot_part);
+    vector<double> mass(nb_tot_part), u(3 * nb_tot_part, 0.0),
+                   drhodt(nb_tot_part, 0.0), rho(nb_tot_part, 0.0),
+                   dudt(3 * nb_tot_part, 0.0), p(nb_tot_part, 0.0),
+                   c(nb_tot_part, 0.0), grad_sum(nb_tot_part, 0.0);
 
     vector<vector<double>> pi_matrix(nb_tot_part), gradW_matrix(nb_tot_part);
     vector<vector<int>> neighbours_matrix(nb_tot_part, vector<int>(100));
@@ -169,13 +174,13 @@ int main(int argc, char *argv[])
     vectors["dudt"] = &dudt;
 
     cout << "state equation chosen : " << state_equation << " \n" << endl;
-    cout << "kappa * h =" << geomParams.kappa * geomParams.h << endl;
-    cout << "(Nx, Ny, Nz) = (" << geomParams.Nx << ", " << geomParams.Ny << ", " << geomParams.Nz << ")" << std::endl;
-    cout << "b_moving_part = " << simParams.nb_moving_part << std::endl;
-    cout << "nb_tot_part = " << nb_tot_part << std::endl;
-    cout << "s=" << geomParams.s << std::endl;
-    cout << "kappa=" << geomParams.kappa << std::endl;
-    cout << "h=" << geomParams.h << std::endl;
+    cout << "kappa * h : " << geomParams.kappa * geomParams.h << endl;
+    cout << "(Nx, Ny, Nz) : (" << geomParams.Nx << ", " << geomParams.Ny << ", " << geomParams.Nz << ")" << std::endl;
+    cout << "b_moving_part : " << simParams.nb_moving_part << std::endl;
+    cout << "nb_tot_part : " << nb_tot_part << std::endl;
+    cout << "s : " << geomParams.s << std::endl;
+    cout << "kappa :" << geomParams.kappa << std::endl;
+    cout << "h : " << geomParams.h << std::endl;
 
 
 
@@ -209,7 +214,7 @@ int main(int argc, char *argv[])
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){
 
-            if (simParams.data_do){extractData(simParams, pos, u, dudt, rho, drhodt, c, p, mass);}
+            if (simParams.data_do)extractData(simParams, pos, u, dudt, rho, drhodt, c, p, mass);
             export_particles("../../output/sph", t, pos, scalars, vectors);
 
         }
@@ -217,7 +222,6 @@ int main(int argc, char *argv[])
         // Clear matrices and reset arrays to 0
         clearAllVectors(simParams, pi_matrix, neighbours_matrix,
                         cell_matrix, gradW_matrix, drhodt, dudt);
-
 
     }
 

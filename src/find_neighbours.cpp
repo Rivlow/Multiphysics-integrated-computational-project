@@ -53,7 +53,6 @@ void sortedList(GeomData &geomParams,
         k = (k == Nz) ? k - 1 : k;
 
         cell_matrix[i + Nx * j + Ny * Nx * k].push_back(n);
-
     }
 
 
@@ -103,23 +102,27 @@ void sortedList(GeomData &geomParams,
                     for (int idx = 0; idx < size_cell; idx++){
 
                         int idx_cell = cell[idx];
+                        if (idx_cell > simParams.nb_fixed_part) continue;
+                        else{
 
-                        if (idx_cell != n){
+                            if (idx_cell != n){
 
-                            double rx, ry, rz, r2;
-                            rx = (pos[3 * n + 0] - pos[3 * idx_cell + 0]);
-                            ry = (pos[3 * n + 1] - pos[3 * idx_cell + 1]);
-                            rz = (pos[3 * n + 2] - pos[3 * idx_cell + 2]);
-                            r2 = rx*rx + ry*ry + rz*rz;
+                                double rx, ry, rz, r2;
+                                rx = (pos[3 * n + 0] - pos[3 * idx_cell + 0]);
+                                ry = (pos[3 * n + 1] - pos[3 * idx_cell + 1]);
+                                rz = (pos[3 * n + 2] - pos[3 * idx_cell + 2]);
+                                r2 = rx*rx + ry*ry + rz*rz;
 
-                            int kappa = geomParams.kappa;
-                            double h = geomParams.h;
+                                int kappa = geomParams.kappa;
+                                double h = geomParams.h;
 
-                            if (r2 <= kappa * kappa *h * h){
-                                neighbours_matrix[n][it++] = idx_cell;
+                                if (r2 <= kappa * kappa *h * h){
+                                    neighbours_matrix[n][it++] = idx_cell;
+                                }
                             }
                         }
                     }
+                    
 
                     gradW_matrix[n].resize(3*it);
                     artificial_visc_matrix[n].resize(it);

@@ -56,9 +56,10 @@ void Euler(GeomData &geomParams,
                     mass, dudt, rho, p, c, pos, u); 
 
     
-    int size_pos = pos.size()/3;
+    int nb_fixed_part = simParams.nb_fixed_part;
+
     #pragma omp parallel for   
-    for (int n = 0; n < size_pos; n++){
+    for (int n = 0; n < nb_fixed_part; n++){
 
         rho[n] += dt * drhodt[n];
 
@@ -109,10 +110,10 @@ void RK22(GeomData &geomParams,
     momentumEquation(geomParams, thermoParams, simParams, t, neighbours_matrix, nb_neighbours, gradW_matrix, artificial_visc_matrix,
                     mass, dudt_half, rho_half, p, c, pos_half, u_half); 
 
-    int size_pos = pos.size()/3;
+    int nb_fixed_part = simParams.nb_fixed_part;
 
     #pragma omp parallel for
-    for (int n = 0; n < size_pos; n++){
+    for (int n = 0; n < nb_fixed_part; n++){
 
         rho[n] += dt * ((1-theta)*drhodt[n] + theta*drhodt_half[n]);
 
