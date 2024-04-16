@@ -11,6 +11,80 @@
 
 using namespace std;
 
+void surfaceParticle(SimulationData& params, vector<vector<int>> neighbours_matrix,vector<double> pos, vector<double> mass,
+                     vector<double> rho, vector<vector<double>> gradW_matrix,vector<int> &surface_part){
+    
+    for(int n = 0; n < params.nb_moving_part ; n++){
+        vector<int> &neighbours = neighbours_matrix[n];
+        
+        for(int idx = 0; idx < neighbours.size() ; idx++){
+                double distz = pos[3*neighbours[idx] + 2] - pos[3*n + 2];
+                if(distz >= 0.0){
+                    double distx = pos[3*neighbours[idx] + 0] - pos[3*n + 0];
+                    double disty = pos[3*neighbours[idx] + 1] - pos[3*n + 1];
+                    
+                }
+        }
+    }
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /*double epsilon = 4.7;
+    int ite = 0, tot = 0;
+    for(int n = 0; n < params.nb_moving_part; n++){
+        double div_r = 0;
+        vector<int> &neighbours = neighbours_matrix[n];
+        vector<double> &gradW = gradW_matrix[n];
+        
+        for(size_t idx = 0 ; idx < neighbours.size(); idx++)
+        {   
+            
+            double dot = 0;
+            for(int coord = 0 ; coord < 3 ; coord++){
+                double diff_pos = pos[3*n+coord] - pos[3*neighbours[idx]+coord];
+                dot = dot + diff_pos*gradW[3*idx + coord];
+            }
+            div_r = div_r + mass[neighbours[idx]]/rho[neighbours[idx]]*dot;
+        }
+        if(abs(div_r)<=epsilon){
+            surface_part[n] = 1;
+            ite++;
+            tot++;
+        }
+        else{
+            if(ite !=0){
+                cout<< ite << endl;
+                
+            }
+            
+            surface_part[n] = 0;
+            ite = 0;
+        }
+    }
+    cout<< ite << endl;
+    cout << "tot = " << tot<< endl;*/
+
+    
+}   
+
+
+
+
 void surfaceTension(SimulationData& params,
 vector<vector<double>> gradW_matrix,
 vector<vector<int>> neighbours_matrix,
@@ -19,7 +93,13 @@ vector<double> rho,
 vector<double> pos,
 vector<double> &F_vol
 ){
-    int a = 2, b = 4;
+    vector<int> surface_part(params.nb_moving_part, 0.0);
+    cout <<"aaaaaaaaaaaaaaaaaaaaaaa"<< endl;
+    surfaceParticle(params,neighbours_matrix,pos,mass,rho,gradW_matrix,surface_part);
+    printArray(surface_part, surface_part.size(), "surface");
+    
+    
+    /*int a = 2, b = 4;
     int nb_part = rho.size();
     vector<double> fprime(nb_part,1);
     vector<double> normal(3*nb_part,0);
@@ -149,7 +229,7 @@ vector<double> &F_vol
     for(int coord = 0; coord <3; coord++){
         F_vol[3*n+coord]  = sigma/rho[n] *div_star_normal[n]*normal[3*n+coord]/C[n];
     } 
-}
+}*/
 
 
 

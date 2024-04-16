@@ -4,11 +4,11 @@
     "shape": "square",
     
     "walls_used": {
-        "floor": true,
+        "floor": false,
         "roof": false,
-        "left_wall": true,
+        "left_wall": false,
         "right_wall": false,
-        "front_wall": true,
+        "front_wall": false,
         "back_wall": false
     },
 
@@ -17,15 +17,15 @@
 
     
 
-    "o": [0.8, 0.8, 0.6],
-    "L": [0.5, 0.5, 0.5],
+    "o": [0.5, 0.5, 0.5],
+    "L": [1, 1, 1],
     "L_d": [2, 2, 2],
     "o_d": [0.0, 0.0, 0.0],
 
     "theta" :0.5,
     "schemeIntegration": "Euler",
-    "s": 0.25,
-    "nstepT": 20000,
+    "s": 0.1,
+    "nstepT": 3,
     "dt": 0.00005,
     "nsave": 100,
 
