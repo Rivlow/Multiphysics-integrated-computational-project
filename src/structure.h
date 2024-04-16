@@ -20,6 +20,8 @@ struct GeomData {
     vector<double> L;
     vector<double> o_d;
     vector<double> L_d;
+    vector<double> post_process_in;
+    vector<double> post_process_out;
     int Nx;
     int Ny;
     int Nz;
@@ -68,6 +70,7 @@ struct SimulationData {
     bool PRINT;
 
     int nb_moving_part;
+    int nb_fixed_part;
 
  
 };

@@ -37,7 +37,7 @@ void gradW(GeomData &geomParams,
             vector<double> pos_val(3);
 
             for (int coord = 0; coord < 3; coord++){
-            
+
                 pos_val[coord] = pos[3 * n + coord] - pos[3 * i_neig + coord];
                 r_val += pos_val[coord]*pos_val[coord];
             }
@@ -66,10 +66,12 @@ void setSpeedOfSound(GeomData &geomParams,
     double c_0 = thermoParams.c_0;
     double rho_0 = thermoParams.rho_0;
     double gamma = thermoParams.gamma;
-    int size_rho = rho.size();
+    int nb_moving_part = simParams.nb_moving_part;
+    bool PRINT = simParams.PRINT;
+
 
     #pragma omp parallel for
-    for (int n = 0; n < size_rho; n++){
+    for (int n = 0; n < nb_moving_part; n++){
 
         if (state_equation == "Ideal gaz law"){
             c[n] = c_0;
@@ -78,6 +80,10 @@ void setSpeedOfSound(GeomData &geomParams,
         if (state_equation == "Quasi incompresible fluid"){
             c[n] = c_0 * pow(rho[n] / rho_0, 0.5 * (gamma - 1));
         }
+    }
+
+        if (PRINT){
+            cout << "setSpeedOfSound passed" << endl;
     }
 
 }
@@ -135,12 +141,12 @@ void setArtificialViscosity(GeomData &geomParams,
     double alpha = thermoParams.alpha;
     double h = geomParams.h;
     bool PRINT = simParams.PRINT;
-    int nb_moving_part = simParams.nb_moving_part;
+    int nb_fixed_part = simParams.nb_fixed_part;
 
 
     if (t == 0){
         #pragma omp parallel for
-        for (int n = 0; n < nb_moving_part; n++){
+        for (int n = 0; n < nb_fixed_part; n++){
 
             int size_neighbours = nb_neighbours[n];
 
@@ -153,12 +159,10 @@ void setArtificialViscosity(GeomData &geomParams,
     else{
 
         vector<double> rel_displ(3), rel_vel(3);
-        int size_pos = pos.size()/3;
-
 
         // Iterations over each particle
         #pragma omp parallel for
-        for (int n = 0; n < size_pos; n++){
+        for (int n = 0; n < nb_fixed_part; n++){
 
             vector<int> &neighbours = neighbours_matrix[n];
             int size_neighbours = nb_neighbours[n];
@@ -216,11 +220,11 @@ void continuityEquation(SimulationData& simParams,
                         vector<double> &mass){
 
     bool PRINT = simParams.PRINT;
-    int size_pos = pos.size()/3;
+    int nb_fixed_part = simParams.nb_fixed_part;
              
     // Iterations over each particle
     #pragma omp parallel for
-    for (int n = 0; n < size_pos; n++){
+    for (int n = 0; n < nb_fixed_part; n++){
 
         vector<int> &neighbours = neighbours_matrix[n];
         vector<double> &gradW= gradW_matrix[n];

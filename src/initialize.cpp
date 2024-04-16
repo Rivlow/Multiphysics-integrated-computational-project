@@ -20,9 +20,9 @@ void initializeMass(GeomData &geomParams,
     double s = geomParams.s;  
     bool PRINT = simParams.PRINT;  
     double V = s * s * s;
-    int rho_size = rho.size();
+    int nb_fixed_part = simParams.nb_fixed_part;
 
-    for (int i = 0; i < rho_size; i++){
+    for (int i = 0; i < nb_fixed_part; i++){
         mass[i] = rho[i] * V;
     }
 
@@ -51,12 +51,12 @@ void initializeRho(ThermoData &thermoParams,
     double gamma = thermoParams.gamma;
     double g = thermoParams.g;
 
-    int rho_size = rho.size();
+    int nb_fixed_part = simParams.nb_fixed_part;
 
 
     if (state_initial_condition == "Hydrostatic"){
         if (state_equation == "Ideal gaz law"){
-            for (int i = 0; i < rho_size; i++){
+            for (int i = 0; i < nb_fixed_part; i++){
 
                 rho[i] = (i < nb_moving_part) ? rho_0 * (1 + M * rho_0 
                                 * g * pos[3 * i + 2] / (R * T)) : rho_fixed;
@@ -66,7 +66,7 @@ void initializeRho(ThermoData &thermoParams,
         if (state_equation == "Quasi incompresible fluid"){
 
             double B = c_0 * c_0 * rho_0 / gamma;
-            for (int i = 0; i < rho_size; i++){
+            for (int i = 0; i < nb_fixed_part; i++){
 
                 rho[i] = (i < nb_moving_part) ? rho_0 * (1 + rho_0 
                                 * g * pos[3 * i + 2] / B) : rho_fixed;
@@ -75,7 +75,7 @@ void initializeRho(ThermoData &thermoParams,
     }
     else{
 
-        for (int i = 0; i < rho_size; i++){
+        for (int i = 0; i < nb_fixed_part; i++){
             rho[i] = (i < nb_moving_part) ? rho_moving : rho_fixed;
         }
     }
@@ -93,20 +93,12 @@ void initializeVelocity(ThermoData &thermoParams,
 
     bool PRINT = simParams.PRINT;
     int nb_moving_part = simParams.nb_moving_part;
-    int u_size = u.size();
 
-    for (int i = 0; i < u_size / 3; i++){
+    for (int i = 0; i < nb_moving_part; i++){
 
-        if (i < nb_moving_part){
-            u[3 * i] = simParams.u_init[0];
-            u[3 * i + 1] = simParams.u_init[1];
-            u[3 * i + 2] = simParams.u_init[2];
-        }
-        else{
-            u[3 * i] = 0;
-            u[3 * i + 1] = 0;
-            u[3 * i + 2] = 0;
-        }
+        u[3 * i] = simParams.u_init[0];
+        u[3 * i + 1] = simParams.u_init[1];
+        u[3 * i + 2] = simParams.u_init[2];
     }
 
     if (PRINT){

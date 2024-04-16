@@ -12,6 +12,7 @@
 
 #include "find_neighbours.h"
 #include "structure.h"
+#include "tools.h"
 
 #include <omp.h>
 
@@ -29,42 +30,47 @@ void sortedList(GeomData &geomParams,
     int Nx = geomParams.Nx;
     int Ny = geomParams.Ny;
     int Nz = geomParams.Nz;
+    double Lx = geomParams.L_d[0], Ly = geomParams.L_d[1], Lz = geomParams.L_d[2];
     int size_pos = pos.size() / 3;
 
-    int it_cell = 0;
+    vector<int> it_cells(size_pos, 0);
 
     // Sort all particles in their corresponding cell
     for (int n = 0; n < size_pos; n++){
 
-        int i = pos[3 * n + 0] / (geomParams.L_d[0] / Nx);
-        int j = pos[3 * n + 1] / (geomParams.L_d[1] / Ny);
-        int k = pos[3 * n + 2] / (geomParams.L_d[2] / Nz);
+        int i = pos[3 * n + 0] / (Lx / Nx);
+        int j = pos[3 * n + 1] / (Ly / Ny);
+        int k = pos[3 * n + 2] / (Lz / Nz);
 
+        // Skip particules outside of the domain
         if (i < 0 || j < 0 || k < 0 || i > Nx || j > Ny || k > Nz){
             continue;
         }
-        
+    
+        // Modify index of particules at boundaries
         i = (i == Nx) ? i - 1 : i;
         j = (j == Ny) ? j - 1 : j;
         k = (k == Nz) ? k - 1 : k;
-        cell_matrix[i + Nx * j + Ny * Nx * k].push_back(n);
-        //cell_matrix[i + Nx * j + Ny * Nx * k][it_cell];
 
+        cell_matrix[i + Nx * j + Ny * Nx * k].push_back(n);
     }
+
+
 
     // Find neighbours for each particle
     #pragma omp parallel for
     for (int n = 0; n < size_pos; n++){
 
-
         int i_cell = pos[3 * n + 0] / (geomParams.L_d[0] / Nx);
         int j_cell = pos[3 * n + 1] / (geomParams.L_d[1] / Ny);
         int k_cell = pos[3 * n + 2] / (geomParams.L_d[2] / Nz);
 
+        // Skip particules outside of the domain
         if (i_cell < 0 || j_cell < 0 || k_cell < 0 || i_cell > Nx || j_cell > Ny || k_cell > Nz){
             continue;
         }
 
+        // Modify index of particules at boundaries
         i_cell = (i_cell >= Nx) ? Nx - 1 : i_cell;
         j_cell = (j_cell >= Ny) ? Ny - 1 : j_cell;
         k_cell = (k_cell >= Nx) ? Nz - 1 : k_cell;
@@ -79,8 +85,6 @@ void sortedList(GeomData &geomParams,
         int k_inf = (k_cell == 0) ? 0 : k_cell - 1;
         int k_supp = (k_cell < Nz - 1) ? k_cell + 1 : (k_cell == Nz - 1) ? k_cell
                                                                          : k_cell - 1;
-
-
         int it = 0;
 
         // Iterate over (max) 26 adjacents cells to find neighbours
@@ -88,35 +92,38 @@ void sortedList(GeomData &geomParams,
             for (int j = j_inf; j <= j_supp; j++){
                 for (int i = i_inf; i <= i_supp; i++){
 
+                    //cout << "avant" << endl;
                     vector<int> &cell = cell_matrix[i + j * Nx + k * Nx * Ny];
+                    //cout << "apres" << endl;
+
                     int size_cell = cell.size();
 
                     // Iterate over particles in cell
                     for (int idx = 0; idx < size_cell; idx++){
 
                         int idx_cell = cell[idx];
+                        if (idx_cell > simParams.nb_fixed_part) continue;
+                        else{
 
-                        if (idx_cell != n){
+                            if (idx_cell != n){
 
-                            double rx, ry, rz, r2;
-                            rx = (pos[3 * n + 0] - pos[3 * idx_cell + 0]);
-                            ry = (pos[3 * n + 1] - pos[3 * idx_cell + 1]);
-                            rz = (pos[3 * n + 2] - pos[3 * idx_cell + 2]);
-                            r2 = rx*rx + ry*ry + rz*rz;
+                                double rx, ry, rz, r2;
+                                rx = (pos[3 * n + 0] - pos[3 * idx_cell + 0]);
+                                ry = (pos[3 * n + 1] - pos[3 * idx_cell + 1]);
+                                rz = (pos[3 * n + 2] - pos[3 * idx_cell + 2]);
+                                r2 = rx*rx + ry*ry + rz*rz;
 
-                            int kappa = geomParams.kappa;
-                            double h = geomParams.h;
+                                int kappa = geomParams.kappa;
+                                double h = geomParams.h;
 
-                            if (r2 <= kappa * kappa *h * h){
-    
-                                //neighbours_matrix[n].push_back(idx_cell);
-                                neighbours_matrix[n][it++] = idx_cell;
-
+                                if (r2 <= kappa * kappa *h * h){
+                                    neighbours_matrix[n][it++] = idx_cell;
+                                }
                             }
                         }
                     }
-                    //cout << "it : " << it << endl;
-                    //neighbours_matrix[n].resize(it);
+                    
+
                     gradW_matrix[n].resize(3*it);
                     artificial_visc_matrix[n].resize(it);
                     nb_neighbours[n] = it;
