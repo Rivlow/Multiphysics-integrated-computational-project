@@ -12,52 +12,66 @@
 
 #include "find_neighbours.h"
 #include "structure.h"
+#include "tools.h"
 
 #include <omp.h>
 
 using namespace std;
 
-void sorted_list(SimulationData& params, 
-                 vector<vector<int>> &cell_matrix,
-                 vector<vector<int>> &neighbours_matrix,
-                 vector<vector<double>> &gradW_matrix,
-                 vector<double> &pos){
+void sortedList(GeomData &geomParams,
+                SimulationData &simParams, 
+                vector<vector<int>> &cell_matrix,
+                vector<vector<int>> &neighbours_matrix,
+                vector<vector<double>> &gradW_matrix,
+                vector<vector<double>> &artificial_visc_matrix,
+                vector<double> &nb_neighbours,
+                vector<double> &pos){
 
-    int Nx = params.Nx;
-    int Ny = params.Ny;
-    int Nz = params.Nz;
+    int Nx = geomParams.Nx;
+    int Ny = geomParams.Ny;
+    int Nz = geomParams.Nz;
+    double Lx = geomParams.L_d[0], Ly = geomParams.L_d[1], Lz = geomParams.L_d[2];
     int size_pos = pos.size() / 3;
+
+    vector<int> it_cells(size_pos, 0);
 
     // Sort all particles in their corresponding cell
     for (int n = 0; n < size_pos; n++){
 
-        int i = pos[3 * n + 0] / (params.L_d[0] / Nx);
-        int j = pos[3 * n + 1] / (params.L_d[1] / Ny);
-        int k = pos[3 * n + 2] / (params.L_d[2] / Nz);
+        int i = pos[3 * n + 0] / (Lx / Nx);
+        int j = pos[3 * n + 1] / (Ly / Ny);
+        int k = pos[3 * n + 2] / (Lz / Nz);
 
+        // Skip particules outside of the domain
         if (i < 0 || j < 0 || k < 0 || i > Nx || j > Ny || k > Nz){
             continue;
         }
-        
+    
+        // Modify index of particules at boundaries
         i = (i == Nx) ? i - 1 : i;
         j = (j == Ny) ? j - 1 : j;
         k = (k == Nz) ? k - 1 : k;
+
         cell_matrix[i + Nx * j + Ny * Nx * k].push_back(n);
 
     }
+
+
 
     // Find neighbours for each particle
     #pragma omp parallel for
     for (int n = 0; n < size_pos; n++){
 
-        int i_cell = pos[3 * n + 0] / (params.L_d[0] / Nx);
-        int j_cell = pos[3 * n + 1] / (params.L_d[1] / Ny);
-        int k_cell = pos[3 * n + 2] / (params.L_d[2] / Nz);
+        int i_cell = pos[3 * n + 0] / (geomParams.L_d[0] / Nx);
+        int j_cell = pos[3 * n + 1] / (geomParams.L_d[1] / Ny);
+        int k_cell = pos[3 * n + 2] / (geomParams.L_d[2] / Nz);
 
+        // Skip particules outside of the domain
         if (i_cell < 0 || j_cell < 0 || k_cell < 0 || i_cell > Nx || j_cell > Ny || k_cell > Nz){
             continue;
         }
 
+        // Modify index of particules at boundaries
         i_cell = (i_cell >= Nx) ? Nx - 1 : i_cell;
         j_cell = (j_cell >= Ny) ? Ny - 1 : j_cell;
         k_cell = (k_cell >= Nx) ? Nz - 1 : k_cell;
@@ -72,16 +86,20 @@ void sorted_list(SimulationData& params,
         int k_inf = (k_cell == 0) ? 0 : k_cell - 1;
         int k_supp = (k_cell < Nz - 1) ? k_cell + 1 : (k_cell == Nz - 1) ? k_cell
                                                                          : k_cell - 1;
+        int it = 0;
 
         // Iterate over (max) 26 adjacents cells to find neighbours
-        for (int i = i_inf; i <= i_supp; i++){
+        for (int k = k_inf; k <= k_supp; k++){
             for (int j = j_inf; j <= j_supp; j++){
-                for (int k = k_inf; k <= k_supp; k++){
+                for (int i = i_inf; i <= i_supp; i++){
 
+                    //cout << "avant" << endl;
                     vector<int> &cell = cell_matrix[i + j * Nx + k * Nx * Ny];
-                    int size_cell =cell.size();
+                    //cout << "apres" << endl;
 
-                    // Iterate over neighbours
+                    int size_cell = cell.size();
+
+                    // Iterate over particles in cell
                     for (int idx = 0; idx < size_cell; idx++){
 
                         int idx_cell = cell[idx];
@@ -94,34 +112,36 @@ void sorted_list(SimulationData& params,
                             rz = (pos[3 * n + 2] - pos[3 * idx_cell + 2]);
                             r2 = rx*rx + ry*ry + rz*rz;
 
-                            int kappa = params.kappa;
-                            double h = params.h;
+                            int kappa = geomParams.kappa;
+                            double h = geomParams.h;
 
                             if (r2 <= kappa * kappa *h * h){
-    
-                                neighbours_matrix[n].push_back(idx_cell);
-
+                                neighbours_matrix[n][it++] = idx_cell;
                             }
                         }
                     }
-                    gradW_matrix[n].resize(3*neighbours_matrix[n].size());
+
+                    gradW_matrix[n].resize(3*it);
+                    artificial_visc_matrix[n].resize(it);
+                    nb_neighbours[n] = it;
 
                 }
             }
         }
     }
 
-    if (params.PRINT){
+    if (simParams.PRINT){
         cout << "findNeighbours passed" << endl;
     }
 
 }
 
-void naiveAlgo(SimulationData& params, 
+void naiveAlgo(GeomData &geomParams,
+               SimulationData &simParams, 
                vector<vector<int>> &neighbours_matrix,
                vector<double> &pos){
 
-    int nb_moving_part = params.nb_moving_part;
+    int nb_moving_part = simParams.nb_moving_part;
 
     // added by RB
     for (int i = 0; i < nb_moving_part; i++)
@@ -139,8 +159,8 @@ void naiveAlgo(SimulationData& params,
             rz = (pos[3 * i + 2] - pos[3 * j + 2]);
             r2 = rx*rx + ry*ry + rz*rz;
 
-            int kappa = params.kappa;
-            double h = params.h;
+            int kappa = geomParams.kappa;
+            double h = geomParams.h;
 
             if (r2 <= kappa * kappa *h * h){
 

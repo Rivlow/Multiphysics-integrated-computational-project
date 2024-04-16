@@ -4,7 +4,7 @@
 
 #include "gradient.h"
 #include "find_neighbours.h"
-#include "Kernel_functions.h"
+#include "Kernel.h"
 #include "tools.h"
 #include "structure.h"
 

@@ -8,48 +8,61 @@
 
 using namespace std;
 
-void gradW( SimulationData& params, 
+void gradW(GeomData &geomParams,    
+           SimulationData &simParams, 
            vector<vector<double>> &gradW_matrix,
            vector<vector<int>> &neighbours_matrix,
-           vector<double> &pos_array);
+           vector<double> &nb_neighbours,
+           vector<double> &pos);
 
-void setSpeedOfSound( SimulationData& params,
-                     vector<double> &c_array,
-                     vector<double> &rho_array);
+void setSpeedOfSound(GeomData &geomParams,    
+                     ThermoData &thermoParams,
+                     SimulationData &simParams, 
+                     vector<double> &c,
+                     vector<double> &rho);
 
-void setPressure( SimulationData& params,
-                 vector<double> &p_array,
-                 vector<double> &rho_array);
+void setPressure(GeomData &geomParams,    
+                 ThermoData &thermoParams,
+                 SimulationData &simParams, 
+                 vector<double> &p,
+                 vector<double> &rho);
 
-void setArtificialViscosity( SimulationData& params,
+void setArtificialViscosity(GeomData &geomParams,    
+                            ThermoData &thermoParams,
+                            SimulationData &simParams, 
                             int t,
-                            vector<vector<double>> &artificial_visc_matrix,
+                            vector<vector<double>> &pi_matrix,
                             vector<vector<int>> &neighbours_matrix,
-                            vector<double> &c_array,
-                            vector<double> &pos_array,
-                            vector<double> &rho_array,
-                            vector<double> &u_array);
+                            vector<double> &nb_neighbours,
+                            vector<double> &c,
+                            vector<double> &pos,
+                            vector<double> &rho,
+                            vector<double> &u);
 
-void continuityEquation( SimulationData& params,
+void continuityEquation(SimulationData &params,
                         vector<vector<int>> &neighbours_matrix,
+                        vector<double> &nb_neighbours,
                         vector<vector<double>> &gradW_matrix,
-                        vector<double> &pos_array,
-                        vector<double> &u_array,
-                        vector<double> &drhodt_array,
-                        vector<double> &rho_array,
-                        vector<double> &mass_array);
+                        vector<double> &pos,
+                        vector<double> &u,
+                        vector<double> &drhodt,
+                        vector<double> &rho,
+                        vector<double> &mass);
 
-void momentumEquation( SimulationData& params,
+void momentumEquation(GeomData &geomParams,    
+                      ThermoData &thermoParams,
+                      SimulationData &simParams, 
                       int t,
                       vector<vector<int>> &neighbours_matrix,
+                      vector<double> &nb_neighbours,
                       vector<vector<double>> &gradW_matrix,
-                      vector<vector<double>> &artificial_visc_matrix,
-                      vector<double> &mass_array,
-                      vector<double> &dudt_array,
-                      vector<double> &rho_array,
-                      vector<double> &p_array, 
-                      vector<double> &c_array,
-                      vector<double> &pos_array,
-                      vector<double> &u_array);
+                      vector<vector<double>> &pi_matrix,
+                      vector<double> &mass,
+                      vector<double> &dudt,
+                      vector<double> &rho,
+                      vector<double> &p, 
+                      vector<double> &c,
+                      vector<double> &pos,
+                      vector<double> &u);
 
 #endif // GRADIENT_H

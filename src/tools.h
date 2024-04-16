@@ -9,7 +9,7 @@
 
 
 using namespace std;
-
+using json = nlohmann::json;
 
 template <typename T>
 void printMatrix(vector<vector<T>> &matrix, int size, string name);
@@ -17,16 +17,23 @@ void printMatrix(vector<vector<T>> &matrix, int size, string name);
 template <typename T>
 void printArray(vector<T> &array, int size, string name);
 
+void getKey(json data,
+            string &state_equation,
+            string &state_initial_condition,
+            string &schemeIntegration,
+            vector<string> &walls_chose);
+    
+
 void createOutputFolder();
 void clearOutputFiles();
 
 void clearAllVectors(SimulationData &params,
-                     vector<vector<double>> &artificial_visc_matrix,
+                     vector<vector<double>> &pi_matrix,
                      vector<vector<int>> &neighbours_matrix,
                      vector<vector<int>> &cell_matrix,
                      vector<vector<double>> &gradW_matrix, 
-                     vector<double> &drhodt_array,
-                     vector<double> &dudt_array);
+                     vector<double> &drhodt,
+                     vector<double> &dudt);
 
 
 #endif // TOOLS_H
