@@ -27,8 +27,6 @@ struct GeomData {
     vector<vector<double>> matrixLong;
     vector<vector<double>> matrixOrig;
     vector<int> vectorType; 
-
-    
 };
 
 struct ThermoData {

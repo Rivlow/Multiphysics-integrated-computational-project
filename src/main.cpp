@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 
         data["matrixLong"],
         data["matrixOrig"],
-        data["vectorType"]
+        data["vectorType"],
     };
 
     ThermoData thermoParams = {

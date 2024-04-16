@@ -17,21 +17,31 @@ using namespace std;
  */
 
 int evaluateNumberParticles(GeomData &geomParams){
-
-
-    vector<double> L = geomParams.L;
+    vector<vector<double>> matrixLong = geomParams.matrixLong;
+    vector<int> vectorType = geomParams.vectorType;
     double s = geomParams.s;
-
-    int ni = int(ceil(L[0] / s));
-    ++ni;
-    int nj = int(ceil(L[1] / s));
-    ++nj;
-    int nk = int(ceil(L[2] / s));
-    ++nk;
-
-    std::cout << "\t=> " << ni << "*" << nj << "*" << nk << " = " << ni * nj * nk << " particles to be generated\n";
-
-    return ni * nj * nk;
+    int nbpart = 0;
+    for(int n=0; n<vectorType.size(); n++){
+        if(vectorType[n]){
+            vector<double> &L = matrixLong[n];    
+            int ni = int(ceil(L[0] / s));
+            if(ni != 1){
+                ++ni;
+            }
+            
+            int nj = int(ceil(L[1] / s));
+            if(nj != 1){
+                ++nj;
+            }
+            int nk = int(ceil(L[2] / s));
+            if(nk != 1){
+                ++nk;
+            }
+            nbpart += ni*nj*nk;
+        }
+    }
+    
+    return nbpart;
 }
 
 void meshcube(GeomData &geomParams,
@@ -63,7 +73,6 @@ void meshcube(GeomData &geomParams,
             ++nj;
         }
         
-
         int nk = int(ceil(L[2] / s));
         if(nk != 1){
             dz = L[2] / nk;
@@ -72,8 +81,6 @@ void meshcube(GeomData &geomParams,
         
         cout<< nk<< endl;
         
-        
-
         // output
         std::cout << "meshing cube at o=(" << o[0] << "," << o[1] << "," << o[2] << ") ";
         std::cout << "of size L=(" << L[0] << "," << L[1] << "," << L[2] << ")\n";
@@ -93,9 +100,7 @@ void meshcube(GeomData &geomParams,
                 for (int k = 0; k < nk; ++k)
                 {
                     double z = o[2] + k * dz;
-                    if(type==0){
-                        //cout << "x , y , z " << x << " , " << y << " , " << z << endl;
-                    }
+                    
                     pos_arr.push_back(x);
                     pos_arr.push_back(y);
                     pos_arr.push_back(z);
