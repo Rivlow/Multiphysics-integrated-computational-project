@@ -90,9 +90,9 @@ int main(int argc, char *argv[])
         int(geomParams.L_d[1] / (geomParams.kappa * geomParams.h)),
         int(geomParams.L_d[2] / (geomParams.kappa * geomParams.h)),
 
-        data["domain"]["shape"],
-        walls_chose,
-        data["domain"]["particle_layers"],
+        data["matrixLong"],
+        data["matrixOrig"],
+        data["vectorType"]
     };
 
     ThermoData thermoParams = {
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 
     // Initialization of the particles
     meshcube(geomParams, pos, type); // moving
-    meshBoundary(geomParams, pos, type); // fixed
+    //meshBoundary(geomParams, pos, type); // fixed
     int nb_tot_part = pos.size()/3;
 
     vector<double> mass(nb_tot_part), u(3 * nb_tot_part),

@@ -24,13 +24,11 @@ struct GeomData {
     int Ny;
     int Nz;
     
-    string shape;
-    vector<string> walls_chose;
-    double particle_layers;
+    vector<vector<double>> matrixLong;
+    vector<vector<double>> matrixOrig;
+    vector<int> vectorType; 
 
-    bool walls_used(string wall)  {
-        return find(walls_chose.begin(), walls_chose.end(), wall) != walls_chose.end();
-    };
+    
 };
 
 struct ThermoData {

@@ -38,58 +38,83 @@ void meshcube(GeomData &geomParams,
               vector<double> &pos_arr,
               vector<double> &type_arr){
 
-    vector<double> L = geomParams.L;
-    vector<double> o = geomParams.o;
-    vector<double> L_d = geomParams.L_d;
-    vector<double> o_d = geomParams.o_d;
+    vector<vector<double>> matrixLong = geomParams.matrixLong;
+    vector<vector<double>> matrixOrig = geomParams.matrixOrig;
+    vector<int> vectorType = geomParams.vectorType;
     double s = geomParams.s;
-    double layer_max = geomParams.particle_layers;
-                
-    // calculate nb of particles along each direction from target size "s"
-    int ni = int(ceil(L[0] / s));
-    double dx = L[0] / ni;
-    ++ni;
-    int nj = int(ceil(L[1] / s));
-    double dy = L[1] / nj;
-    ++nj;
-    int nk = int(ceil(L[2] / s));
-    double dz = L[2] / nk;
-    ++nk;
+    
+    for(int n =0 ; n<vectorType.size();n++){
+        vector<double> &L = matrixLong[n];
+        vector<double> &o = matrixOrig[n];
+        int type = vectorType[n];
+        double dx = 0;
+        double dy = 0;
+        double dz = 0;
 
-    // output
-    std::cout << "meshing cube at o=(" << o[0] << "," << o[1] << "," << o[2] << ") ";
-    std::cout << "of size L=(" << L[0] << "," << L[1] << "," << L[2] << ")\n";
-    std::cout << "\tparticle spacing s=(" << dx << "," << dy << "," << dz << ") [target was s=" << s << "]\n";
-    // std::cout << "\t=> " << ni << "*" << nj << "*" << nk << " = " << ni * nj * nk << " particles to be generated\n";
+        int ni = int(ceil(L[0] / s));
+        if(ni != 1){
+            dx = L[0] / ni;
+            ++ni;
+        }
+        
+        int nj = int(ceil(L[1] / s));
+        if(nj != 1){
+            dy = L[1] / nj;
+            ++nj;
+        }
+        
 
-    // memory allocation
-    pos_arr.reserve(pos_arr.size() + ni * nj * nk * 3);
+        int nk = int(ceil(L[2] / s));
+        if(nk != 1){
+            dz = L[2] / nk;
+            ++nk;
+        }
+        
+        cout<< nk<< endl;
+        
+        
 
-    // particle generation
-    for (int i = 0; i < ni; ++i)
-    {
-        double x = o[0] + (layer_max-1)*s/2 + i * dx;
-        for (int j = 0; j < nj; ++j)
+        // output
+        std::cout << "meshing cube at o=(" << o[0] << "," << o[1] << "," << o[2] << ") ";
+        std::cout << "of size L=(" << L[0] << "," << L[1] << "," << L[2] << ")\n";
+        std::cout << "\tparticle spacing s=(" << dx << "," << dy << "," << dz << ") [target was s=" << s << "]\n";
+        std::cout << "\t=> " << ni << "*" << nj << "*" << nk << " = " << ni * nj * nk << " particles to be generated\n";
+
+        // memory allocation
+        pos_arr.reserve(pos_arr.size() + ni * nj * nk * 3);
+
+        // particle generation
+        for (int i = 0; i < ni; ++i)
         {
-            double y = o[1] +(layer_max-1)*s/2 + j * dy;
-            for (int k = 0; k < nk; ++k)
+            double x = o[0] + i * dx;
+            for (int j = 0; j < nj; ++j)
             {
-                double z = o[2] +(layer_max-1)*s/2+ k * dz;
-                pos_arr.push_back(x);
-                pos_arr.push_back(y);
-                pos_arr.push_back(z);
+                double y = o[1] + j * dy;
+                for (int k = 0; k < nk; ++k)
+                {
+                    double z = o[2] + k * dz;
+                    if(type==0){
+                        //cout << "x , y , z " << x << " , " << y << " , " << z << endl;
+                    }
+                    pos_arr.push_back(x);
+                    pos_arr.push_back(y);
+                    pos_arr.push_back(z);
 
-                type_arr.push_back(1.0);
+                    type_arr.push_back(type);
+                }
             }
         }
     }
 }
 
+    
+
+
 void meshBoundary(GeomData &geomParams,
                   vector<double> &bound_arr, 
                   vector<double> &type_arr){
 
-    vector<double> L = geomParams.L;
+    /*vector<double> L = geomParams.L;
     vector<double> o = geomParams.o;
     vector<double> L_d = geomParams.L_d;
     vector<double> o_d = geomParams.o_d;
@@ -235,5 +260,5 @@ void meshBoundary(GeomData &geomParams,
                 }
             }
         }
-    }
+    }*/
 }

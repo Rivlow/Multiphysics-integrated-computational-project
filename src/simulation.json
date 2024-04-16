@@ -1,19 +1,8 @@
 {
 
-  "domain": {
-    "shape": "square",
-    
-    "walls_used": {
-        "floor": true,
-        "roof": false,
-        "left_wall": true,
-        "right_wall": true,
-        "front_wall": true,
-        "back_wall": true
-    },
-
-    "particle_layers": 2
-  },
+  "matrixLong" : [[ 1, 1, 1], [ 2, 2, 0.05], [ 1.9, 1.9, 0.05]],
+  "matrixOrig" : [[ 0.5, 0.5, 1.1], [ 0, 0, 0], [ 0.05, 0.05, 0.05]],
+  "vectorType" : [ 1, 0, 0],
 
   "data_store": {
     "do":false,
@@ -31,7 +20,7 @@
 
     "theta" :0.5,
     "schemeIntegration": {"Euler":true,"RK22":false},
-    "s": 0.15,
+    "s": 0.1,
     "nstepT": 20000,
     "dt": 0.00005,
     "nsave": 100,
@@ -48,7 +37,7 @@
     "beta": 0,
     "M": 18e-3, 
 
-    "print_debug":true,
+    "print_debug":false,
     "stateEquation" : {"Ideal gaz law":false, "Quasi incompresible fluid":true},
     "initialCondition" : {"Hydrostatic":false, "Constant":true}
 }
