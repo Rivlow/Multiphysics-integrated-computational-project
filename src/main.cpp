@@ -135,6 +135,7 @@ int main(int argc, char *argv[])
     vector<double> pos, type;
 
     int Nx = geomParams.Nx, Ny = geomParams.Ny, Nz = geomParams.Nz; 
+
     vector<vector<int>> cell_matrix(Nx * Ny * Nz);
 
     // Initialization of the particles
@@ -149,8 +150,6 @@ int main(int argc, char *argv[])
 
     vector<vector<double>> pi_matrix(nb_tot_part), gradW_matrix(nb_tot_part);
     vector<vector<int>> neighbours_matrix(nb_tot_part, vector<int>(100));
-    //vector<vector<int>> neighbours_matrix(nb_tot_part);
-
     vector<double> nb_neighbours(nb_tot_part, 0.0); 
 
     // Variables defined to used "export.cpp"

@@ -37,7 +37,7 @@ void gradW(GeomData &geomParams,
             vector<double> pos_val(3);
 
             for (int coord = 0; coord < 3; coord++){
-            
+                
                 pos_val[coord] = pos[3 * n + coord] - pos[3 * i_neig + coord];
                 r_val += pos_val[coord]*pos_val[coord];
             }
@@ -67,6 +67,8 @@ void setSpeedOfSound(GeomData &geomParams,
     double rho_0 = thermoParams.rho_0;
     double gamma = thermoParams.gamma;
     int size_rho = rho.size();
+    bool PRINT = simParams.PRINT;
+
 
     #pragma omp parallel for
     for (int n = 0; n < size_rho; n++){
@@ -78,6 +80,10 @@ void setSpeedOfSound(GeomData &geomParams,
         if (state_equation == "Quasi incompresible fluid"){
             c[n] = c_0 * pow(rho[n] / rho_0, 0.5 * (gamma - 1));
         }
+    }
+
+        if (PRINT){
+            cout << "setSpeedOfSound passed" << endl;
     }
 
 }
