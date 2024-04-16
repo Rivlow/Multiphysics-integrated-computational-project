@@ -11,10 +11,10 @@
 
 using namespace std;
 
-void surfaceParticle(SimulationData& params, vector<vector<int>> neighbours_matrix,vector<double> pos, vector<double> mass,
+void surfaceParticle(SimulationData& simparams, vector<vector<int>> neighbours_matrix,vector<double> pos, vector<double> mass,
                      vector<double> rho, vector<vector<double>> gradW_matrix,vector<int> &surface_part){
     
-    for(int n = 0; n < params.nb_moving_part ; n++){
+    for(int n = 0; n < simparams.nb_moving_part ; n++){
         vector<int> &neighbours = neighbours_matrix[n];
         
         for(int idx = 0; idx < neighbours.size() ; idx++){
@@ -29,7 +29,7 @@ void surfaceParticle(SimulationData& params, vector<vector<int>> neighbours_matr
     }
 }
 
-void surfaceTension(SimulationData& params,
+void surfaceTension(SimulationData& simparams,
 vector<vector<double>> gradW_matrix,
 vector<vector<int>> neighbours_matrix,
 vector<double> mass,

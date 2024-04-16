@@ -9,10 +9,10 @@
 #include "structure.h"
 
 using namespace std;
-void surfaceParticle(SimulationData& params, vector<vector<int>> neighbours_matrix,vector<double> pos, vector<double> mass,
+void surfaceParticle(SimulationData& simparams, vector<vector<int>> neighbours_matrix,vector<double> pos, vector<double> mass,
                      vector<double> rho, vector<vector<double>> gradW_matrix,vector<int> &surface_part);
 
-void surfaceTension(SimulationData& params,
+void surfaceTension(SimulationData& simparams,
 vector<vector<double>> gradW_matrix,
 vector<vector<int>> neighbours_matrix,
 vector<double> mass,
