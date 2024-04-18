@@ -33,10 +33,12 @@ int evaluateNumberParticles(GeomData &geomParams){
             if(nj != 1){
                 ++nj;
             }
+
             int nk = int(ceil(L[2] / s));
             if(nk != 1){
                 ++nk;
             }
+            
             nbpart += ni*nj*nk;
         }
     }

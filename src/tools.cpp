@@ -172,6 +172,10 @@ void clearAllVectors(SimulationData &simParams,
         neighbours_matrix[i].clear();
         pi_matrix[i].clear();
         drhodt[i] = 0.0;
+        for(int coord = 0 ; coord < 3 ; coord ++){
+            dudt[3*i+coord] = 0.0;
+        
+        }
         dudt[i] = 0.0;
     }
 

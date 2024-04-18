@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
     cout << "h=" << geomParams.h << std::endl;
 
 
-
+    printArray(type, type.size(),"type");
 
     /*---------------------------- SPH ALGORITHM  ----------------------------*/
 
@@ -205,7 +205,7 @@ int main(int argc, char *argv[])
         // Update density, velocity and position (Euler explicit or RK22 scheme)
         updateVariables(geomParams, thermoParams, simParams, t, pos, u, rho, drhodt, c, p, dudt, mass, 
                         pi_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
-
+        //printArray(dudt,3*simParams.nb_moving_part,"dudt");
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){
 
@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
         clearAllVectors(simParams, pi_matrix, neighbours_matrix,
                         cell_matrix, gradW_matrix, drhodt, dudt);
 
-
+         //printArray(dudt,3*simParams.nb_moving_part,"dudt_clear");
     }
 
     auto t1 = std::chrono::high_resolution_clock::now();
