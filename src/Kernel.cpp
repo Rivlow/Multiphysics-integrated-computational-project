@@ -43,16 +43,15 @@ double derive_bell(double r, double h)
 
 double f_cubic_spline(double r, double h)
 {
-    double alpha = 3 / (2 * M_PI * h * h * h);
-    double W = 0;
-    if (r / h < 1)
+    double alpha = 3.0 / (2.0 * M_PI * h * h * h);
+    double W = 0.0;
+    if (r / h < 1.0)
     {
-        W = alpha * (3 / 2 - r * r / (h * h) + 1 / 2 * r * r * r / (h * h * h));
+        W = alpha * (1.0 - r * r / (h * h) + 0.5 * r * r * r / (h * h * h));
     }
-    if (1 <= r / h && r / h < 2)
+    if (1.0 <= r / h && r / h < 2.0)
     {
-
-        W = alpha * 1 / 6 * ((1 - r / h) * (1 - r / h) * (1 - r / h));
+        W = alpha * 1.0/6.0 * ((2.0 - r / h) * (2.0 - r / h) * (2.0 - r / h));
     }
     return W;
 }
@@ -65,11 +64,11 @@ double derive_cubic_spline(double r, double h)
 
     if (1.0 <= r / h && r / h < 2.0)
     {
-        DW = alpha / h * (-0.5 * (1 - r / h) * (1 - r / h));
+        DW = alpha / h * (-0.5 * (2.0 - r / h) * (2.0 - r / h));
     }
     if (r / h < 1.0)
     {
-        DW = alpha / h * (1.5 * r * r / (h * h) - 2 * r / h);
+        DW = alpha / h * (1.5 * r * r / (h * h) - 2.0 * r / h);
         
     }
 

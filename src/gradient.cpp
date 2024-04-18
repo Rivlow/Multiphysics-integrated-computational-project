@@ -7,6 +7,7 @@
 #include "Kernel.h"
 #include "tools.h"
 #include "structure.h"
+#include "surface_tension.h"
 
 
 using namespace std;
@@ -289,6 +290,11 @@ void momentumEquation(GeomData &geomParams,
     setArtificialViscosity(geomParams, thermoParams, simParams, t, pi_matrix, 
                            neighbours_matrix, nb_neighbours, c, pos, rho, u); 
 
+    vector<double> F_vol(3*simParams.nb_moving_part,0.0);
+
+    surfaceTension(simParams, geomParams, gradW_matrix, neighbours_matrix, mass, 
+                   rho, pos, F_vol);
+
     // Iterate over each particle
     #pragma omp parallel for
     for (int n = 0; n < nb_moving_part; n++){
@@ -296,7 +302,7 @@ void momentumEquation(GeomData &geomParams,
         vector<int> &neighbours = neighbours_matrix[n];
         vector<double> &gradW = gradW_matrix[n];
         vector<double> &artificial_visc = pi_matrix[n];
-        vector<double> F_vol = {0.0, 0.0, g};
+        
         double rho_a = rho[n];
         double p_a = p[n];
 
@@ -316,10 +322,10 @@ void momentumEquation(GeomData &geomParams,
             }
 
             dudt[3 * n + cord] *= -1;
-            dudt[3 * n + cord] += F_vol[cord];
+            dudt[3 * n + cord] += F_vol[3 * n + cord];
         }
     }
-
+    //printArray(F_vol, F_vol.size(),"force");
     if (PRINT){
         cout << "momentumEquation passed" << endl;
     }

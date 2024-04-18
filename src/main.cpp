@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
     cout << "h=" << geomParams.h << std::endl;
 
 
-    printArray(type, type.size(),"type");
+    //printArray(type, type.size(),"type");
 
     /*---------------------------- SPH ALGORITHM  ----------------------------*/
 

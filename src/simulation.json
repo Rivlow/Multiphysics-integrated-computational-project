@@ -1,8 +1,8 @@
 {
 
-  "matrixLong" : [[ 1, 1, 1], [ 2, 2, 0.05], [ 1.9, 1.9, 0.05]],
-  "matrixOrig" : [[ 0.5, 0.5, 1.1], [ 0, 0, 0], [ 0.05, 0.05, 0.05]],
-  "vectorType" : [ 1, 0, 0],
+  "matrixLong" : [[ 0.5, 0.5, 0.5]],
+  "matrixOrig" : [[ 0.5, 0.5, 0.5]],
+  "vectorType" : [ 1],
 
   "data_store": {
     "do":false,
@@ -18,10 +18,10 @@
     "L_d": [2, 2, 2],
     "o_d": [0.0, 0.0, 0.0],
 
-    "theta" :0.5,
+    "theta" :0.25,
     "schemeIntegration": {"Euler":true,"RK22":false},
-    "s": 0.1,
-    "nstepT": 20000,
+    "s": 0.05,
+    "nstepT": 60000,
     "dt": 0.00005,
     "nsave": 100,
 
