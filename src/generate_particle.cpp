@@ -35,7 +35,7 @@ int evaluateNumberParticles(GeomData &geomParams){
 }
 
 void meshcube(GeomData &geomParams,
-              vector<double> &pos_arr,
+              vector<double> &pos,
               vector<double> &type){
 
     vector<double> L = geomParams.L;
@@ -63,7 +63,7 @@ void meshcube(GeomData &geomParams,
     // std::cout << "\t=> " << ni << "*" << nj << "*" << nk << " = " << ni * nj * nk << " particles to be generated\n";
 
     // memory allocation
-    pos_arr.reserve(pos_arr.size() + ni * nj * nk * 3);
+    pos.reserve(pos.size() + ni * nj * nk * 3);
 
     // particle generation
     for (int i = 0; i < ni; ++i)
@@ -75,9 +75,9 @@ void meshcube(GeomData &geomParams,
             for (int k = 0; k < nk; ++k)
             {
                 double z = o[2] +(layer_max-1)*s/2+ k * dz;
-                pos_arr.push_back(x);
-                pos_arr.push_back(y);
-                pos_arr.push_back(z);
+                pos.push_back(x);
+                pos.push_back(y);
+                pos.push_back(z);
 
                 type.push_back(1.0);
             }
