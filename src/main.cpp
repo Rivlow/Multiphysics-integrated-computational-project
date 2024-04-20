@@ -119,10 +119,6 @@ int main(int argc, char *argv[])
         data["dt"],
         data["theta"],
         schemeIntegration,
-        data["data_store"]["name"],
-        data["data_store"]["init"],
-        data["data_store"]["end"],
-        data["data_store"]["do"],
         data["u_init"],
         state_equation,
         state_initial_condition,
@@ -142,8 +138,6 @@ int main(int argc, char *argv[])
 
     // Initialization of the particles
     meshcube(geomParams, simParams, pos, type); 
-    simParams.nb_part = pos.size()/3;
-    cout << simParams.nb_part << endl;
     meshPostProcess(geomParams, simParams, pos, type);
     int nb_tot_part = pos.size()/3;
 
@@ -195,9 +189,8 @@ int main(int argc, char *argv[])
     for (int t = 0; t < simParams.nstepT; t++){
         simParams.t = t;
 
-        //printArray(c, c.size(), "c (in main)");
         // Check if timeStep is small enough
-        checkTimeStep(geomParams, thermoParams, simParams, pos, u, c, neighbours_matrix, nb_neighbours, pi_matrix);
+        //checkTimeStep(geomParams, thermoParams, simParams, pos, u, c, neighbours_matrix, nb_neighbours, pi_matrix);
 
         // Apply the linked-list algorithm
         sortedList(geomParams, simParams, cell_matrix, neighbours_matrix, gradW_matrix, 
@@ -212,18 +205,15 @@ int main(int argc, char *argv[])
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){
 
-            if (simParams.data_do) extractData(simParams, thermoParams, pos, p, mass, gradW_matrix, neighbours_matrix);
+            //extractData(simParams, thermoParams, pos, p, mass, gradW_matrix, neighbours_matrix);
             export_particles("../../output/sph", t, pos, scalars, vectors);
 
         }
-
-        //if(t % simParams.nsave == 0 && simParams.t > 85*100) printMatrix(gradW_matrix, gradW_matrix.size()/3, "gradW");
 
         // Clear matrices and reset arrays to 0
         clearAllVectors(simParams, pi_matrix, neighbours_matrix,
                         cell_matrix, gradW_matrix, drhodt, dudt);
 
-         //printArray(dudt,3*simParams.nb_moving_part,"dudt_clear");
     }
 
     auto t1 = chrono::high_resolution_clock::now();

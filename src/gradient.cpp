@@ -67,7 +67,6 @@ void setSpeedOfSound(GeomData &geomParams,
     double c_0 = thermoParams.c_0;
     double rho_0 = thermoParams.rho_0;
     double gamma = thermoParams.gamma;
-    int size_rho = rho.size();
     bool PRINT = simParams.PRINT;
     int nb_part = simParams.nb_part;
 

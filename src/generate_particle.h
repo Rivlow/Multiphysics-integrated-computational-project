@@ -17,10 +17,6 @@ void meshcube(GeomData &geomParams,
               vector<double> &pos,
               vector<double> &type);
 
-void meshBoundary(GeomData &geomParams,
-                  vector<double> &bound_arr, 
-                  vector<double> &type_arr);
-
 void meshPostProcess(GeomData &geomParams,
                      SimulationData &simParams,
                      vector<double> &pos, 
