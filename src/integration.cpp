@@ -20,7 +20,6 @@
 void Euler(GeomData &geomParams,    
            ThermoData &thermoParams,
            SimulationData &simParams, 
-            int t,
             vector<double> &pos,
             vector<double> &u,
             vector<double> &rho,
@@ -52,13 +51,13 @@ void Euler(GeomData &geomParams,
                     pos, u, drhodt, rho, mass); 
 
     // Compute D(u)/Dt for all particles
-    momentumEquation(geomParams, thermoParams, simParams, t, neighbours_matrix, nb_neighbours, gradW_matrix, artificial_visc_matrix,
+    momentumEquation(geomParams, thermoParams, simParams, neighbours_matrix, nb_neighbours, gradW_matrix, artificial_visc_matrix,
                     mass, dudt, rho, p, c, pos, u); 
 
     
-    int size_pos = pos.size()/3;
+    int nb_part = simParams.nb_part;
     #pragma omp parallel for   
-    for (int n = 0; n < size_pos; n++){
+    for (int n = 0; n < nb_part; n++){
 
         rho[n] += dt * drhodt[n];
 
@@ -73,7 +72,6 @@ void Euler(GeomData &geomParams,
 void RK22(GeomData &geomParams,    
           ThermoData &thermoParams,
           SimulationData &simParams, 
-          int t,
           vector<double> &pos,
           vector<double> &u,
           vector<double> &rho,
@@ -98,7 +96,7 @@ void RK22(GeomData &geomParams,
                     drhodt_half(nb_tot_part,0.0),
                     dudt_half(3*nb_tot_part,0.0);
 
-    Euler(geomParams, thermoParams, simParams, t, pos_half, u_half, rho_half, drhodt_half, c, p, dudt_half, 
+    Euler(geomParams, thermoParams, simParams, pos_half, u_half, rho_half, drhodt_half, c, p, dudt_half, 
               mass, artificial_visc_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
 
     // Compute D(rho)/Dt for all particles
@@ -106,7 +104,7 @@ void RK22(GeomData &geomParams,
                     pos_half, u_half, drhodt_half, rho_half, mass); 
 
     // Compute D(u)/Dt for all particles
-    momentumEquation(geomParams, thermoParams, simParams, t, neighbours_matrix, nb_neighbours, gradW_matrix, artificial_visc_matrix,
+    momentumEquation(geomParams, thermoParams, simParams, neighbours_matrix, nb_neighbours, gradW_matrix, artificial_visc_matrix,
                     mass, dudt_half, rho_half, p, c, pos_half, u_half); 
 
     int size_pos = pos.size()/3;
@@ -129,7 +127,6 @@ void RK22(GeomData &geomParams,
 void updateVariables(GeomData &geomParams,    
                      ThermoData &thermoParams,
                      SimulationData &simParams, 
-                     int t,
                      vector<double> &pos,
                      vector<double> &u,
                      vector<double> &rho,
@@ -149,7 +146,7 @@ void updateVariables(GeomData &geomParams,
 
     if (schemeIntegration == "Euler"){
     
-        Euler(geomParams, thermoParams, simParams, t, pos, u, rho, drhodt, c, p, dudt, mass, artificial_visc_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
+        Euler(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, artificial_visc_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
     }
 
     if (schemeIntegration == "RK22"){
@@ -160,7 +157,7 @@ void updateVariables(GeomData &geomParams,
                         drhodt_half(nb_tot_part,0.0),
                         dudt_half(3*nb_tot_part,0.0);
 
-        RK22(geomParams, thermoParams, simParams, t, pos, u, rho, drhodt, c, p, dudt, mass, artificial_visc_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
+        RK22(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, artificial_visc_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
 
     }
 

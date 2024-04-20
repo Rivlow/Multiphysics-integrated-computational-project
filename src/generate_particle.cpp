@@ -47,8 +47,9 @@ int evaluateNumberParticles(GeomData &geomParams){
 }
 
 void meshcube(GeomData &geomParams,
-              vector<double> &pos_arr,
-              vector<double> &type_arr){
+              SimulationData &simParams,
+              vector<double> &pos,
+              vector<double> &type){
 
     vector<vector<double>> matrixLong = geomParams.matrixLong;
     vector<vector<double>> matrixOrig = geomParams.matrixOrig;
@@ -58,7 +59,7 @@ void meshcube(GeomData &geomParams,
     for(int n =0 ; n<vectorType.size();n++){
         vector<double> &L = matrixLong[n];
         vector<double> &o = matrixOrig[n];
-        int type = vectorType[n];
+        int type_val = vectorType[n];
         double dx = 0;
         double dy = 0;
         double dz = 0;
@@ -84,13 +85,13 @@ void meshcube(GeomData &geomParams,
         cout<< nk<< endl;
         
         // output
-        std::cout << "meshing cube at o=(" << o[0] << "," << o[1] << "," << o[2] << ") ";
-        std::cout << "of size L=(" << L[0] << "," << L[1] << "," << L[2] << ")\n";
-        std::cout << "\tparticle spacing s=(" << dx << "," << dy << "," << dz << ") [target was s=" << s << "]\n";
-        std::cout << "\t=> " << ni << "*" << nj << "*" << nk << " = " << ni * nj * nk << " particles to be generated\n";
+        cout << "meshing cube at o=(" << o[0] << "," << o[1] << "," << o[2] << ") ";
+        cout << "of size L=(" << L[0] << "," << L[1] << "," << L[2] << ")\n";
+        cout << "\tparticle spacing s=(" << dx << "," << dy << "," << dz << ") [target was s=" << s << "]\n";
+        cout << "\t=> " << ni << "*" << nj << "*" << nk << " = " << ni * nj * nk << " particles to be generated\n";
 
         // memory allocation
-        pos_arr.reserve(pos_arr.size() + ni * nj * nk * 3);
+        pos.reserve(pos.size() + ni * nj * nk * 3);
 
         // particle generation
         for (int i = 0; i < ni; ++i)
@@ -103,11 +104,11 @@ void meshcube(GeomData &geomParams,
                 {
                     double z = o[2] + k * dz;
                     
-                    pos_arr.push_back(x);
-                    pos_arr.push_back(y);
-                    pos_arr.push_back(z);
+                    pos.push_back(x);
+                    pos.push_back(y);
+                    pos.push_back(z);
 
-                    type_arr.push_back(type);
+                    type.push_back(type_val);
                 }
             }
         }
@@ -268,4 +269,38 @@ void meshBoundary(GeomData &geomParams,
             }
         }
     }*/
+}
+
+void meshPostProcess(GeomData &geomParams,
+                     SimulationData &simParams,
+                     vector<double> &pos, 
+                     vector<double> &type){
+
+    vector<double>& post_process_in = geomParams.post_process_in;
+    vector<double>& post_process_out = geomParams.post_process_out;
+    double s = geomParams.s;
+
+    double dx = post_process_out[0] - post_process_in[0];
+    double dy = post_process_out[1] - post_process_in[1];
+    double dz = post_process_out[2] - post_process_in[2];
+
+    double dist = sqrt(dx * dx + dy * dy + dz * dz);
+
+    // Particules created between initial and last particule
+    int nb_points = static_cast<int>(dist / s);
+
+    double step_x = dx / nb_points;
+    double step_y = dy / nb_points;
+    double step_z = dz / nb_points;
+    int count = 0;
+
+    for (int i = 0; i < nb_points; i++) {
+        count++;
+        pos.push_back(post_process_in[0] + i * step_x);
+        pos.push_back(post_process_in[1] + i * step_y);
+        pos.push_back(post_process_in[2] + i * step_z);
+        type.push_back(2.0);
+    }
+
+    cout << "nb post_pro particules : " << count << endl;
 }

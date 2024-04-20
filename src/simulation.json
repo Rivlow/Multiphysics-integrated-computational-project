@@ -1,7 +1,7 @@
 {
 
   "matrixLong" : [[ 1, 1, 1], [ 2, 2, 0.05], [ 1.9, 1.9, 0.05]],
-  "matrixOrig" : [[ 0.5, 0.5, 1.1], [ 0, 0, 0], [ 0.05, 0.05, 0.05]],
+  "matrixOrig" : [[ 0.5, 0.5, 0.07], [ 0.05, 0.05, 0.05], [ 0.05, 0.05, 0.05]],
   "vectorType" : [ 1, 0, 0],
 
   "data_store": {
@@ -11,34 +11,35 @@
     "end":26
   },
 
+  "post_process_in":[0, 0, 0.5],
+  "post_process_out":[2, 2, 0.5],
+
     
+  "o": [0.8, 0.8, 0.6],
+  "L": [0.5, 0.5, 0.5],
+  "L_d": [2, 2, 2],
+  "o_d": [0.0, 0.0, 0.0],
 
-    "o": [0.8, 0.8, 0.6],
-    "L": [0.5, 0.5, 0.5],
-    "L_d": [2, 2, 2],
-    "o_d": [0.0, 0.0, 0.0],
+  "theta" :0.5,
+  "s": 0.1,
+  "nstepT": 20000,
+  "dt": 0.005,
+  "nsave": 100,
+  "kappa": 2,
+  "rho_0": 1000,
+  "rho_moving": 1000,
+  "rho_fixed" : 1000,
+  "T": 298.15,
+  "u_init": [0.0, 0.0, 0.0],
+  "c_0": 30, 
+  "gamma": 7, 
+  "alpha": 0.5,
+  "beta": 0,
+  "M": 18e-3, 
 
-    "theta" :0.5,
-    "schemeIntegration": {"Euler":true,"RK22":false},
-    "s": 0.1,
-    "nstepT": 20000,
-    "dt": 0.00005,
-    "nsave": 100,
-
-    "kappa": 2,
-    "rho_0": 1000,
-    "rho_moving": 1000,
-    "rho_fixed" : 1000,
-    "T": 298.15,
-    "u_init": [0.0, 0.0, 0.0],
-    "c_0": 30, 
-    "gamma": 7, 
-    "alpha": 0.5,
-    "beta": 0,
-    "M": 18e-3, 
-
-    "print_debug":false,
-    "stateEquation" : {"Ideal gaz law":false, "Quasi incompresible fluid":true},
-    "initialCondition" : {"Hydrostatic":false, "Constant":true}
+  "schemeIntegration": {"Euler":true,"RK22":false},
+  "print_debug":false,
+  "stateEquation" : {"Ideal gaz law":false, "Quasi incompresible fluid":true},
+  "initialCondition" : {"Hydrostatic":true, "Constant":false}
 }
 

@@ -17,12 +17,10 @@
 
 using namespace std;
 
-void extractData(SimulationData& params,
-                 vector<double> &pos, 
-                 vector<double> &u, 
-                 vector<double> &dudt, 
-                 vector<double> &rho, 
-                 vector<double> &drhodt, 
-                 vector<double> &c, 
+void extractData(SimulationData& simParams,
+                 ThermoData& thermoParams,
+                 vector<double> &pos,  
                  vector<double> &p, 
-                 vector<double> &mass);
+                 vector<double> &mass,
+                 vector<vector<double>> &gradW_matrix,
+                 vector<vector<int>> &neighbours_matrix);

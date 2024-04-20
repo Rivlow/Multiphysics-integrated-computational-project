@@ -12,121 +12,78 @@ namespace fs = std::filesystem;
 
 
 void extractData(SimulationData& simParams,
-                 vector<double> &pos, 
-                 vector<double> &u, 
-                 vector<double> &dudt, 
-                 vector<double> &rho, 
-                 vector<double> &drhodt, 
-                 vector<double> &c, 
+                 ThermoData& thermoParams,
+                 vector<double> &pos,  
                  vector<double> &p, 
-                 vector<double> &mass){
+                 vector<double> &mass,
+                 vector<vector<double>> &gradW_matrix,
+                 vector<vector<int>> &neighbours_matrix){
 
-    vector<string> data_store = simParams.data_store;
-    int init = simParams.data_init;
-    int end = simParams.data_end;
 
     string outputDir = "../../output";
+    string outputFile_rho = outputDir + "/" + "rho" +".csv";
+    string outputFile_p = outputDir + "/" + "p" +".csv";
 
+    // Create folder if not existing
+    if (!fs::exists(outputDir)) fs::create_directories(outputDir);
 
-    for (auto &var : data_store){
+    ofstream output_rho(outputFile_rho, ios::app);
+    ofstream output_p(outputFile_p, ios::app);
 
-        string outputFile = outputDir + "/" + var +".csv";
+    if (!output_rho.is_open() || !output_p.is_open()) {
+        cerr << "Error while opening CSV file." << endl;
+        return;
+    }
 
-        // Create folder if not existing
-        if (!fs::exists(outputDir)) {
-            fs::create_directories(outputDir);
+    int init = simParams.nb_part;
+    int end = pos.size()/3;
+
+    for (int n = init; n <= end; n++) {
+
+        vector<int> &neighbours = neighbours_matrix[n];
+        vector<double> &gradW = gradW_matrix[n];
+        int neighbours_size = neighbours.size();
+        double rho_tot = 0, p_tot = 0;
+
+        for (int idx = 0; idx < neighbours_size; idx++){
+
+            int i_neig = neighbours[idx];
+            double m_b = mass[i_neig];
+            double gradW_ab = gradW[idx];
+
+            rho_tot += m_b*gradW_ab;
         }
 
-        ofstream output(outputFile, ios::app);
+        string state_equation = simParams.state_equation;
+        double rho_0 = thermoParams.rho_0;
+        double c_0 = thermoParams.c_0;
+        double R = thermoParams.R;
+        double T = thermoParams.T;
+        double M = thermoParams.M;
+        double gamma = thermoParams.gamma;
 
-        if (!output.is_open()) {
-            cerr << "Error while opening CSV file." << endl;
-            return;
-        }
-
-
-        // Store the desired data 
-        if (var == "pos") {
-            for (int i = init; i <= end; ++i) {
-                if (i == end){
-                    output << pos[i];
-                }
-                else{
-                    output << pos[i] << ",";
-                }
-            }
-            output << endl;
-        }
-        else if (var == "u") {
-            for (int i = init; i <= end; ++i) {
-            if (i == end){
-                    output << u[i];
-                }
-                else{
-                    output << u[i] << ",";
-                }
-            }
-            output << endl;        
-        }
-        else if (var == "dudt") {
-            for (int i = init; i <= end; ++i) {
-                if (i == end){
-                    output << dudt[i];
-                }
-                else{
-                    output << dudt[i] << ",";
-                }
-            }
-            output << endl;
-        }
-        else if (var == "rho") {
-            for (int i = init; i <= end; ++i) {
-                if (i == end){
-                    output << rho[i];
-                }
-                else{
-                    output << rho[i] << ",";
-                }
-            }
-            output << endl;
-        }
-        else if (var == "drhodt") {
-            for (int i = init; i <= end; ++i) {
-                if (i == end){
-                    output << drhodt[i];
-                }
-                else{
-                    output << drhodt[i] << ",";
-                }
-            }
-            output << endl;
-        }
-        else if (var == "c") {
-            for (int i = init; i <= end; ++i) {
-                if (i == end){
-                    output << c[i];
-                }
-                else{
-                    output << c[i] << ",";
-                }
-            }
-            output<< endl;
-        }
-        else if (var == "p") {
-            for (int i = init; i <= end; ++i) {
-                if (i == end){
-                    output << p[i];
-                }
-                else{
-                    output << p[i] << ",";
-                }
-            }
-            output << endl;
+        if (state_equation == "Ideal gaz law") p_tot = (rho_tot / rho_0 - 1) * (R * T) / M;
+        else if (simParams.state_equation == "Quasi incompresible fluid"){
+            double B = c_0 * c_0 * rho_0 / gamma;
+            p_tot = B * (pow(rho_tot / rho_0, gamma) - 1);
         }
         else {
-            cout << "Error : data name not found." << endl;
+            cout << "Error : no state equation chosen" << endl;
+            exit(1);
         }
 
-        output.close();
+
+        if (n == end){
+            output_rho << rho_tot;
+            output_p << p_tot;
+        }
+        else{
+            output_rho << rho_tot << ",";
+            output_p << p_tot << ",";
+        }
     }
+
+    output_rho.close();
+    output_p.close();
+
 }

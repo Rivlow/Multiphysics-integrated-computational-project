@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     ifstream inputf(argv[1]);
     json data = json::parse(inputf);
 
-    std::cout << argv[1] << ":\n"
+    cout << argv[1] << ":\n"
               << data.dump(4) << std::endl; // print input data to screen
 
     createOutputFolder();
@@ -86,6 +86,8 @@ int main(int argc, char *argv[])
         data["L"],
         data["o_d"],
         data["L_d"],
+        data["post_process_in"],
+        data["post_process_out"],
         int(geomParams.L_d[0] / (geomParams.kappa * geomParams.h)),
         int(geomParams.L_d[1] / (geomParams.kappa * geomParams.h)),
         int(geomParams.L_d[2] / (geomParams.kappa * geomParams.h)),
@@ -139,8 +141,10 @@ int main(int argc, char *argv[])
     vector<vector<int>> cell_matrix(Nx * Ny * Nz);
 
     // Initialization of the particles
-    meshcube(geomParams, pos, type); // moving
-    //meshBoundary(geomParams, pos, type); // fixed
+    meshcube(geomParams, simParams, pos, type); 
+    simParams.nb_part = pos.size()/3;
+    cout << simParams.nb_part << endl;
+    meshPostProcess(geomParams, simParams, pos, type);
     int nb_tot_part = pos.size()/3;
 
     vector<double> mass(nb_tot_part), u(3 * nb_tot_part),
@@ -171,14 +175,11 @@ int main(int argc, char *argv[])
     cout << "state equation chosen : " << state_equation << " \n" << endl;
     cout << "kappa * h =" << geomParams.kappa * geomParams.h << endl;
     cout << "(Nx, Ny, Nz) = (" << geomParams.Nx << ", " << geomParams.Ny << ", " << geomParams.Nz << ")" << std::endl;
-    cout << "b_moving_part = " << simParams.nb_moving_part << std::endl;
+    cout << "nb_moving_part = " << simParams.nb_moving_part << std::endl;
     cout << "nb_tot_part = " << nb_tot_part << std::endl;
     cout << "s=" << geomParams.s << std::endl;
     cout << "kappa=" << geomParams.kappa << std::endl;
     cout << "h=" << geomParams.h << std::endl;
-
-
-    printArray(type, type.size(),"type");
 
     /*---------------------------- SPH ALGORITHM  ----------------------------*/
 
@@ -189,11 +190,14 @@ int main(int argc, char *argv[])
     initializeViscosity(simParams, pi_matrix);
     setPressure(geomParams, thermoParams, simParams, p, rho); 
     setSpeedOfSound(geomParams, thermoParams, simParams, c, rho);
+    
 
     for (int t = 0; t < simParams.nstepT; t++){
+        simParams.t = t;
 
+        //printArray(c, c.size(), "c (in main)");
         // Check if timeStep is small enough
-        checkTimeStep(geomParams, thermoParams, simParams, t, pos, c, neighbours_matrix, nb_neighbours, pi_matrix);
+        checkTimeStep(geomParams, thermoParams, simParams, pos, u, c, neighbours_matrix, nb_neighbours, pi_matrix);
 
         // Apply the linked-list algorithm
         sortedList(geomParams, simParams, cell_matrix, neighbours_matrix, gradW_matrix, 
@@ -203,16 +207,17 @@ int main(int argc, char *argv[])
         gradW(geomParams, simParams, gradW_matrix, neighbours_matrix, nb_neighbours, pos); 
 
         // Update density, velocity and position (Euler explicit or RK22 scheme)
-        updateVariables(geomParams, thermoParams, simParams, t, pos, u, rho, drhodt, c, p, dudt, mass, 
+        updateVariables(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
                         pi_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
-        //printArray(dudt,3*simParams.nb_moving_part,"dudt");
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){
 
-            if (simParams.data_do){extractData(simParams, pos, u, dudt, rho, drhodt, c, p, mass);}
+            if (simParams.data_do) extractData(simParams, thermoParams, pos, p, mass, gradW_matrix, neighbours_matrix);
             export_particles("../../output/sph", t, pos, scalars, vectors);
 
         }
+
+        //if(t % simParams.nsave == 0 && simParams.t > 85*100) printMatrix(gradW_matrix, gradW_matrix.size()/3, "gradW");
 
         // Clear matrices and reset arrays to 0
         clearAllVectors(simParams, pi_matrix, neighbours_matrix,
@@ -221,10 +226,10 @@ int main(int argc, char *argv[])
          //printArray(dudt,3*simParams.nb_moving_part,"dudt_clear");
     }
 
-    auto t1 = std::chrono::high_resolution_clock::now();
-    auto delta_t = std::chrono::duration_cast<std::chrono::duration<double>>(t1 - t0).count();
-    std::cout << "duration: " << delta_t << "s.\n";
+    auto t1 = chrono::high_resolution_clock::now();
+    auto delta_t = chrono::duration_cast<chrono::duration<double>>(t1 - t0).count();
+    cout << "duration: " << delta_t << "s.\n";
+    cout << "\n Simulation done." << std::endl;
 
-    std::cout << "\n Simulation done." << std::endl;
     return 0;
 }

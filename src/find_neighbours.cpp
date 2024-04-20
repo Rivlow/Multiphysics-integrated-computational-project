@@ -33,8 +33,6 @@ void sortedList(GeomData &geomParams,
     double Lx = geomParams.L_d[0], Ly = geomParams.L_d[1], Lz = geomParams.L_d[2];
     int size_pos = pos.size() / 3;
 
-    vector<int> it_cells(size_pos, 0);
-
     // Sort all particles in their corresponding cell
     for (int n = 0; n < size_pos; n++){
 
@@ -43,10 +41,8 @@ void sortedList(GeomData &geomParams,
         int k = pos[3 * n + 2] / (Lz / Nz);
 
         // Skip particules outside of the domain
-        if (i < 0 || j < 0 || k < 0 || i > Nx || j > Ny || k > Nz){
-            continue;
-        }
-    
+        if (i < 0 || j < 0 || k < 0 || i > Nx || j > Ny || k > Nz) continue;
+        
         // Modify index of particules at boundaries
         i = (i == Nx) ? i - 1 : i;
         j = (j == Ny) ? j - 1 : j;
@@ -56,10 +52,8 @@ void sortedList(GeomData &geomParams,
 
     }
 
-
-
     // Find neighbours for each particle
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for (int n = 0; n < size_pos; n++){
 
         int i_cell = pos[3 * n + 0] / (geomParams.L_d[0] / Nx);
@@ -67,9 +61,8 @@ void sortedList(GeomData &geomParams,
         int k_cell = pos[3 * n + 2] / (geomParams.L_d[2] / Nz);
 
         // Skip particules outside of the domain
-        if (i_cell < 0 || j_cell < 0 || k_cell < 0 || i_cell > Nx || j_cell > Ny || k_cell > Nz){
-            continue;
-        }
+        if (i_cell < 0 || j_cell < 0 || k_cell < 0 || i_cell > Nx || j_cell > Ny || k_cell > Nz) continue;
+        
 
         // Modify index of particules at boundaries
         i_cell = (i_cell >= Nx) ? Nx - 1 : i_cell;
@@ -93,10 +86,7 @@ void sortedList(GeomData &geomParams,
             for (int j = j_inf; j <= j_supp; j++){
                 for (int i = i_inf; i <= i_supp; i++){
 
-                    //cout << "avant" << endl;
                     vector<int> &cell = cell_matrix[i + j * Nx + k * Nx * Ny];
-                    //cout << "apres" << endl;
-
                     int size_cell = cell.size();
 
                     // Iterate over particles in cell
@@ -104,35 +94,37 @@ void sortedList(GeomData &geomParams,
 
                         int idx_cell = cell[idx];
 
-                        if (idx_cell != n){
+                        //if (idx_cell >= simParams.nb_tot_part) cout << "ghost part" << endl;
+                        if (idx_cell >= simParams.nb_part) continue;
+                        else{
 
-                            double rx, ry, rz, r2;
-                            rx = (pos[3 * n + 0] - pos[3 * idx_cell + 0]);
-                            ry = (pos[3 * n + 1] - pos[3 * idx_cell + 1]);
-                            rz = (pos[3 * n + 2] - pos[3 * idx_cell + 2]);
-                            r2 = rx*rx + ry*ry + rz*rz;
+                            if (idx_cell != n){
 
-                            int kappa = geomParams.kappa;
-                            double h = geomParams.h;
+                                double rx, ry, rz, r2;
+                                rx = (pos[3 * n + 0] - pos[3 * idx_cell + 0]);
+                                ry = (pos[3 * n + 1] - pos[3 * idx_cell + 1]);
+                                rz = (pos[3 * n + 2] - pos[3 * idx_cell + 2]);
+                                r2 = rx*rx + ry*ry + rz*rz;
 
-                            if (r2 <= kappa * kappa *h * h){
-                                neighbours_matrix[n][it++] = idx_cell;
+                                int kappa = geomParams.kappa;
+                                double h = geomParams.h;
+
+                                if (r2 <= kappa * kappa *h * h) neighbours_matrix[n][it++] = idx_cell;
+                            
                             }
                         }
                     }
-
-                    gradW_matrix[n].resize(3*it);
-                    artificial_visc_matrix[n].resize(it);
-                    nb_neighbours[n] = it;
-
                 }
             }
         }
+
+        gradW_matrix[n].resize(3*it);
+        artificial_visc_matrix[n].resize(it);
+        nb_neighbours[n] = it;
     }
 
-    if (simParams.PRINT){
-        cout << "findNeighbours passed" << endl;
-    }
+    if (simParams.PRINT) cout << "findNeighbours passed" << endl;
+
 
 }
 
@@ -175,62 +167,62 @@ void printNeighbours(vector<vector<int>> &neighbours_matrix_linked,
                      vector<vector<int>> &neighbours_matrix_naive){
 
     for (int i = 0; i < int(neighbours_matrix_linked.size()); i++){
-        std::cout << "Particle " << i << " : ";
+        cout << "Particle " << i << " : ";
 
-        std::cout << "{";
+        cout << "{";
         for (int j = 0; j < int(neighbours_matrix_linked[i].size()); j++){
 
-            std::cout << neighbours_matrix_linked[i][j];
+            cout << neighbours_matrix_linked[i][j];
             if (j != int(neighbours_matrix_linked[i].size() - 1)){
-                std::cout << ", ";
+                cout << ", ";
             }
         }
-        std::cout << "} (Linked-list) VS {";
+        cout << "} (Linked-list) VS {";
 
         for (int j = 0; j < int(neighbours_matrix_naive[i].size()); j++){
 
-            std::cout << neighbours_matrix_naive[i][j];
+            cout << neighbours_matrix_naive[i][j];
             if (j != int(neighbours_matrix_naive[i].size() - 1)){
-                std::cout << ", ";
+                cout << ", ";
             }
         }
-        std::cout << "} (naive)\n \n";
+        cout << "} (naive)\n \n";
     }
 }
 
-void CompareNeighbours( std::vector<std::vector<int>> &neighbours_matrix_linked,
-                      std::vector<std::vector<int>> &neighbours_matrix_naive){
+void CompareNeighbours( vector<vector<int>> &neighbours_matrix_linked,
+                      vector<vector<int>> &neighbours_matrix_naive){
                         
     for (int i = 0; i < int(neighbours_matrix_linked.size()); i++){
-        std::cout << "Particle " << i << " : ";
+        cout << "Particle " << i << " : ";
 
-        std::cout << "{";
+        cout << "{";
         for (int j = 0; j < int(neighbours_matrix_linked[i].size()); j++) {
             if (j < int(neighbours_matrix_naive[i].size())) {
                 if (neighbours_matrix_linked[i][j] == neighbours_matrix_naive[i][j]){
-                    std::cout << neighbours_matrix_linked[i][j];
+                    cout << neighbours_matrix_linked[i][j];
                 } else {
-                    std::cout << "[" << neighbours_matrix_linked[i][j] << "-" << neighbours_matrix_naive[i][j] << "]";
+                    cout << "[" << neighbours_matrix_linked[i][j] << "-" << neighbours_matrix_naive[i][j] << "]";
                 }
             } else {
-                std::cout << "[" << neighbours_matrix_linked[i][j] << "-N/A]";
+                cout << "[" << neighbours_matrix_linked[i][j] << "-N/A]";
             }
 
             if (j != int(neighbours_matrix_linked[i].size() - 1)) {
-                std::cout << ", ";
+                cout << ", ";
             }
         }
-        std::cout << "} (Linked-list) VS {";
+        cout << "} (Linked-list) VS {";
 
         for (int j = 0; j < int(neighbours_matrix_naive[i].size()); j++) {
             if (j >= int(neighbours_matrix_linked[i].size())) {
-                std::cout << "[" << neighbours_matrix_naive[i][j] << "-N/A]";
+                cout << "[" << neighbours_matrix_naive[i][j] << "-N/A]";
             }
 
             if (j != int(neighbours_matrix_naive[i].size() - 1)) {
-                std::cout << ", ";
+                cout << ", ";
             }
         }
-        std::cout << "} (naive)\n \n";
+        cout << "} (naive)\n \n";
     }
 }
