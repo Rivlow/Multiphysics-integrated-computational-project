@@ -292,9 +292,9 @@ void momentumEquation(GeomData &geomParams,
 
     vector<double> F_vol(3*simParams.nb_moving_part,0.0);
 
-    surfaceTension(simParams, geomParams, gradW_matrix, neighbours_matrix, mass, 
+    surfaceTension(simParams, geomParams, nb_neighbours, neighbours_matrix, mass, 
                    rho, pos, F_vol);
-
+    //printArray(F_vol, F_vol.size(), "fvol");
     // Iterate over each particle
     #pragma omp parallel for
     for (int n = 0; n < nb_moving_part; n++){

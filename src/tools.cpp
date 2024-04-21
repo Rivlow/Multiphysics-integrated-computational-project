@@ -169,7 +169,10 @@ void clearAllVectors(SimulationData &simParams,
 
     for (int i = 0; i < nb_moving_part; i++){
         gradW_matrix[i].clear();
-        neighbours_matrix[i].clear();
+        for(int j = 0; j < neighbours_matrix[i].size(); j++){
+            neighbours_matrix[i][j] = 0.0;
+        }
+        
         pi_matrix[i].clear();
         drhodt[i] = 0.0;
         for(int coord = 0 ; coord < 3 ; coord ++){

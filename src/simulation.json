@@ -20,9 +20,9 @@
 
     "theta" :0.25,
     "schemeIntegration": {"Euler":true,"RK22":false},
-    "s": 0.05,
+    "s": 0.025,
     "nstepT": 60000,
-    "dt": 0.00005,
+    "dt": 0.000001,
     "nsave": 100,
 
     "kappa": 2,

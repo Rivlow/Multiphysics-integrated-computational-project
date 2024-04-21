@@ -191,14 +191,14 @@ int main(int argc, char *argv[])
     setSpeedOfSound(geomParams, thermoParams, simParams, c, rho);
 
     for (int t = 0; t < simParams.nstepT; t++){
-
+        
         // Check if timeStep is small enough
         checkTimeStep(geomParams, thermoParams, simParams, t, pos, c, neighbours_matrix, nb_neighbours, pi_matrix);
 
         // Apply the linked-list algorithm
         sortedList(geomParams, simParams, cell_matrix, neighbours_matrix, gradW_matrix, 
                     pi_matrix, nb_neighbours, pos); 
-
+        //printMatrix(neighbours_matrix, neighbours_matrix.size(), "neig");
         // Compute ∇_a(W_ab) for all particles
         gradW(geomParams, simParams, gradW_matrix, neighbours_matrix, nb_neighbours, pos); 
 
