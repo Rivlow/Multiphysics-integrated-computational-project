@@ -78,8 +78,7 @@ template void printArray<double>(vector<double> &, int, string);
 void getKey(json data,
             string &state_equation,
             string &state_initial_condition,
-            string &schemeIntegration,
-            vector<string> &walls_chose){
+            string &schemeIntegration){
     
     for (auto &it : data["stateEquation"].items())
     {
@@ -102,12 +101,6 @@ void getKey(json data,
         if (it.value() == true)
         {
             state_initial_condition = it.key();
-        }
-    };
-
-    for (auto& wall : data["domain"]["walls_used"].items()) {
-        if (wall.value().get<bool>()) {
-            walls_chose.push_back(wall.key());
         }
     };
 }
@@ -160,29 +153,30 @@ void clearAllVectors(SimulationData &simParams,
                      vector<double> &dudt){
 
     bool PRINT = simParams.PRINT;
-    int nb_moving_part = simParams.nb_moving_part;
+    int nb_part = simParams.nb_part;
     int cell_size = cell_matrix.size();
+    int neighbours_size = neighbours_matrix.size();
 
     for (int i = 0; i < cell_size; i++){
         cell_matrix[i].clear();
     }
 
-    for (int i = 0; i < nb_moving_part; i++){
+    for (int i = 0; i < neighbours_size; i++){
+        for (int j = 0; j < int(neighbours_matrix[i].size()); j++){
+            neighbours_matrix[i][j] = 0;
+        }
+    }
+
+
+    for (int i = 0; i < nb_part; i++){
         gradW_matrix[i].clear();
-        neighbours_matrix[i].clear();
         pi_matrix[i].clear();
         drhodt[i] = 0.0;
-        for(int coord = 0 ; coord < 3 ; coord ++){
+
+        for(int coord = 0 ; coord < 3 ; coord ++)
             dudt[3*i+coord] = 0.0;
         
         }
-        dudt[i] = 0.0;
-    }
 
-
-    if (PRINT){
-        cout << "clearAllVectors passed" << endl;
-    }
-
-
+    if (PRINT) cout << "clearAllVectors passed" << endl;
 }

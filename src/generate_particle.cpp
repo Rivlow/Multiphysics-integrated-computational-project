@@ -21,7 +21,8 @@ int evaluateNumberParticles(GeomData &geomParams){
     vector<int> vectorType = geomParams.vectorType;
     double s = geomParams.s;
     int nbpart = 0;
-    for(int n=0; n<vectorType.size(); n++){
+
+    for(int n = 0; n < int(vectorType.size()); n++){
         if(vectorType[n]){
             vector<double> &L = matrixLong[n];    
             int ni = int(ceil(L[0] / s));
@@ -56,7 +57,8 @@ void meshcube(GeomData &geomParams,
     vector<int> vectorType = geomParams.vectorType;
     double s = geomParams.s;
     
-    for(int n =0 ; n<vectorType.size();n++){
+    for(int n = 0 ; n < int(vectorType.size()); n++){
+
         vector<double> &L = matrixLong[n];
         vector<double> &o = matrixOrig[n];
         int type_val = vectorType[n];

@@ -19,11 +19,11 @@ void gradW(GeomData &geomParams,
            vector<double> &pos){
 
     double h = geomParams.h;
-    int nb_moving_part = simParams.nb_moving_part;
+    int nb_part = simParams.nb_part;
 
     // Iterations over each particle
     #pragma omp parallel for
-    for (int n = 0; n < nb_moving_part; n++){
+    for (int n = 0; n < nb_part; n++){
 
         vector<int> &neighbours = neighbours_matrix[n];
         vector<double> &gradW = gradW_matrix[n];
@@ -51,9 +51,8 @@ void gradW(GeomData &geomParams,
         }
     }
 
-    if (simParams.PRINT){
-            cout << "gradW passed" << endl;
-    }
+    if (simParams.PRINT)cout << "gradW passed" << endl;
+    
 }
 
 
@@ -70,20 +69,19 @@ void setSpeedOfSound(GeomData &geomParams,
     bool PRINT = simParams.PRINT;
     int nb_part = simParams.nb_part;
 
-    //if (simParams.t == 25) printArray(c, c.size(), "c");
-
-
     #pragma omp parallel for
     for (int n = 0; n < nb_part; n++){
 
         if (state_equation == "Ideal gaz law") c[n] = c_0;        
-        if (state_equation == "Quasi incompresible fluid") c[n] = c_0 * pow(rho[n] / rho_0, 0.5 * (gamma - 1));
+        else if (state_equation == "Quasi incompresible fluid") c[n] = c_0 * pow(rho[n] / rho_0, 0.5 * (gamma - 1));
+        else {
+            cout << "Error : no state equation chosen" << endl;
+            exit(1);
+        } 
 
         if (c[n] < 0){
             cout << "c ="<< c[n]<< " at timestep : " <<simParams.t << endl;
-            cout << "associated rho = " << rho[n] << endl;
-            cout << "c_0 = " << c_0 << endl;
-            cout << "val = " << pow(rho[n] / rho_0, 0.5 * (gamma - 1)) << "\n" << endl;
+            exit(1);
         }
     
     }
@@ -108,13 +106,11 @@ void setPressure(GeomData &geomParams,
     string state_equation = simParams.state_equation;
 
     #pragma omp parallel for
-    for (int n = 0; n < nb_moving_part; n++)
-    {
+    for (int n = 0; n < nb_moving_part; n++){
 
         if (state_equation == "Ideal gaz law") p[n] = (rho[n] / rho_0 - 1) * (R * T) / M;
 
-        else if (state_equation == "Quasi incompresible fluid")
-        {
+        else if (state_equation == "Quasi incompresible fluid"){
             double B = c_0 * c_0 * rho_0 / gamma;
             p[n] = B * (pow(rho[n] / rho_0, gamma) - 1);
         }
@@ -146,16 +142,14 @@ void setArtificialViscosity(GeomData &geomParams,
     int nb_moving_part = simParams.nb_moving_part;
     int t = simParams.t;
 
-
     if (t == 0){
         #pragma omp parallel for
         for (int n = 0; n < nb_moving_part; n++){
 
             int size_neighbours = nb_neighbours[n];
 
-            for (int idx = 0; idx < size_neighbours; idx++){
+            for (int idx = 0; idx < size_neighbours; idx++)
                 pi_matrix[n][idx] = 0;
-            }
         }
     }
 
@@ -207,9 +201,8 @@ void setArtificialViscosity(GeomData &geomParams,
         }
     }
     
-    if (PRINT){
-            cout << "setArtificialViscosity passed" << endl;
-    }
+    if (PRINT) cout << "setArtificialViscosity passed" << endl;
+    
 }
 
 void continuityEquation(SimulationData& simParams,
@@ -230,13 +223,12 @@ void continuityEquation(SimulationData& simParams,
     for (int n = 0; n < nb_part; n++){
 
         vector<int> &neighbours = neighbours_matrix[n];
-        vector<double> &gradW= gradW_matrix[n];
+        vector<double> &gradW = gradW_matrix[n];
         int size_neighbours = nb_neighbours[n];
 
         // Summation over b = 1 -> nb_neighbours
         for (int idx = 0; idx < size_neighbours; idx++){
 
-            
             double dot_product = 0;
             int i_neig = neighbours[idx];
             double m_b = mass[i_neig];
@@ -250,15 +242,10 @@ void continuityEquation(SimulationData& simParams,
             }
             
             drhodt[n] += m_b * dot_product;
-            //if (simParams.t > 90*100 && simParams.nsave %100 == 0) cout << dot_product << endl;
-            //if (dot_product != 0) cout << "val useful at n : " << n << endl;
         }
-
     }
 
-    if (PRINT){
-            cout << "continuityEquation passed" << endl;
-    }
+    if (PRINT) cout << "continuityEquation passed" << endl;
 }
 
 void momentumEquation(GeomData &geomParams,    

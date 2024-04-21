@@ -38,21 +38,17 @@ void Euler(GeomData &geomParams,
     double theta = simParams.theta;
     double dt = simParams.dt;
 
-    if (schemeIntegration == "RK22"){
-        dt = simParams.dt/(2*theta);
-    }
-
-    if (schemeIntegration == "Euler"){
-        dt = simParams.dt;
-    }
+    if (schemeIntegration == "RK22") dt = simParams.dt/(2*theta);
+    if (schemeIntegration == "Euler") dt = simParams.dt;
+    
 
     // Compute D(rho)/Dt for all particles
     continuityEquation(simParams, neighbours_matrix, nb_neighbours, gradW_matrix, 
-                    pos, u, drhodt, rho, mass); 
+                       pos, u, drhodt, rho, mass); 
 
     // Compute D(u)/Dt for all particles
-    momentumEquation(geomParams, thermoParams, simParams, neighbours_matrix, nb_neighbours, gradW_matrix, artificial_visc_matrix,
-                    mass, dudt, rho, p, c, pos, u); 
+    momentumEquation(geomParams, thermoParams, simParams, neighbours_matrix, nb_neighbours,
+                     gradW_matrix, artificial_visc_matrix, mass, dudt, rho, p, c, pos, u); 
 
     
     int nb_part = simParams.nb_part;
@@ -60,6 +56,10 @@ void Euler(GeomData &geomParams,
     for (int n = 0; n < nb_part; n++){
 
         rho[n] += dt * drhodt[n];
+        if (rho[n] < 0){
+            cout << "Rho negative (" << rho[n] << ") at t:" << simParams.t << endl;
+            exit(1);
+        }
 
         for (int cord = 0; cord < 3; cord++){
 
@@ -143,10 +143,10 @@ void updateVariables(GeomData &geomParams,
     string schemeIntegration = simParams.schemeIntegration;
     int nb_tot_part = pos.size()/3;
 
-    if (schemeIntegration == "Euler"){
+    if (schemeIntegration == "Euler")
+        Euler(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
+              artificial_visc_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
     
-        Euler(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, artificial_visc_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
-    }
 
     if (schemeIntegration == "RK22"){
 
@@ -156,11 +156,10 @@ void updateVariables(GeomData &geomParams,
                         drhodt_half(nb_tot_part,0.0),
                         dudt_half(3*nb_tot_part,0.0);
 
-        RK22(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, artificial_visc_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
-
+        RK22(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass,
+             artificial_visc_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
     }
 
-    if (PRINT){
-        cout << "update passed" << endl;
-    }
+    if (PRINT) cout << "update passed" << endl;
+    
 }

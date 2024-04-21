@@ -33,25 +33,25 @@ int main(int argc, char *argv[])
 
     /*---------------- SETTING COMPILATION PARAMETERS/FOLDER NEEDED --------------------*/
 
-    auto t0 = std::chrono::high_resolution_clock::now();
+    auto t0 = chrono::high_resolution_clock::now();
 
     #ifdef _OPENMP
-        std::cout << "OpenMP available: OMP_NUM_THREADS=" << omp_get_max_threads() << "\n";
+        cout << "OpenMP available: OMP_NUM_THREADS=" << omp_get_max_threads() << "\n";
     #else
-        std::cout << "OpenMP not available.\n";
+        cout << "OpenMP not available.\n";
     #endif
 
     #ifdef NDEBUG
         // code has been configured with "cmake -DCMAKE_BUILD_TYPE=Release .."
-        std::cout << "code built in RELEASE mode.\n";
+        cout << "code built in RELEASE mode.\n";
     #else
         // code has been configured with "cmake .."
-        std::cout << "code built in DEBUG mode.\n";
+        cout << "code built in DEBUG mode.\n";
     #endif
 
         if (argc != 2)
         {
-            std::cout << "\nusage: " << argv[0] << " <param.json>\n\n";
+            cout << "\nusage: " << argv[0] << " <param.json>\n\n";
             return EXIT_FAILURE;
         }
 
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     json data = json::parse(inputf);
 
     cout << argv[1] << ":\n"
-              << data.dump(4) << std::endl; // print input data to screen
+              << data.dump(4) << endl; // print input data to screen
 
     createOutputFolder();
     clearOutputFiles();
@@ -70,11 +70,10 @@ int main(int argc, char *argv[])
     string state_equation;
     string state_initial_condition;
     string schemeIntegration;
-    vector<string> walls_chose;
 
     // Structure to store parameters
     getKey(data, state_equation, state_initial_condition, 
-           schemeIntegration, walls_chose);
+           schemeIntegration);
 
 
     GeomData geomParams = {
@@ -108,8 +107,8 @@ int main(int argc, char *argv[])
         data["M"],
         data["T"],
         data["gamma"],
-        8.314, // [J/(K.mol)]
-        -9.81, // [m/s²]
+        data["R"],
+        data["g"],
     };
 
     SimulationData simParams = {
@@ -131,20 +130,18 @@ int main(int argc, char *argv[])
 
     // Vector used (and labelled w.r.t particles location)
     vector<double> pos, type;
-
     int Nx = geomParams.Nx, Ny = geomParams.Ny, Nz = geomParams.Nz; 
-
     vector<vector<int>> cell_matrix(Nx * Ny * Nz);
 
-    // Initialization of the particles
+    // Initialize particles
     meshcube(geomParams, simParams, pos, type); 
-    meshPostProcess(geomParams, simParams, pos, type);
+    //meshPostProcess(geomParams, simParams, pos, type);
     int nb_tot_part = pos.size()/3;
 
-    vector<double> mass(nb_tot_part), u(3 * nb_tot_part),
-                   drhodt(nb_tot_part), rho(nb_tot_part),
-                   dudt(3 * nb_tot_part, 0.0), p(nb_tot_part),
-                   c(nb_tot_part), grad_sum(nb_tot_part);
+    vector<double> mass(nb_tot_part, 0), u(3 * nb_tot_part, 0),
+                   drhodt(nb_tot_part, 0), rho(nb_tot_part, 0),
+                   dudt(3 * nb_tot_part, 0), p(nb_tot_part, 0),
+                   c(nb_tot_part, 0), grad_sum(nb_tot_part, 0);
 
     vector<vector<double>> pi_matrix(nb_tot_part), gradW_matrix(nb_tot_part);
     vector<vector<int>> neighbours_matrix(nb_tot_part, vector<int>(100));
@@ -153,8 +150,6 @@ int main(int argc, char *argv[])
     // Variables defined to used "export.cpp"
     map<string, vector<double> *> scalars;
     map<string, vector<double> *> vectors;
-
-
     scalars["type"] = &type;
     scalars["mass"] = &mass;
     scalars["rho"] = &rho;
@@ -168,20 +163,20 @@ int main(int argc, char *argv[])
 
     cout << "state equation chosen : " << state_equation << " \n" << endl;
     cout << "kappa * h =" << geomParams.kappa * geomParams.h << endl;
-    cout << "(Nx, Ny, Nz) = (" << geomParams.Nx << ", " << geomParams.Ny << ", " << geomParams.Nz << ")" << std::endl;
-    cout << "nb_moving_part = " << simParams.nb_moving_part << std::endl;
-    cout << "nb_tot_part = " << nb_tot_part << std::endl;
-    cout << "s=" << geomParams.s << std::endl;
-    cout << "kappa=" << geomParams.kappa << std::endl;
-    cout << "h=" << geomParams.h << std::endl;
+    cout << "(Nx, Ny, Nz) = (" << geomParams.Nx << ", " << geomParams.Ny << ", " << geomParams.Nz << ")" << endl;
+    cout << "nb_moving_part = " << simParams.nb_moving_part << endl;
+    cout << "nb_tot_part = " << nb_tot_part << endl;
+    cout << "s =" << geomParams.s << endl;
+    cout << "kappa =" << geomParams.kappa << endl;
+    cout << "h =" << geomParams.h << endl;
 
     /*---------------------------- SPH ALGORITHM  ----------------------------*/
 
-    // Initialise variables of the problem
-    initializeRho(thermoParams, simParams, pos, rho);
-    initializeMass(geomParams, simParams, rho, mass);
-    initializeVelocity(thermoParams, simParams, u);
-    initializeViscosity(simParams, pi_matrix);
+    // Initialize variables of the problem
+    initRho(thermoParams, simParams, pos, rho);
+    initMass(geomParams, simParams, rho, mass);
+    initVelocity(thermoParams, simParams, u);
+    initViscosity(simParams, pi_matrix);
     setPressure(geomParams, thermoParams, simParams, p, rho); 
     setSpeedOfSound(geomParams, thermoParams, simParams, c, rho);
     
@@ -190,11 +185,12 @@ int main(int argc, char *argv[])
         simParams.t = t;
 
         // Check if timeStep is small enough
-        //checkTimeStep(geomParams, thermoParams, simParams, pos, u, c, neighbours_matrix, nb_neighbours, pi_matrix);
+        checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
+                      neighbours_matrix, nb_neighbours, pi_matrix);
 
         // Apply the linked-list algorithm
-        sortedList(geomParams, simParams, cell_matrix, neighbours_matrix, gradW_matrix, 
-                    pi_matrix, nb_neighbours, pos); 
+        sortedList(geomParams, simParams, cell_matrix, neighbours_matrix, 
+                   gradW_matrix, pi_matrix, nb_neighbours, pos); 
 
         // Compute ∇_a(W_ab) for all particles
         gradW(geomParams, simParams, gradW_matrix, neighbours_matrix, nb_neighbours, pos); 
@@ -207,7 +203,6 @@ int main(int argc, char *argv[])
 
             //extractData(simParams, thermoParams, pos, p, mass, gradW_matrix, neighbours_matrix);
             export_particles("../../output/sph", t, pos, scalars, vectors);
-
         }
 
         // Clear matrices and reset arrays to 0

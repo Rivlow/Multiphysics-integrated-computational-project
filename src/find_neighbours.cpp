@@ -53,7 +53,7 @@ void sortedList(GeomData &geomParams,
     }
 
     // Find neighbours for each particle
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (int n = 0; n < size_pos; n++){
 
         int i_cell = pos[3 * n + 0] / (geomParams.L_d[0] / Nx);
@@ -117,10 +117,11 @@ void sortedList(GeomData &geomParams,
                 }
             }
         }
-
+        
         gradW_matrix[n].resize(3*it);
         artificial_visc_matrix[n].resize(it);
         nb_neighbours[n] = it;
+       
     }
 
     if (simParams.PRINT) cout << "findNeighbours passed" << endl;
@@ -133,17 +134,17 @@ void naiveAlgo(GeomData &geomParams,
                vector<vector<int>> &neighbours_matrix,
                vector<double> &pos){
 
-    int nb_moving_part = simParams.nb_moving_part;
+    int pos_size = pos.size()/3; 
 
     // added by RB
-    for (int i = 0; i < nb_moving_part; i++)
-        neighbours_matrix[i].resize(0);
+    //for (int i = 0; i < nb_moving_part; i++)
+        //neighbours_matrix[i].resize(0);
 
+    int it_i = 0, it_j = 0;
 
     // Find neighbours for each particle
-    for (int i = 0; i < nb_moving_part; i++){
-
-        for (int j = i + 1; j < nb_moving_part; j++){
+    for (int i = 0; i < pos_size; i++){
+        for (int j = i + 1; j < pos_size; j++){
 
             double rx, ry, rz, r2;
             rx = (pos[3 * i] - pos[3 * j]);
@@ -156,8 +157,8 @@ void naiveAlgo(GeomData &geomParams,
 
             if (r2 <= kappa * kappa *h * h){
 
-                neighbours_matrix[i].push_back(j);
-                neighbours_matrix[j].push_back(i);
+                neighbours_matrix[i][it_i++];
+                neighbours_matrix[j][it_j++];
             }
         }
     }
