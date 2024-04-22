@@ -41,8 +41,8 @@ struct ThermoData {
     double M;
     double T;
     double gamma;
-    double R = 8.314; // [J/(K.mol)]
-    double g = -9.81; // [m/s²]
+    double R ; // [J/(K.mol)]
+    double g; // [m/s²]
 
 };
 

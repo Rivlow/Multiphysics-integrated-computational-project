@@ -27,6 +27,9 @@ void sortedList(GeomData &geomParams,
                 vector<double> &nb_neighbours,
                 vector<double> &pos){
 
+    if (simParams.PRINT){
+        cout << "findNeighbours begins" << endl;
+    }
     int Nx = geomParams.Nx;
     int Ny = geomParams.Ny;
     int Nz = geomParams.Nz;
