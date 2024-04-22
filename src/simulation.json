@@ -1,7 +1,7 @@
 {
 
-  "matrixLong" : [[ 0.5, 0.5, 0.5]],
-  "matrixOrig" : [[ 0.5, 0.5, 0.5]],
+  "matrixLong" : [[ 1, 1, 1]],
+  "matrixOrig" : [[ 1, 1, 1.1]],
   "vectorType" : [ 1],
 
   "data_store": {
@@ -15,14 +15,14 @@
 
     "o": [0.8, 0.8, 0.6],
     "L": [0.5, 0.5, 0.5],
-    "L_d": [2, 2, 2],
+    "L_d": [3, 3, 3],
     "o_d": [0.0, 0.0, 0.0],
 
     "theta" :0.25,
     "schemeIntegration": {"Euler":true,"RK22":false},
-    "s": 0.025,
-    "nstepT": 60000,
-    "dt": 0.000001,
+    "s": 0.05,
+    "nstepT": 30000,
+    "dt": 0.00005,
     "nsave": 100,
 
     "kappa": 2,
@@ -36,6 +36,8 @@
     "alpha": 0.5,
     "beta": 0,
     "M": 18e-3, 
+    "R": 8.314,
+    "g": -9.81,
 
     "print_debug":false,
     "stateEquation" : {"Ideal gaz law":false, "Quasi incompresible fluid":true},

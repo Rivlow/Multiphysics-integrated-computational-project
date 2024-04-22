@@ -124,13 +124,14 @@ void sortedList(GeomData &geomParams,
                         }
                     }
 
-                    gradW_matrix[n].resize(3*it);
-                    artificial_visc_matrix[n].resize(it);
-                    nb_neighbours[n] = it;
+                    
 
                 }
             }
         }
+        gradW_matrix[n].resize(3*it);
+        artificial_visc_matrix[n].resize(it);
+        nb_neighbours[n] = it;
     }
 
     if (simParams.PRINT){

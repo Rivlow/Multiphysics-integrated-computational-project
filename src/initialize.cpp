@@ -137,9 +137,9 @@ void initializeViscosity(SimulationData &simParams,
 void checkTimeStep(GeomData &geomParams,    
                    ThermoData &thermoParams,
                    SimulationData &simParams, 
-                   int t,
-                   vector<double> pos,
-                   vector<double> c,
+                   vector<double> &pos,
+                   vector<double> &u,
+                   vector<double> &c,
                    vector<vector<int>> &neighbours_matrix,
                    vector<double> &nb_neighbours,
                    vector<vector<double>> &pi_matrix){
@@ -149,6 +149,7 @@ void checkTimeStep(GeomData &geomParams,
     double h = geomParams.h;
     double g = thermoParams.g;
     int nb_moving_part = simParams.nb_moving_part;
+    int t = simParams.t;
 
     double dt_f = h / abs(g);
     double dt_cv;
@@ -163,27 +164,49 @@ void checkTimeStep(GeomData &geomParams,
         double next_dt = simParams.dt;
 
         if (abs(prev_dt - next_dt) != 0){
-            cout << "dt has to be modified, was : " << prev_dt << " and is now : " << next_dt << endl;
+            cout << "dt has to be modified (timestep :" << t <<")"<<", was : " << prev_dt << " and is now : " << next_dt << endl;
         }
     }
     else{
 
+        #pragma omp parallel for   
         for (int n = 0; n < nb_moving_part; n++){
 
-            vector<double> &artificial_visc = pi_matrix[n];
             vector<int> &neighbours = neighbours_matrix[n];
+            int size_neighbours = nb_neighbours[n];
 
-            double c_a = c[n];
-            int size_neighbours = neighbours.size();
-
+            // Iteration over each associated neighbours
             for (int idx = 0; idx < size_neighbours; idx++){
 
-                double pi_ab = artificial_visc[idx];
-                max_b = (pi_ab > max_b) ? pi_ab: max_b;
+                int i_neig = neighbours[idx];
+                vector<double> rel_displ(3), rel_vel(3);
 
+                rel_displ[0] = (pos[3 * n + 0] - pos[3 * i_neig + 0]);
+                rel_displ[1] = (pos[3 * n + 1] - pos[3 * i_neig + 1]);
+                rel_displ[2] = (pos[3 * n + 2] - pos[3 * i_neig + 2]);
+
+                rel_vel[0] = (u[3 * n + 0] - u[3 * i_neig + 0]);
+                rel_vel[1] = (u[3 * n + 1] - u[3 * i_neig + 1]);
+                rel_vel[2] = (u[3 * n + 2] - u[3 * i_neig + 2]);
+
+                double u_ab_x_ab = 0, x_ab_2 = 0;
+
+                // Dot product
+                for (int cord = 0; cord < 3; cord++){
+                    u_ab_x_ab += rel_vel[cord] * rel_displ[cord];
+                    x_ab_2 += rel_displ[cord] * rel_displ[cord];
+                }
+
+                double nu_2 = 0.01 * h * h;
+                double mu_ab = (h * u_ab_x_ab) / (x_ab_2 + nu_2);
+                max_b = (mu_ab > max_b)? mu_ab : max_b;
             }
 
+            double c_a = c[n];
             double val = h/(c_a + 0.6*(alpha*c_a + beta*max_b));
+            if (c_a < 0) cout << "c_a : " << c_a << " at timestep : " << t << endl;
+            if (c_a < 0) printArray(c, c.size(), "c (in init)");
+
             min_a = (val < min_a) ? val : min_a;
 
         }
@@ -200,7 +223,7 @@ void checkTimeStep(GeomData &geomParams,
             double next_dt = simParams.dt;
             
             if (abs(prev_dt - next_dt) != 0){
-                cout << "dt has to be modified, was " << prev_dt << " and is now " << next_dt << endl;
+                cout << "dt modified (t :" << t <<")"<<", was : " << prev_dt << " and is now : " << next_dt << endl;
             }
         }
         else{
@@ -210,7 +233,7 @@ void checkTimeStep(GeomData &geomParams,
             double next_dt = simParams.dt;
 
             if (abs(prev_dt - next_dt) != 0){
-                cout << "dt has to be modified, was " << prev_dt << " and is now " << next_dt << endl;
+                cout << "dt has to be modified (timestep :" << t <<")"<<", was : " << prev_dt << " and is now : " << next_dt << endl;
             }
         }
     }

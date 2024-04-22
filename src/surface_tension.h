@@ -11,6 +11,7 @@
 using namespace std;
 
 
-void surfaceTension(SimulationData& simParams, GeomData &geomParams, vector<double> nb_neighbours,
-                    vector<vector<int>> neighbours_matrix, vector<double> mass,
+void surfaceTension(SimulationData& simParams, GeomData &geomParams,
+ThermoData &thermoParam, vector<double> nb_neighbours,
+                    vector<vector<int>> neighbours_matrix,vector<vector<double>> gradW_matrix, vector<double> mass,
                     vector<double> rho, vector<double> pos, vector<double> &F_vol);

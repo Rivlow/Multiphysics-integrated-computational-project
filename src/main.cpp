@@ -106,8 +106,8 @@ int main(int argc, char *argv[])
         data["M"],
         data["T"],
         data["gamma"],
-        8.314, // [J/(K.mol)]
-        -9.81, // [m/s²]
+        data["R"], // [J/(K.mol)]
+        data["g"], // [m/s²]
     };
 
     SimulationData simParams = {
@@ -126,6 +126,7 @@ int main(int argc, char *argv[])
         state_initial_condition,
         data["print_debug"],
         evaluateNumberParticles(geomParams),
+
     };
 
 
@@ -191,10 +192,10 @@ int main(int argc, char *argv[])
     setSpeedOfSound(geomParams, thermoParams, simParams, c, rho);
 
     for (int t = 0; t < simParams.nstepT; t++){
-        
+        simParams.t = t;
         // Check if timeStep is small enough
-        checkTimeStep(geomParams, thermoParams, simParams, t, pos, c, neighbours_matrix, nb_neighbours, pi_matrix);
-
+        checkTimeStep(geomParams, thermoParams, simParams, pos, u, c, neighbours_matrix, nb_neighbours, pi_matrix);
+        
         // Apply the linked-list algorithm
         sortedList(geomParams, simParams, cell_matrix, neighbours_matrix, gradW_matrix, 
                     pi_matrix, nb_neighbours, pos); 
