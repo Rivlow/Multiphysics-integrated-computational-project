@@ -8,9 +8,8 @@
 #include "tools.h"
 #include "structure.h"
 #include "surface_tension.h"
-
-
 using namespace std;
+
 
 void gradW(GeomData &geomParams,    
            SimulationData &simParams, 
@@ -315,9 +314,9 @@ void momentumEquation(GeomData &geomParams,
             
                 
             dudt[3 * n + cord] += F_vol[3 * n + cord];
-            /*if(cord == 2){
+            if(cord == 2){
                 dudt[3 * n + cord] += g;
-            }*/
+            }
         }
     }
 

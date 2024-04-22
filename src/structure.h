@@ -20,14 +20,15 @@ struct GeomData {
     vector<double> L;
     vector<double> o_d;
     vector<double> L_d;
-    vector<double> post_process_in;
-    vector<double> post_process_out;
+    bool post_process_do;
+    vector<double> xyz_init;
+    vector<double> xyz_end;
     int Nx;
     int Ny;
     int Nz;
-    vector<vector<double>> matrixLong;
-    vector<vector<double>> matrixOrig;
-    vector<int> vectorType; 
+    vector<vector<double>> matrix_long;
+    vector<vector<double>> matrix_orig;
+    vector<int> vector_type; 
 };
 
 struct ThermoData {
@@ -41,8 +42,8 @@ struct ThermoData {
     double M;
     double T;
     double gamma;
-    double R ; // [J/(K.mol)]
-    double g; // [m/s²]
+    double R ; 
+    double g; 
 
 };
 

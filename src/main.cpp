@@ -75,26 +75,26 @@ int main(int argc, char *argv[])
     getKey(data, state_equation, state_initial_condition, 
            schemeIntegration);
 
-
     GeomData geomParams = {
 
         data["kappa"],
         data["s"],
         1.2 * geomParams.s,
-        data["o"],
-        data["L"],
-        data["o_d"],
-        data["L_d"],
-        data["post_process_in"],
-        data["post_process_out"],
+        data["domain"]["o"],
+        data["domain"]["L"],
+        data["domain"]["o_d"],
+        data["domain"]["L_d"],
+        data["post_process"]["do"],
+        data["post_process"]["xyz_init"],
+        data["post_process"]["xyz_end"],
         int(geomParams.L_d[0] / (geomParams.kappa * geomParams.h)),
         int(geomParams.L_d[1] / (geomParams.kappa * geomParams.h)),
         int(geomParams.L_d[2] / (geomParams.kappa * geomParams.h)),
-
-        data["matrixLong"],
-        data["matrixOrig"],
-        data["vectorType"],
+        data["domain"]["matrix_long"],
+        data["domain"]["matrix_orig"],
+        data["domain"]["vector_type"],
     };
+    cout << "GeomData initialized" << endl;
 
     ThermoData thermoParams = {
 
@@ -108,8 +108,11 @@ int main(int argc, char *argv[])
         data["T"],
         data["gamma"],
         data["R"],
-        data["g"],
+        data["forces"]["gravity"] ? 9.81 : 0,
+        
     };
+    cout << "ThermoData initialized" << endl;
+
 
     SimulationData simParams = {
 
@@ -125,6 +128,7 @@ int main(int argc, char *argv[])
         evaluateNumberParticles(geomParams),
 
     };
+    cout << "SimulationData initialized" << endl;
 
 
     /*------------------- INITIALIZATION OF VARIABLES USED -------------------*/
@@ -136,7 +140,7 @@ int main(int argc, char *argv[])
 
     // Initialize particles
     meshcube(geomParams, simParams, pos, type); 
-    //meshPostProcess(geomParams, simParams, pos, type);
+    if (geomParams.post_process_do) meshPostProcess(geomParams, simParams, pos, type);
     int nb_tot_part = pos.size()/3;
 
     vector<double> mass(nb_tot_part, 0), u(3 * nb_tot_part, 0),

@@ -17,8 +17,8 @@ using namespace std;
  */
 
 int evaluateNumberParticles(GeomData &geomParams){
-    vector<vector<double>> matrixLong = geomParams.matrixLong;
-    vector<int> vectorType = geomParams.vectorType;
+    vector<vector<double>> matrixLong = geomParams.matrix_long;
+    vector<int> vectorType = geomParams.vector_type;
     double s = geomParams.s;
     int nbpart = 0;
 
@@ -52,15 +52,15 @@ void meshcube(GeomData &geomParams,
               vector<double> &pos,
               vector<double> &type){
 
-    vector<vector<double>> matrixLong = geomParams.matrixLong;
-    vector<vector<double>> matrixOrig = geomParams.matrixOrig;
-    vector<int> vectorType = geomParams.vectorType;
+    vector<vector<double>> matrix_long = geomParams.matrix_long;
+    vector<vector<double>> matrix_orig = geomParams.matrix_orig;
+    vector<int> vectorType = geomParams.vector_type;
     double s = geomParams.s;
     
     for(int n = 0 ; n < int(vectorType.size()); n++){
 
-        vector<double> &L = matrixLong[n];
-        vector<double> &o = matrixOrig[n];
+        vector<double> &L = matrix_long[n];
+        vector<double> &o = matrix_orig[n];
         int type_val = vectorType[n];
         double dx = 0;
         double dy = 0;
@@ -125,13 +125,13 @@ void meshPostProcess(GeomData &geomParams,
                      vector<double> &pos, 
                      vector<double> &type){
 
-    vector<double>& post_process_in = geomParams.post_process_in;
-    vector<double>& post_process_out = geomParams.post_process_out;
+    vector<double>& xyz_init = geomParams.xyz_init;
+    vector<double>& xyz_end = geomParams.xyz_end;
     double s = geomParams.s;
 
-    double dx = post_process_out[0] - post_process_in[0];
-    double dy = post_process_out[1] - post_process_in[1];
-    double dz = post_process_out[2] - post_process_in[2];
+    double dx = xyz_end[0] - xyz_init[0];
+    double dy = xyz_end[1] - xyz_init[1];
+    double dz = xyz_end[2] - xyz_init[2];
 
     double dist = sqrt(dx * dx + dy * dy + dz * dz);
 
@@ -145,9 +145,9 @@ void meshPostProcess(GeomData &geomParams,
 
     for (int i = 0; i < nb_points; i++) {
         count++;
-        pos.push_back(post_process_in[0] + i * step_x);
-        pos.push_back(post_process_in[1] + i * step_y);
-        pos.push_back(post_process_in[2] + i * step_z);
+        pos.push_back(xyz_init[0] + i * step_x);
+        pos.push_back(xyz_init[1] + i * step_y);
+        pos.push_back(xyz_init[2] + i * step_z);
         type.push_back(2.0);
     }
 
