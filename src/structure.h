@@ -20,10 +20,11 @@ struct GeomData {
     vector<double> L;
     vector<double> o_d;
     vector<double> L_d;
+    vector<double> post_process_in;
+    vector<double> post_process_out;
     int Nx;
     int Ny;
     int Nz;
-    
     vector<vector<double>> matrixLong;
     vector<vector<double>> matrixOrig;
     vector<int> vectorType; 
@@ -52,20 +53,13 @@ struct SimulationData {
     double dt; 
     double theta;
     string schemeIntegration;
-    vector<string> data_store;
-    int data_init;
-    int data_end;
-    bool data_do;
-    
     vector<double> u_init;
-
     string state_equation; 
     string state_initial_condition;
     bool PRINT;
-
     int nb_moving_part;
+    int nb_part;
     int t;
-
  
 };
 

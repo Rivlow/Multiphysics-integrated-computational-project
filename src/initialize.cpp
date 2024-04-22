@@ -7,34 +7,34 @@
 #include "initialize.h"
 #include "structure.h"
 #include "gradient.h"
-
-
+#include "tools.h"
 
 using namespace std;
 
-void initializeMass(GeomData &geomParams,
-                    SimulationData &simParams, 
-                    vector<double> &rho,
-                    vector<double> &mass){
+
+void initMass(GeomData &geomParams,
+              SimulationData &simParams, 
+              vector<double> &rho,
+              vector<double> &mass){
 
     double s = geomParams.s;  
     bool PRINT = simParams.PRINT;  
     double V = s * s * s;
     int rho_size = rho.size();
 
-    for (int i = 0; i < rho_size; i++){
+    #pragma omp parallel for   
+    for (int i = 0; i < rho_size; i++)
         mass[i] = rho[i] * V;
-    }
+    
 
-    if (PRINT){
-        cout << "initializeMass passed" << endl;
-    }
+    if (PRINT) cout << "initMass passed" << endl;
+    
 }
 
-void initializeRho(ThermoData &thermoParams,
-                   SimulationData &simParams,
-                   vector<double> &pos,
-                   vector<double> &rho){
+void initRho(ThermoData &thermoParams,
+             SimulationData &simParams,
+             vector<double> &pos,
+             vector<double> &rho){
 
     string state_initial_condition = simParams.state_initial_condition;
     string state_equation = simParams.state_equation;
@@ -56,37 +56,34 @@ void initializeRho(ThermoData &thermoParams,
 
     if (state_initial_condition == "Hydrostatic"){
         if (state_equation == "Ideal gaz law"){
-            for (int i = 0; i < rho_size; i++){
 
+            #pragma omp parallel for   
+            for (int i = 0; i < rho_size; i++)
                 rho[i] = (i < nb_moving_part) ? rho_0 * (1 + M * rho_0 
-                                * g * pos[3 * i + 2] / (R * T)) : rho_fixed;
-            }
+                                * g * pos[3 * i + 2] / (R * T)) : rho_fixed;    
         }
 
         if (state_equation == "Quasi incompresible fluid"){
 
             double B = c_0 * c_0 * rho_0 / gamma;
-            for (int i = 0; i < rho_size; i++){
-
+            for (int i = 0; i < rho_size; i++)
                 rho[i] = (i < nb_moving_part) ? rho_0 * (1 + rho_0 
-                                * g * pos[3 * i + 2] / B) : rho_fixed;
-            }
+                                * g * pos[3 * i + 2] / B) : rho_fixed;  
         }
     }
     else{
 
-        for (int i = 0; i < rho_size; i++){
+        #pragma omp parallel for   
+        for (int i = 0; i < rho_size; i++)
             rho[i] = (i < nb_moving_part) ? rho_moving : rho_fixed;
-        }
+        
     }
 
-    if (PRINT){
-
-        cout << "initializeRho passed" << endl;
-    }
+    if (PRINT) cout << "initRho passed" << endl;
+    
 }
 
-void initializeVelocity(ThermoData &thermoParams,
+void initVelocity(ThermoData &thermoParams,
                         SimulationData &simParams, 
                         vector<double> &u){
 
@@ -95,6 +92,7 @@ void initializeVelocity(ThermoData &thermoParams,
     int nb_moving_part = simParams.nb_moving_part;
     int u_size = u.size();
 
+    #pragma omp parallel for   
     for (int i = 0; i < u_size / 3; i++){
 
         if (i < nb_moving_part){
@@ -110,16 +108,16 @@ void initializeVelocity(ThermoData &thermoParams,
     }
 
     if (PRINT){
-       cout << "initializeVelocity passed" << endl;
+       cout << "initVelocity passed" << endl;
     }
 }
 
-void initializeViscosity(SimulationData &simParams, 
+void initViscosity(SimulationData &simParams, 
                          vector<vector<double>> &pi_matrix){
 
     bool PRINT = simParams.PRINT;
     int size_pi_matrix = pi_matrix.size();
-
+    #pragma omp parallel for   
     for (int i = 0; i < size_pi_matrix; i++){
 
         int size_artificial_visc = pi_matrix[i].size();
@@ -130,7 +128,7 @@ void initializeViscosity(SimulationData &simParams,
     }
 
     if (PRINT){
-        cout << "initializeViscosity passed" << endl;
+        cout << "initViscosity passed" << endl;
     }
 }
 
