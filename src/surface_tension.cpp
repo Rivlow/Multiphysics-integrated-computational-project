@@ -88,7 +88,7 @@ vector<double> &F_vol
     }
 
 
-    double alpha = 8;
+    double alpha = 100;
     #pragma omp parallel for 
     for(int n = 0; n<simParams.nb_moving_part; n++){
         vector<int> &neighbours = neighbours_matrix[n];
