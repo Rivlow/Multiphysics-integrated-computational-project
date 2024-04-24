@@ -61,7 +61,7 @@ vector<double> &F_vol
             cout<<"W = "<< W << endl;
             cout<<"dx = "<< dx << endl;
             cout<<"dy = "<< dy << endl;
-            cout<<"dz = "<< dz << endl;
+            cout<<"dz = "<< dz << en    dl;
 
         }
     }
@@ -88,7 +88,7 @@ vector<double> &F_vol
     }
 
 
-    double alpha = 100;
+    double alpha = 0.8;
     #pragma omp parallel for 
     for(int n = 0; n<simParams.nb_moving_part; n++){
         vector<int> &neighbours = neighbours_matrix[n];
