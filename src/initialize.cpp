@@ -7,34 +7,34 @@
 #include "initialize.h"
 #include "structure.h"
 #include "gradient.h"
-
-
+#include "tools.h"
 
 using namespace std;
 
-void initializeMass(GeomData &geomParams,
-                    SimulationData &simParams, 
-                    vector<double> &rho,
-                    vector<double> &mass){
+
+void initMass(GeomData &geomParams,
+              SimulationData &simParams, 
+              vector<double> &rho,
+              vector<double> &mass){
 
     double s = geomParams.s;  
     bool PRINT = simParams.PRINT;  
     double V = s * s * s;
-    int nb_fixed_part = simParams.nb_fixed_part;
+    int rho_size = rho.size();
 
-    for (int i = 0; i < nb_fixed_part; i++){
+    #pragma omp parallel for   
+    for (int i = 0; i < rho_size; i++)
         mass[i] = rho[i] * V;
-    }
+    
 
-    if (PRINT){
-        cout << "initializeMass passed" << endl;
-    }
+    if (PRINT) cout << "initMass passed" << endl;
+    
 }
 
-void initializeRho(ThermoData &thermoParams,
-                   SimulationData &simParams,
-                   vector<double> &pos,
-                   vector<double> &rho){
+void initRho(ThermoData &thermoParams,
+             SimulationData &simParams,
+             vector<double> &pos,
+             vector<double> &rho){
 
     string state_initial_condition = simParams.state_initial_condition;
     string state_equation = simParams.state_equation;
@@ -51,67 +51,73 @@ void initializeRho(ThermoData &thermoParams,
     double gamma = thermoParams.gamma;
     double g = thermoParams.g;
 
-    int nb_fixed_part = simParams.nb_fixed_part;
+    int rho_size = rho.size();
 
 
     if (state_initial_condition == "Hydrostatic"){
         if (state_equation == "Ideal gaz law"){
-            for (int i = 0; i < nb_fixed_part; i++){
 
+            #pragma omp parallel for   
+            for (int i = 0; i < rho_size; i++)
                 rho[i] = (i < nb_moving_part) ? rho_0 * (1 + M * rho_0 
-                                * g * pos[3 * i + 2] / (R * T)) : rho_fixed;
-            }
+                                * g * pos[3 * i + 2] / (R * T)) : rho_fixed;    
         }
 
         if (state_equation == "Quasi incompresible fluid"){
 
             double B = c_0 * c_0 * rho_0 / gamma;
-            for (int i = 0; i < nb_fixed_part; i++){
-
+            for (int i = 0; i < rho_size; i++)
                 rho[i] = (i < nb_moving_part) ? rho_0 * (1 + rho_0 
-                                * g * pos[3 * i + 2] / B) : rho_fixed;
-            }
+                                * g * pos[3 * i + 2] / B) : rho_fixed;  
         }
     }
     else{
 
-        for (int i = 0; i < nb_fixed_part; i++){
+        #pragma omp parallel for   
+        for (int i = 0; i < rho_size; i++)
             rho[i] = (i < nb_moving_part) ? rho_moving : rho_fixed;
-        }
+        
     }
 
-    if (PRINT){
-
-        cout << "initializeRho passed" << endl;
-    }
+    if (PRINT) cout << "initRho passed" << endl;
+    
 }
 
-void initializeVelocity(ThermoData &thermoParams,
+void initVelocity(ThermoData &thermoParams,
                         SimulationData &simParams, 
                         vector<double> &u){
 
 
     bool PRINT = simParams.PRINT;
     int nb_moving_part = simParams.nb_moving_part;
+    int u_size = u.size();
 
-    for (int i = 0; i < nb_moving_part; i++){
+    #pragma omp parallel for   
+    for (int i = 0; i < u_size / 3; i++){
 
-        u[3 * i] = simParams.u_init[0];
-        u[3 * i + 1] = simParams.u_init[1];
-        u[3 * i + 2] = simParams.u_init[2];
+        if (i < nb_moving_part){
+            u[3 * i] = simParams.u_init[0];
+            u[3 * i + 1] = simParams.u_init[1];
+            u[3 * i + 2] = simParams.u_init[2];
+        }
+        else{
+            u[3 * i] = 0;
+            u[3 * i + 1] = 0;
+            u[3 * i + 2] = 0;
+        }
     }
 
     if (PRINT){
-       cout << "initializeVelocity passed" << endl;
+       cout << "initVelocity passed" << endl;
     }
 }
 
-void initializeViscosity(SimulationData &simParams, 
+void initViscosity(SimulationData &simParams, 
                          vector<vector<double>> &pi_matrix){
 
     bool PRINT = simParams.PRINT;
     int size_pi_matrix = pi_matrix.size();
-
+    #pragma omp parallel for   
     for (int i = 0; i < size_pi_matrix; i++){
 
         int size_artificial_visc = pi_matrix[i].size();
@@ -122,16 +128,16 @@ void initializeViscosity(SimulationData &simParams,
     }
 
     if (PRINT){
-        cout << "initializeViscosity passed" << endl;
+        cout << "initViscosity passed" << endl;
     }
 }
 
 void checkTimeStep(GeomData &geomParams,    
                    ThermoData &thermoParams,
                    SimulationData &simParams, 
-                   int t,
-                   vector<double> pos,
-                   vector<double> c,
+                   vector<double> &pos,
+                   vector<double> &u,
+                   vector<double> &c,
                    vector<vector<int>> &neighbours_matrix,
                    vector<double> &nb_neighbours,
                    vector<vector<double>> &pi_matrix){
@@ -141,6 +147,7 @@ void checkTimeStep(GeomData &geomParams,
     double h = geomParams.h;
     double g = thermoParams.g;
     int nb_moving_part = simParams.nb_moving_part;
+    int t = simParams.t;
 
     double dt_f = h / abs(g);
     double dt_cv;
@@ -155,27 +162,49 @@ void checkTimeStep(GeomData &geomParams,
         double next_dt = simParams.dt;
 
         if (abs(prev_dt - next_dt) != 0){
-            cout << "dt has to be modified, was : " << prev_dt << " and is now : " << next_dt << endl;
+            cout << "dt has to be modified (timestep :" << t <<")"<<", was : " << prev_dt << " and is now : " << next_dt << endl;
         }
     }
     else{
 
+        #pragma omp parallel for   
         for (int n = 0; n < nb_moving_part; n++){
 
-            vector<double> &artificial_visc = pi_matrix[n];
             vector<int> &neighbours = neighbours_matrix[n];
+            int size_neighbours = nb_neighbours[n];
 
-            double c_a = c[n];
-            int size_neighbours = neighbours.size();
-
+            // Iteration over each associated neighbours
             for (int idx = 0; idx < size_neighbours; idx++){
 
-                double pi_ab = artificial_visc[idx];
-                max_b = (pi_ab > max_b) ? pi_ab: max_b;
+                int i_neig = neighbours[idx];
+                vector<double> rel_displ(3), rel_vel(3);
 
+                rel_displ[0] = (pos[3 * n + 0] - pos[3 * i_neig + 0]);
+                rel_displ[1] = (pos[3 * n + 1] - pos[3 * i_neig + 1]);
+                rel_displ[2] = (pos[3 * n + 2] - pos[3 * i_neig + 2]);
+
+                rel_vel[0] = (u[3 * n + 0] - u[3 * i_neig + 0]);
+                rel_vel[1] = (u[3 * n + 1] - u[3 * i_neig + 1]);
+                rel_vel[2] = (u[3 * n + 2] - u[3 * i_neig + 2]);
+
+                double u_ab_x_ab = 0, x_ab_2 = 0;
+
+                // Dot product
+                for (int cord = 0; cord < 3; cord++){
+                    u_ab_x_ab += rel_vel[cord] * rel_displ[cord];
+                    x_ab_2 += rel_displ[cord] * rel_displ[cord];
+                }
+
+                double nu_2 = 0.01 * h * h;
+                double mu_ab = (h * u_ab_x_ab) / (x_ab_2 + nu_2);
+                max_b = (mu_ab > max_b)? mu_ab : max_b;
             }
 
+            double c_a = c[n];
             double val = h/(c_a + 0.6*(alpha*c_a + beta*max_b));
+            if (c_a < 0) cout << "c_a : " << c_a << " at timestep : " << t << endl;
+            if (c_a < 0) printArray(c, c.size(), "c (in init)");
+
             min_a = (val < min_a) ? val : min_a;
 
         }
@@ -192,7 +221,7 @@ void checkTimeStep(GeomData &geomParams,
             double next_dt = simParams.dt;
             
             if (abs(prev_dt - next_dt) != 0){
-                cout << "dt has to be modified, was " << prev_dt << " and is now " << next_dt << endl;
+                cout << "dt modified (t :" << t <<")"<<", was : " << prev_dt << " and is now : " << next_dt << endl;
             }
         }
         else{
@@ -202,7 +231,7 @@ void checkTimeStep(GeomData &geomParams,
             double next_dt = simParams.dt;
 
             if (abs(prev_dt - next_dt) != 0){
-                cout << "dt has to be modified, was " << prev_dt << " and is now " << next_dt << endl;
+                cout << "dt has to be modified (timestep :" << t <<")"<<", was : " << prev_dt << " and is now : " << next_dt << endl;
             }
         }
     }

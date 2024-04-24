@@ -25,14 +25,9 @@ struct GeomData {
     int Nx;
     int Ny;
     int Nz;
-    
-    string shape;
-    vector<string> walls_chose;
-    double particle_layers;
-
-    bool walls_used(string wall)  {
-        return find(walls_chose.begin(), walls_chose.end(), wall) != walls_chose.end();
-    };
+    vector<vector<double>> matrixLong;
+    vector<vector<double>> matrixOrig;
+    vector<int> vectorType; 
 };
 
 struct ThermoData {
@@ -46,8 +41,8 @@ struct ThermoData {
     double M;
     double T;
     double gamma;
-    double R = 8.314; // [J/(K.mol)]
-    double g = -9.81; // [m/s²]
+    double R ; // [J/(K.mol)]
+    double g; // [m/s²]
 
 };
 
@@ -58,20 +53,13 @@ struct SimulationData {
     double dt; 
     double theta;
     string schemeIntegration;
-    vector<string> data_store;
-    int data_init;
-    int data_end;
-    bool data_do;
-    
     vector<double> u_init;
-
     string state_equation; 
     string state_initial_condition;
     bool PRINT;
-
     int nb_moving_part;
-    int nb_fixed_part;
-
+    int nb_part;
+    int t;
  
 };
 

@@ -7,6 +7,7 @@
 #include "Kernel.h"
 #include "tools.h"
 #include "structure.h"
+#include "surface_tension.h"
 
 
 using namespace std;
@@ -19,11 +20,11 @@ void gradW(GeomData &geomParams,
            vector<double> &pos){
 
     double h = geomParams.h;
-    int nb_moving_part = simParams.nb_moving_part;
+    int nb_part = simParams.nb_part;
 
     // Iterations over each particle
     #pragma omp parallel for
-    for (int n = 0; n < nb_moving_part; n++){
+    for (int n = 0; n < nb_part; n++){
 
         vector<int> &neighbours = neighbours_matrix[n];
         vector<double> &gradW = gradW_matrix[n];
@@ -33,16 +34,16 @@ void gradW(GeomData &geomParams,
         for (int idx = 0; idx < size_neighbours; idx++){
 
             int i_neig = neighbours[idx];
-            double r_ab, r_val = 0;
+            double r_ab = 0;
             vector<double> pos_val(3);
 
             for (int coord = 0; coord < 3; coord++){
-
+                
                 pos_val[coord] = pos[3 * n + coord] - pos[3 * i_neig + coord];
-                r_val += pos_val[coord]*pos_val[coord];
+                r_ab += pos_val[coord]*pos_val[coord];
             }
 
-            r_ab = sqrt(r_val);
+            r_ab = sqrt(r_ab);
             double deriv = derive_cubic_spline(r_ab, h);
 
             for (int coord = 0; coord < 3; coord++){
@@ -51,10 +52,10 @@ void gradW(GeomData &geomParams,
         }
     }
 
-    if (simParams.PRINT){
-            cout << "gradW passed" << endl;
-    }
+    if (simParams.PRINT)cout << "gradW passed" << endl;
+    
 }
+
 
 void setSpeedOfSound(GeomData &geomParams,    
                      ThermoData &thermoParams,
@@ -66,26 +67,27 @@ void setSpeedOfSound(GeomData &geomParams,
     double c_0 = thermoParams.c_0;
     double rho_0 = thermoParams.rho_0;
     double gamma = thermoParams.gamma;
-    int nb_moving_part = simParams.nb_moving_part;
     bool PRINT = simParams.PRINT;
-
+    int nb_part = simParams.nb_part;
 
     #pragma omp parallel for
-    for (int n = 0; n < nb_moving_part; n++){
+    for (int n = 0; n < nb_part; n++){
 
-        if (state_equation == "Ideal gaz law"){
-            c[n] = c_0;
-        }
+        if (state_equation == "Ideal gaz law") c[n] = c_0;        
+        else if (state_equation == "Quasi incompresible fluid") c[n] = c_0 * pow(rho[n] / rho_0, 0.5 * (gamma - 1));
+        else {
+            cout << "Error : no state equation chosen" << endl;
+            exit(1);
+        } 
 
-        if (state_equation == "Quasi incompresible fluid"){
-            c[n] = c_0 * pow(rho[n] / rho_0, 0.5 * (gamma - 1));
+        if (c[n] < 0){
+            cout << "c ="<< c[n]<< " at timestep : " <<simParams.t << endl;
+            exit(1);
         }
+    
     }
 
-        if (PRINT){
-            cout << "setSpeedOfSound passed" << endl;
-    }
-
+        if (PRINT) cout << "setSpeedOfSound passed" << endl;
 }
 
 void setPressure(GeomData &geomParams,    
@@ -105,30 +107,27 @@ void setPressure(GeomData &geomParams,
     string state_equation = simParams.state_equation;
 
     #pragma omp parallel for
-    for (int n = 0; n < nb_moving_part; n++)
-    {
+    for (int n = 0; n < nb_moving_part; n++){
 
-        if (state_equation == "Ideal gaz law")
-        {
-            p[n] = (rho[n] / rho_0 - 1) * (R * T) / M;
-        }
+        if (state_equation == "Ideal gaz law") p[n] = (rho[n] / rho_0 - 1) * (R * T) / M;
 
-        if (state_equation == "Quasi incompresible fluid")
-        {
+        else if (state_equation == "Quasi incompresible fluid"){
             double B = c_0 * c_0 * rho_0 / gamma;
             p[n] = B * (pow(rho[n] / rho_0, gamma) - 1);
         }
+        else {
+            cout << "Error : no state equation chosen" << endl;
+            exit(1);
+        }
     }
 
-    if (PRINT){
-            cout << "setPressure passed" << endl;
-    }
+    if (PRINT) cout << "setPressure passed" << endl;
+    
 }
 
 void setArtificialViscosity(GeomData &geomParams,    
                             ThermoData &thermoParams,
                             SimulationData &simParams, 
-                            int t,
                             vector<vector<double>> &pi_matrix,
                             vector<vector<int>> &neighbours_matrix,
                             vector<double> &nb_neighbours,
@@ -141,18 +140,17 @@ void setArtificialViscosity(GeomData &geomParams,
     double alpha = thermoParams.alpha;
     double h = geomParams.h;
     bool PRINT = simParams.PRINT;
-    int nb_fixed_part = simParams.nb_fixed_part;
-
+    int nb_moving_part = simParams.nb_moving_part;
+    int t = simParams.t;
 
     if (t == 0){
         #pragma omp parallel for
-        for (int n = 0; n < nb_fixed_part; n++){
+        for (int n = 0; n < nb_moving_part; n++){
 
             int size_neighbours = nb_neighbours[n];
 
-            for (int idx = 0; idx < size_neighbours; idx++){
+            for (int idx = 0; idx < size_neighbours; idx++)
                 pi_matrix[n][idx] = 0;
-            }
         }
     }
 
@@ -162,7 +160,7 @@ void setArtificialViscosity(GeomData &geomParams,
 
         // Iterations over each particle
         #pragma omp parallel for
-        for (int n = 0; n < nb_fixed_part; n++){
+        for (int n = 0; n < nb_moving_part; n++){
 
             vector<int> &neighbours = neighbours_matrix[n];
             int size_neighbours = nb_neighbours[n];
@@ -204,9 +202,8 @@ void setArtificialViscosity(GeomData &geomParams,
         }
     }
     
-    if (PRINT){
-            cout << "setArtificialViscosity passed" << endl;
-    }
+    if (PRINT) cout << "setArtificialViscosity passed" << endl;
+    
 }
 
 void continuityEquation(SimulationData& simParams,
@@ -220,20 +217,19 @@ void continuityEquation(SimulationData& simParams,
                         vector<double> &mass){
 
     bool PRINT = simParams.PRINT;
-    int nb_fixed_part = simParams.nb_fixed_part;
+    int nb_part = simParams.nb_part;
              
     // Iterations over each particle
     #pragma omp parallel for
-    for (int n = 0; n < nb_fixed_part; n++){
+    for (int n = 0; n < nb_part; n++){
 
         vector<int> &neighbours = neighbours_matrix[n];
-        vector<double> &gradW= gradW_matrix[n];
+        vector<double> &gradW = gradW_matrix[n];
         int size_neighbours = nb_neighbours[n];
 
         // Summation over b = 1 -> nb_neighbours
         for (int idx = 0; idx < size_neighbours; idx++){
 
-            
             double dot_product = 0;
             int i_neig = neighbours[idx];
             double m_b = mass[i_neig];
@@ -248,18 +244,14 @@ void continuityEquation(SimulationData& simParams,
             
             drhodt[n] += m_b * dot_product;
         }
-
     }
 
-    if (PRINT){
-            cout << "continuityEquation passed" << endl;
-    }
+    if (PRINT) cout << "continuityEquation passed" << endl;
 }
 
 void momentumEquation(GeomData &geomParams,    
                       ThermoData &thermoParams,
                       SimulationData &simParams, 
-                      int t,
                       vector<vector<int>> &neighbours_matrix,
                       vector<double> &nb_neighbours,
                       vector<vector<double>> &gradW_matrix,
@@ -284,9 +276,14 @@ void momentumEquation(GeomData &geomParams,
     setSpeedOfSound(geomParams, thermoParams, simParams, c, rho);
 
     // Compute artificial viscosity Π_ab for all particles
-    setArtificialViscosity(geomParams, thermoParams, simParams, t, pi_matrix, 
+    setArtificialViscosity(geomParams, thermoParams, simParams, pi_matrix, 
                            neighbours_matrix, nb_neighbours, c, pos, rho, u); 
 
+    vector<double> F_vol(3*simParams.nb_moving_part,0.0);
+
+    surfaceTension(simParams, geomParams,thermoParams, nb_neighbours, neighbours_matrix, gradW_matrix, mass, 
+                   rho, pos, F_vol);
+    //printArray(F_vol, F_vol.size(), "fvol");
     // Iterate over each particle
     #pragma omp parallel for
     for (int n = 0; n < nb_moving_part; n++){
@@ -294,14 +291,15 @@ void momentumEquation(GeomData &geomParams,
         vector<int> &neighbours = neighbours_matrix[n];
         vector<double> &gradW = gradW_matrix[n];
         vector<double> &artificial_visc = pi_matrix[n];
-        vector<double> F_vol = {0.0, 0.0, g};
+        
         double rho_a = rho[n];
         double p_a = p[n];
 
         for (int cord = 0; cord < 3; cord++){
 
             // Summation over b = 1 -> nb_neighbours
-            for (int idx = 0; idx < int(nb_neighbours[n]); idx++){
+            int size_neighbours = nb_neighbours[n];
+            for (int idx = 0; idx < size_neighbours; idx++){
 
                 int i_neig = neighbours[idx];
                 double pi_ab = artificial_visc[idx];
@@ -314,13 +312,16 @@ void momentumEquation(GeomData &geomParams,
             }
 
             dudt[3 * n + cord] *= -1;
-            dudt[3 * n + cord] += F_vol[cord];
+            
+                
+            dudt[3 * n + cord] += F_vol[3 * n + cord];
+            /*if(cord == 2){
+                dudt[3 * n + cord] += g;
+            }*/
         }
     }
 
-    if (PRINT){
-        cout << "momentumEquation passed" << endl;
-    }
+    if (PRINT) cout << "momentumEquation passed" << endl;
 }
 
 

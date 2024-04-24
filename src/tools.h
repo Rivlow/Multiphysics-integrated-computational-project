@@ -20,8 +20,7 @@ void printArray(vector<T> &array, int size, string name);
 void getKey(json data,
             string &state_equation,
             string &state_initial_condition,
-            string &schemeIntegration,
-            vector<string> &walls_chose);
+            string &schemeIntegration);
     
 
 void createOutputFolder();
