@@ -145,7 +145,7 @@ void checkTimeStep(GeomData &geomParams,
     double alpha = thermoParams.alpha;
     double beta = thermoParams.beta;
     double h = geomParams.h;
-    double g = thermoParams.g;
+    double g = (simParams.is_gravity) ? -9.81 : 0;
     int nb_moving_part = simParams.nb_moving_part;
     int t = simParams.t;
 
@@ -157,7 +157,8 @@ void checkTimeStep(GeomData &geomParams,
     if (t == 0){
 
         double prev_dt = simParams.dt;
-        double dt_f = h / abs(g);
+        double F_st_max = thermoParams.F_st_max;
+        double dt_f = h / sqrt(F_st_max*F_st_max + g*g);
         simParams.dt = (simParams.dt > dt_f) ? dt_f : simParams.dt;
         double next_dt = simParams.dt;
 

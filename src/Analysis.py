@@ -72,11 +72,11 @@ def plotData(all_data, particle):
 
     for data, name in zip(data_tot, names):
         
-        t = np.arange(0, np.shape(data)[0], 1)
+        t = np.arange(0, np.shape(data)[0]/39, 1)
         var = np.zeros(len(t))
 
-        for i, rows in enumerate(data):
-            var[i] = rows[particle]
+        for i, rows in enumerate(data/39):
+            var[i] = rows[particle+i*39]
         
         plt.figure()
         plt.scatter(t, var)

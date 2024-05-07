@@ -8,9 +8,8 @@
 #include "tools.h"
 #include "structure.h"
 #include "surface_tension.h"
-
-
 using namespace std;
+
 
 void gradW(GeomData &geomParams,    
            SimulationData &simParams, 
@@ -264,8 +263,8 @@ void momentumEquation(GeomData &geomParams,
                       vector<double> &pos,
                       vector<double> &u){
 
-
-    double g = thermoParams.g;
+    //cout << "simParams.is_gravity = " << simParams.is_gravity << endl;
+    double g = (simParams.is_gravity) ? -9.81 : 0;
     bool PRINT = simParams.PRINT;
     int nb_moving_part = simParams.nb_moving_part;
 
@@ -281,9 +280,12 @@ void momentumEquation(GeomData &geomParams,
 
     vector<double> F_vol(3*simParams.nb_moving_part,0.0);
 
-    surfaceTension(simParams, geomParams,thermoParams, nb_neighbours, neighbours_matrix, gradW_matrix, mass, 
+    if (simParams.is_surface_tension)
+        surfaceTension(simParams, geomParams,thermoParams, nb_neighbours, neighbours_matrix, gradW_matrix, mass, 
                    rho, pos, F_vol);
-    //printArray(F_vol, F_vol.size(), "fvol");
+
+          
+
     // Iterate over each particle
     #pragma omp parallel for
     for (int n = 0; n < nb_moving_part; n++){
@@ -312,12 +314,12 @@ void momentumEquation(GeomData &geomParams,
             }
 
             dudt[3 * n + cord] *= -1;
-            
-                
             dudt[3 * n + cord] += F_vol[3 * n + cord];
-            /*if(cord == 2){
+
+            if(cord == 2)
                 dudt[3 * n + cord] += g;
-            }*/
+
+            
         }
     }
 

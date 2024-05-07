@@ -79,6 +79,7 @@ void getKey(json data,
             string &state_equation,
             string &state_initial_condition,
             string &schemeIntegration){
+
     
     for (auto &it : data["stateEquation"].items())
     {
@@ -103,6 +104,8 @@ void getKey(json data,
             state_initial_condition = it.key();
         }
     };
+
+    cout <<"getKey passed" << endl;
 }
 
 

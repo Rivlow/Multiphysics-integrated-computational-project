@@ -4,6 +4,8 @@
 #include <iostream>
 #include <cmath>
 
+double W_coh(double r, double h);
+
 double f_gaussian(double r, double h);
 double deriv_gaussian(double r, double h);
 

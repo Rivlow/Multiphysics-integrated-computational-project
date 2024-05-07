@@ -20,7 +20,7 @@ void sortedList(GeomData &geomParams,
                 vector<vector<int>> &cell_matrix,
                 vector<vector<int>> &neighbours_matrix,
                 vector<vector<double>> &gradW_matrix,
-                vector<vector<double>> &artificial_visc_matrix,
+                vector<vector<double>> &pi_matrix,
                 vector<double> &nb_neighbours,
                 vector<double> &pos);
 
