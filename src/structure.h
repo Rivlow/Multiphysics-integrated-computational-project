@@ -44,6 +44,7 @@ struct ThermoData {
     double gamma;
     double R ; 
     double g; 
+    double F_st_max;
 
 };
 
@@ -58,9 +59,13 @@ struct SimulationData {
     string state_equation; 
     string state_initial_condition;
     bool PRINT;
+    bool is_gravity;
+    bool is_surface_tension;
+    bool is_adhesion;
     int nb_moving_part;
     int nb_part;
     int t;
+
  
 };
 

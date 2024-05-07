@@ -49,8 +49,8 @@ int main(int argc, char *argv[])
         cout << "code built in DEBUG mode.\n";
     #endif
 
-        if (argc != 2)
-        {
+        if (argc != 2){
+
             cout << "\nusage: " << argv[0] << " <param.json>\n\n";
             return EXIT_FAILURE;
         }
@@ -74,6 +74,20 @@ int main(int argc, char *argv[])
     // Structure to store parameters
     getKey(data, state_equation, state_initial_condition, 
            schemeIntegration);
+
+    cout << "kappa" << data["kappa"] << endl;
+    cout << "s" << data["s"] << endl;
+    cout << "o" << data["domain"]["o"] << endl;
+    cout << "L" << data["domain"]["L"] << endl;
+    cout << "o_d" << data["domain"]["o_d"] << endl;
+    cout << "L_d" << data["domain"]["L_d"]<< endl;
+    cout << "do" << data["post_process"]["do"] << endl;
+    cout << "xyz_init" << data["post_process"]["xyz_init"] << endl;
+    cout << "xyz_end" << data["post_process"]["xyz_end"] << endl;
+    cout << "matrix_long" << data["domain"]["matrix_long"] << endl;
+    cout << "matrix_orig" << data["domain"]["matrix_orig"] << endl;
+    cout << "vector_type" << data["domain"]["vector_type"] << endl;
+
 
     GeomData geomParams = {
 
@@ -108,8 +122,8 @@ int main(int argc, char *argv[])
         data["T"],
         data["gamma"],
         data["R"],
-        data["forces"]["gravity"] ? 9.81 : 0,
-        
+        0,
+        0,
     };
     cout << "ThermoData initialized" << endl;
 
@@ -125,8 +139,11 @@ int main(int argc, char *argv[])
         state_equation,
         state_initial_condition,
         data["print_debug"],
+        data["forces"]["gravity"],
+        data["forces"]["surface_tension"],
+        data["forces"]["adhesion"],
         evaluateNumberParticles(geomParams),
-
+        0,
     };
     cout << "SimulationData initialized" << endl;
 
@@ -167,13 +184,13 @@ int main(int argc, char *argv[])
     vectors["dudt"] = &dudt;
 
     cout << "state equation chosen : " << state_equation << " \n" << endl;
-    cout << "kappa * h =" << geomParams.kappa * geomParams.h << endl;
+    cout << "kappa * h = " << geomParams.kappa * geomParams.h << endl;
     cout << "(Nx, Ny, Nz) = (" << geomParams.Nx << ", " << geomParams.Ny << ", " << geomParams.Nz << ")" << endl;
     cout << "nb_moving_part = " << simParams.nb_moving_part << endl;
     cout << "nb_tot_part = " << nb_tot_part << endl;
-    cout << "s =" << geomParams.s << endl;
-    cout << "kappa =" << geomParams.kappa << endl;
-    cout << "h =" << geomParams.h << endl;
+    cout << "s = " << geomParams.s << endl;
+    cout << "kappa = " << geomParams.kappa << endl;
+    cout << "h = " << geomParams.h << endl;
 
     /*---------------------------- SPH ALGORITHM  ----------------------------*/
 
@@ -203,10 +220,13 @@ int main(int argc, char *argv[])
         // Update density, velocity and position (Euler explicit or RK22 scheme)
         updateVariables(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
                         pi_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
+
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){
 
-            //extractData(simParams, thermoParams, pos, p, mass, gradW_matrix, neighbours_matrix);
+            if (geomParams.post_process_do) 
+                extractData(geomParams, simParams, thermoParams, pos, p, mass, neighbours_matrix);
+                
             export_particles("../../output/sph", t, pos, scalars, vectors);
         }
 

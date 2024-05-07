@@ -17,7 +17,7 @@ using namespace std;
 
 void surfaceTension(SimulationData& simParams,
                     GeomData &geomParams,
-                    ThermoData &thermoParam,
+                    ThermoData &thermoParams,
                     vector<double> nb_neighbours,
                     vector<vector<int>> neighbours_matrix,
                     vector<vector<double>> gradW_matrix,
@@ -52,14 +52,14 @@ void surfaceTension(SimulationData& simParams,
 
     double alpha = 8;
     #pragma omp parallel for 
-    for(int n = 0; n<simParams.nb_moving_part; n++){
+    for(int n = 0; n < simParams.nb_moving_part; n++){
         
         vector<int> &neighbours = neighbours_matrix[n];
         int size_neighbours = nb_neighbours[n];
         
-        for(int idx = 0; idx<size_neighbours; idx++){
+        for(int idx = 0; idx < size_neighbours; idx++){
 
-            double K_ij = 2*thermoParam.rho_0/(rho[n]+rho[neighbours[idx]]);
+            double K_ij = 2*thermoParams.rho_0/(rho[n]+rho[neighbours[idx]]);
             double dx = pos[3*n+0] - pos[3*neighbours[idx]+0];
             double dy = pos[3*n+1] - pos[3*neighbours[idx]+1];
             double dz = pos[3*n+2] - pos[3*neighbours[idx]+2];
@@ -67,13 +67,19 @@ void surfaceTension(SimulationData& simParams,
             double r = sqrt(r2);
             double W = W_coh(r,geomParams.h);
 
-            
-            F_vol[3*n + 0] += -K_ij*((alpha*mass[n])*mass[neighbours[idx]]*dx*W/r + alpha*(normal[3*n+0]-normal[3*neighbours[idx]+0]));
-            F_vol[3*n + 1] += -K_ij*((alpha*mass[n])*mass[neighbours[idx]]*dy*W/r + alpha*(normal[3*n+1]-normal[3*neighbours[idx]+1]));
-            F_vol[3*n + 2] += -K_ij*((alpha*mass[n])*mass[neighbours[idx]]*dz*W/r + alpha*(normal[3*n+2]-normal[3*neighbours[idx]+2]));
-            
-             
+            int i_neig = neighbours[idx];
+            double m_a = mass[n];
+            double m_b = mass[i_neig];
+
+            for(int coord = 0; coord <3; coord ++)
+                F_vol[3*n + coord] += -K_ij*((alpha*m_a)*m_b*dx*W/r + 
+                                      alpha*(normal[3*n+coord]-normal[3*i_neig+coord]));
+     
         }
+
+        double F_n = sqrt(F_vol[3*n+0]*F_vol[3*n+0] + F_vol[3*n+1]*F_vol[3*n+1] + F_vol[3*n+2]*F_vol[3*n+2])/mass[n];
+        thermoParams.F_st_max = (abs(F_n) > abs(thermoParams.F_st_max))? F_n : thermoParams.F_st_max;
+        
     }
 
 
