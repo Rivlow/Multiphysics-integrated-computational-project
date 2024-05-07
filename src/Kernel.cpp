@@ -67,7 +67,7 @@ double f_cubic_spline(double r, double h){
     double W;
 
     if (r / h < 1.0)
-        W = alpha * (1.0 - r * r / (h * h) + 0.5 * r * r * r / (h * h * h));
+        W = alpha * (2/3- r * r / (h * h) + 0.5 * r * r * r / (h * h * h));
     
     else if (1.0 <= r / h && r / h < 2.0)
         W = alpha * 1.0/6.0 * ((2.0 - r / h) * (2.0 - r / h) * (2.0 - r / h));
