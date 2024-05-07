@@ -25,11 +25,12 @@ void sortedList(GeomData &geomParams,
                 vector<vector<double>> &gradW_matrix,
                 vector<vector<double>> &artificial_visc_matrix,
                 vector<double> &nb_neighbours,
+                vector<double> &type,
                 vector<double> &pos){
 
-    if (simParams.PRINT){
+    if (simParams.PRINT)
         cout << "findNeighbours begins" << endl;
-    }
+    
     int Nx = geomParams.Nx;
     int Ny = geomParams.Ny;
     int Nz = geomParams.Nz;
@@ -98,7 +99,7 @@ void sortedList(GeomData &geomParams,
                         int idx_cell = cell[idx];
 
                         //if (idx_cell >= simParams.nb_tot_part) cout << "ghost part" << endl;
-                        if (idx_cell >= simParams.nb_part) continue;
+                        if (type[idx_cell] == 2.0) continue;
                         else{
 
                             if (idx_cell != n){

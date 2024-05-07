@@ -17,8 +17,9 @@ using namespace std;
  */
 
 int evaluateNumberParticles(GeomData &geomParams){
-    vector<vector<double>> matrixLong = geomParams.matrixLong;
-    vector<int> vectorType = geomParams.vectorType;
+    
+    vector<vector<double>> matrixLong = geomParams.matrix_long;
+    vector<int> vectorType = geomParams.vector_type;
     double s = geomParams.s;
     int nbpart = 0;
 
@@ -52,9 +53,9 @@ void meshcube(GeomData &geomParams,
               vector<double> &pos,
               vector<double> &type){
 
-    vector<vector<double>> matrixLong = geomParams.matrixLong;
-    vector<vector<double>> matrixOrig = geomParams.matrixOrig;
-    vector<int> vectorType = geomParams.vectorType;
+    vector<vector<double>> matrixLong = geomParams.matrix_long;
+    vector<vector<double>> matrixOrig = geomParams.matrix_orig;
+    vector<int> vectorType = geomParams.vector_type;
     double s = geomParams.s;
     
     for(int n = 0 ; n < int(vectorType.size()); n++){
@@ -125,8 +126,8 @@ void meshPostProcess(GeomData &geomParams,
                      vector<double> &pos, 
                      vector<double> &type){
 
-    vector<double>& post_process_in = geomParams.post_process_in;
-    vector<double>& post_process_out = geomParams.post_process_out;
+    vector<double>& post_process_in = geomParams.xyz_init;
+    vector<double>& post_process_out = geomParams.xyz_end;
     double s = geomParams.s;
 
     double dx = post_process_out[0] - post_process_in[0];

@@ -10,24 +10,22 @@
 
 using namespace std;
 
-
 struct GeomData {
     
     int kappa;
     double s;
     double h; 
-    vector<double> o;
-    vector<double> L;
     vector<double> o_d;
     vector<double> L_d;
-    vector<double> post_process_in;
-    vector<double> post_process_out;
+    vector<double> xyz_init;
+    vector<double> xyz_end;
+    bool post_process_do;
     int Nx;
     int Ny;
     int Nz;
-    vector<vector<double>> matrixLong;
-    vector<vector<double>> matrixOrig;
-    vector<int> vectorType; 
+    vector<vector<double>> matrix_long;
+    vector<vector<double>> matrix_orig;
+    vector<int> vector_type; 
 };
 
 struct ThermoData {

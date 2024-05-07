@@ -81,12 +81,11 @@ int main(int argc, char *argv[])
         data["kappa"],
         data["s"],
         1.2 * geomParams.s,
-        data["o"],
-        data["L"],
         data["o_d"],
         data["L_d"],
-        data["post_process_in"],
-        data["post_process_out"],
+        data["post_process"]["xyz_init"],
+        data["post_process"]["xyz_end"],
+        data["post_process"]["do"],
         int(geomParams.L_d[0] / (geomParams.kappa * geomParams.h)),
         int(geomParams.L_d[1] / (geomParams.kappa * geomParams.h)),
         int(geomParams.L_d[2] / (geomParams.kappa * geomParams.h)),
@@ -136,7 +135,8 @@ int main(int argc, char *argv[])
 
     // Initialize particles
     meshcube(geomParams, simParams, pos, type); 
-    //meshPostProcess(geomParams, simParams, pos, type);
+    if (geomParams.post_process_do) 
+        meshPostProcess(geomParams, simParams, pos, type);
     int nb_tot_part = pos.size()/3;
 
     vector<double> mass(nb_tot_part, 0), u(3 * nb_tot_part, 0),
@@ -201,8 +201,9 @@ int main(int argc, char *argv[])
                         pi_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){
-
-            //extractData(simParams, thermoParams, pos, p, mass, gradW_matrix, neighbours_matrix);
+                if (geomParams.post_process_do) 
+                    extractData(geomParams, simParams, thermoParams, pos, p, mass, neighbours_matrix);
+                    
             export_particles("../../output/sph", t, pos, scalars, vectors);
         }
 

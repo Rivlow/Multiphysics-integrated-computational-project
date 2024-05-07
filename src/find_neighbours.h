@@ -22,6 +22,7 @@ void sortedList(GeomData &geomParams,
                 vector<vector<double>> &gradW_matrix,
                 vector<vector<double>> &artificial_visc_matrix,
                 vector<double> &nb_neighbours,
+                vector<double> &type,
                 vector<double> &pos);
 
 void naiveAlgo(GeomData &geomParams,
