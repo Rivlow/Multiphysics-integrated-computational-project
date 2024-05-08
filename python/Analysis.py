@@ -4,7 +4,7 @@ import os
 from matplotlib import pyplot as plt
 import pandas as pd
 import numpy as np
-
+import sys
 """
 def read_vtp(path):
     reader = vtk.vtkXMLPolyDataReader()
@@ -78,7 +78,7 @@ def plotData(all_data):
         print(data)
 
         for i, rows in enumerate(data):
-            var[i] = rows[particle]
+            var[i] = rows[0]
         
         plt.figure()
         plt.scatter(t, var)
@@ -93,9 +93,12 @@ def plotData(all_data):
     
 def main():
     
-    outputFile = "output/"    
+    # Chemin absolu du répertoire du script actuel
+    current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
+    outputFile = os.path.dirname(current_directory) + "\\output"  
     all_data = getData(outputFile)
-    plotData(all_data)
+    print(all_data)
+    #plotData(all_data)
     
     
     

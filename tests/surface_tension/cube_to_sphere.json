@@ -9,14 +9,14 @@
   },
 
   "post_process":{
-    "do": false,
-    "xyz_init": [0, 0, 0.5],
-    "xyz_end": [2.8, 2.8, 0.5]
+    "do": true,
+    "xyz_init": [0, 0, 0.75],
+    "xyz_end": [2.8, 2.8, 0.75]
   },
 
   "simulation":{
     "theta" :0.5,
-    "s": 0.1,
+    "s": 0.05,
     "nstepT": 20000,
     "dt": 0.00001,
     "nsave": 100,

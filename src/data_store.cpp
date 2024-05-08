@@ -19,7 +19,7 @@ void extractData(GeomData &geomParams,
                  vector<double> &p, 
                  vector<double> &mass,
                  vector<int> &neighbours,
-                 vector<int> &nb_neighbours){
+                 vector<double> &nb_neighbours){
 
     string outputDir = "../../output";
     string outputFile_rho = outputDir + "/" + "rho" +".csv";
@@ -43,8 +43,6 @@ void extractData(GeomData &geomParams,
     int end = pos.size()/3;
 
     for (int n = init; n < end; n++){
-
-        //cout << "n : " << n <<endl;
 
         int neighbours_size = nb_neighbours[n];
         double rho_tot = 0, p_tot = 0;
