@@ -26,6 +26,8 @@ void getKey(json data,
 void createOutputFolder();
 void clearOutputFiles();
 
+void progresssBar(double pourcentage, int t, int nstepT);
+
 void clearAllVectors(SimulationData &params,
                      vector<vector<double>> &pi_matrix,
                      vector<vector<int>> &neighbours_matrix,

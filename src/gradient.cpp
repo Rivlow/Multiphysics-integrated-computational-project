@@ -35,19 +35,19 @@ void gradW(GeomData &geomParams,
 
             int i_neig = neighbours[idx];
             double r_ab = 0;
-            vector<double> pos_val(3);
+            vector<double> d_xyz(3);
 
             for (int coord = 0; coord < 3; coord++){
                 
-                pos_val[coord] = pos[3 * n + coord] - pos[3 * i_neig + coord];
-                r_ab += pos_val[coord]*pos_val[coord];
+                d_xyz[coord] = pos[3 * n + coord] - pos[3 * i_neig + coord];
+                r_ab += d_xyz[coord]*d_xyz[coord];
             }
 
             r_ab = sqrt(r_ab);
             double deriv = derive_cubic_spline(r_ab, h);
 
             for (int coord = 0; coord < 3; coord++){
-                gradW[3 * idx + coord] = pos_val[coord] / r_ab * deriv;
+                gradW[3 * idx + coord] = d_xyz[coord] / r_ab * deriv;
             }
         }
     }
@@ -265,7 +265,7 @@ void momentumEquation(GeomData &geomParams,
                       vector<double> &u){
 
 
-    double g = thermoParams.g;
+    double g = (simParams.is_gravity)? -9.81 : 0;
     bool PRINT = simParams.PRINT;
     int nb_moving_part = simParams.nb_moving_part;
 
@@ -281,9 +281,10 @@ void momentumEquation(GeomData &geomParams,
 
     vector<double> F_vol(3*simParams.nb_moving_part,0.0);
 
-    surfaceTension(simParams, geomParams,thermoParams, nb_neighbours, neighbours_matrix, gradW_matrix, mass, 
-                   rho, pos, F_vol);
-    //printArray(F_vol, F_vol.size(), "fvol");
+    if (simParams.is_surface_tension)
+        surfaceTension(simParams, geomParams,thermoParams, nb_neighbours,
+                       neighbours_matrix, gradW_matrix, mass, rho, pos, F_vol);
+
     // Iterate over each particle
     #pragma omp parallel for
     for (int n = 0; n < nb_moving_part; n++){
@@ -312,12 +313,11 @@ void momentumEquation(GeomData &geomParams,
             }
 
             dudt[3 * n + cord] *= -1;
-            
-                
             dudt[3 * n + cord] += F_vol[3 * n + cord];
-            /*if(cord == 2){
+
+            if(cord == 2)
                 dudt[3 * n + cord] += g;
-            }*/
+            
         }
     }
 

@@ -80,7 +80,7 @@ void getKey(json data,
             string &state_initial_condition,
             string &schemeIntegration){
     
-    for (auto &it : data["stateEquation"].items())
+    for (auto &it : data["condition"]["stateEquation"].items())
     {
         if (it.value() == true)
         {
@@ -88,7 +88,7 @@ void getKey(json data,
         }
     };
 
-    for (auto &it : data["schemeIntegration"].items())
+    for (auto &it : data["condition"]["schemeIntegration"].items())
     {
         if (it.value() == true)
         {
@@ -96,7 +96,7 @@ void getKey(json data,
         }
     };
 
-    for (auto &it : data["initialCondition"].items())
+    for (auto &it : data["condition"]["initialCondition"].items())
     {
         if (it.value() == true)
         {
@@ -142,6 +142,26 @@ void clearOutputFiles(){
     }
 
 }
+
+void progresssBar(double pourcentage, int t, int nstepT){
+
+    const int largeurBarre = 50;
+    int remplissage = pourcentage * largeurBarre / 100;
+
+    cout << "[";
+
+    for (int i = 0; i < largeurBarre; ++i) {
+        if (i < remplissage) {
+            cout << "#";
+        } else {
+            cout << " ";
+        }
+    }
+
+    cout << "] " << fixed << setprecision(2) << pourcentage << "%\r";
+    cout.flush();
+}
+
 
 
 void clearAllVectors(SimulationData &simParams,

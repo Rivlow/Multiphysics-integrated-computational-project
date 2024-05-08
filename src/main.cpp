@@ -28,6 +28,7 @@ using json = nlohmann::json;
 using namespace std;
 
 
+
 int main(int argc, char *argv[])
 {
 
@@ -75,14 +76,16 @@ int main(int argc, char *argv[])
     getKey(data, state_equation, state_initial_condition, 
            schemeIntegration);
 
-
     GeomData geomParams = {
 
-        data["kappa"],
-        data["s"],
+        data["simulation"]["kappa"],
+        data["simulation"]["s"],
         1.2 * geomParams.s,
-        data["o_d"],
-        data["L_d"],
+        data["domain"]["o_d"],
+        data["domain"]["L_d"],
+        data["domain"]["matrix_long"],
+        data["domain"]["matrix_orig"],
+        data["domain"]["vector_type"],
         data["post_process"]["xyz_init"],
         data["post_process"]["xyz_end"],
         data["post_process"]["do"],
@@ -90,40 +93,41 @@ int main(int argc, char *argv[])
         int(geomParams.L_d[1] / (geomParams.kappa * geomParams.h)),
         int(geomParams.L_d[2] / (geomParams.kappa * geomParams.h)),
 
-        data["matrix_long"],
-        data["matrix_orig"],
-        data["vector_type"],
     };
 
     ThermoData thermoParams = {
 
-        data["alpha"],
-        data["beta"],
-        data["c_0"],
-        data["rho_moving"],
-        data["rho_fixed"],
-        data["rho_0"],
-        data["M"],
-        data["T"],
-        data["gamma"],
-        data["R"],
-        data["g"],
+        data["simulation"]["alpha"],
+        data["simulation"]["beta"],
+        data["thermo"]["c_0"],
+        data["thermo"]["rho_moving"],
+        data["thermo"]["rho_fixed"],
+        data["thermo"]["rho_0"],
+        data["thermo"]["M"],
+        data["thermo"]["T"],
+        data["thermo"]["gamma"],
+        data["thermo"]["R"],
     };
 
     SimulationData simParams = {
 
-        data["nstepT"],
-        data["nsave"],
-        data["dt"],
-        data["theta"],
+        data["simulation"]["nstepT"],
+        data["simulation"]["nsave"],
+        data["simulation"]["dt"],
+        data["simulation"]["theta"],
         schemeIntegration,
-        data["u_init"],
+        data["thermo"]["u_init"],
         state_equation,
         state_initial_condition,
-        data["print_debug"],
+        false,
+        true,
+        data["condition"]["print_debug"],
         evaluateNumberParticles(geomParams),
-
+        0,
+        0,
     };
+
+
 
 
     /*------------------- INITIALIZATION OF VARIABLES USED -------------------*/
@@ -163,13 +167,13 @@ int main(int argc, char *argv[])
     vectors["dudt"] = &dudt;
 
     cout << "state equation chosen : " << state_equation << " \n" << endl;
-    cout << "kappa * h =" << geomParams.kappa * geomParams.h << endl;
+    cout << "kappa * h = " << geomParams.kappa * geomParams.h << endl;
     cout << "(Nx, Ny, Nz) = (" << geomParams.Nx << ", " << geomParams.Ny << ", " << geomParams.Nz << ")" << endl;
     cout << "nb_moving_part = " << simParams.nb_moving_part << endl;
     cout << "nb_tot_part = " << nb_tot_part << endl;
     cout << "s =" << geomParams.s << endl;
-    cout << "kappa =" << geomParams.kappa << endl;
-    cout << "h =" << geomParams.h << endl;
+    cout << "kappa = " << geomParams.kappa << endl;
+    cout << "h = " << geomParams.h << endl;
 
     /*---------------------------- SPH ALGORITHM  ----------------------------*/
 
@@ -200,17 +204,14 @@ int main(int argc, char *argv[])
         // Update density, velocity and position (Euler explicit or RK22 scheme)
         updateVariables(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
                         pi_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
+
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){
                 if (geomParams.post_process_do)
                     extractData(geomParams, simParams, thermoParams, pos, p, mass, neighbours_matrix);
                 
-                    
             export_particles("../../output/sph", t, pos, scalars, vectors);
-
-            auto t_actual = chrono::high_resolution_clock::now();
-            double ratio = double(t)/double(simParams.nstepT);
-            cout << ratio*100 << "% of the simulation." <<"\n"<<endl;
+            progresssBar(double(t)/double(simParams.nstepT) * 100, t, simParams.nstepT);
         }
 
 
@@ -222,8 +223,8 @@ int main(int argc, char *argv[])
 
     auto t1 = chrono::high_resolution_clock::now();
     auto delta_t = chrono::duration_cast<chrono::duration<double>>(t1 - t0).count();
-    cout << "duration: " << delta_t << "s.\n";
-    cout << "\n Simulation done." << endl;
+    cout << " \n duration: " << delta_t << "s.\n";
+    cout << "Simulation done." << endl;
 
     return 0;
 }

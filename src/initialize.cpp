@@ -49,7 +49,7 @@ void initRho(ThermoData &thermoParams,
     double rho_moving = thermoParams.rho_moving;
     double c_0 = thermoParams.c_0;
     double gamma = thermoParams.gamma;
-    double g = thermoParams.g;
+    double g = (simParams.is_gravity)? -9.81 : 0;
 
     int rho_size = rho.size();
 
@@ -145,11 +145,12 @@ void checkTimeStep(GeomData &geomParams,
     double alpha = thermoParams.alpha;
     double beta = thermoParams.beta;
     double h = geomParams.h;
-    double g = thermoParams.g;
+    double g = (simParams.is_gravity)? -9.81 : 0;
     int nb_moving_part = simParams.nb_moving_part;
     int t = simParams.t;
 
-    double dt_f = h / abs(g);
+    double F_st_max = simParams.F_st_max;
+    double dt_f = h / sqrt(g*g + F_st_max*F_st_max);
     double dt_cv;
     double min_a = numeric_limits<double>::max();
     double max_b = numeric_limits<double>::min();
@@ -161,9 +162,10 @@ void checkTimeStep(GeomData &geomParams,
         simParams.dt = (simParams.dt > dt_f) ? dt_f : simParams.dt;
         double next_dt = simParams.dt;
 
-        if (abs(prev_dt - next_dt) != 0){
-            cout << "dt has to be modified (timestep :" << t <<")"<<", was : " << prev_dt << " and is now : " << next_dt << endl;
-        }
+        if (abs(prev_dt - next_dt) != 0)
+            cout << "dt has to be modified (timestep :" << t <<")"<<", was : "
+             << prev_dt << " and is now : " << next_dt << endl;
+        
     }
     else{
 
@@ -220,19 +222,21 @@ void checkTimeStep(GeomData &geomParams,
             simParams.dt = (dt_final < simParams.dt) ? dt_final : simParams.dt;
             double next_dt = simParams.dt;
             
-            if (abs(prev_dt - next_dt) != 0){
-                cout << "dt modified (t :" << t <<")"<<", was : " << prev_dt << " and is now : " << next_dt << endl;
+            if (abs(prev_dt - next_dt) != 0)
+                cout << "dt modified (t :" << t <<")"<<", was : " << prev_dt
+                     << " and is now : " << next_dt << endl;
             }
-        }
+        
         else{
 
             double prev_dt = simParams.dt;
             simParams.dt = (dt_final < simParams.dt) ? dt_final : simParams.dt;
             double next_dt = simParams.dt;
 
-            if (abs(prev_dt - next_dt) != 0){
-                cout << "dt has to be modified (timestep :" << t <<")"<<", was : " << prev_dt << " and is now : " << next_dt << endl;
-            }
+            if (abs(prev_dt - next_dt) != 0)
+                cout << "dt has to be modified (timestep :" << t <<")"<<", was : " 
+                     << prev_dt << " and is now : " << next_dt << endl;
+            
         }
     }
 }
