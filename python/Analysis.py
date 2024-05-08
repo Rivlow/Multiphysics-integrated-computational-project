@@ -4,7 +4,7 @@ import os
 from matplotlib import pyplot as plt
 import pandas as pd
 import numpy as np
-
+import sys
 """
 def read_vtp(path):
     reader = vtk.vtkXMLPolyDataReader()
@@ -58,13 +58,13 @@ def getData(directory):
         
         return df, name
     else:
-        print(f"No csv. files in folder : {directory}.")
+        print(f"No csv files in folder : {directory}.")
 
     
 path = os.getcwd()
 
 
-def plotData(all_data, particle):
+def plotData(all_data):
     
     data_tot = all_data[0]
     names = all_data[1]
@@ -74,9 +74,11 @@ def plotData(all_data, particle):
         
         t = np.arange(0, np.shape(data)[0], 1)
         var = np.zeros(len(t))
+        
+        print(data)
 
         for i, rows in enumerate(data):
-            var[i] = rows[particle]
+            var[i] = rows[0]
         
         plt.figure()
         plt.scatter(t, var)
@@ -85,16 +87,18 @@ def plotData(all_data, particle):
         plt.title(f"{name[:-4]}")
         plt.tight_layout()
         plt.show()
+
         
     
     
 def main():
     
-    outputFile = "output/"
-    particle = 20
-    
+    # Chemin absolu du répertoire du script actuel
+    current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
+    outputFile = os.path.dirname(current_directory) + "\\output"  
     all_data = getData(outputFile)
-    plotData(all_data, particle)
+    print(all_data)
+    #plotData(all_data)
     
     
     

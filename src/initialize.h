@@ -34,7 +34,7 @@ void checkTimeStep(GeomData &geomParams,
                    vector<double> &pos,
                    vector<double> &u,
                    vector<double> &c,
-                   vector<vector<int>> &neighbours_matrix,
+                   vector<int> &neighbours,
                    vector<double> &nb_neighbours,
                    vector<vector<double>> &pi_matrix);
 
