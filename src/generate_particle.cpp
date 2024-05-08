@@ -51,7 +51,9 @@ int evaluateNumberParticles(GeomData &geomParams){
 void meshcube(GeomData &geomParams,
               SimulationData &simParams,
               vector<double> &pos,
-              vector<double> &type){
+              vector<double> &type,
+              int &MP_count,
+              int &FP_count){
 
     vector<vector<double>> matrixLong = geomParams.matrix_long;
     vector<vector<double>> matrixOrig = geomParams.matrix_orig;
@@ -84,9 +86,7 @@ void meshcube(GeomData &geomParams,
             dz = L[2] / nk;
             ++nk;
         }
-        
-        cout<< nk<< endl;
-        
+                
         // output
         cout << "meshing cube at o=(" << o[0] << "," << o[1] << "," << o[2] << ") ";
         cout << "of size L=(" << L[0] << "," << L[1] << "," << L[2] << ")\n";
@@ -110,8 +110,12 @@ void meshcube(GeomData &geomParams,
                     pos.push_back(x);
                     pos.push_back(y);
                     pos.push_back(z);
-
                     type.push_back(type_val);
+
+                    if (type_val == 1)
+                        MP_count++;
+                    else if (type_val == 0)
+                        FP_count++;
                 }
             }
         }
@@ -124,33 +128,33 @@ void meshcube(GeomData &geomParams,
 void meshPostProcess(GeomData &geomParams,
                      SimulationData &simParams,
                      vector<double> &pos, 
-                     vector<double> &type){
+                     vector<double> &type,
+                     int &GP_count){
 
-    vector<double>& post_process_in = geomParams.xyz_init;
-    vector<double>& post_process_out = geomParams.xyz_end;
-    double s = geomParams.s;
+    if(geomParams.post_process_do){
+        vector<double>& post_process_in = geomParams.xyz_init;
+        vector<double>& post_process_out = geomParams.xyz_end;
+        double s = geomParams.s;
 
-    double dx = post_process_out[0] - post_process_in[0];
-    double dy = post_process_out[1] - post_process_in[1];
-    double dz = post_process_out[2] - post_process_in[2];
+        double dx = post_process_out[0] - post_process_in[0];
+        double dy = post_process_out[1] - post_process_in[1];
+        double dz = post_process_out[2] - post_process_in[2];
 
-    double dist = sqrt(dx * dx + dy * dy + dz * dz);
+        double dist = sqrt(dx * dx + dy * dy + dz * dz);
 
-    // Particules created between initial and last particule
-    int nb_points = static_cast<int>(dist / s);
+        // Particules created between initial and last particule
+        int nb_points = static_cast<int>(dist / s);
 
-    double step_x = dx / nb_points;
-    double step_y = dy / nb_points;
-    double step_z = dz / nb_points;
-    int count = 0;
+        double step_x = dx / nb_points;
+        double step_y = dy / nb_points;
+        double step_z = dz / nb_points;
 
-    for (int i = 0; i < nb_points; i++) {
-        count++;
-        pos.push_back(post_process_in[0] + i * step_x);
-        pos.push_back(post_process_in[1] + i * step_y);
-        pos.push_back(post_process_in[2] + i * step_z);
-        type.push_back(2.0);
+        for (int i = 0; i < nb_points; i++) {
+            GP_count++;
+            pos.push_back(post_process_in[0] + i * step_x);
+            pos.push_back(post_process_in[1] + i * step_y);
+            pos.push_back(post_process_in[2] + i * step_z);
+            type.push_back(2.0);
+        }
     }
-
-    cout << "nb post_pro particules : " << count << endl;
 }

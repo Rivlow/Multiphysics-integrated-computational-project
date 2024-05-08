@@ -6,6 +6,7 @@
 #include <fstream>
 #include <cassert>
 #include <filesystem>
+#include <chrono>
 
 #include "tools.h"
 #include "structure.h"
@@ -143,10 +144,12 @@ void clearOutputFiles(){
 
 }
 
-void progresssBar(double pourcentage, int t, int nstepT){
+void progressBar(double ratio, double elapsed_time) {
 
+    double ratio_time = ratio * 100; 
+    double remain_time = (elapsed_time/ratio_time) * (100 - ratio_time);
     const int largeurBarre = 50;
-    int remplissage = pourcentage * largeurBarre / 100;
+    int remplissage = ratio * largeurBarre;
 
     cout << "[";
 
@@ -158,7 +161,7 @@ void progresssBar(double pourcentage, int t, int nstepT){
         }
     }
 
-    cout << "] " << fixed << setprecision(2) << pourcentage << "%\r";
+    cout << "] " << fixed << setprecision(2) << ratio * 100 << "% (approximated remaining time = "<< remain_time << "s )\r";
     cout.flush();
 }
 

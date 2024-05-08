@@ -86,7 +86,7 @@ void surfaceTension(SimulationData& simParams,
         }
     }
 
-    double alpha = 10;
+    double alpha = simParams.alpha_st;
     #pragma omp parallel for 
     for(int n = 0; n<simParams.nb_moving_part; n++){
 

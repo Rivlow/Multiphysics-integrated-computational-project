@@ -142,8 +142,8 @@ void checkTimeStep(GeomData &geomParams,
                    vector<double> &nb_neighbours,
                    vector<vector<double>> &pi_matrix){
 
-    double alpha = thermoParams.alpha;
-    double beta = thermoParams.beta;
+    double alpha = simParams.alpha;
+    double beta = simParams.beta;
     double h = geomParams.h;
     double g = (simParams.is_gravity)? -9.81 : 0;
     int nb_moving_part = simParams.nb_moving_part;
@@ -158,7 +158,6 @@ void checkTimeStep(GeomData &geomParams,
     if (t == 0){
 
         double prev_dt = simParams.dt;
-        double dt_f = h / abs(g);
         simParams.dt = (simParams.dt > dt_f) ? dt_f : simParams.dt;
         double next_dt = simParams.dt;
 
@@ -174,40 +173,40 @@ void checkTimeStep(GeomData &geomParams,
 
             int size_neighbours = nb_neighbours[n];
 
-            // Iteration over each associated neighbours
-            for (int idx = 0; idx < size_neighbours; idx++){
+            
 
-                int i_neig = neighbours[100*n + idx];
-                vector<double> rel_displ(3), rel_vel(3);
+            if (beta != 0.0){
+                // Iteration over each associated neighbours
+                for (int idx = 0; idx < size_neighbours; idx++){
 
-                rel_displ[0] = (pos[3 * n + 0] - pos[3 * i_neig + 0]);
-                rel_displ[1] = (pos[3 * n + 1] - pos[3 * i_neig + 1]);
-                rel_displ[2] = (pos[3 * n + 2] - pos[3 * i_neig + 2]);
+                    int i_neig = neighbours[100*n + idx];
+                    vector<double> rel_displ(3), rel_vel(3);
 
-                rel_vel[0] = (u[3 * n + 0] - u[3 * i_neig + 0]);
-                rel_vel[1] = (u[3 * n + 1] - u[3 * i_neig + 1]);
-                rel_vel[2] = (u[3 * n + 2] - u[3 * i_neig + 2]);
+                    for (int coord = 0; coord < 3; coord++){
+                        rel_displ[coord] = (pos[3 * n + coord] - pos[3 * i_neig + coord]);
+                        rel_vel[coord] = (u[3 * n + coord] - u[3 * i_neig + coord]);
+                    }
 
-                double u_ab_x_ab = 0, x_ab_2 = 0;
+                    double u_ab_x_ab = 0, x_ab_2 = 0;
 
-                // Dot product
-                for (int cord = 0; cord < 3; cord++){
-                    u_ab_x_ab += rel_vel[cord] * rel_displ[cord];
-                    x_ab_2 += rel_displ[cord] * rel_displ[cord];
+                    // Dot product
+                    for (int cord = 0; cord < 3; cord++){
+                        u_ab_x_ab += rel_vel[cord] * rel_displ[cord];
+                        x_ab_2 += rel_displ[cord] * rel_displ[cord];
+                    }
+
+                    double nu_2 = 0.01 * h * h;
+                    double mu_ab = (h * u_ab_x_ab) / (x_ab_2 + nu_2);
+                    max_b = (mu_ab > max_b)? mu_ab : max_b;
                 }
-
-                double nu_2 = 0.01 * h * h;
-                double mu_ab = (h * u_ab_x_ab) / (x_ab_2 + nu_2);
-                max_b = (mu_ab > max_b)? mu_ab : max_b;
             }
 
+            else
+                max_b = 0;
+        
             double c_a = c[n];
-            double val = h/(c_a + 0.6*(alpha*c_a + beta*max_b));
-            if (c_a < 0) cout << "c_a : " << c_a << " at timestep : " << t << endl;
-            if (c_a < 0) printArray(c, c.size(), "c (in init)");
-
+            double val = geomParams.h/(c_a + 0.6*(alpha*c_a + beta*max_b));
             min_a = (val < min_a) ? val : min_a;
-
         }
 
         dt_cv = min_a;
@@ -221,10 +220,12 @@ void checkTimeStep(GeomData &geomParams,
             simParams.dt = (dt_final < simParams.dt) ? dt_final : simParams.dt;
             double next_dt = simParams.dt;
             
-            if (abs(prev_dt - next_dt) != 0)
+            if (abs(prev_dt - next_dt) != 0){
+                cout << setprecision(8);
                 cout << "dt modified (t :" << t <<")"<<", was : " << prev_dt
                      << " and is now : " << next_dt << endl;
             }
+        }
         
         else{
 
@@ -232,9 +233,11 @@ void checkTimeStep(GeomData &geomParams,
             simParams.dt = (dt_final < simParams.dt) ? dt_final : simParams.dt;
             double next_dt = simParams.dt;
 
-            if (abs(prev_dt - next_dt) != 0)
-                cout << "dt has to be modified (timestep :" << t <<")"<<", was : " 
-                     << prev_dt << " and is now : " << next_dt << endl;
+            if (abs(prev_dt - next_dt) != 0){
+                cout << setprecision(8);
+                cout << "dt modified (t :" << t <<")"<<", was : " << prev_dt
+                     << " and is now : " << next_dt << endl;
+            }
             
         }
     }

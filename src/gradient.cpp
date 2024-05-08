@@ -135,8 +135,8 @@ void setArtificialViscosity(GeomData &geomParams,
                             vector<double> &rho,
                             vector<double> &u){
 
-    double beta = thermoParams.beta;
-    double alpha = thermoParams.alpha;
+    double beta = simParams.beta;
+    double alpha = simParams.alpha;
     double h = geomParams.h;
     bool PRINT = simParams.PRINT;
     int nb_moving_part = simParams.nb_moving_part;

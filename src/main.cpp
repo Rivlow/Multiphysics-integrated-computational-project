@@ -62,8 +62,8 @@ int main(int argc, char *argv[])
     ifstream inputf(argv[1]);
     json data = json::parse(inputf);
 
-    cout << argv[1] << ":\n"
-              << data.dump(4) << endl; // print input data to screen
+    //cout << argv[1] << ":\n"
+    //          << data.dump(4) << endl; // print input data to screen
 
     createOutputFolder();
     clearOutputFiles();
@@ -75,6 +75,7 @@ int main(int argc, char *argv[])
     // Structure to store parameters
     getKey(data, state_equation, state_initial_condition, 
            schemeIntegration);
+
 
     GeomData geomParams = {
 
@@ -96,9 +97,6 @@ int main(int argc, char *argv[])
     };
 
     ThermoData thermoParams = {
-
-        data["simulation"]["alpha"],
-        data["simulation"]["beta"],
         data["thermo"]["c_0"],
         data["thermo"]["rho_moving"],
         data["thermo"]["rho_fixed"],
@@ -115,6 +113,9 @@ int main(int argc, char *argv[])
         data["simulation"]["nsave"],
         data["simulation"]["dt"],
         data["simulation"]["theta"],
+        data["simulation"]["alpha"],
+        data["simulation"]["beta"],
+        data["simulation"]["alpha_st"],
         schemeIntegration,
         data["thermo"]["u_init"],
         state_equation,
@@ -134,15 +135,14 @@ int main(int argc, char *argv[])
 
     // Vector used (and labelled w.r.t particles location)
     vector<double> pos, type;
-    int Nx = geomParams.Nx, Ny = geomParams.Ny, Nz = geomParams.Nz; 
-    vector<vector<int>> cell_matrix(Nx * Ny * Nz);
+    vector<vector<int>> cell_matrix(geomParams.Nx * geomParams.Ny * geomParams.Nz);
 
     // Initialize particles
-    meshcube(geomParams, simParams, pos, type); 
-    if (geomParams.post_process_do) 
-        meshPostProcess(geomParams, simParams, pos, type);
+    int MP_count = 0, FP_count = 0, GP_count = 0;
+    meshcube(geomParams, simParams, pos, type, MP_count, FP_count); 
+    meshPostProcess(geomParams, simParams, pos, type, GP_count);
+    
     int nb_tot_part = pos.size()/3;
-
     vector<double> mass(nb_tot_part, 0), u(3 * nb_tot_part, 0),
                    drhodt(nb_tot_part, 0), rho(nb_tot_part, 0),
                    dudt(3 * nb_tot_part, 0), p(nb_tot_part, 0),
@@ -166,14 +166,45 @@ int main(int argc, char *argv[])
     vectors["u"] = &u;
     vectors["dudt"] = &dudt;
 
-    cout << "state equation chosen : " << state_equation << " \n" << endl;
-    cout << "kappa * h = " << geomParams.kappa * geomParams.h << endl;
-    cout << "(Nx, Ny, Nz) = (" << geomParams.Nx << ", " << geomParams.Ny << ", " << geomParams.Nz << ")" << endl;
-    cout << "nb_moving_part = " << simParams.nb_moving_part << endl;
-    cout << "nb_tot_part = " << nb_tot_part << endl;
+    cout << "#===============================#" << endl;
+    cout << "# General simulation parameters #" << endl;
+    cout << "#===============================#" << "\n" << endl;
     cout << "s =" << geomParams.s << endl;
     cout << "kappa = " << geomParams.kappa << endl;
     cout << "h = " << geomParams.h << endl;
+    cout << "nstepT = " << simParams.nstepT << endl;
+    cout << "nsave = " << simParams.nsave << endl;
+    cout << "dt = " << simParams.dt << endl;
+    cout << "theta = " << simParams.theta <<endl;
+    cout << "alpha (artificial viscosity): " << simParams.alpha << endl;
+    cout << "alpha (surface tension): " << simParams.alpha_st << endl;
+    cout << "beta (artificial visocity): " << simParams.beta  << endl;
+    cout << "state equation : " << state_equation << endl;
+    cout << "state initial condition : " << state_initial_condition << "\n" << endl;
+
+    cout << "#==================#" << endl;
+    cout << "# Domain variables #" << endl;
+    cout << "#==================#" << "\n" << endl;
+    cout << "Radius of neighbourhood (kappa * h) = " << geomParams.kappa * geomParams.h << endl;
+    cout << "Number of cells in each direction (Nx, Ny, Nz) = (" << geomParams.Nx << ", " << geomParams.Ny << ", " << geomParams.Nz << ")" << endl;
+    cout << "Number of fluid particles = " << MP_count << endl;
+    cout << "Number of fixed particles = " << FP_count << endl;
+    cout << "Number of post process particles = " << GP_count << endl;
+    cout << "Total number of particles = " << nb_tot_part << "\n" << endl;
+
+    cout << "#==================#" << endl;
+    cout << "# Thermo variables #" << endl;
+    cout << "#==================#" << "\n" << endl; 
+    cout << "Initial speed of sound (c_0) = " << thermoParams.c_0 << endl;
+    cout << "Moving particle density (rho_moving) = " << thermoParams.rho_moving << endl;
+    cout << "Fixed particle density (rho_fixed) = " << thermoParams.rho_fixed << endl;
+    cout << "Initial density (rho_0) = " << thermoParams.rho_0 << endl;
+    cout << "Molar mass (M) = " << thermoParams.M << endl;
+    cout << "Heat capacity ration (gamma) = " << thermoParams.gamma << endl;
+    cout << "Ideal gaz constant (R) = " << thermoParams.R << "\n" << endl;
+
+    
+    
 
     /*---------------------------- SPH ALGORITHM  ----------------------------*/
 
@@ -190,10 +221,6 @@ int main(int argc, char *argv[])
 
         simParams.t = t;
 
-        // Check if timeStep is small enough
-        checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
-                      neighbours, nb_neighbours, pi_matrix);
-
         // Apply the linked-list algorithm
         sortedList(geomParams, simParams, cell_matrix, neighbours, 
                    gradW_matrix, pi_matrix, nb_neighbours, type, pos); 
@@ -205,13 +232,25 @@ int main(int argc, char *argv[])
         updateVariables(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
                         pi_matrix, gradW_matrix, neighbours, nb_neighbours);
 
+        // Check if timeStep is small enough
+        checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
+                      neighbours, nb_neighbours, pi_matrix);
+
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){
                 if (geomParams.post_process_do)
                     extractData(geomParams, simParams, thermoParams, pos, p, mass, neighbours, nb_neighbours);
                 
             export_particles("../../output/sph", t, pos, scalars, vectors, false);
-            progresssBar(double(t)/double(simParams.nstepT) * 100, t, simParams.nstepT);
+
+            auto t_act = chrono::high_resolution_clock::now();
+            double elapsed_time = double(chrono::duration_cast<chrono::duration<double>>(t_act - t0).count());
+            progressBar(double(t)/double(simParams.nstepT), elapsed_time);
+
+                        
+            // Calculer le temps écoulé depuis le début de la simulation
+            
+            
         }
 
 
@@ -223,7 +262,7 @@ int main(int argc, char *argv[])
 
     auto t1 = chrono::high_resolution_clock::now();
     auto delta_t = chrono::duration_cast<chrono::duration<double>>(t1 - t0).count();
-    cout << " \n duration: " << delta_t << "s.\n";
+    cout << "\n duration: " << delta_t << "s.\n";
     cout << "Simulation done." << endl;
 
     return 0;

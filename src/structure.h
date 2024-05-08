@@ -31,9 +31,6 @@ struct GeomData {
 
 
 struct ThermoData {
- 
-    double alpha;
-    double beta;
     double c_0;
     double rho_moving;
     double rho_fixed;
@@ -50,6 +47,9 @@ struct SimulationData {
     int nsave;
     double dt; 
     double theta;
+    double alpha;
+    double beta;
+    double alpha_st;
     string schemeIntegration;
     vector<double> u_init;
     string state_equation; 
