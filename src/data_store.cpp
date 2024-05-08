@@ -9,7 +9,7 @@
 #include <omp.h>
 
 using namespace std;
-namespace fs = std::filesystem;
+namespace fs = filesystem;
 
 
 void extractData(GeomData &geomParams,  
@@ -20,13 +20,15 @@ void extractData(GeomData &geomParams,
                  vector<double> &mass,
                  vector<vector<int>> &neighbours_matrix){
 
-
     string outputDir = "../../output";
     string outputFile_rho = outputDir + "/" + "rho" +".csv";
     string outputFile_p = outputDir + "/" + "p" +".csv";
 
     // Create folder if not existing
-    if (!fs::exists(outputDir)) fs::create_directories(outputDir);
+    if (!fs::exists(outputDir)){
+        fs::create_directories(outputDir);
+        cout << "Create p.csv and rho.csv files" <<endl;
+    }
 
     ofstream output_rho(outputFile_rho, ios::app);
     ofstream output_p(outputFile_p, ios::app);
@@ -39,7 +41,9 @@ void extractData(GeomData &geomParams,
     int init = simParams.nb_part;
     int end = pos.size()/3;
 
-    for (int n = init; n <= end; n++){
+    for (int n = init; n < end; n++){
+
+        //cout << "n : " << n <<endl;
 
         vector<int> &neighbours = neighbours_matrix[n];
         int neighbours_size = neighbours.size();
@@ -47,6 +51,7 @@ void extractData(GeomData &geomParams,
 
         for (int idx = 0; idx < neighbours_size; idx++){
 
+            //cout << "idx : " << idx <<endl;
             int i_neig = neighbours[idx];
             double r_ab = 0;
             vector<double> pos_val(3);
@@ -83,7 +88,7 @@ void extractData(GeomData &geomParams,
         }
 
 
-        if (n == end){
+        if (n == end-1){
             output_rho << rho_tot << "\n";
             output_p << p_tot << "\n";
         }
@@ -95,6 +100,5 @@ void extractData(GeomData &geomParams,
 
     output_rho.close();
     output_p.close();
-    cout << "data_stored passed." << endl;
 
 }

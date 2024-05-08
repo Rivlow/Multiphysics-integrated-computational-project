@@ -90,9 +90,9 @@ int main(int argc, char *argv[])
         int(geomParams.L_d[1] / (geomParams.kappa * geomParams.h)),
         int(geomParams.L_d[2] / (geomParams.kappa * geomParams.h)),
 
-        data["matrixLong"],
-        data["matrixOrig"],
-        data["vectorType"],
+        data["matrix_long"],
+        data["matrix_orig"],
+        data["vector_type"],
     };
 
     ThermoData thermoParams = {
@@ -183,6 +183,7 @@ int main(int argc, char *argv[])
     
 
     for (int t = 0; t < simParams.nstepT; t++){
+
         simParams.t = t;
 
         // Check if timeStep is small enough
@@ -191,7 +192,7 @@ int main(int argc, char *argv[])
 
         // Apply the linked-list algorithm
         sortedList(geomParams, simParams, cell_matrix, neighbours_matrix, 
-                   gradW_matrix, pi_matrix, nb_neighbours, pos); 
+                   gradW_matrix, pi_matrix, nb_neighbours, type, pos); 
 
         // Compute ∇_a(W_ab) for all particles
         gradW(geomParams, simParams, gradW_matrix, neighbours_matrix, nb_neighbours, pos); 
@@ -201,11 +202,17 @@ int main(int argc, char *argv[])
                         pi_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){
-                if (geomParams.post_process_do) 
+                if (geomParams.post_process_do)
                     extractData(geomParams, simParams, thermoParams, pos, p, mass, neighbours_matrix);
+                
                     
             export_particles("../../output/sph", t, pos, scalars, vectors);
+
+            auto t_actual = chrono::high_resolution_clock::now();
+            double ratio = double(t)/double(simParams.nstepT);
+            cout << ratio*100 << "% of the simulation." <<"\n"<<endl;
         }
+
 
         // Clear matrices and reset arrays to 0
         clearAllVectors(simParams, pi_matrix, neighbours_matrix,
@@ -216,7 +223,7 @@ int main(int argc, char *argv[])
     auto t1 = chrono::high_resolution_clock::now();
     auto delta_t = chrono::duration_cast<chrono::duration<double>>(t1 - t0).count();
     cout << "duration: " << delta_t << "s.\n";
-    cout << "\n Simulation done." << std::endl;
+    cout << "\n Simulation done." << endl;
 
     return 0;
 }

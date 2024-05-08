@@ -58,13 +58,13 @@ def getData(directory):
         
         return df, name
     else:
-        print(f"No csv. files in folder : {directory}.")
+        print(f"No csv files in folder : {directory}.")
 
     
 path = os.getcwd()
 
 
-def plotData(all_data, particle):
+def plotData(all_data):
     
     data_tot = all_data[0]
     names = all_data[1]
@@ -74,6 +74,8 @@ def plotData(all_data, particle):
         
         t = np.arange(0, np.shape(data)[0], 1)
         var = np.zeros(len(t))
+        
+        print(data)
 
         for i, rows in enumerate(data):
             var[i] = rows[particle]
@@ -85,16 +87,15 @@ def plotData(all_data, particle):
         plt.title(f"{name[:-4]}")
         plt.tight_layout()
         plt.show()
+
         
     
     
 def main():
     
-    outputFile = "output/"
-    particle = 20
-    
+    outputFile = "output/"    
     all_data = getData(outputFile)
-    plotData(all_data, particle)
+    plotData(all_data)
     
     
     
