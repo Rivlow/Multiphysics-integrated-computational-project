@@ -18,7 +18,7 @@ using namespace std;
 void sortedList(GeomData &geomParams,
                 SimulationData &simParams, 
                 vector<vector<int>> &cell_matrix,
-                vector<vector<int>> &neighbours_matrix,
+                vector<int> &neighbours,
                 vector<vector<double>> &gradW_matrix,
                 vector<vector<double>> &artificial_visc_matrix,
                 vector<double> &nb_neighbours,

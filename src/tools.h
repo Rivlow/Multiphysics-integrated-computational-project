@@ -30,7 +30,7 @@ void progresssBar(double pourcentage, int t, int nstepT);
 
 void clearAllVectors(SimulationData &params,
                      vector<vector<double>> &pi_matrix,
-                     vector<vector<int>> &neighbours_matrix,
+                     vector<int> &neighbours,
                      vector<vector<int>> &cell_matrix,
                      vector<vector<double>> &gradW_matrix, 
                      vector<double> &drhodt,

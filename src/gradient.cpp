@@ -15,7 +15,7 @@ using namespace std;
 void gradW(GeomData &geomParams,    
            SimulationData &simParams, 
            vector<vector<double>> &gradW_matrix,
-           vector<vector<int>> &neighbours_matrix,
+           vector<int> &neighbours,
            vector<double> &nb_neighbours,
            vector<double> &pos){
 
@@ -26,14 +26,13 @@ void gradW(GeomData &geomParams,
     #pragma omp parallel for
     for (int n = 0; n < nb_part; n++){
 
-        vector<int> &neighbours = neighbours_matrix[n];
         vector<double> &gradW = gradW_matrix[n];
         int size_neighbours = nb_neighbours[n];
 
         // Iterations over each associated neighbours 
         for (int idx = 0; idx < size_neighbours; idx++){
 
-            int i_neig = neighbours[idx];
+            int i_neig = neighbours[100*n + idx];
             double r_ab = 0;
             vector<double> d_xyz(3);
 
@@ -129,7 +128,7 @@ void setArtificialViscosity(GeomData &geomParams,
                             ThermoData &thermoParams,
                             SimulationData &simParams, 
                             vector<vector<double>> &pi_matrix,
-                            vector<vector<int>> &neighbours_matrix,
+                            vector<int> &neighbours,
                             vector<double> &nb_neighbours,
                             vector<double> &c,
                             vector<double> &pos,
@@ -162,13 +161,12 @@ void setArtificialViscosity(GeomData &geomParams,
         #pragma omp parallel for
         for (int n = 0; n < nb_moving_part; n++){
 
-            vector<int> &neighbours = neighbours_matrix[n];
             int size_neighbours = nb_neighbours[n];
 
             // Iteration over each associated neighbours
             for (int idx = 0; idx < size_neighbours; idx++){
 
-                int i_neig = neighbours[idx];
+                int i_neig = neighbours[100*n + idx];
 
                 rel_displ[0] = (pos[3 * n + 0] - pos[3 * i_neig + 0]);
                 rel_displ[1] = (pos[3 * n + 1] - pos[3 * i_neig + 1]);
@@ -207,7 +205,7 @@ void setArtificialViscosity(GeomData &geomParams,
 }
 
 void continuityEquation(SimulationData& simParams,
-                        vector<vector<int>> &neighbours_matrix,
+                        vector<int> &neighbours,
                         vector<double> &nb_neighbours,
                         vector<vector<double>> &gradW_matrix,
                         vector<double> &pos,
@@ -223,7 +221,6 @@ void continuityEquation(SimulationData& simParams,
     #pragma omp parallel for
     for (int n = 0; n < nb_part; n++){
 
-        vector<int> &neighbours = neighbours_matrix[n];
         vector<double> &gradW = gradW_matrix[n];
         int size_neighbours = nb_neighbours[n];
 
@@ -231,7 +228,7 @@ void continuityEquation(SimulationData& simParams,
         for (int idx = 0; idx < size_neighbours; idx++){
 
             double dot_product = 0;
-            int i_neig = neighbours[idx];
+            int i_neig = neighbours[100*n + idx];
             double m_b = mass[i_neig];
 
             // Dot product of u_ab with grad_a(W_ab)
@@ -252,7 +249,7 @@ void continuityEquation(SimulationData& simParams,
 void momentumEquation(GeomData &geomParams,    
                       ThermoData &thermoParams,
                       SimulationData &simParams, 
-                      vector<vector<int>> &neighbours_matrix,
+                      vector<int> &neighbours,
                       vector<double> &nb_neighbours,
                       vector<vector<double>> &gradW_matrix,
                       vector<vector<double>> &pi_matrix,
@@ -277,19 +274,18 @@ void momentumEquation(GeomData &geomParams,
 
     // Compute artificial viscosity Π_ab for all particles
     setArtificialViscosity(geomParams, thermoParams, simParams, pi_matrix, 
-                           neighbours_matrix, nb_neighbours, c, pos, rho, u); 
+                           neighbours, nb_neighbours, c, pos, rho, u); 
 
     vector<double> F_vol(3*simParams.nb_moving_part,0.0);
 
     if (simParams.is_surface_tension)
         surfaceTension(simParams, geomParams,thermoParams, nb_neighbours,
-                       neighbours_matrix, gradW_matrix, mass, rho, pos, F_vol);
+                       neighbours, gradW_matrix, mass, rho, pos, F_vol);
 
     // Iterate over each particle
     #pragma omp parallel for
     for (int n = 0; n < nb_moving_part; n++){
 
-        vector<int> &neighbours = neighbours_matrix[n];
         vector<double> &gradW = gradW_matrix[n];
         vector<double> &artificial_visc = pi_matrix[n];
         
@@ -298,11 +294,12 @@ void momentumEquation(GeomData &geomParams,
 
         for (int cord = 0; cord < 3; cord++){
 
-            // Summation over b = 1 -> nb_neighbours
             int size_neighbours = nb_neighbours[n];
+
+            // Summation over b = 1 -> nb_neighbours
             for (int idx = 0; idx < size_neighbours; idx++){
 
-                int i_neig = neighbours[idx];
+                int i_neig = neighbours[100*n + idx];
                 double pi_ab = artificial_visc[idx];
                 double rho_b = rho[i_neig];
                 double m_b = mass[i_neig];

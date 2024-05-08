@@ -30,7 +30,7 @@ void Euler(GeomData &geomParams,
             vector<double> &mass,
             vector<vector<double>> &artificial_visc_matrix,
             vector<vector<double>> &gradW_matrix,
-            vector<vector<int>> &neighbours_matrix,
+            vector<int> &neighbours,
             vector<double> &nb_neighbours){
 
 
@@ -43,11 +43,11 @@ void Euler(GeomData &geomParams,
     
 
     // Compute D(rho)/Dt for all particles
-    continuityEquation(simParams, neighbours_matrix, nb_neighbours, gradW_matrix, 
+    continuityEquation(simParams, neighbours, nb_neighbours, gradW_matrix, 
                        pos, u, drhodt, rho, mass); 
 
     // Compute D(u)/Dt for all particles
-    momentumEquation(geomParams, thermoParams, simParams, neighbours_matrix, nb_neighbours,
+    momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours,
                      gradW_matrix, artificial_visc_matrix, mass, dudt, rho, p, c, pos, u); 
 
     
@@ -82,7 +82,7 @@ void RK22(GeomData &geomParams,
           vector<double> &mass,
           vector<vector<double>> &artificial_visc_matrix,
           vector<vector<double>> &gradW_matrix,
-          vector<vector<int>> &neighbours_matrix,
+          vector<int> &neighbours,
           vector<double> &nb_neighbours){
 
     double dt = simParams.dt;
@@ -97,14 +97,14 @@ void RK22(GeomData &geomParams,
                     dudt_half(3*nb_tot_part,0.0);
 
     Euler(geomParams, thermoParams, simParams, pos_half, u_half, rho_half, drhodt_half, c, p, dudt_half, 
-              mass, artificial_visc_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
+              mass, artificial_visc_matrix, gradW_matrix, neighbours, nb_neighbours);
 
     // Compute D(rho)/Dt for all particles
-    continuityEquation(simParams, neighbours_matrix, nb_neighbours, gradW_matrix, 
+    continuityEquation(simParams, neighbours, nb_neighbours, gradW_matrix, 
                     pos_half, u_half, drhodt_half, rho_half, mass); 
 
     // Compute D(u)/Dt for all particles
-    momentumEquation(geomParams, thermoParams, simParams, neighbours_matrix, nb_neighbours, gradW_matrix, artificial_visc_matrix,
+    momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW_matrix, artificial_visc_matrix,
                     mass, dudt_half, rho_half, p, c, pos_half, u_half); 
 
     int nb_part = simParams.nb_part;
@@ -136,7 +136,7 @@ void updateVariables(GeomData &geomParams,
                      vector<double> &mass,
                      vector<vector<double>> &artificial_visc_matrix,
                      vector<vector<double>> &gradW_matrix,
-                     vector<vector<int>> &neighbours_matrix,
+                     vector<int> &neighbours,
                      vector<double> &nb_neighbours){
 
     bool PRINT = simParams.PRINT;
@@ -145,7 +145,7 @@ void updateVariables(GeomData &geomParams,
 
     if (schemeIntegration == "Euler")
         Euler(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
-              artificial_visc_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
+              artificial_visc_matrix, gradW_matrix, neighbours, nb_neighbours);
     
 
     if (schemeIntegration == "RK22"){
@@ -157,7 +157,7 @@ void updateVariables(GeomData &geomParams,
                         dudt_half(3*nb_tot_part,0.0);
 
         RK22(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass,
-             artificial_visc_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
+             artificial_visc_matrix, gradW_matrix, neighbours, nb_neighbours);
     }
 
     if (PRINT) cout << "update passed" << endl;

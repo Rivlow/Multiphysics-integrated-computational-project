@@ -21,7 +21,7 @@ using namespace std;
 void sortedList(GeomData &geomParams,
                 SimulationData &simParams, 
                 vector<vector<int>> &cell_matrix,
-                vector<vector<int>> &neighbours_matrix,
+                vector<int> &neighbours,
                 vector<vector<double>> &gradW_matrix,
                 vector<vector<double>> &artificial_visc_matrix,
                 vector<double> &nb_neighbours,
@@ -113,7 +113,7 @@ void sortedList(GeomData &geomParams,
                                 int kappa = geomParams.kappa;
                                 double h = geomParams.h;
 
-                                if (r2 <= kappa * kappa *h * h) neighbours_matrix[n][it++] = idx_cell;
+                                if (r2 <= kappa * kappa *h * h) neighbours[100*n + it++] = idx_cell;
                             
                             }
                         }

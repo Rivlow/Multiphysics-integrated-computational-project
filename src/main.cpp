@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
                    c(nb_tot_part, 0), grad_sum(nb_tot_part, 0);
 
     vector<vector<double>> pi_matrix(nb_tot_part), gradW_matrix(nb_tot_part);
-    vector<vector<int>> neighbours_matrix(nb_tot_part, vector<int>(100));
+    vector<int> neighbours(100*nb_tot_part);
     vector<double> nb_neighbours(nb_tot_part, 0.0); 
 
     // Variables defined to used "export.cpp"
@@ -192,31 +192,31 @@ int main(int argc, char *argv[])
 
         // Check if timeStep is small enough
         checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
-                      neighbours_matrix, nb_neighbours, pi_matrix);
+                      neighbours, nb_neighbours, pi_matrix);
 
         // Apply the linked-list algorithm
-        sortedList(geomParams, simParams, cell_matrix, neighbours_matrix, 
+        sortedList(geomParams, simParams, cell_matrix, neighbours, 
                    gradW_matrix, pi_matrix, nb_neighbours, type, pos); 
 
         // Compute ∇_a(W_ab) for all particles
-        gradW(geomParams, simParams, gradW_matrix, neighbours_matrix, nb_neighbours, pos); 
+        gradW(geomParams, simParams, gradW_matrix, neighbours, nb_neighbours, pos); 
 
         // Update density, velocity and position (Euler explicit or RK22 scheme)
         updateVariables(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
-                        pi_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
+                        pi_matrix, gradW_matrix, neighbours, nb_neighbours);
 
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){
                 if (geomParams.post_process_do)
-                    extractData(geomParams, simParams, thermoParams, pos, p, mass, neighbours_matrix);
+                    extractData(geomParams, simParams, thermoParams, pos, p, mass, neighbours);
                 
-            export_particles("../../output/sph", t, pos, scalars, vectors);
+            export_particles("../../output/sph", t, pos, scalars, vectors, false);
             progresssBar(double(t)/double(simParams.nstepT) * 100, t, simParams.nstepT);
         }
 
 
         // Clear matrices and reset arrays to 0
-        clearAllVectors(simParams, pi_matrix, neighbours_matrix,
+        clearAllVectors(simParams, pi_matrix, neighbours,
                         cell_matrix, gradW_matrix, drhodt, dudt);
 
     }

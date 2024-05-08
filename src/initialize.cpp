@@ -138,7 +138,7 @@ void checkTimeStep(GeomData &geomParams,
                    vector<double> &pos,
                    vector<double> &u,
                    vector<double> &c,
-                   vector<vector<int>> &neighbours_matrix,
+                   vector<int> &neighbours,
                    vector<double> &nb_neighbours,
                    vector<vector<double>> &pi_matrix){
 
@@ -172,13 +172,12 @@ void checkTimeStep(GeomData &geomParams,
         #pragma omp parallel for   
         for (int n = 0; n < nb_moving_part; n++){
 
-            vector<int> &neighbours = neighbours_matrix[n];
             int size_neighbours = nb_neighbours[n];
 
             // Iteration over each associated neighbours
             for (int idx = 0; idx < size_neighbours; idx++){
 
-                int i_neig = neighbours[idx];
+                int i_neig = neighbours[100*n + idx];
                 vector<double> rel_displ(3), rel_vel(3);
 
                 rel_displ[0] = (pos[3 * n + 0] - pos[3 * i_neig + 0]);

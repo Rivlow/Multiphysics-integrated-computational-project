@@ -9,7 +9,7 @@
   },
 
   "post_process":{
-    "do": true,
+    "do": false,
     "xyz_init": [0, 0, 0.5],
     "xyz_end": [2.8, 2.8, 0.5]
   },

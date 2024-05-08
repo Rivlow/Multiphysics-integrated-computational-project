@@ -28,16 +28,15 @@ double W_coh(double r, double h){
 }
 
 void surfaceTension(SimulationData& simParams,
-GeomData &geomParams,
-ThermoData &thermoParam,
-vector<double> nb_neighbours,
-vector<vector<int>> neighbours_matrix,
-vector<vector<double>> gradW_matrix,
-vector<double> mass,
-vector<double> rho,
-vector<double> pos,
-vector<double> &F_vol
-){
+                    GeomData &geomParams,
+                    ThermoData &thermoParam,
+                    vector<double> nb_neighbours,
+                    vector<int> neighbours,
+                    vector<vector<double>> gradW_matrix,
+                    vector<double> mass,
+                    vector<double> rho,
+                    vector<double> pos,
+                    vector<double> &F_vol){
     /*
     double alpha = 12.5;
     #pragma omp parallel for 
@@ -70,13 +69,12 @@ vector<double> &F_vol
     #pragma omp parallel for 
     for(int n = 0; n<simParams.nb_moving_part; n++){
 
-        vector<int> &neighbours = neighbours_matrix[n];
         vector<double> &gradW = gradW_matrix[n];
         int size_neighbours = nb_neighbours[n];
         
         for(int idx = 0; idx<size_neighbours; idx++){ 
 
-            int i_neig = neighbours[idx]; 
+            int i_neig = neighbours[100*n + idx]; 
             double m_j = mass[i_neig];
             double rho_j = rho[i_neig];
             
@@ -92,12 +90,11 @@ vector<double> &F_vol
     #pragma omp parallel for 
     for(int n = 0; n<simParams.nb_moving_part; n++){
 
-        vector<int> &neighbours = neighbours_matrix[n];
         int size_neighbours = nb_neighbours[n];
         
         for(int idx = 0; idx<size_neighbours; idx++){
 
-            int i_neig = neighbours[idx];
+            int i_neig = neighbours[100*n + idx];
             double K_ij = 2*thermoParam.rho_0/(rho[n]+rho[i_neig]);
             double r_ab = 0;
             vector<double> d_xyz(3);

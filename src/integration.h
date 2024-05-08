@@ -17,7 +17,7 @@ void Euler(GeomData &geomParams,
             vector<double> &mass,
             vector<vector<double>> &artificial_visc_matrix,
             vector<vector<double>> &gradW_matrix,
-            vector<vector<int>> &neighbours_matrix,
+            vector<int> &neighbours,
             vector<double> &nb_neighbours);
 
 void RK22(GeomData &geomParams,    
@@ -33,7 +33,7 @@ void RK22(GeomData &geomParams,
           vector<double> &mass,
           vector<vector<double>> &artificial_visc_matrix,
           vector<vector<double>> &gradW_matrix,
-          vector<vector<int>> &neighbours_matrix,
+          vector<int> &neighbours,
           vector<double> &nb_neighbours);
 
 void updateVariables(GeomData &geomParams,    
@@ -49,5 +49,5 @@ void updateVariables(GeomData &geomParams,
                      vector<double> &mass,
                      vector<vector<double>> &artificial_visc_matrix,
                      vector<vector<double>> &gradW_matrix,
-                     vector<vector<int>> &neighbours_matrix,
+                     vector<int> &neighbours,
                      vector<double> &nb_neighbours);
