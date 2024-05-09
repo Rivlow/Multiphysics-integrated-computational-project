@@ -26,9 +26,11 @@ void getKey(json data,
 void createOutputFolder();
 void clearOutputFiles();
 
+void progressBar(double ratio, double elapsed_time);
+
 void clearAllVectors(SimulationData &params,
                      vector<vector<double>> &pi_matrix,
-                     vector<vector<int>> &neighbours_matrix,
+                     vector<int> &neighbours,
                      vector<vector<int>> &cell_matrix,
                      vector<vector<double>> &gradW_matrix, 
                      vector<double> &drhodt,
