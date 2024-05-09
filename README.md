@@ -17,6 +17,9 @@ Windows : In the upper path of the folder **PI_LUCA_KILLIAN** write in a termina
 
 which will first set the location of mingw compiler/zlib/cmake; create mandatory local environment variables and immediatly shift your path to the desired location (in the build folder).
 
+--Note--: to run this code correctly, you need to download the main folder in this precise path:
+    ```C:\Users\Username\pi_luca_killian\src\build>```
+
 ### Define simulation
 In the **.json** file, several parameters can be adjusted:
     - thermodynamics variables (temperature, density, R, heat capacity ratio, ...)
@@ -85,9 +88,21 @@ Here is an example of .json file used:
 }
 
 ```
+### Launch simulation
+
+Once everything is ready, one can run the code by the following code line:
+    ```solver.exe ../../tests/surface_tension/cube_to_sphere.json```
 
 In the example above, a single cube of fluid particles is created "in the void" and surface tensions will be applied to it. Thus this cube will become a sphere after a short period of time as can be seen on the video below:
 
 ![Test GIF](good_sim_ihopeso.gif)
+
+### Analyse simulation
+
+The results of the particles variables (position, velocity, pressure, density, speed of sound, number of neighbours, ...) can be visuallized using either Paraview (for nice spatial view) or our python scripts (which are simply reading **.csv** files created during the simulation).
+
+A CONTINUER
+
+Once the simulation is done, one may analyse the result using either 
 
 
