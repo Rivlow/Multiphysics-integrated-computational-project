@@ -1,8 +1,9 @@
 import vtk
-from vtk.util.numpy_support import vtk_to_numpy
+#from vtk.util.numpy_support import vtk_to_numpy
 import os
-from matplotlib import pyplot as plt
-import pandas as pd
+import sys
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 
 """
@@ -58,13 +59,13 @@ def getData(directory):
         
         return df, name
     else:
-        print(f"No csv. files in folder : {directory}.")
+        print(f"No csv files in folder : {directory}.")
 
     
 path = os.getcwd()
 
 
-def plotData(all_data, particle):
+def plotData(all_data):
     
     data_tot = all_data[0]
     names = all_data[1]
@@ -72,11 +73,13 @@ def plotData(all_data, particle):
 
     for data, name in zip(data_tot, names):
         
-        t = np.arange(0, np.shape(data)[0]/39, 1)
+        t = np.arange(0, np.shape(data)[0], 1)
         var = np.zeros(len(t))
+        
+        print(data)
 
-        for i, rows in enumerate(data/39):
-            var[i] = rows[particle+i*39]
+        for i, rows in enumerate(data):
+            var[i] = rows[0]
         
         plt.figure()
         plt.scatter(t, var)
@@ -85,16 +88,61 @@ def plotData(all_data, particle):
         plt.title(f"{name[:-4]}")
         plt.tight_layout()
         plt.show()
+
         
     
     
 def main():
     
-    outputFile = "output/"
-    particle = 20
-    
+    # Chemin absolu du répertoire du script actuel
+    current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
+    outputFile = os.path.dirname(current_directory) + "\\output"  
     all_data = getData(outputFile)
-    plotData(all_data, particle)
+    
+    print(all_data[1])
+    data = all_data[0][1]
+    # Création des subplots
+    fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+
+    # Plot 2D
+    for i in range(data.shape[1]):
+        axs[0].plot(range(data.shape[0]), data[:, i], label=f'part {i}')
+    axs[0].legend(loc='best')
+    axs[0].set_title('Plot 2D')
+    axs[0].set_xlabel('Iterations')
+    axs[0].set_ylabel('Values')
+
+    # Plot 3D
+    ax = fig.add_subplot(122, projection='3d')
+    for i in range(data.shape[1]):
+        ax.plot(range(data.shape[0]), data[:, i], zs=i)
+    ax.set_title('Plot 3D')
+    ax.set_xlabel('Iterations')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Ghost particles')
+
+    plt.tight_layout()
+    plt.show()
+        
+    
+'''
+    
+    # Création de la figure
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Tracé des données
+    ax.scatter(x, y, z)
+
+    # Étiquetage des axes
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+
+    # Affichage du graphe
+    plt.show()
+    #plotData(all_data)
+'''
     
     
     

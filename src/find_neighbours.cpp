@@ -21,15 +21,16 @@ using namespace std;
 void sortedList(GeomData &geomParams,
                 SimulationData &simParams, 
                 vector<vector<int>> &cell_matrix,
-                vector<vector<int>> &neighbours_matrix,
+                vector<int> &neighbours,
                 vector<vector<double>> &gradW_matrix,
                 vector<vector<double>> &pi_matrix,
                 vector<double> &nb_neighbours,
+                vector<double> &type,
                 vector<double> &pos){
 
-    if (simParams.PRINT){
+    if (simParams.PRINT)
         cout << "findNeighbours begins" << endl;
-    }
+    
     int Nx = geomParams.Nx;
     int Ny = geomParams.Ny;
     int Nz = geomParams.Nz;
@@ -98,7 +99,7 @@ void sortedList(GeomData &geomParams,
                         int idx_cell = cell[idx];
 
                         //if (idx_cell >= simParams.nb_tot_part) cout << "ghost part" << endl;
-                        if (idx_cell >= simParams.nb_part) continue;
+                        if (type[idx_cell] == 2.0) continue;
                         else{
 
                             if (idx_cell != n){
@@ -112,7 +113,7 @@ void sortedList(GeomData &geomParams,
                                 int kappa = geomParams.kappa;
                                 double h = geomParams.h;
 
-                                if (r2 <= kappa * kappa *h * h) neighbours_matrix[n][it++] = idx_cell;
+                                if (r2 <= kappa * kappa *h * h) neighbours[100*n + it++] = idx_cell;
                             
                             }
                         }
@@ -132,6 +133,7 @@ void sortedList(GeomData &geomParams,
 
 }
 
+/*
 void naiveAlgo(GeomData &geomParams,
                SimulationData &simParams, 
                vector<vector<int>> &neighbours_matrix,
@@ -165,6 +167,7 @@ void naiveAlgo(GeomData &geomParams,
         }
     }
 }
+*/
 
 void printNeighbours(vector<vector<int>> &neighbours_matrix_linked,
                      vector<vector<int>> &neighbours_matrix_naive){

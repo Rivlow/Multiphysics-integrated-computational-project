@@ -10,31 +10,27 @@
 
 using namespace std;
 
-
 struct GeomData {
     
     int kappa;
     double s;
     double h; 
-    vector<double> o;
-    vector<double> L;
     vector<double> o_d;
     vector<double> L_d;
-    bool post_process_do;
-    vector<double> xyz_init;
-    vector<double> xyz_end;
-    int Nx;
-    int Ny;
-    int Nz;
     vector<vector<double>> matrix_long;
     vector<vector<double>> matrix_orig;
     vector<int> vector_type; 
+    vector<double> xyz_init;
+    vector<double> xyz_end;
+    bool post_process_do;
+    int Nx;
+    int Ny;
+    int Nz;
+
 };
 
+
 struct ThermoData {
- 
-    double alpha;
-    double beta;
     double c_0;
     double rho_moving;
     double rho_fixed;
@@ -42,10 +38,7 @@ struct ThermoData {
     double M;
     double T;
     double gamma;
-    double R ; 
-    double g; 
-    double F_st_max;
-
+    double R ; // [J/(K.mol)]
 };
 
 struct SimulationData {
@@ -54,10 +47,15 @@ struct SimulationData {
     int nsave;
     double dt; 
     double theta;
+    double alpha;
+    double beta;
+    double alpha_st;
     string schemeIntegration;
     vector<double> u_init;
     string state_equation; 
     string state_initial_condition;
+    bool is_gravity;
+    bool is_surface_tension;
     bool PRINT;
     bool is_gravity;
     bool is_surface_tension;
@@ -65,7 +63,7 @@ struct SimulationData {
     int nb_moving_part;
     int nb_part;
     int t;
-
+    double F_st_max;
  
 };
 

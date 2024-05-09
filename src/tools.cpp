@@ -6,6 +6,7 @@
 #include <fstream>
 #include <cassert>
 #include <filesystem>
+#include <chrono>
 
 #include "tools.h"
 #include "structure.h"
@@ -81,7 +82,7 @@ void getKey(json data,
             string &schemeIntegration){
 
     
-    for (auto &it : data["stateEquation"].items())
+    for (auto &it : data["condition"]["stateEquation"].items())
     {
         if (it.value() == true)
         {
@@ -89,7 +90,7 @@ void getKey(json data,
         }
     };
 
-    for (auto &it : data["schemeIntegration"].items())
+    for (auto &it : data["condition"]["schemeIntegration"].items())
     {
         if (it.value() == true)
         {
@@ -97,7 +98,7 @@ void getKey(json data,
         }
     };
 
-    for (auto &it : data["initialCondition"].items())
+    for (auto &it : data["condition"]["initialCondition"].items())
     {
         if (it.value() == true)
         {
@@ -146,10 +147,32 @@ void clearOutputFiles(){
 
 }
 
+void progressBar(double ratio, double elapsed_time) {
+
+    double ratio_time = ratio * 100; 
+    double remain_time = (elapsed_time/ratio_time) * (100 - ratio_time);
+    const int largeurBarre = 50;
+    int remplissage = ratio * largeurBarre;
+
+    cout << "[";
+
+    for (int i = 0; i < largeurBarre; ++i) {
+        if (i < remplissage) {
+            cout << "#";
+        } else {
+            cout << " ";
+        }
+    }
+
+    cout << "] " << fixed << setprecision(2) << ratio * 100 << "% (approximated remaining time = "<< remain_time << "s )\r";
+    cout.flush();
+}
+
+
 
 void clearAllVectors(SimulationData &simParams,
                      vector<vector<double>> &pi_matrix,
-                     vector<vector<int>> &neighbours_matrix,
+                     vector<int> &neighbours,
                      vector<vector<int>> &cell_matrix,
                      vector<vector<double>> &gradW_matrix, 
                      vector<double> &drhodt,
@@ -158,28 +181,24 @@ void clearAllVectors(SimulationData &simParams,
     bool PRINT = simParams.PRINT;
     int nb_part = simParams.nb_part;
     int cell_size = cell_matrix.size();
-    int neighbours_size = neighbours_matrix.size();
+    int neighbours_size = neighbours.size();
 
-    for (int i = 0; i < cell_size; i++){
+    for (int i = 0; i < cell_size; i++)
         cell_matrix[i].clear();
-    }
+    
 
-    for (int i = 0; i < neighbours_size; i++){
-        for (int j = 0; j < int(neighbours_matrix[i].size()); j++){
-            neighbours_matrix[i][j] = 0;
-        }
-    }
-
-
+    for (int i = 0; i < neighbours_size; i++)
+        neighbours[i] = 0;
+        
     for (int i = 0; i < nb_part; i++){
+
         gradW_matrix[i].clear();
         pi_matrix[i].clear();
         drhodt[i] = 0.0;
 
         for(int coord = 0 ; coord < 3 ; coord ++)
-            dudt[3*i+coord] = 0.0;
-        
-        }
+            dudt[3*i+coord] = 0.0;    
+    }
 
     if (PRINT) cout << "clearAllVectors passed" << endl;
 }

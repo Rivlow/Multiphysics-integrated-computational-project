@@ -23,4 +23,5 @@ void extractData(GeomData &geomParams,
                  vector<double> &pos,  
                  vector<double> &p, 
                  vector<double> &mass,
-                 vector<vector<int>> &neighbours_matrix);
+                 vector<int> &neighbours,
+                 vector<double> &nb_neighbours);

@@ -9,7 +9,7 @@
 #include <omp.h>
 
 using namespace std;
-namespace fs = std::filesystem;
+namespace fs = filesystem;
 
 
 void extractData(GeomData &geomParams,  
@@ -18,20 +18,23 @@ void extractData(GeomData &geomParams,
                  vector<double> &pos,  
                  vector<double> &p, 
                  vector<double> &mass,
-                 vector<vector<int>> &neighbours_matrix){
-
+                 vector<int> &neighbours,
+                 vector<double> &nb_neighbours){
 
     string outputDir = "../../output";
     string outputFile_rho = outputDir + "/" + "rho" +".csv";
     string outputFile_p = outputDir + "/" + "p" +".csv";
 
     // Create folder if not existing
-    if (!fs::exists(outputDir)) fs::create_directories(outputDir);
+    if (!fs::exists(outputDir)){
+        fs::create_directories(outputDir);
+        cout << "Create p.csv and rho.csv files" <<endl;
+    }
 
     ofstream output_rho(outputFile_rho, ios::app);
     ofstream output_p(outputFile_p, ios::app);
 
-    if (!output_rho.is_open() || !output_p.is_open()) {
+    if (!output_rho.is_open() || !output_p.is_open()){
         cerr << "Error while opening CSV file." << endl;
         return;
     }
@@ -39,15 +42,15 @@ void extractData(GeomData &geomParams,
     int init = simParams.nb_part;
     int end = pos.size()/3;
 
-    for (int n = init; n <= end; n++) {
+    for (int n = init; n < end; n++){
 
-        vector<int> &neighbours = neighbours_matrix[n];
-        int neighbours_size = neighbours.size();
+        int neighbours_size = nb_neighbours[n];
         double rho_tot = 0, p_tot = 0;
 
         for (int idx = 0; idx < neighbours_size; idx++){
 
-            int i_neig = neighbours[idx];
+            //cout << "idx : " << idx <<endl;
+            int i_neig = neighbours[100*n + idx];
             double r_ab = 0;
             vector<double> pos_val(3);
 
@@ -83,9 +86,9 @@ void extractData(GeomData &geomParams,
         }
 
 
-        if (n == end){
-            output_rho << rho_tot;
-            output_p << p_tot;
+        if (n == end-1){
+            output_rho << rho_tot << "\n";
+            output_p << p_tot << "\n";
         }
         else{
             output_rho << rho_tot << ",";
