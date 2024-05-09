@@ -4,21 +4,21 @@
 
 ## What is it about ?
 
-This multiphysics integrated computational project is focused on computational fluid dynamics in continuum mechanic and more precisely focused on the **Smoothed-particle hydrodynamics** (so-called SPH method) which is computed in c++ language. This method has been created in the 19's (1977 by Gingold, Monaghan and Lucy) and is thus relatively new. Hence, one specificaly focus on microfluidic applications (such as surface tensions, adhesions) in order to compare our results to some well known examples to assess the accuracy of our models.
+This multiphysics integrated computational project is focused on computational fluid dynamics in continuum mechanic and more precisely focused on the **Smoothed-particle hydrodynamics** (so-called SPH method) which is computed in c++ language. This method has been created in the 19's (1977 by Gingold, Monaghan and Lucy) and is thus relatively new. Hence, one specificaly focuses on microfluidic applications (such as surface tensions, adhesions) in order to compare our results to some well known examples to assess the accuracy of our models.
 
 ## How to run the code ?
 
 ### Before launching simulation
-Once all files are downloaded, few things have to be considered before running simulations. Indeed, this c++ code is compiled using CMake (to ease the use of makefiles) and Ninja (to ease the access to files/folders' name) and thus some variables have to be defined before hand.
+Once all files are downloaded, few things have to be considered before running simulations. Indeed, this c++ code is compiled using CMake (to ease the use of makefiles) and Ninja (to ease the access to files/folders' name) and thus some variables have to be defined beforehand.
 
 Windows : In the upper path of the folder **PI_LUCA_KILLIAN** write in a terminal
-
     ```envs\windows.cmd```
 
 which will first set the location of mingw compiler/zlib/cmake; create mandatory local environment variables and immediatly shift your path to the desired location (in the build folder).
 
---Note--: to run this code correctly, you need to download the main folder in this precise path:
-    ```C:\Users\Username\pi_luca_killian\src\build>```
+<u>Note</u> : to run this code correctly, you need to download the main folder in this precise path:
+
+```C:\Users\Username\pi_luca_killian\src\build>```
 
 ### Define simulation
 In the **.json** file, several parameters can be adjusted:
