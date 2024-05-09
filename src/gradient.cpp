@@ -259,9 +259,10 @@ void momentumEquation(GeomData &geomParams,
                       vector<double> &p, 
                       vector<double> &c,
                       vector<double> &pos,
-                      vector<double> &u){
+                      vector<double> &u,
+                      vector<double> type){
 
-
+    //cout << simParams.is_gravity << endl;
     double g = (simParams.is_gravity)? -9.81 : 0;
     bool PRINT = simParams.PRINT;
     int nb_moving_part = simParams.nb_moving_part;
@@ -280,8 +281,8 @@ void momentumEquation(GeomData &geomParams,
 
     if (simParams.is_surface_tension)
         surfaceTension(simParams, geomParams,thermoParams, nb_neighbours,
-                       neighbours, gradW_matrix, mass, rho, pos, F_vol);
-
+                       neighbours, gradW_matrix, mass, rho, pos, F_vol,type);
+    
     // Iterate over each particle
     #pragma omp parallel for
     for (int n = 0; n < nb_moving_part; n++){
@@ -307,13 +308,41 @@ void momentumEquation(GeomData &geomParams,
 
                 dudt[3 * n + cord] += m_b * (p_b / (rho_b * rho_b) +
                                       p_a / (rho_a * rho_a) + pi_ab)* gradW[3*idx + cord];
+
+                if(simParams.is_adhesion){
+                    double beta = 4;
+                    double W_adh = 0;
+                    double r_ab = 0;
+                    vector<double> d_xyz(3);
+                    for (int coord = 0; coord < 3; coord++){
+                    
+                    d_xyz[coord] = pos[3 * n + coord] - pos[3 * i_neig + coord];
+                    r_ab += d_xyz[coord]*d_xyz[coord];
+                    }
+
+                    r_ab = sqrt(r_ab);
+                    if(2*r_ab > geomParams.h && r_ab<=geomParams.h){
+                        double cst = 0.007/pow(geomParams.h,3.25);
+                        double fct = sqrt(sqrt(-4*r_ab*r_ab/geomParams.h+6*r_ab-2*geomParams.h));
+                        W_adh = cst*fct;
+                    }
+
+                    for (int coord = 0; coord < 3; coord++){
+                        double boundary = 1-type[n];
+                    F_vol[3*n + coord] += beta*boundary*mass[n]*m_b*W_adh*d_xyz[coord]/r_ab;
+                    
+                    }
+                }
             }
 
             dudt[3 * n + cord] *= -1;
             dudt[3 * n + cord] += F_vol[3 * n + cord];
 
-            if(cord == 2)
+            if(cord == 2){
                 dudt[3 * n + cord] += g;
+                //cout << g << endl;
+            }
+                
             
         }
     }

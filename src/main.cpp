@@ -120,8 +120,9 @@ int main(int argc, char *argv[])
         data["thermo"]["u_init"],
         state_equation,
         state_initial_condition,
-        false,
-        true,
+        data["forces"]["gravity"],
+        data["forces"]["surface_tension"],
+        data["forces"]["adhesion"],
         data["condition"]["print_debug"],
         evaluateNumberParticles(geomParams),
         0,
@@ -230,7 +231,7 @@ int main(int argc, char *argv[])
 
         // Update density, velocity and position (Euler explicit or RK22 scheme)
         updateVariables(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
-                        pi_matrix, gradW_matrix, neighbours, nb_neighbours);
+                        pi_matrix, gradW_matrix, neighbours, nb_neighbours, type);
 
         // Check if timeStep is small enough
         checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,

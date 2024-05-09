@@ -56,6 +56,7 @@ struct SimulationData {
     string state_initial_condition;
     bool is_gravity;
     bool is_surface_tension;
+    bool is_adhesion;
     bool PRINT;
     int nb_moving_part;
     int nb_part;
