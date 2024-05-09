@@ -88,6 +88,6 @@ Here is an example of .json file used:
 
 In the example above, a single cube of fluid particles is created "in the void" and surface tensions will be applied to it. Thus this cube will become a sphere after a short period of time as can be seen on the video below:
 
-![Test GIF](output/good_sim_ihopeso.gif)
+![Test GIF](good_sim_ihopeso.gif)
 
 
