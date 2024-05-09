@@ -133,6 +133,7 @@ void sortedList(GeomData &geomParams,
 
 }
 
+/*
 void naiveAlgo(GeomData &geomParams,
                SimulationData &simParams, 
                vector<vector<int>> &neighbours_matrix,
@@ -167,6 +168,7 @@ void naiveAlgo(GeomData &geomParams,
         }
     }
 }
+*/
 
 void printNeighbours(vector<vector<int>> &neighbours_matrix_linked,
                      vector<vector<int>> &neighbours_matrix_naive){

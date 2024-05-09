@@ -51,3 +51,13 @@ void updateVariables(GeomData &geomParams,
                      vector<vector<double>> &gradW_matrix,
                      vector<int> &neighbours,
                      vector<double> &nb_neighbours);
+
+void checkTimeStep(GeomData &geomParams,    
+                   ThermoData &thermoParams,
+                   SimulationData &simParams, 
+                   vector<double> &pos,
+                   vector<double> &u,
+                   vector<double> &c,
+                   vector<int> &neighbours,
+                   vector<double> &nb_neighbours,
+                   vector<vector<double>> &pi_matrix);

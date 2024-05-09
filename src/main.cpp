@@ -262,7 +262,7 @@ int main(int argc, char *argv[])
 
     auto t1 = chrono::high_resolution_clock::now();
     auto delta_t = chrono::duration_cast<chrono::duration<double>>(t1 - t0).count();
-    cout << "\n duration: " << delta_t << "s.\n";
+    cout << "\nduration: " << delta_t << "s (" << int((MP_count+FP_count)/delta_t)<<" particles/s).\n";
     cout << "Simulation done." << endl;
 
     return 0;
