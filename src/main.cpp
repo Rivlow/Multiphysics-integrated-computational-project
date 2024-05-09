@@ -33,7 +33,6 @@ int main(int argc, char *argv[])
 {
 
     /*---------------- SETTING COMPILATION PARAMETERS/FOLDER NEEDED --------------------*/
-
     auto t0 = chrono::high_resolution_clock::now();
 
     #ifdef _OPENMP
@@ -216,6 +215,7 @@ int main(int argc, char *argv[])
     setPressure(geomParams, thermoParams, simParams, p, rho); 
     setSpeedOfSound(geomParams, thermoParams, simParams, c, rho);
     
+    auto t_mid = chrono::high_resolution_clock::now();
 
     for (int t = 0; t < simParams.nstepT; t++){
 
@@ -244,7 +244,7 @@ int main(int argc, char *argv[])
             export_particles("../../output/sph", t, pos, scalars, vectors, false);
 
             auto t_act = chrono::high_resolution_clock::now();
-            double elapsed_time = double(chrono::duration_cast<chrono::duration<double>>(t_act - t0).count());
+            double elapsed_time = double(chrono::duration_cast<chrono::duration<double>>(t_act - t_mid).count());
             progressBar(double(t)/double(simParams.nstepT), elapsed_time);
 
                         
