@@ -9,7 +9,7 @@
   },
 
   "post_process":{
-    "do": true,
+    "do": false,
     "xyz_init": [0, 0, 0.75],
     "xyz_end": [2.8, 2.8, 0.75]
   },
@@ -23,7 +23,8 @@
     "kappa": 2,
     "alpha": 0.5,
     "beta": 0,
-    "alpha_st":10
+    "alpha_st":10,
+    "beta_adh": 10
   },
 
   "thermo":{

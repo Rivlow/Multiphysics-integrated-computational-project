@@ -2,7 +2,7 @@
 
     "domain":{
       "matrix_long" : [[1, 1, 1],[3,3,0.025],[2.95,2.95,0.025]],
-      "matrix_orig" : [[1, 1, 0.075],[0,0,0],[0.025,0.025,0.025]],
+      "matrix_orig" : [[1, 1, 0.075],[0.0,0.0,0],[0.025,0.025,0.025]],
       "vector_type" : [1,0,0],
       "L_d": [3, 3, 3],
       "o_d": [0.0, 0.0, 0.0]
@@ -17,13 +17,14 @@
     "simulation":{
       "theta" :0.5,
       "s": 0.05,
-      "nstepT": 35000,
-      "dt": 0.00005,
+      "nstepT": 100000,
+      "dt": 0.00001,
       "nsave": 100,
       "kappa": 2,
       "alpha": 0.5,
       "beta": 0,
-      "alpha_st":10
+      "alpha_st":50,
+      "beta_adh": 10
     },
   
     "thermo":{
@@ -40,7 +41,7 @@
   
     
     "forces":{
-      "gravity":false,
+      "gravity":true,
       "surface_tension":true,
       "adhesion":true
     },

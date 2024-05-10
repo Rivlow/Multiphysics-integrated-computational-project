@@ -116,6 +116,7 @@ int main(int argc, char *argv[])
         data["simulation"]["alpha"],
         data["simulation"]["beta"],
         data["simulation"]["alpha_st"],
+        data["simulation"]["beta_adh"],
         schemeIntegration,
         data["thermo"]["u_init"],
         state_equation,

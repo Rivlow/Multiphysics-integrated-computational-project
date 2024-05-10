@@ -278,11 +278,14 @@ void momentumEquation(GeomData &geomParams,
                            neighbours, nb_neighbours, c, pos, rho, u); 
 
     vector<double> F_vol(3*simParams.nb_moving_part,0.0);
-
+    
+    
     if (simParams.is_surface_tension)
+    {
+        
         surfaceTension(simParams, geomParams,thermoParams, nb_neighbours,
                        neighbours, gradW_matrix, mass, rho, pos, F_vol,type);
-    
+    }
     // Iterate over each particle
     #pragma omp parallel for
     for (int n = 0; n < nb_moving_part; n++){
@@ -308,9 +311,10 @@ void momentumEquation(GeomData &geomParams,
 
                 dudt[3 * n + cord] += m_b * (p_b / (rho_b * rho_b) +
                                       p_a / (rho_a * rho_a) + pi_ab)* gradW[3*idx + cord];
-
+                
                 if(simParams.is_adhesion){
-                    double beta = 4;
+                    
+                    double beta_ad = simParams.beta_adh;
                     double W_adh = 0;
                     double r_ab = 0;
                     vector<double> d_xyz(3);
@@ -322,6 +326,7 @@ void momentumEquation(GeomData &geomParams,
 
                     r_ab = sqrt(r_ab);
                     if(2*r_ab > geomParams.h && r_ab<=geomParams.h){
+                        
                         double cst = 0.007/pow(geomParams.h,3.25);
                         double fct = sqrt(sqrt(-4*r_ab*r_ab/geomParams.h+6*r_ab-2*geomParams.h));
                         W_adh = cst*fct;
@@ -329,16 +334,20 @@ void momentumEquation(GeomData &geomParams,
 
                     for (int coord = 0; coord < 3; coord++){
                         double boundary = 1-type[n];
-                    F_vol[3*n + coord] += beta*boundary*mass[n]*m_b*W_adh*d_xyz[coord]/r_ab;
+                    F_vol[3*n + coord] += beta_ad*boundary*mass[n]*m_b*W_adh*d_xyz[coord]/r_ab;
                     
                     }
                 }
+
+
+                
             }
 
             dudt[3 * n + cord] *= -1;
             dudt[3 * n + cord] += F_vol[3 * n + cord];
 
             if(cord == 2){
+                
                 dudt[3 * n + cord] += g;
                 //cout << g << endl;
             }

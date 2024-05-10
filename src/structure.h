@@ -50,6 +50,7 @@ struct SimulationData {
     double alpha;
     double beta;
     double alpha_st;
+    double beta_adh;
     string schemeIntegration;
     vector<double> u_init;
     string state_equation; 

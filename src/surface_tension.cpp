@@ -12,20 +12,6 @@
 
 using namespace std;
 
-double W_coh(double r, double h){
-    double W = 0.0;
-    double cst = 32/(M_PI*h*h*h*h*h*h*h*h*h);
-    if(2.0*r>h && r<=h){
-        W = cst*(h-r)*(h-r)*(h-r)*r*r*r;
-    }
-    else if(r>0 && 2.0*r<=h){
-        W = cst *( 2.0*(h-r)*(h-r)*(h-r)*r*r*r - h*h*h*h*h*h/64);
-    }
-    else{
-        W = 0.0;
-    }
-    return W;
-}
 
 void surfaceTension(SimulationData& simParams,
                     GeomData &geomParams,
