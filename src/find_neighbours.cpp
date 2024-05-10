@@ -22,8 +22,10 @@ void sortedList(GeomData &geomParams,
                 SimulationData &simParams, 
                 vector<vector<int>> &cell_matrix,
                 vector<int> &neighbours,
+                vector<int> &track_surface,
                 vector<vector<double>> &gradW_matrix,
-                vector<vector<double>> &artificial_visc_matrix,
+                vector<vector<double>> W_matrix,
+                vector<vector<double>> &pi_matrix,
                 vector<double> &nb_neighbours,
                 vector<double> &type,
                 vector<double> &pos){
@@ -113,7 +115,25 @@ void sortedList(GeomData &geomParams,
                                 int kappa = geomParams.kappa;
                                 double h = geomParams.h;
 
-                                if (r2 <= kappa * kappa *h * h) neighbours[100*n + it++] = idx_cell;
+                                if (r2 <= kappa * kappa *h * h){
+                                    
+                                    neighbours[100*n + it++] = idx_cell;
+
+                                    if (type[n] == 1.0){ //FP
+
+                                        double theta = acos(rz / sqrt(r2)); 
+                                        double phi = atan2(ry, rx); 
+
+                                        theta = theta * 180.0 / M_PI;
+                                        phi = phi * 180.0 / M_PI + (phi < 0 ? 360.0 : 0);// phi between 0 et 360 degrees
+
+                                        int i_idx = static_cast<int>(theta / 45.0) - ((fmod(theta, 45.0) == 0.0) ? 1 : 0);
+                                        int j_idx = static_cast<int>(phi / 45.0) - ((fmod(phi, 45.0) == 0.0) ? 1 : 0);
+
+                                        track_surface[32*n + (i_idx + 4*j_idx)]++;
+                                    }
+                                    
+                                }
                             
                             }
                         }
@@ -123,7 +143,8 @@ void sortedList(GeomData &geomParams,
         }
         
         gradW_matrix[n].resize(3*it);
-        artificial_visc_matrix[n].resize(it);
+        W_matrix[n].resize(it);
+        pi_matrix[n].resize(it);
         nb_neighbours[n] = it;
        
     }

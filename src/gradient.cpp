@@ -15,6 +15,7 @@ using namespace std;
 void gradW(GeomData &geomParams,    
            SimulationData &simParams, 
            vector<vector<double>> &gradW_matrix,
+           vector<vector<double>> &W_matrix,
            vector<int> &neighbours,
            vector<double> &nb_neighbours,
            vector<double> &pos){
@@ -27,6 +28,8 @@ void gradW(GeomData &geomParams,
     for (int n = 0; n < nb_part; n++){
 
         vector<double> &gradW = gradW_matrix[n];
+        vector<double> &W = W_matrix[n];
+
         int size_neighbours = nb_neighbours[n];
 
         // Iterations over each associated neighbours 
@@ -44,6 +47,8 @@ void gradW(GeomData &geomParams,
 
             r_ab = sqrt(r_ab);
             double deriv = derive_cubic_spline(r_ab, h);
+            W[idx] = f_cubic_spline(r_ab, h);
+
 
             for (int coord = 0; coord < 3; coord++){
                 gradW[3 * idx + coord] = d_xyz[coord] / r_ab * deriv;

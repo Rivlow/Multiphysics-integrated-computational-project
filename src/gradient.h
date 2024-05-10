@@ -11,6 +11,7 @@ using namespace std;
 void gradW(GeomData &geomParams,    
            SimulationData &simParams, 
            vector<vector<double>> &gradW_matrix,
+           vector<vector<double>> W_matrix,
            vector<int> &neighbours,
            vector<double> &nb_neighbours,
            vector<double> &pos);
