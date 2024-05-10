@@ -20,6 +20,7 @@ void gradW(GeomData &geomParams,
            vector<double> &nb_neighbours,
            vector<double> &pos){
 
+
     double h = geomParams.h;
     int nb_part = simParams.nb_part;
 
@@ -28,8 +29,6 @@ void gradW(GeomData &geomParams,
     for (int n = 0; n < nb_part; n++){
 
         vector<double> &gradW = gradW_matrix[n];
-        vector<double> &W = W_matrix[n];
-
         int size_neighbours = nb_neighbours[n];
 
         // Iterations over each associated neighbours 
@@ -47,7 +46,8 @@ void gradW(GeomData &geomParams,
 
             r_ab = sqrt(r_ab);
             double deriv = derive_cubic_spline(r_ab, h);
-            W[idx] = f_cubic_spline(r_ab, h);
+            double W = f_cubic_spline(r_ab, h);
+            W_matrix[n][idx] = W;
 
 
             for (int coord = 0; coord < 3; coord++){
@@ -256,7 +256,10 @@ void momentumEquation(GeomData &geomParams,
                       SimulationData &simParams, 
                       vector<int> &neighbours,
                       vector<double> &nb_neighbours,
+                      vector<int> &track_surface,
+                      vector<double> &N_smoothed,
                       vector<vector<double>> &gradW_matrix,
+                      vector<vector<double>> W_matrix,
                       vector<vector<double>> &pi_matrix,
                       vector<double> &mass,
                       vector<double> &dudt,
@@ -265,6 +268,7 @@ void momentumEquation(GeomData &geomParams,
                       vector<double> &c,
                       vector<double> &pos,
                       vector<double> &u){
+
 
 
     double g = (simParams.is_gravity)? -9.81 : 0;
@@ -284,8 +288,10 @@ void momentumEquation(GeomData &geomParams,
     vector<double> F_vol(3*simParams.nb_moving_part,0.0);
 
     if (simParams.is_surface_tension)
-        surfaceTension(simParams, geomParams,thermoParams, nb_neighbours,
-                       neighbours, gradW_matrix, mass, rho, pos, F_vol);
+        surfaceTension(simParams, geomParams,thermoParams, nb_neighbours, neighbours, 
+                       track_surface, N_smoothed, gradW_matrix, W_matrix, mass, rho, pos, F_vol);
+
+
 
     // Iterate over each particle
     #pragma omp parallel for

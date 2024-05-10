@@ -43,7 +43,7 @@ void surfaceTension(SimulationData& simParams,
 
 
     vector<double> normal(3*simParams.nb_moving_part,0.0);
-    vector<double> grad_r(3*simParams.nb_moving_part,0.0);
+    vector<double> div_r(3*simParams.nb_moving_part,0.0);
     vector<double> c(simParams.nb_moving_part,0.0);
     vector<double> R(simParams.nb_moving_part,0.0);
 
@@ -52,8 +52,8 @@ void surfaceTension(SimulationData& simParams,
     // and determine the "N" for each particle (N = 1 indicates particle at free surface, otherwise N = 0)
     // The free surface is detected by both math (first) and geom method (second)
 
-    #pragma omp parallel for 
-    for(int n = 0; n<simParams.nb_moving_part; n++){
+    //#pragma omp parallel for 
+    for(int n = 0; n < simParams.nb_moving_part; n++){
 
         vector<double> &gradW = gradW_matrix[n];
         int size_neighbours = nb_neighbours[n];
@@ -63,36 +63,35 @@ void surfaceTension(SimulationData& simParams,
             int i_neig = neighbours[100*n + idx]; 
             double m_j = mass[i_neig];
             double rho_j = rho[i_neig];
+            double dot_product = 0; //r_ij*gradW_ij
 
             for(int coord = 0; coord < 3; coord ++){
 
-                double r_ij = pos[3*n+coord] - pos[3*i_neig]+coord;
+                double r_ij = pos[3*n+coord] - pos[3*i_neig+coord];
                 double grad = gradW[3*idx+coord];
-                grad_r[3*n+coord] += r_ij*m_j*grad/rho_j;
-
+                dot_product += r_ij*m_j*grad/rho_j;
                 normal[3*n+coord] += r_ij*m_j*grad/rho_j;
             }
+
+            div_r[n] = dot_product;
         }
 
-        double threshold = 0;
-        for(int coord = 0; coord < 3; coord ++)
-            threshold += grad_r[3*n+coord]*grad_r[3*n+coord];
-
         // mathematical check
-        if (threshold <= 1.7){ // particle n is potentially located on free surface
-
+        if (abs(div_r[n]) <= 1.7){ // particle n is potentially located on free surface
             // geom check
             int count = 0;
+            //printArray(track_surface, track_surface.size(), "track");
             for (int i = 0; i < 32; i++){
+
                 if (track_surface[32*n + i] == 0)
-                    count++;
-                
+                    count++;   
             }
 
             if (count > 0)
                 N_smoothed[n] = 1;
         }
     }
+    //cout << "first loop ok " << endl;
 
     // Second loop evaluated the smoothed color function "c"
     for(int n = 0; n < simParams.nb_moving_part; n++){
@@ -117,11 +116,13 @@ void surfaceTension(SimulationData& simParams,
             c[n] = 1;
     }
 
+    //cout << "Second loop ok " << endl;
+
+
     // Third loop evaluated the normal vector "n"
     for(int n = 0; n < simParams.nb_moving_part; n++){
 
         int size_neighbours = nb_neighbours[n];
-        double sum = 0;
 
         for(int idx = 0; idx < size_neighbours; idx++){ 
 
@@ -134,12 +135,12 @@ void surfaceTension(SimulationData& simParams,
                 normal[3*n + coord] -= m_j*gradW_matrix[n][3*idx+coord]*(c[i_neig] - c[n])/rho_j;
         }
     }
+    //cout << "Third loop ok " << endl;
 
     // Fourth loop evaluate the surface curvature
     for(int n = 0; n < simParams.nb_moving_part; n++){
 
         int size_neighbours = nb_neighbours[n];
-        double sum = 0;
 
         // Evaluate normal n
         for(int idx = 0; idx < size_neighbours; idx++){ 
@@ -180,7 +181,7 @@ void surfaceTension(SimulationData& simParams,
             vector<double> n_imag(3);
             double norm_imag = 0;
 
-            if (N_i = 1.0 && N_j == 0.0){ // (particle i at surface and j in the fluid)
+            if (N_i == 1.0 && N_j == 0.0){ // (particle i at surface and j in the fluid)
                 
                 for (int coord = 0; coord < 3; coord++){
                     n_imag[coord] = 2*normal[3*n + coord]/norm_i - normal[3*i_neig + coord]/norm_j;
@@ -200,7 +201,7 @@ void surfaceTension(SimulationData& simParams,
                 L_i += min(R_i, R_imag)*m_j*W_matrix[n][idx]/rho_j; // kernel gradient correction to counteract truncated solution
             }
 
-            else if (N_j = 1.0 && N_i == 0.0){ // (particle j at surface and i in the fluid)
+            else if (N_j == 1.0 && N_i == 0.0){ // (particle j at surface and i in the fluid)
 
                 for (int coord = 0; coord < 3; coord++){
                     n_imag[coord] = 2*normal[3*i_neig + coord]/norm_i - normal[3*n + coord]/norm_j;
@@ -244,9 +245,8 @@ void surfaceTension(SimulationData& simParams,
             }
 
             simParams.F_st_max = sqrt(F_res);
-
-
-
     }  
+    //cout << "Fourth loop ok " << endl;
+
     
 }

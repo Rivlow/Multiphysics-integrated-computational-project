@@ -24,14 +24,11 @@ void sortedList(GeomData &geomParams,
                 vector<int> &neighbours,
                 vector<int> &track_surface,
                 vector<vector<double>> &gradW_matrix,
-                vector<vector<double>> W_matrix,
+                vector<vector<double>> &W_matrix,
                 vector<vector<double>> &pi_matrix,
                 vector<double> &nb_neighbours,
                 vector<double> &type,
                 vector<double> &pos){
-
-    if (simParams.PRINT)
-        cout << "findNeighbours begins" << endl;
     
     int Nx = geomParams.Nx;
     int Ny = geomParams.Ny;
@@ -119,7 +116,8 @@ void sortedList(GeomData &geomParams,
                                     
                                     neighbours[100*n + it++] = idx_cell;
 
-                                    if (type[n] == 1.0){ //FP
+                                    if (type[n] == 1){ //FP
+           
 
                                         double theta = acos(rz / sqrt(r2)); 
                                         double phi = atan2(ry, rx); 
@@ -130,8 +128,9 @@ void sortedList(GeomData &geomParams,
                                         int i_idx = static_cast<int>(theta / 45.0) - ((fmod(theta, 45.0) == 0.0) ? 1 : 0);
                                         int j_idx = static_cast<int>(phi / 45.0) - ((fmod(phi, 45.0) == 0.0) ? 1 : 0);
 
-                                        track_surface[32*n + (i_idx + 4*j_idx)]++;
+                                        track_surface[32*n + (4*i_idx + j_idx)]++;
                                     }
+                                    
                                     
                                 }
                             

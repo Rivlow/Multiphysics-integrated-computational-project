@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
         data["thermo"]["T"],
         data["thermo"]["gamma"],
         data["thermo"]["R"],
-        data["sigma"]["R"],
+        data["thermo"]["sigma"],
 
     };
 
@@ -150,9 +150,9 @@ int main(int argc, char *argv[])
                    c(nb_tot_part, 0), grad_sum(nb_tot_part, 0);
 
     vector<vector<double>> pi_matrix(nb_tot_part), gradW_matrix(nb_tot_part), W_matrix(nb_tot_part);
-    vector<int> track_surface(32*FP_count, 0);
+    vector<int> track_surface(32*MP_count, 0);
     vector<int> neighbours(100*nb_tot_part);
-    vector<double> nb_neighbours(nb_tot_part, 0.0); 
+    vector<double> nb_neighbours(nb_tot_part, 0.0), N_smoothed(MP_count, 0.0); 
 
     // Variables defined to used "export.cpp"
     map<string, vector<double> *> scalars;
@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
     cout << "Initial density (rho_0) = " << thermoParams.rho_0 << endl;
     cout << "Molar mass (M) = " << thermoParams.M << endl;
     cout << "Heat capacity ration (gamma) = " << thermoParams.gamma << endl;
-    cout << "Ideal gaz constant (R) = " << thermoParams.R << "\n" << endl;
+    cout << "Ideal gaz constant (R) = " << thermoParams.R << endl;
     cout << "Surface tension stress (sigma) = " << thermoParams.R << "\n" << endl;
 
     
@@ -234,11 +234,14 @@ int main(int argc, char *argv[])
 
         // Update density, velocity and position (Euler explicit or RK22 scheme)
         updateVariables(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
-                        pi_matrix, gradW_matrix, neighbours, nb_neighbours);
+                        pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, track_surface, N_smoothed);
+
 
         // Check if timeStep is small enough
         checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
                       neighbours, nb_neighbours, pi_matrix);
+
+        //printArray(u, u.size(), "u");
 
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){
