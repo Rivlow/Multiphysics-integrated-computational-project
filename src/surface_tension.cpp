@@ -49,12 +49,14 @@ void surfaceTension(SimulationData& simParams,
     vector<double> N(simParams.nb_moving_part,0.0);
 
 
-
+    cout << "first loop " << endl;
     // First loop compute the scalar div(r) 
     // and determine the "N" for each particle (N = 1 indicates particle at free surface, otherwise N = 0)
     // The free surface is detected by both math (first) and geom method (second)
-
-    //#pragma omp parallel for 
+    //printArray(track_surface, track_surface.size(), "tracksur");
+    int nb_one = 0;
+    int nb_zero = 0;
+    
     for(int n = 0; n < simParams.nb_moving_part; n++){
 
         vector<double> &gradW = gradW_matrix[n];
@@ -77,25 +79,31 @@ void surfaceTension(SimulationData& simParams,
 
             div_r[n] = dot_product;
         }
-
+        
         // mathematical check
-        if (abs(div_r[n]) <= 1.7){ // particle n is potentially located on free surface
+        if (1){ // particle n is potentially located on free surface
 
             int count = 0; // geom check
 
-            for (int i = 0; i < 32; i++){
+            for (int i = 0; i < 16; i++){
 
-                if (track_surface[32*n + i] == 0)
+                if (track_surface[16*n + i] == 0)
                     count++;   
             }
 
             if (count > 0)
+            {
                 N[n] = 1;
+                nb_one++;
+            }
         }
+        nb_zero++;
     }
-    //cout << "first loop ok " << endl;
+    printArray(track_surface,track_surface.size(), "track_surface");
+    cout << "nb_one " << nb_one  << " nb_zero " << nb_zero<< endl;
 
     // Second loop evaluated the smoothed color function "c"
+    #pragma omp parallel for 
     for(int n = 0; n < simParams.nb_moving_part; n++){
 
         int size_neighbours = nb_neighbours[n];
@@ -123,6 +131,7 @@ void surfaceTension(SimulationData& simParams,
 
 
     // Third loop evaluated the normal vector "n"
+    #pragma omp parallel for 
     for(int n = 0; n < simParams.nb_moving_part; n++){
 
         int size_neighbours = nb_neighbours[n];
@@ -139,8 +148,9 @@ void surfaceTension(SimulationData& simParams,
         }
     }
     //cout << "Third loop ok " << endl;
-
+    //printArray(N,N.size(),"N");
     // Fourth loop evaluate the surface curvature
+    #pragma omp parallel for 
     for(int n = 0; n < simParams.nb_moving_part; n++){
 
         int size_neighbours = nb_neighbours[n];
@@ -185,7 +195,7 @@ void surfaceTension(SimulationData& simParams,
             double norm_imag = 0;
 
             if (N_i == 1.0 && N_j == 0.0){ // (particle i at surface and j in the fluid)
-                
+                //cout << "test1" << endl;
                 for (int coord = 0; coord < 3; coord++){
                     n_imag[coord] = 2*normal[3*n + coord]/norm_i - normal[3*i_neig + coord]/norm_j;
                     norm_imag += n_imag[coord]*n_imag[coord];
@@ -205,7 +215,7 @@ void surfaceTension(SimulationData& simParams,
             }
 
             else if (N_j == 1.0 && N_i == 0.0){ // (particle j at surface and i in the fluid)
-
+                //cout << "ahhhhh1" << endl;
                 for (int coord = 0; coord < 3; coord++){
                     n_imag[coord] = 2*normal[3*i_neig + coord]/norm_i - normal[3*n + coord]/norm_j;
                     norm_imag += n_imag[coord]*n_imag[coord];
@@ -220,12 +230,12 @@ void surfaceTension(SimulationData& simParams,
                     dot_product += delta_norm*(-1*gradW_matrix[n][3*idx+coord]);
                 }
 
-                k_i -= min(R_i, R_imag)*dot_product*m_j/rho_j;
-                L_i += min(R_i, R_imag)*m_j*W_matrix[n][idx]/rho_j; // kernel gradient correction to counteract truncated solution
+                k_i -= R_i*dot_product*m_j/rho_j;
+                L_i += R_i*m_j*W_matrix[n][idx]/rho_j; // kernel gradient correction to counteract truncated solution
 
             }
             else{ // neither particle i,j on the surface
-
+                //cout << "JE HAIS PI" << endl;
                 double R_j = (norm_j > 0.01/geomParams.h)? 1 : 0;           
                 double dot_product = 0;
 

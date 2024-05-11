@@ -34,7 +34,8 @@ void clearAllVectors(SimulationData &params,
                      vector<vector<int>> &cell_matrix,
                      vector<vector<double>> &gradW_matrix, 
                      vector<double> &drhodt,
-                     vector<double> &dudt);
+                     vector<double> &dudt,
+                     vector<int> &track_surface);
 
 
 #endif // TOOLS_H

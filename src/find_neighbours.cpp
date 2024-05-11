@@ -56,7 +56,8 @@ void sortedList(GeomData &geomParams,
     }
 
     // Find neighbours for each particle
-    #pragma omp parallel for
+    //make
+    //#pragma omp parallel for
     for (int n = 0; n < size_pos; n++){
 
         int i_cell = pos[3 * n + 0] / (geomParams.L_d[0] / Nx);
@@ -121,14 +122,16 @@ void sortedList(GeomData &geomParams,
 
                                         double theta = acos(rz / sqrt(r2)); 
                                         double phi = atan2(ry, rx); 
+                                        
 
                                         theta = theta * 180.0 / M_PI;
-                                        phi = phi * 180.0 / M_PI + (phi < 0 ? 360.0 : 0);// phi between 0 et 360 degrees
-
-                                        int i_idx = static_cast<int>(theta / 45.0) - ((fmod(theta, 45.0) == 0.0) ? 1 : 0);
-                                        int j_idx = static_cast<int>(phi / 45.0) - ((fmod(phi, 45.0) == 0.0) ? 1 : 0);
-
-                                        track_surface[32*n + (4*i_idx + j_idx)]++;
+                                        phi = phi * 180.0 / M_PI + (phi < 0 ? 360.0 : 0) ;// phi between 0 et 360 degrees
+                                       
+                                        int i_idx = (theta > 90 ? 0 : 8);
+                                        int j_idx = static_cast<int>(phi / 45.0);
+                                        
+                                        
+                                        track_surface[16*n + (j_idx + i_idx)]++;
                                     }
                                     
                                     

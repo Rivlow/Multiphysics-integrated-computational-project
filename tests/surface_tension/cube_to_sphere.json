@@ -9,16 +9,16 @@
   },
 
   "post_process":{
-    "do": true,
+    "do": false,
     "xyz_init": [0, 0, 0.75],
     "xyz_end": [2.8, 2.8, 0.75]
   },
 
   "simulation":{
     "theta" :0.5,
-    "s": 0.2,
-    "nstepT": 30000,
-    "dt": 0.00001,
+    "s": 0.1,
+    "nstepT": 1,
+    "dt": 0.000005,
     "nsave": 100,
     "kappa": 2,
     "alpha": 0.5,
@@ -36,7 +36,7 @@
     "gamma": 7, 
     "M": 18e-3, 
     "R":8.314,
-    "sigma":728000
+    "sigma":72800
   },
 
   
