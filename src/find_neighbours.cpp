@@ -181,7 +181,6 @@ void naiveAlgo(GeomData &geomParams,
             double h = geomParams.h;
 
             if (r2 <= kappa * kappa *h * h){
-
                 neighbours_matrix[i][it_i++];
                 neighbours_matrix[j][it_j++];
             }
@@ -200,18 +199,18 @@ void printNeighbours(vector<vector<int>> &neighbours_matrix_linked,
         for (int j = 0; j < int(neighbours_matrix_linked[i].size()); j++){
 
             cout << neighbours_matrix_linked[i][j];
-            if (j != int(neighbours_matrix_linked[i].size() - 1)){
+            if (j != int(neighbours_matrix_linked[i].size() - 1))
                 cout << ", ";
-            }
+            
         }
         cout << "} (Linked-list) VS {";
 
         for (int j = 0; j < int(neighbours_matrix_naive[i].size()); j++){
 
             cout << neighbours_matrix_naive[i][j];
-            if (j != int(neighbours_matrix_naive[i].size() - 1)){
+            if (j != int(neighbours_matrix_naive[i].size() - 1))
                 cout << ", ";
-            }
+            
         }
         cout << "} (naive)\n \n";
     }

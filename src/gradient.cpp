@@ -8,9 +8,8 @@
 #include "tools.h"
 #include "structure.h"
 #include "surface_tension.h"
-
-
 using namespace std;
+
 
 void gradW(GeomData &geomParams,    
            SimulationData &simParams, 

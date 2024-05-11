@@ -49,8 +49,8 @@ int main(int argc, char *argv[])
         cout << "code built in DEBUG mode.\n";
     #endif
 
-        if (argc != 2)
-        {
+        if (argc != 2){
+
             cout << "\nusage: " << argv[0] << " <param.json>\n\n";
             return EXIT_FAILURE;
         }
@@ -75,6 +75,19 @@ int main(int argc, char *argv[])
     getKey(data, state_equation, state_initial_condition, 
            schemeIntegration);
 
+    cout << "kappa" << data["kappa"] << endl;
+    cout << "s" << data["s"] << endl;
+    cout << "o" << data["domain"]["o"] << endl;
+    cout << "L" << data["domain"]["L"] << endl;
+    cout << "o_d" << data["domain"]["o_d"] << endl;
+    cout << "L_d" << data["domain"]["L_d"]<< endl;
+    cout << "do" << data["post_process"]["do"] << endl;
+    cout << "xyz_init" << data["post_process"]["xyz_init"] << endl;
+    cout << "xyz_end" << data["post_process"]["xyz_end"] << endl;
+    cout << "matrix_long" << data["domain"]["matrix_long"] << endl;
+    cout << "matrix_orig" << data["domain"]["matrix_orig"] << endl;
+    cout << "vector_type" << data["domain"]["vector_type"] << endl;
+
 
     GeomData geomParams = {
 
@@ -94,6 +107,7 @@ int main(int argc, char *argv[])
         int(geomParams.L_d[2] / (geomParams.kappa * geomParams.h)),
 
     };
+    cout << "GeomData initialized" << endl;
 
     ThermoData thermoParams = {
         data["thermo"]["c_0"],
@@ -107,6 +121,8 @@ int main(int argc, char *argv[])
         data["thermo"]["sigma"],
 
     };
+    cout << "ThermoData initialized" << endl;
+
 
     SimulationData simParams = {
 
