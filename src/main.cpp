@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
                    c(nb_tot_part, 0), grad_sum(nb_tot_part, 0);
 
     vector<vector<double>> pi_matrix(nb_tot_part), gradW_matrix(nb_tot_part), W_matrix(nb_tot_part);
-    vector<int> track_surface(32*MP_count, 0);
+    vector<int> track_surface(16*MP_count, 0);
     vector<int> neighbours(100*nb_tot_part);
     vector<double> nb_neighbours(nb_tot_part, 0.0), N_smoothed(MP_count, 0.0); 
 
@@ -278,7 +278,7 @@ int main(int argc, char *argv[])
 
         // Clear matrices and reset arrays to 0
         clearAllVectors(simParams, pi_matrix, neighbours,
-                        cell_matrix, gradW_matrix, drhodt, dudt);
+                        cell_matrix, gradW_matrix, drhodt, dudt, track_surface);
 
     }
 
