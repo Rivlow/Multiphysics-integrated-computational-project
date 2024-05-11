@@ -241,7 +241,6 @@ int main(int argc, char *argv[])
         checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
                       neighbours, nb_neighbours, pi_matrix);
 
-        //printArray(u, u.size(), "u");
 
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){

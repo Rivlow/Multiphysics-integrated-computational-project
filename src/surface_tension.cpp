@@ -46,9 +46,11 @@ void surfaceTension(SimulationData& simParams,
     vector<double> div_r(3*simParams.nb_moving_part,0.0);
     vector<double> c(simParams.nb_moving_part,0.0);
     vector<double> R(simParams.nb_moving_part,0.0);
+    vector<double> N(simParams.nb_moving_part,0.0);
 
 
-    // First loop compute the vector grad(r) 
+
+    // First loop compute the scalar div(r) 
     // and determine the "N" for each particle (N = 1 indicates particle at free surface, otherwise N = 0)
     // The free surface is detected by both math (first) and geom method (second)
 
@@ -68,9 +70,9 @@ void surfaceTension(SimulationData& simParams,
             for(int coord = 0; coord < 3; coord ++){
 
                 double r_ij = pos[3*n+coord] - pos[3*i_neig+coord];
-                double grad = gradW[3*idx+coord];
-                dot_product += r_ij*m_j*grad/rho_j;
-                normal[3*n+coord] += r_ij*m_j*grad/rho_j;
+                double gradW_ij = gradW[3*idx+coord];
+                dot_product += r_ij*m_j*gradW_ij/rho_j;
+                //normal[3*n+coord] += r_ij*m_j*gradW_ij/rho_j;
             }
 
             div_r[n] = dot_product;
@@ -78,9 +80,9 @@ void surfaceTension(SimulationData& simParams,
 
         // mathematical check
         if (abs(div_r[n]) <= 1.7){ // particle n is potentially located on free surface
-            // geom check
-            int count = 0;
-            //printArray(track_surface, track_surface.size(), "track");
+
+            int count = 0; // geom check
+
             for (int i = 0; i < 32; i++){
 
                 if (track_surface[32*n + i] == 0)
@@ -88,7 +90,7 @@ void surfaceTension(SimulationData& simParams,
             }
 
             if (count > 0)
-                N_smoothed[n] = 1;
+                N[n] = 1;
         }
     }
     //cout << "first loop ok " << endl;
@@ -98,7 +100,8 @@ void surfaceTension(SimulationData& simParams,
 
         int size_neighbours = nb_neighbours[n];
         double sum = 0;
-        if (N_smoothed[n] == 1){
+        
+        if (N[n] == 1){
             for(int idx = 0; idx < size_neighbours; idx++){ 
                 
                 int i_neig = neighbours[100*n + idx];
@@ -163,8 +166,8 @@ void surfaceTension(SimulationData& simParams,
             int i_neig = neighbours[100*n + idx];
             double m_j = mass[i_neig];
             double rho_j = rho[i_neig];
-            double N_i = N_smoothed[n];
-            double N_j = N_smoothed[i_neig];
+            double N_i = N[n];
+            double N_j = N[i_neig];
 
             for (int coord = 0; coord < 3; coord++){
                 norm_i +=normal[3*n + coord]*normal[3*n + coord];
