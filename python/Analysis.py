@@ -123,26 +123,7 @@ def main():
 
     plt.tight_layout()
     plt.show()
-        
-    
-'''
-    
-    # Création de la figure
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-
-    # Tracé des données
-    ax.scatter(x, y, z)
-
-    # Étiquetage des axes
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-
-    # Affichage du graphe
-    plt.show()
-    #plotData(all_data)
-'''
+ 
     
     
     

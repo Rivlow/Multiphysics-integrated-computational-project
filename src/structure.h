@@ -39,6 +39,7 @@ struct ThermoData {
     double T;
     double gamma;
     double R ; // [J/(K.mol)]
+    double sigma;
 };
 
 struct SimulationData {
