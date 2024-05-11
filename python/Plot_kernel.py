@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import os
+import sys
 
 
 SMALL_SIZE = 8
@@ -42,6 +44,8 @@ for idx, r in enumerate(r_span):
         W[idx] = 0
         dW[idx] = 0
 
+current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
+print(current_directory)
 
 plt.figure()
 plt.plot(r_span, W/alpha, label=r'W(r,h)$ / \alpha$', c='b')
@@ -51,7 +55,7 @@ plt.grid(True)
 plt.legend(loc = 'best')
 
 plt.tight_layout()
+plt.savefig(f"{current_directory}/Pictures/kernel_cubic_spline.PDF")
 plt.show()
-plt.savefig("Pictures/kernel_cubic_spline.PDF")
         
  
