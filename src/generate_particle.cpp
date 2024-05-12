@@ -62,8 +62,8 @@ void meshcube(GeomData &geomParams,
     
     for(int n = 0 ; n < int(vectorType.size()); n++){
 
-        vector<double> &L = matrixLong[n];
-        vector<double> &o = matrixOrig[n];
+        vector<double> &L = matrix_long[n];
+        vector<double> &o = matrix_orig[n];
         int type_val = vectorType[n];
         double dx = 0;
         double dy = 0;
@@ -92,6 +92,7 @@ void meshcube(GeomData &geomParams,
         cout << "of size L=(" << L[0] << "," << L[1] << "," << L[2] << ")\n";
         cout << "\tparticle spacing s=(" << dx << "," << dy << "," << dz << ") [target was s=" << s << "]\n";
         cout << "\t=> " << ni << "*" << nj << "*" << nk << " = " << ni * nj * nk << " particles to be generated\n";
+        cout <<"\n"<< endl;
 
         // memory allocation
         pos.reserve(pos.size() + ni * nj * nk * 3);

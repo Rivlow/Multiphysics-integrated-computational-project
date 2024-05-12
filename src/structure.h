@@ -39,6 +39,7 @@ struct ThermoData {
     double T;
     double gamma;
     double R ; // [J/(K.mol)]
+    double sigma;
 };
 
 struct SimulationData {
@@ -57,6 +58,9 @@ struct SimulationData {
     bool is_gravity;
     bool is_surface_tension;
     bool PRINT;
+    bool is_gravity;
+    bool is_surface_tension;
+    bool is_adhesion;
     int nb_moving_part;
     int nb_part;
     int t;

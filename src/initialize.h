@@ -28,14 +28,5 @@ void initVelocity(ThermoData &thermoParams,
 void initViscosity(SimulationData &simParams, 
                          vector<vector<double>> &pi_matrix);
 
-void checkTimeStep(GeomData &geomParams,    
-                   ThermoData &thermoParams,
-                   SimulationData &simParams, 
-                   vector<double> &pos,
-                   vector<double> &u,
-                   vector<double> &c,
-                   vector<int> &neighbours,
-                   vector<double> &nb_neighbours,
-                   vector<vector<double>> &pi_matrix);
 
 #endif // INITIALIZE_H

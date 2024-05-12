@@ -80,6 +80,7 @@ void getKey(json data,
             string &state_equation,
             string &state_initial_condition,
             string &schemeIntegration){
+
     
     for (auto &it : data["condition"]["stateEquation"].items())
     {
@@ -104,6 +105,8 @@ void getKey(json data,
             state_initial_condition = it.key();
         }
     };
+
+    cout <<"getKey passed" << endl;
 }
 
 
@@ -173,7 +176,8 @@ void clearAllVectors(SimulationData &simParams,
                      vector<vector<int>> &cell_matrix,
                      vector<vector<double>> &gradW_matrix, 
                      vector<double> &drhodt,
-                     vector<double> &dudt){
+                     vector<double> &dudt,
+                     vector<int> &track_surface){
 
     bool PRINT = simParams.PRINT;
     int nb_part = simParams.nb_part;
@@ -196,6 +200,9 @@ void clearAllVectors(SimulationData &simParams,
         for(int coord = 0 ; coord < 3 ; coord ++)
             dudt[3*i+coord] = 0.0;    
     }
+    for(int i = 0 ; i < track_surface.size(); i++){
 
+        track_surface[i] = 0.0;
+    }
     if (PRINT) cout << "clearAllVectors passed" << endl;
 }

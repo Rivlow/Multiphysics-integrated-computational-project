@@ -33,7 +33,6 @@ int main(int argc, char *argv[])
 {
 
     /*---------------- SETTING COMPILATION PARAMETERS/FOLDER NEEDED --------------------*/
-
     auto t0 = chrono::high_resolution_clock::now();
 
     #ifdef _OPENMP
@@ -50,8 +49,8 @@ int main(int argc, char *argv[])
         cout << "code built in DEBUG mode.\n";
     #endif
 
-        if (argc != 2)
-        {
+        if (argc != 2){
+
             cout << "\nusage: " << argv[0] << " <param.json>\n\n";
             return EXIT_FAILURE;
         }
@@ -76,6 +75,19 @@ int main(int argc, char *argv[])
     getKey(data, state_equation, state_initial_condition, 
            schemeIntegration);
 
+    cout << "kappa" << data["kappa"] << endl;
+    cout << "s" << data["s"] << endl;
+    cout << "o" << data["domain"]["o"] << endl;
+    cout << "L" << data["domain"]["L"] << endl;
+    cout << "o_d" << data["domain"]["o_d"] << endl;
+    cout << "L_d" << data["domain"]["L_d"]<< endl;
+    cout << "do" << data["post_process"]["do"] << endl;
+    cout << "xyz_init" << data["post_process"]["xyz_init"] << endl;
+    cout << "xyz_end" << data["post_process"]["xyz_end"] << endl;
+    cout << "matrix_long" << data["domain"]["matrix_long"] << endl;
+    cout << "matrix_orig" << data["domain"]["matrix_orig"] << endl;
+    cout << "vector_type" << data["domain"]["vector_type"] << endl;
+
 
     GeomData geomParams = {
 
@@ -95,6 +107,7 @@ int main(int argc, char *argv[])
         int(geomParams.L_d[2] / (geomParams.kappa * geomParams.h)),
 
     };
+    cout << "GeomData initialized" << endl;
 
     ThermoData thermoParams = {
         data["thermo"]["c_0"],
@@ -105,7 +118,11 @@ int main(int argc, char *argv[])
         data["thermo"]["T"],
         data["thermo"]["gamma"],
         data["thermo"]["R"],
+        data["thermo"]["sigma"],
+
     };
+    cout << "ThermoData initialized" << endl;
+
 
     SimulationData simParams = {
 
@@ -148,9 +165,10 @@ int main(int argc, char *argv[])
                    dudt(3 * nb_tot_part, 0), p(nb_tot_part, 0),
                    c(nb_tot_part, 0), grad_sum(nb_tot_part, 0);
 
-    vector<vector<double>> pi_matrix(nb_tot_part), gradW_matrix(nb_tot_part);
+    vector<vector<double>> pi_matrix(nb_tot_part), gradW_matrix(nb_tot_part), W_matrix(nb_tot_part);
+    vector<int> track_surface(16*MP_count, 0);
     vector<int> neighbours(100*nb_tot_part);
-    vector<double> nb_neighbours(nb_tot_part, 0.0); 
+    vector<double> nb_neighbours(nb_tot_part, 0.0), N_smoothed(MP_count, 0.0); 
 
     // Variables defined to used "export.cpp"
     map<string, vector<double> *> scalars;
@@ -201,7 +219,8 @@ int main(int argc, char *argv[])
     cout << "Initial density (rho_0) = " << thermoParams.rho_0 << endl;
     cout << "Molar mass (M) = " << thermoParams.M << endl;
     cout << "Heat capacity ration (gamma) = " << thermoParams.gamma << endl;
-    cout << "Ideal gaz constant (R) = " << thermoParams.R << "\n" << endl;
+    cout << "Ideal gaz constant (R) = " << thermoParams.R << endl;
+    cout << "Surface tension stress (sigma) = " << thermoParams.R << "\n" << endl;
 
     
     
@@ -216,25 +235,28 @@ int main(int argc, char *argv[])
     setPressure(geomParams, thermoParams, simParams, p, rho); 
     setSpeedOfSound(geomParams, thermoParams, simParams, c, rho);
     
+    auto t_mid = chrono::high_resolution_clock::now();
 
     for (int t = 0; t < simParams.nstepT; t++){
 
         simParams.t = t;
 
         // Apply the linked-list algorithm
-        sortedList(geomParams, simParams, cell_matrix, neighbours, 
-                   gradW_matrix, pi_matrix, nb_neighbours, type, pos); 
+        sortedList(geomParams, simParams, cell_matrix, neighbours, track_surface,
+                   gradW_matrix, W_matrix, pi_matrix, nb_neighbours, type, pos); 
 
         // Compute ∇_a(W_ab) for all particles
-        gradW(geomParams, simParams, gradW_matrix, neighbours, nb_neighbours, pos); 
+        gradW(geomParams, simParams, gradW_matrix, W_matrix, neighbours, nb_neighbours, pos); 
 
         // Update density, velocity and position (Euler explicit or RK22 scheme)
         updateVariables(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
-                        pi_matrix, gradW_matrix, neighbours, nb_neighbours);
+                        pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, track_surface, N_smoothed);
+
 
         // Check if timeStep is small enough
         checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
                       neighbours, nb_neighbours, pi_matrix);
+
 
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){
@@ -244,7 +266,7 @@ int main(int argc, char *argv[])
             export_particles("../../output/sph", t, pos, scalars, vectors, false);
 
             auto t_act = chrono::high_resolution_clock::now();
-            double elapsed_time = double(chrono::duration_cast<chrono::duration<double>>(t_act - t0).count());
+            double elapsed_time = double(chrono::duration_cast<chrono::duration<double>>(t_act - t_mid).count());
             progressBar(double(t)/double(simParams.nstepT), elapsed_time);
 
                         
@@ -256,13 +278,13 @@ int main(int argc, char *argv[])
 
         // Clear matrices and reset arrays to 0
         clearAllVectors(simParams, pi_matrix, neighbours,
-                        cell_matrix, gradW_matrix, drhodt, dudt);
+                        cell_matrix, gradW_matrix, drhodt, dudt, track_surface);
 
     }
 
     auto t1 = chrono::high_resolution_clock::now();
     auto delta_t = chrono::duration_cast<chrono::duration<double>>(t1 - t0).count();
-    cout << "\n duration: " << delta_t << "s.\n";
+    cout << "\nduration: " << delta_t << "s (" << int((MP_count+FP_count)/delta_t)<<" particles/s).\n";
     cout << "Simulation done." << endl;
 
     return 0;

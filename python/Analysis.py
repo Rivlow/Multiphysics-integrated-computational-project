@@ -1,10 +1,11 @@
 import vtk
-from vtk.util.numpy_support import vtk_to_numpy
+#from vtk.util.numpy_support import vtk_to_numpy
 import os
-from matplotlib import pyplot as plt
-import pandas as pd
-import numpy as np
 import sys
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+
 """
 def read_vtp(path):
     reader = vtk.vtkXMLPolyDataReader()
@@ -97,8 +98,32 @@ def main():
     current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
     outputFile = os.path.dirname(current_directory) + "\\output"  
     all_data = getData(outputFile)
-    print(all_data)
-    #plotData(all_data)
+    
+    print(all_data[1])
+    data = all_data[0][1]
+    # Création des subplots
+    fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+
+    # Plot 2D
+    for i in range(data.shape[1]):
+        axs[0].plot(range(data.shape[0]), data[:, i], label=f'part {i}')
+    axs[0].legend(loc='best')
+    axs[0].set_title('Plot 2D')
+    axs[0].set_xlabel('Iterations')
+    axs[0].set_ylabel('Values')
+
+    # Plot 3D
+    ax = fig.add_subplot(122, projection='3d')
+    for i in range(data.shape[1]):
+        ax.plot(range(data.shape[0]), data[:, i], zs=i)
+    ax.set_title('Plot 3D')
+    ax.set_xlabel('Iterations')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Ghost particles')
+
+    plt.tight_layout()
+    plt.show()
+ 
     
     
     
