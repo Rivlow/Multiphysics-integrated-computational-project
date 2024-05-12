@@ -52,12 +52,10 @@ void sortedList(GeomData &geomParams,
         k = (k == Nz) ? k - 1 : k;
 
         cell_matrix[i + Nx * j + Ny * Nx * k].push_back(n);
-
     }
 
     // Find neighbours for each particle
-    //make
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (int n = 0; n < size_pos; n++){
 
         int i_cell = pos[3 * n + 0] / (geomParams.L_d[0] / Nx);
@@ -98,7 +96,6 @@ void sortedList(GeomData &geomParams,
 
                         int idx_cell = cell[idx];
 
-                        //if (idx_cell >= simParams.nb_tot_part) cout << "ghost part" << endl;
                         if (type[idx_cell] == 2.0) continue;
                         else{
 
