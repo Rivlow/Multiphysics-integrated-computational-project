@@ -24,7 +24,8 @@
     "alpha": 0.5,
     "beta": 0,
     "alpha_st":10,
-    "beta_adh": 10
+    "beta_adh": 10,
+    "dimension": 2
   },
 
   "thermo":{

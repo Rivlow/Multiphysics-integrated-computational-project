@@ -43,8 +43,9 @@ void gradW(GeomData &geomParams,
             }
 
             r_ab = sqrt(r_ab);
-            double deriv = derive_cubic_spline(r_ab, h);
-
+            //cout << r_ab << endl;
+            double deriv = derive_cubic_spline(r_ab, h, simParams);
+                   
             for (int coord = 0; coord < 3; coord++){
                 gradW[3 * idx + coord] = d_xyz[coord] / r_ab * deriv;
             }
@@ -179,9 +180,9 @@ void setArtificialViscosity(GeomData &geomParams,
                 double u_ab_x_ab = 0, x_ab_2 = 0;
 
                 // Dot product
-                for (int cord = 0; cord < 3; cord++){
-                    u_ab_x_ab += rel_vel[cord] * rel_displ[cord];
-                    x_ab_2 += rel_displ[cord] * rel_displ[cord];
+                for (int coord = 0; coord < 3; coord++){
+                    u_ab_x_ab += rel_vel[coord] * rel_displ[coord];
+                    x_ab_2 += rel_displ[coord] * rel_displ[coord];
                 }
 
                 double c_a = c[n];
@@ -232,11 +233,11 @@ void continuityEquation(SimulationData& simParams,
             double m_b = mass[i_neig];
 
             // Dot product of u_ab with grad_a(W_ab)
-            for (int cord = 0; cord < 3; cord++){
+            for (int coord = 0; coord < 3; coord++){
 
-                double u_a = u[3 * n + cord];
-                double u_b = u[3 * i_neig + cord];
-                dot_product += (u_a - u_b) * gradW[3*idx + cord];
+                double u_a = u[3 * n + coord];
+                double u_b = u[3 * i_neig + coord];
+                dot_product += (u_a - u_b) * gradW[3*idx + coord];
             }
             
             drhodt[n] += m_b * dot_product;
@@ -296,7 +297,7 @@ void momentumEquation(GeomData &geomParams,
         double rho_a = rho[n];
         double p_a = p[n];
 
-        for (int cord = 0; cord < 3; cord++){
+        for (int coord = 0; coord < 3; coord++){
 
             int size_neighbours = nb_neighbours[n];
 
@@ -309,8 +310,8 @@ void momentumEquation(GeomData &geomParams,
                 double m_b = mass[i_neig];
                 double p_b = p[i_neig];
 
-                dudt[3 * n + cord] += m_b * (p_b / (rho_b * rho_b) +
-                                      p_a / (rho_a * rho_a) + pi_ab)* gradW[3*idx + cord];
+                dudt[3 * n + coord] += m_b * (p_b / (rho_b * rho_b) +
+                                      p_a / (rho_a * rho_a) + pi_ab)* gradW[3*idx + coord];
                 
                 if(simParams.is_adhesion){
                     
@@ -343,12 +344,12 @@ void momentumEquation(GeomData &geomParams,
                 
             }
 
-            dudt[3 * n + cord] *= -1;
-            dudt[3 * n + cord] += F_vol[3 * n + cord];
+            dudt[3 * n + coord] *= -1;
+            dudt[3 * n + coord] += F_vol[3 * n + coord];
 
-            if(cord == 2){
+            if(coord == 2){
                 
-                dudt[3 * n + cord] += g;
+                dudt[3 * n + coord] += g;
                 //cout << g << endl;
             }
                 

@@ -109,6 +109,7 @@ int main(int argc, char *argv[])
 
     SimulationData simParams = {
 
+        data["simulation"]["dimension"],
         data["simulation"]["nstepT"],
         data["simulation"]["nsave"],
         data["simulation"]["dt"],
@@ -128,6 +129,7 @@ int main(int argc, char *argv[])
         evaluateNumberParticles(geomParams),
         0,
         0,
+        
     };
 
 
@@ -204,7 +206,8 @@ int main(int argc, char *argv[])
     cout << "Molar mass (M) = " << thermoParams.M << endl;
     cout << "Heat capacity ration (gamma) = " << thermoParams.gamma << endl;
     cout << "Ideal gaz constant (R) = " << thermoParams.R << "\n" << endl;
-
+    int dim = simParams.dimension;
+    cout << dim << endl;
     
     
 

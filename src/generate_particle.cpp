@@ -121,7 +121,7 @@ void meshcube(GeomData &geomParams,
             }
         }
     }
-
+    
     simParams.nb_part = pos.size()/3;
 }
 

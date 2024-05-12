@@ -2,6 +2,7 @@
 #include <cmath>
 #include <stdio.h>
 #include "Kernel.h"
+#include "structure.h"
 
 using namespace std;
 
@@ -72,10 +73,20 @@ double f_cubic_spline(double r, double h)
     return W;
 }
 
-double derive_cubic_spline(double r, double h)
+double derive_cubic_spline(double r, double h, SimulationData &simParams)
 {
 
-    double alpha = 3 / (2 * M_PI * h * h * h);
+    int dim = simParams.dimension;
+    //cout << "dim : " << dim << endl;
+    double alpha = 0;
+    if(dim == 3){
+        alpha = 3 / (2 * M_PI * h * h * h);
+    }
+    if(dim == 2){
+        alpha = 15.0 /( 7.0 * M_PI * h * h );
+        //cout << "alpha : " << alpha << endl;
+    }
+    
     double DW = 0;
 
     if (1.0 <= r / h && r / h < 2.0)

@@ -43,6 +43,7 @@ struct ThermoData {
 
 struct SimulationData {
 
+    int dimension;
     int nstepT;
     int nsave;
     double dt; 
@@ -63,6 +64,7 @@ struct SimulationData {
     int nb_part;
     int t;
     double F_st_max;
+    
  
 };
 
