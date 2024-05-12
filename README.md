@@ -94,10 +94,10 @@ Once everything is ready, one can run the code by the following code line:
     ```solver.exe ../../tests/surface_tension/cube_to_sphere.json```
 
 In the example above, a cube of fluid particles inside a box is subjected to gravity:
-![Test GIF](output/good_sim_ihopeso.gif)
+![Test GIF](boite_s_0_01.gif)
 
 Another example is a single cube of fluid particles is created "in the void" and surface tensions will be applied to it. Thus this cube will become a sphere after a short period of time as can be seen on the video below:
-![Test GIF](output/good_sim_ihopeso.gif)
+![Test GIF](good_sim_ihopeso.gif)
 
 
 
