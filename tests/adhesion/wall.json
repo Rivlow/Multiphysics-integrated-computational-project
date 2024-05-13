@@ -17,14 +17,15 @@
     "simulation":{
       "theta" :0.5,
       "s": 0.05,
-      "nstepT": 100000,
+      "nstepT": 50000,
       "dt": 0.00001,
       "nsave": 100,
       "kappa": 2,
       "alpha": 0.5,
       "beta": 0,
-      "alpha_st":50,
-      "beta_adh": 10
+      "alpha_st": 5,
+      "beta_adh": 100,
+      "dimension": 3
     },
   
     "thermo":{

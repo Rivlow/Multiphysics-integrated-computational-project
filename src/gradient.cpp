@@ -326,15 +326,17 @@ void momentumEquation(GeomData &geomParams,
                     }
 
                     r_ab = sqrt(r_ab);
-                    if(2*r_ab > geomParams.h && r_ab<=geomParams.h){
+                    double kh = geomParams.kappa*geomParams.h;
+                    if(2*r_ab > kh && r_ab<=kh){
                         
-                        double cst = 0.007/pow(geomParams.h,3.25);
-                        double fct = sqrt(sqrt(-4*r_ab*r_ab/geomParams.h+6*r_ab-2*geomParams.h));
+                        double cst = 0.007/pow(kh,3.25);
+                        double fct = sqrt(sqrt(-4*r_ab*r_ab/kh+6*r_ab-2*kh));
                         W_adh = cst*fct;
                     }
 
                     for (int coord = 0; coord < 3; coord++){
-                        double boundary = 1-type[n];
+                        double boundary = 1-type[i_neig];
+                        
                     F_vol[3*n + coord] += beta_ad*boundary*mass[n]*m_b*W_adh*d_xyz[coord]/r_ab;
                     
                     }

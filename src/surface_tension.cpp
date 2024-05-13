@@ -93,7 +93,7 @@ void surfaceTension(SimulationData& simParams,
                 }
                 
                 r_ab = sqrt(r_ab);
-                double W_ab = W_coh(r_ab,geomParams.h);
+                double W_ab = W_coh(r_ab,geomParams.kappa*geomParams.h);
                 double m_a = mass[n];
                 double m_b = mass[i_neig];
                 double F_res = 0;
