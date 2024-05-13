@@ -21,7 +21,8 @@ void Euler(GeomData &geomParams,
             vector<int> &neighbours,
             vector<double> &nb_neighbours,
             vector<int> &track_surface,
-            vector<double> &N_smoothed);
+            vector<double> &N_smoothed,
+            vector<double> type);
 
 void RK22(GeomData &geomParams,    
           ThermoData &thermoParams,
@@ -40,7 +41,8 @@ void RK22(GeomData &geomParams,
           vector<int> &neighbours,
           vector<double> &nb_neighbours,
           vector<int> &track_surface,
-          vector<double> &N_smoothed);
+          vector<double> &N_smoothed,
+          vector<double> type);
 
 void updateVariables(GeomData &geomParams,    
                      ThermoData &thermoParams,
@@ -59,7 +61,8 @@ void updateVariables(GeomData &geomParams,
                      vector<int> &neighbours,
                      vector<double> &nb_neighbours,
                      vector<int> &track_surface,
-                     vector<double> &N_smoothed);
+                     vector<double> &N_smoothed,
+                     vector<double> type);
 
 void checkTimeStep(GeomData &geomParams,    
                    ThermoData &thermoParams,

@@ -44,7 +44,7 @@ void gradW(GeomData &geomParams,
             }
 
             r_ab = sqrt(r_ab);
-            double deriv = derive_cubic_spline(r_ab, h);
+            double deriv = derive_cubic_spline(r_ab, h, simParams);
             double W = f_cubic_spline(r_ab, h);
             W_matrix[n][idx] = W;
 
@@ -289,9 +289,9 @@ void momentumEquation(GeomData &geomParams,
     
     if (simParams.is_surface_tension)
         surfaceTension(simParams, geomParams,thermoParams, nb_neighbours, neighbours, 
-                       track_surface, N_smoothed, gradW_matrix, W_matrix, mass, rho, pos, F_vol);
+                       track_surface, N_smoothed, gradW_matrix, W_matrix, mass, rho, pos, F_vol,type);
 
-
+    printArray(F_vol,F_vol.size(),"fvol0");
 
     // Iterate over each particle
     #pragma omp parallel for

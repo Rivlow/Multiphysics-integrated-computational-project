@@ -117,18 +117,18 @@ void sortedList(GeomData &geomParams,
                                     if (type[n] == 1){ //FP
            
 
-                                        double theta = acos(rz / sqrt(r2)); 
-                                        double phi = atan2(ry, rx); 
+                                        double theta = atan2(rz, rx); 
+                                        //double phi = atan2(ry, rx); 
                                         
 
-                                        theta = theta * 180.0 / M_PI;
-                                        phi = phi * 180.0 / M_PI + (phi < 0 ? 360.0 : 0) ;// phi between 0 et 360 degrees
+                                        theta = theta * 180.0 / M_PI  + (theta < 0 ? 360.0 : 0);
+                                        //phi = phi * 180.0 / M_PI + (phi < 0 ? 360.0 : 0) ;// phi between 0 et 360 degrees
                                        
-                                        int i_idx = (theta > 90 ? 0 : 8);
-                                        int j_idx = static_cast<int>(phi / 45.0);
+                                        int i_idx = static_cast<int>(theta / 45.0);
+                                        //int j_idx = static_cast<int>(phi / 45.0);
                                         
                                         
-                                        track_surface[16*n + (j_idx + i_idx)]++;
+                                        track_surface[8*n + i_idx]++;
                                     }
                                     
                                     

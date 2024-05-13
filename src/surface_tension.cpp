@@ -27,7 +27,8 @@ void surfaceTension(SimulationData& simParams,
                     vector<double> mass,
                     vector<double> rho,
                     vector<double> pos,
-                    vector<double> &F_vol){
+                    vector<double> &F_vol,
+                    vector<double> type){
 
 
     vector<double> normal(3*simParams.nb_moving_part,0.0);
@@ -51,31 +52,36 @@ void surfaceTension(SimulationData& simParams,
         int size_neighbours = nb_neighbours[n];
         
         for(int idx = 0; idx < size_neighbours; idx++){ 
-
+            
             int i_neig = neighbours[100*n + idx]; 
             double m_j = mass[i_neig];
             double rho_j = rho[i_neig];
             double dot_product = 0; //r_ij*gradW_ij
-
+            
             for(int coord = 0; coord < 3; coord ++){
-
+                
                 double r_ij = pos[3*n+coord] - pos[3*i_neig+coord];
+                
                 double gradW_ij = gradW[3*idx+coord];
+                
                 dot_product += r_ij*m_j*gradW_ij/rho_j;
                 //normal[3*n+coord] += r_ij*m_j*gradW_ij/rho_j;
+                
             }
-
+            //cout << rho_j << endl;
+           // cout<< " dot_prod : " << dot_product << endl;
             div_r[n] = dot_product;
+            //cout<< " apres dot prot "  << endl;
         }
-        
+        //cout<<"après 2eme " << endl;
         // mathematical check
         if (1){ // particle n is potentially located on free surface
 
             int count = 0; // geom check
 
-            for (int i = 0; i < 16; i++){
+            for (int i = 0; i < 8; i++){
 
-                if (track_surface[16*n + i] == 0)
+                if (track_surface[8*n + i] == 0)
                     count++;   
             }
 
@@ -84,10 +90,13 @@ void surfaceTension(SimulationData& simParams,
                 N[n] = 1;
                 nb_one++;
             }
+
         }
         nb_zero++;
+        
     }
-    printArray(track_surface,track_surface.size(), "track_surface");
+    //printArray(track_surface,track_surface.size(), "track_surface");
+    
     cout << "nb_one " << nb_one  << " nb_zero " << nb_zero<< endl;
 
     // Second loop evaluated the smoothed color function "c"
@@ -114,7 +123,7 @@ void surfaceTension(SimulationData& simParams,
         else
             c[n] = 1;
     }
-
+   
     //cout << "Second loop ok " << endl;
 
 
@@ -135,10 +144,11 @@ void surfaceTension(SimulationData& simParams,
                 normal[3*n + coord] -= m_j*gradW_matrix[n][3*idx+coord]*(c[i_neig] - c[n])/rho_j;
         }
     }
+    
     //cout << "Third loop ok " << endl;
     //printArray(N,N.size(),"N");
     // Fourth loop evaluate the surface curvature
-    #pragma omp parallel for 
+    //#pragma omp parallel for 
     for(int n = 0; n < simParams.nb_moving_part; n++){
 
         int size_neighbours = nb_neighbours[n];
@@ -151,8 +161,11 @@ void surfaceTension(SimulationData& simParams,
             double m_j = mass[i_neig];
             double rho_j = rho[i_neig];
 
-            for (int coord = 0; coord < 3; coord++)
+            for (int coord = 0; coord < 3; coord++){
                 normal[3*n + coord] -= m_j*gradW_matrix[n][3*idx+coord]*(c[i_neig] - c[n])/rho_j;
+                //cout << " normal[3*n + coord] : "<< normal[3*n + coord] << "    ";
+            }
+                //cout << endl;
         }
 
         double norm_i = 0, norm_j = 0;
@@ -175,77 +188,98 @@ void surfaceTension(SimulationData& simParams,
 
             norm_i= sqrt(norm_i);
             norm_j= sqrt(norm_j);
+            //cout << "norm_i : "<< norm_i << ", norm_j : " << norm_j << endl;
             // find particles with reliable normal vectors (truncate solution using R_i)
             double R_i = (norm_i > 0.01/geomParams.h)? 1 : 0;
 
             // If particle i or j at the surface, create imaginary particle 
             vector<double> n_imag(3);
             double norm_imag = 0;
+            if(norm_i != 0 && norm_j !=0){
 
-            if (N_i == 1.0 && N_j == 0.0){ // (particle i at surface and j in the fluid)
+                if (N_i == 1.0 && N_j == 0.0){ // (particle i at surface and j in the fluid)
                 //cout << "test1" << endl;
-                for (int coord = 0; coord < 3; coord++){
-                    n_imag[coord] = 2*normal[3*n + coord]/norm_i - normal[3*i_neig + coord]/norm_j;
-                    norm_imag += n_imag[coord]*n_imag[coord];
+                    for (int coord = 0; coord < 3; coord++){
+                        n_imag[coord] = 2*normal[3*n + coord]/norm_i - normal[3*i_neig + coord]/norm_j;
+                        norm_imag += n_imag[coord]*n_imag[coord];
+                    }
+
+                    norm_imag = sqrt(norm_imag);
+                    double R_imag = (norm_imag > 0.01/geomParams.h)? 1 : 0;
+                    double dot_product = 0;
+
+                    for (int coord = 0; coord < 3; coord++){
+                        double delta_norm = n_imag[coord]/norm_imag - normal[3*n+coord]/norm_i;
+                        dot_product += delta_norm*(-1*gradW_matrix[n][3*idx+coord]);
+                    }
+
+                    k_i -= min(R_i, R_imag)*dot_product*m_j/rho_j;
+                    L_i += min(R_i, R_imag)*m_j*W_matrix[n][idx]/rho_j; // kernel gradient correction to counteract truncated solution
                 }
 
-                norm_imag = sqrt(norm_imag);
-                double R_imag = (norm_imag > 0.01/geomParams.h)? 1 : 0;
-                double dot_product = 0;
+                else if (N_j == 1.0 && N_i == 0.0){ // (particle j at surface and i in the fluid)
+                    //cout << "ahhhhh1" << endl;
+                    for (int coord = 0; coord < 3; coord++){
+                        n_imag[coord] = 2*normal[3*i_neig + coord]/norm_j - normal[3*n + coord]/norm_i;
+                        norm_imag += n_imag[coord]*n_imag[coord];
+                    }
 
-                for (int coord = 0; coord < 3; coord++){
-                    double delta_norm = n_imag[coord]/norm_imag - normal[3*n+coord]/norm_i;
-                    dot_product += delta_norm*(-1*gradW_matrix[n][3*idx+coord]);
+                    norm_imag = sqrt(norm_imag);
+                    double R_imag = (norm_imag > 0.01/geomParams.h)? 1 : 0;
+                    double dot_product = 0;
+
+                    for (int coord = 0; coord < 3; coord++){
+                        double delta_norm = n_imag[coord]/norm_imag - normal[3*n+coord]/norm_i;
+                        dot_product += delta_norm*(-1*gradW_matrix[n][3*idx+coord]);
+                    }
+
+                    k_i -= R_i*dot_product*m_j/rho_j;
+                    L_i += R_i*m_j*W_matrix[n][idx]/rho_j; // kernel gradient correction to counteract truncated solution
+
                 }
+                else{ // neither particle i,j on the surface
+                    
+                    double R_j = (norm_j > 0.01/geomParams.h)? 1 : 0;           
+                    double dot_product = 0;
+                    
+                    for (int coord = 0; coord < 3; coord++){
+                        double delta_norm = normal[3*i_neig + coord]/norm_j - normal[3*n+coord]/norm_i;
+                        dot_product += delta_norm*(gradW_matrix[n][3*idx+coord]);
+                        /*if(abs(dot_product)<0.000001 && abs(dot_product)>0){
+                            cout << " R°j  " << R_j <<"  norm_j  " << norm_j <<  endl;
+                        cout<<"dot product : " << dot_product << " delta_norm : " << delta_norm << " gradW_matrix[n][3*idx+coord] " << gradW_matrix[n][3*idx+coord]<<endl;
+                        cout<<"n " << n << " ineig " << i_neig << endl;
+                        cout << "normal[3*i_neig + coord]/norm_j : "  << normal[3*i_neig + coord] << " normal[3*n+coord]/norm_i " << normal[3*n+coord]/norm_i << endl;
+                        }*/
 
-                k_i -= min(R_i, R_imag)*dot_product*m_j/rho_j;
-                L_i += min(R_i, R_imag)*m_j*W_matrix[n][idx]/rho_j; // kernel gradient correction to counteract truncated solution
+                    }
+                    k_i -= R_i*R_j*dot_product*m_j/rho_j;
+                    L_i += R_i*R_j*m_j*W_matrix[n][idx]/rho_j; 
+                    
+                    //cout << " dot_product " << dot_product << endl;// kernel gradient correction to counteract truncated solution
+                }
             }
+            if(L_i){
+                k_i  = k_i/L_i;
+                
+            }   
+            
+            
+            
+            
 
-            else if (N_j == 1.0 && N_i == 0.0){ // (particle j at surface and i in the fluid)
-                //cout << "ahhhhh1" << endl;
-                for (int coord = 0; coord < 3; coord++){
-                    n_imag[coord] = 2*normal[3*i_neig + coord]/norm_i - normal[3*n + coord]/norm_j;
-                    norm_imag += n_imag[coord]*n_imag[coord];
-                }
+            
 
-                norm_imag = sqrt(norm_imag);
-                double R_imag = (norm_imag > 0.01/geomParams.h)? 1 : 0;
-                double dot_product = 0;
-
-                for (int coord = 0; coord < 3; coord++){
-                    double delta_norm = n_imag[coord]/norm_imag - normal[3*n+coord]/norm_i;
-                    dot_product += delta_norm*(-1*gradW_matrix[n][3*idx+coord]);
-                }
-
-                k_i -= R_i*dot_product*m_j/rho_j;
-                L_i += R_i*m_j*W_matrix[n][idx]/rho_j; // kernel gradient correction to counteract truncated solution
-
-            }
-            else{ // neither particle i,j on the surface
-                //cout << "JE HAIS PI" << endl;
-                double R_j = (norm_j > 0.01/geomParams.h)? 1 : 0;           
-                double dot_product = 0;
-
-                for (int coord = 0; coord < 3; coord++){
-                    double delta_norm = normal[3*i_neig + coord]/norm_j - normal[3*n+coord]/norm_i;
-                    dot_product += delta_norm*(gradW_matrix[n][3*idx+coord]);
-                }
-
-                k_i -= min(R_i, R_j)*dot_product*m_j/rho_j;
-                L_i += min(R_i, R_j)*m_j*W_matrix[n][idx]/rho_j; // kernel gradient correction to counteract truncated solution
-            }
+            
         }
-
-        k_i  = k_i/L_i;
         double F_res = 0;
-
         for (int coord = 0; coord < 3; coord++){
-                F_vol[3*n + coord] += thermoParam.sigma*k_i*normal[3*n + coord]/rho[n];
-                F_res += F_vol[3*n + coord]*F_vol[3*n + coord];
-            }
-
-            simParams.F_st_max = sqrt(F_res);
+                    F_vol[3*n + coord] += thermoParam.sigma*k_i*normal[3*n + coord]/rho[n];
+                    //cout<<" k_i " << k_i << "   normal[3*n + coord]     " << normal[3*n + coord] <<  "    rho[n]    "  << rho[n] << endl;
+                    F_res += F_vol[3*n + coord]*F_vol[3*n + coord];
+                }
+        simParams.F_st_max = sqrt(F_res);
+            
     }  
     //cout << "Fourth loop ok " << endl;
 
