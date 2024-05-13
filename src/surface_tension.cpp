@@ -217,7 +217,8 @@ void surfaceTension(SimulationData& simParams,
                     L_i += min(R_i, R_imag)*m_j*W_matrix[n][idx]/rho_j; // kernel gradient correction to counteract truncated solution
                 }
 
-                else if (N_j == 1.0 && N_i == 0.0){ // (particle j at surface and i in the fluid)
+                else if (N_j == 1.0 && N_i == 0.0){ 
+                    continue;// (particle j at surface and i in the fluid)
                     //cout << "ahhhhh1" << endl;
                     for (int coord = 0; coord < 3; coord++){
                         n_imag[coord] = 2*normal[3*i_neig + coord]/norm_j - normal[3*n + coord]/norm_i;
@@ -233,8 +234,8 @@ void surfaceTension(SimulationData& simParams,
                         dot_product += delta_norm*(-1*gradW_matrix[n][3*idx+coord]);
                     }
 
-                    k_i -= R_i*dot_product*m_j/rho_j;
-                    L_i += R_i*m_j*W_matrix[n][idx]/rho_j; // kernel gradient correction to counteract truncated solution
+                    k_i -= min(R_i, R_imag)*dot_product*m_j/rho_j;
+                    L_i += min(R_i, R_imag)*m_j*W_matrix[n][idx]/rho_j; // kernel gradient correction to counteract truncated solution
 
                 }
                 else{ // neither particle i,j on the surface
@@ -246,7 +247,7 @@ void surfaceTension(SimulationData& simParams,
                         double delta_norm = normal[3*i_neig + coord]/norm_j - normal[3*n+coord]/norm_i;
                         dot_product += delta_norm*(gradW_matrix[n][3*idx+coord]);
                         /*if(abs(dot_product)<0.000001 && abs(dot_product)>0){
-                            cout << " R°j  " << R_j <<"  norm_j  " << norm_j <<  endl;
+                            cout << " R_j  " << R_j <<"  norm_j  " << norm_j <<  endl;
                         cout<<"dot product : " << dot_product << " delta_norm : " << delta_norm << " gradW_matrix[n][3*idx+coord] " << gradW_matrix[n][3*idx+coord]<<endl;
                         cout<<"n " << n << " ineig " << i_neig << endl;
                         cout << "normal[3*i_neig + coord]/norm_j : "  << normal[3*i_neig + coord] << " normal[3*n+coord]/norm_i " << normal[3*n+coord]/norm_i << endl;
@@ -256,7 +257,7 @@ void surfaceTension(SimulationData& simParams,
                     k_i -= R_i*R_j*dot_product*m_j/rho_j;
                     L_i += R_i*R_j*m_j*W_matrix[n][idx]/rho_j; 
                     
-                    //cout << " dot_product " << dot_product << endl;// kernel gradient correction to counteract truncated solution
+                    cout << "   n   "<< n<<  "      dot_product   " << dot_product << "   k_i     "<< k_i << "    R_i     " << R_i << "      R_j     " << R_j << "    m_j    " <<  m_j << endl;// kernel gradient correction to counteract truncated solution
                 }
             }
             if(L_i){
