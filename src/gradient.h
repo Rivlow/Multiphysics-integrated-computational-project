@@ -65,6 +65,7 @@ void momentumEquation(GeomData &geomParams,
                       vector<double> &p, 
                       vector<double> &c,
                       vector<double> &pos,
-                      vector<double> &u);
+                      vector<double> &u,
+                      vector<double> type);
 
 #endif // GRADIENT_H

@@ -126,6 +126,7 @@ int main(int argc, char *argv[])
 
     SimulationData simParams = {
 
+        data["simulation"]["dimension"],
         data["simulation"]["nstepT"],
         data["simulation"]["nsave"],
         data["simulation"]["dt"],
@@ -133,16 +134,19 @@ int main(int argc, char *argv[])
         data["simulation"]["alpha"],
         data["simulation"]["beta"],
         data["simulation"]["alpha_st"],
+        data["simulation"]["beta_adh"],
         schemeIntegration,
         data["thermo"]["u_init"],
         state_equation,
         state_initial_condition,
-        false,
-        true,
+        data["forces"]["gravity"],
+        data["forces"]["surface_tension"],
+        data["forces"]["adhesion"],
         data["condition"]["print_debug"],
         evaluateNumberParticles(geomParams),
         0,
         0,
+        
     };
 
 

@@ -63,10 +63,10 @@ void Euler(GeomData &geomParams,
             exit(1);
         }
 
-        for (int cord = 0; cord < 3; cord++){
+        for (int coord = 0; coord < 3; coord++){
 
-            pos[3 * n + cord] += dt * u[3 * n + cord];
-            u[3 * n + cord] += dt * dudt[3 * n + cord];
+            pos[3 * n + coord] += dt * u[3 * n + coord];
+            u[3 * n + coord] += dt * dudt[3 * n + coord];
         }
     }
 }
@@ -118,11 +118,11 @@ void RK22(GeomData &geomParams,
 
         rho[n] += dt * ((1-theta)*drhodt[n] + theta*drhodt_half[n]);
 
-        for (int cord = 0; cord < 3; cord++){
+        for (int coord = 0; coord < 3; coord++){
 
-            double u_temp = u[3 * n + cord] + dt*dudt_half[3 * n + cord];
-            pos[3 * n + cord] += dt * ((1-theta)*u[3 * n + cord] + theta*u_temp);
-            u[3 * n + cord] += dt *  ((1-theta)*dudt[3 * n + cord] + theta*dudt_half[3 * n + cord]);
+            double u_temp = u[3 * n + coord] + dt*dudt_half[3 * n + coord];
+            pos[3 * n + coord] += dt * ((1-theta)*u[3 * n + coord] + theta*u_temp);
+            u[3 * n + coord] += dt *  ((1-theta)*dudt[3 * n + coord] + theta*dudt_half[3 * n + coord]);
 
         }
     } 
@@ -230,9 +230,9 @@ void checkTimeStep(GeomData &geomParams,
                     double u_ab_x_ab = 0, x_ab_2 = 0;
 
                     // Dot product
-                    for (int cord = 0; cord < 3; cord++){
-                        u_ab_x_ab += rel_vel[cord] * rel_displ[cord];
-                        x_ab_2 += rel_displ[cord] * rel_displ[cord];
+                    for (int coord = 0; coord < 3; coord++){
+                        u_ab_x_ab += rel_vel[coord] * rel_displ[coord];
+                        x_ab_2 += rel_displ[coord] * rel_displ[coord];
                     }
 
                     double nu_2 = 0.01 * h * h;
