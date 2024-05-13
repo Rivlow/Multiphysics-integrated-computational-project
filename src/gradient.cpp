@@ -8,16 +8,17 @@
 #include "tools.h"
 #include "structure.h"
 #include "surface_tension.h"
-
-
 using namespace std;
+
 
 void gradW(GeomData &geomParams,    
            SimulationData &simParams, 
            vector<vector<double>> &gradW_matrix,
+           vector<vector<double>> &W_matrix,
            vector<int> &neighbours,
            vector<double> &nb_neighbours,
            vector<double> &pos){
+
 
     double h = geomParams.h;
     int nb_part = simParams.nb_part;
@@ -43,9 +44,11 @@ void gradW(GeomData &geomParams,
             }
 
             r_ab = sqrt(r_ab);
-            //cout << r_ab << endl;
-            double deriv = derive_cubic_spline(r_ab, h, simParams);
-                   
+            double deriv = derive_cubic_spline(r_ab, h);
+            double W = f_cubic_spline(r_ab, h);
+            W_matrix[n][idx] = W;
+
+
             for (int coord = 0; coord < 3; coord++){
                 gradW[3 * idx + coord] = d_xyz[coord] / r_ab * deriv;
             }
@@ -252,7 +255,10 @@ void momentumEquation(GeomData &geomParams,
                       SimulationData &simParams, 
                       vector<int> &neighbours,
                       vector<double> &nb_neighbours,
+                      vector<int> &track_surface,
+                      vector<double> &N_smoothed,
                       vector<vector<double>> &gradW_matrix,
+                      vector<vector<double>> W_matrix,
                       vector<vector<double>> &pi_matrix,
                       vector<double> &mass,
                       vector<double> &dudt,
@@ -263,7 +269,7 @@ void momentumEquation(GeomData &geomParams,
                       vector<double> &u,
                       vector<double> type){
 
-    //cout << simParams.is_gravity << endl;
+
     double g = (simParams.is_gravity)? -9.81 : 0;
     bool PRINT = simParams.PRINT;
     int nb_moving_part = simParams.nb_moving_part;
@@ -282,11 +288,11 @@ void momentumEquation(GeomData &geomParams,
     
     
     if (simParams.is_surface_tension)
-    {
-        
-        surfaceTension(simParams, geomParams,thermoParams, nb_neighbours,
-                       neighbours, gradW_matrix, mass, rho, pos, F_vol,type);
-    }
+        surfaceTension(simParams, geomParams,thermoParams, nb_neighbours, neighbours, 
+                       track_surface, N_smoothed, gradW_matrix, W_matrix, mass, rho, pos, F_vol);
+
+
+
     // Iterate over each particle
     #pragma omp parallel for
     for (int n = 0; n < nb_moving_part; n++){

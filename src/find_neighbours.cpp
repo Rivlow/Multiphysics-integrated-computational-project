@@ -22,14 +22,13 @@ void sortedList(GeomData &geomParams,
                 SimulationData &simParams, 
                 vector<vector<int>> &cell_matrix,
                 vector<int> &neighbours,
+                vector<int> &track_surface,
                 vector<vector<double>> &gradW_matrix,
-                vector<vector<double>> &artificial_visc_matrix,
+                vector<vector<double>> &W_matrix,
+                vector<vector<double>> &pi_matrix,
                 vector<double> &nb_neighbours,
                 vector<double> &type,
                 vector<double> &pos){
-
-    if (simParams.PRINT)
-        cout << "findNeighbours begins" << endl;
     
     int Nx = geomParams.Nx;
     int Ny = geomParams.Ny;
@@ -53,7 +52,6 @@ void sortedList(GeomData &geomParams,
         k = (k == Nz) ? k - 1 : k;
 
         cell_matrix[i + Nx * j + Ny * Nx * k].push_back(n);
-
     }
 
     // Find neighbours for each particle
@@ -98,7 +96,6 @@ void sortedList(GeomData &geomParams,
 
                         int idx_cell = cell[idx];
 
-                        //if (idx_cell >= simParams.nb_tot_part) cout << "ghost part" << endl;
                         if (type[idx_cell] == 2.0) continue;
                         else{
 
@@ -113,7 +110,29 @@ void sortedList(GeomData &geomParams,
                                 int kappa = geomParams.kappa;
                                 double h = geomParams.h;
 
-                                if (r2 <= kappa * kappa *h * h) neighbours[100*n + it++] = idx_cell;
+                                if (r2 <= kappa * kappa *h * h){
+                                    
+                                    neighbours[100*n + it++] = idx_cell;
+
+                                    if (type[n] == 1){ //FP
+           
+
+                                        double theta = acos(rz / sqrt(r2)); 
+                                        double phi = atan2(ry, rx); 
+                                        
+
+                                        theta = theta * 180.0 / M_PI;
+                                        phi = phi * 180.0 / M_PI + (phi < 0 ? 360.0 : 0) ;// phi between 0 et 360 degrees
+                                       
+                                        int i_idx = (theta > 90 ? 0 : 8);
+                                        int j_idx = static_cast<int>(phi / 45.0);
+                                        
+                                        
+                                        track_surface[16*n + (j_idx + i_idx)]++;
+                                    }
+                                    
+                                    
+                                }
                             
                             }
                         }
@@ -123,7 +142,8 @@ void sortedList(GeomData &geomParams,
         }
         
         gradW_matrix[n].resize(3*it);
-        artificial_visc_matrix[n].resize(it);
+        W_matrix[n].resize(it);
+        pi_matrix[n].resize(it);
         nb_neighbours[n] = it;
        
     }
@@ -161,7 +181,6 @@ void naiveAlgo(GeomData &geomParams,
             double h = geomParams.h;
 
             if (r2 <= kappa * kappa *h * h){
-
                 neighbours_matrix[i][it_i++];
                 neighbours_matrix[j][it_j++];
             }
@@ -180,18 +199,18 @@ void printNeighbours(vector<vector<int>> &neighbours_matrix_linked,
         for (int j = 0; j < int(neighbours_matrix_linked[i].size()); j++){
 
             cout << neighbours_matrix_linked[i][j];
-            if (j != int(neighbours_matrix_linked[i].size() - 1)){
+            if (j != int(neighbours_matrix_linked[i].size() - 1))
                 cout << ", ";
-            }
+            
         }
         cout << "} (Linked-list) VS {";
 
         for (int j = 0; j < int(neighbours_matrix_naive[i].size()); j++){
 
             cout << neighbours_matrix_naive[i][j];
-            if (j != int(neighbours_matrix_naive[i].size() - 1)){
+            if (j != int(neighbours_matrix_naive[i].size() - 1))
                 cout << ", ";
-            }
+            
         }
         cout << "} (naive)\n \n";
     }
