@@ -231,7 +231,7 @@ void surfaceTension(SimulationData& simParams,
 
                     for (int coord = 0; coord < 3; coord++){
                         double delta_norm = n_imag[coord]/norm_imag - normal[3*n+coord]/norm_i;
-                        dot_product += delta_norm*(-1*gradW_matrix[n][3*idx+coord]);
+                        dot_product += delta_norm*(-1*gradW_matrix[n][3*idx+coord]);// a chané ça car grad pas bon
                     }
 
                     k_i -= min(R_i, R_imag)*dot_product*m_j/rho_j;
