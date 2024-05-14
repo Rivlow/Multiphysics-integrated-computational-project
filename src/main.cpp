@@ -189,43 +189,40 @@ int main(int argc, char *argv[])
     cout << "#===============================#" << endl;
     cout << "# General simulation parameters #" << endl;
     cout << "#===============================#" << "\n" << endl;
-    cout << "s =" << geomParams.s << endl;
-    cout << "kappa = " << geomParams.kappa << endl;
-    cout << "h = " << geomParams.h << endl;
-    cout << "nstepT = " << simParams.nstepT << endl;
-    cout << "nsave = " << simParams.nsave << endl;
-    cout << "dt = " << simParams.dt << endl;
-    cout << "theta = " << simParams.theta <<endl;
-    cout << "alpha (artificial viscosity): " << simParams.alpha << endl;
-    cout << "alpha (surface tension): " << simParams.alpha_st << endl;
-    cout << "beta (artificial visocity): " << simParams.beta  << endl;
-    cout << "state equation : " << state_equation << endl;
-    cout << "state initial condition : " << state_initial_condition << "\n" << endl;
+    cout << "s = " << geomParams.s << " [m]" << endl;
+    cout << "kappa = " << geomParams.kappa << " [-]" << endl;
+    cout << "h = " << geomParams.h << " [m]" << endl;
+    cout << "nstepT = " << simParams.nstepT << " [steps]" << endl;
+    cout << "nsave = " << simParams.nsave << " [steps]" << endl;
+    cout << "dt = " << simParams.dt << " [s]" << endl;
+    cout << "theta = " << simParams.theta << " [-]" << endl;
+    cout << "alpha (artificial viscosity) = " << simParams.alpha << " [-]" << endl;
+    cout << "alpha (surface tension) = " << simParams.alpha_st << " [-]" << endl;
+    cout << "beta (artificial viscosity) = " << simParams.beta << " [-]" << endl;
+    cout << "state equation = " << state_equation << endl;
+    cout << "state initial condition = " << state_initial_condition << "\n" << endl;
 
     cout << "#==================#" << endl;
     cout << "# Domain variables #" << endl;
     cout << "#==================#" << "\n" << endl;
-    cout << "Radius of neighbourhood (kappa * h) = " << geomParams.kappa * geomParams.h << endl;
+    cout << "Radius of neighbourhood (kappa * h) = " << geomParams.kappa * geomParams.h << " [m]" << endl;
     cout << "Number of cells in each direction (Nx, Ny, Nz) = (" << geomParams.Nx << ", " << geomParams.Ny << ", " << geomParams.Nz << ")" << endl;
-    cout << "Number of fluid particles = " << MP_count << endl;
-    cout << "Number of fixed particles = " << FP_count << endl;
-    cout << "Number of post process particles = " << GP_count << endl;
-    cout << "Total number of particles = " << nb_tot_part << "\n" << endl;
+    cout << "Number of fluid particles = " << MP_count  << " [-]" << endl;
+    cout << "Number of fixed particles = " << FP_count  << " [-]" << endl;
+    cout << "Number of post process particles = " << GP_count << " [-]" << endl;
+    cout << "Total number of particles = " << nb_tot_part << " [-]" << "\n" << endl;
 
     cout << "#==================#" << endl;
     cout << "# Thermo variables #" << endl;
-    cout << "#==================#" << "\n" << endl; 
-    cout << "Initial speed of sound (c_0) = " << thermoParams.c_0 << endl;
-    cout << "Moving particle density (rho_moving) = " << thermoParams.rho_moving << endl;
-    cout << "Fixed particle density (rho_fixed) = " << thermoParams.rho_fixed << endl;
-    cout << "Initial density (rho_0) = " << thermoParams.rho_0 << endl;
-    cout << "Molar mass (M) = " << thermoParams.M << endl;
-    cout << "Heat capacity ration (gamma) = " << thermoParams.gamma << endl;
-    cout << "Ideal gaz constant (R) = " << thermoParams.R << endl;
-    cout << "Surface tension stress (sigma) = " << thermoParams.R << "\n" << endl;
-
-    
-    
+    cout << "#==================#" << "\n" << endl;
+    cout << "Initial speed of sound (c_0) = " << thermoParams.c_0 << " [m/s]" << endl;
+    cout << "Moving particle density (rho_moving) = " << thermoParams.rho_moving << " [kg/m^3]" << endl;
+    cout << "Fixed particle density (rho_fixed) = " << thermoParams.rho_fixed << " [kg/m^3]" << endl;
+    cout << "Initial density (rho_0) = " << thermoParams.rho_0 << " [kg/m^3]" << endl;
+    cout << "Molar mass (M) = " << thermoParams.M << " [kg/mol]" << endl;
+    cout << "Heat capacity ratio (gamma) = " << thermoParams.gamma << " [-]" << endl;
+    cout << "Ideal gas constant (R) = " << thermoParams.R << " [J/(mol*K)]" << endl;
+    cout << "Surface tension stress (sigma) = " << thermoParams.sigma << " [N/m]" << "\n" << endl;
 
     /*---------------------------- SPH ALGORITHM  ----------------------------*/
 
