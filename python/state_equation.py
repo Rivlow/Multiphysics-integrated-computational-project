@@ -24,6 +24,7 @@ R = 8.314
 T = 273.15 + 25
 gamma = 7
 B = np.power(c_0,2)*rho_0/gamma
+print(f"B = {B}")
 M = 18e-3
 
 
