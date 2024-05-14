@@ -291,7 +291,7 @@ void momentumEquation(GeomData &geomParams,
         surfaceTension(simParams, geomParams,thermoParams, nb_neighbours, neighbours, 
                        track_surface, N_smoothed, gradW_matrix, W_matrix, mass, rho, pos, F_vol,type);
 
-    printArray(F_vol,F_vol.size(),"fvol0");
+    //printArray(F_vol,F_vol.size(),"fvol0");
 
     // Iterate over each particle
     #pragma omp parallel for
