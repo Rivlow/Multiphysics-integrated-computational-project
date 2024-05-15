@@ -14,7 +14,7 @@
 using namespace std;
 
 
-
+/*
 void surfaceTension(SimulationData& simParams,
                     GeomData &geomParams,
                     ThermoData &thermoParam,
@@ -38,7 +38,7 @@ void surfaceTension(SimulationData& simParams,
     vector<double> surface_nei(simParams.nb_moving_part,0.0);
 
 
-    cout << "first loop " << endl;
+    //cout << "first loop " << endl;
     // First loop compute the scalar div(r) 
     // and determine the "N" for each particle (N = 1 indicates particle at free surface, otherwise N = 0)
     // The free surface is detected by both math (first) and geom method (second)
@@ -91,7 +91,7 @@ void surfaceTension(SimulationData& simParams,
             {
                 N[n] = 1;
                 nb_one++;
-            }*/
+            }
 
         }
         nb_zero++;
@@ -270,7 +270,7 @@ void surfaceTension(SimulationData& simParams,
                         cout<<"dot product : " << dot_product << " delta_norm : " << delta_norm << " gradW_matrix[n][3*idx+coord] " << gradW_matrix[n][3*idx+coord]<<endl;
                         cout<<"n " << n << " ineig " << i_neig << endl;
                         cout << "normal[3*i_neig + coord]/norm_j : "  << normal[3*i_neig + coord] << " normal[3*n+coord]/norm_i " << normal[3*n+coord]/norm_i << endl;
-                        }*/
+                        }
 
                     }
                     k_i -= R_i*R_j*dot_product*m_j/rho_j;
@@ -282,15 +282,7 @@ void surfaceTension(SimulationData& simParams,
             if(L_i){
                 k_i  = k_i/L_i;
                 
-            }   
-            
-            
-            
-            
-
-            
-
-            
+            }         
         }
         double F_res = 0;
         for (int coord = 0; coord < 3; coord++){
@@ -301,36 +293,27 @@ void surfaceTension(SimulationData& simParams,
         simParams.F_st_max = sqrt(F_res);
             
     }  
-    cout << "Fourth loop ok " << endl;
+    //cout << "Fourth loop ok " << endl;
 
     
 }
+*/
 
-/*double W_coh(double r, double h){
-    double W = 0.0;
-    double cst = 32/(M_PI*h*h*h*h*h*h*h*h*h);
-    if(2.0*r>h && r<=h){
-        W = cst*(h-r)*(h-r)*(h-r)*r*r*r;
-    }
-    else if(r>0 && 2.0*r<=h){
-        W = cst *( 2.0*(h-r)*(h-r)*(h-r)*r*r*r - h*h*h*h*h*h/64);
-    }
-    else{
-        W = 0.0;
-    }
-    return W;
-}
 
 void surfaceTension(SimulationData& simParams,
                     GeomData &geomParams,
                     ThermoData &thermoParam,
                     vector<double> nb_neighbours,
                     vector<int> neighbours,
+                    vector<int> &track_surface,
+                    vector<double> &N_smoothed,
                     vector<vector<double>> gradW_matrix,
+                    vector<vector<double>> W_matrix,
                     vector<double> mass,
                     vector<double> rho,
                     vector<double> pos,
-                    vector<double> &F_vol){
+                    vector<double> &F_vol,
+                    vector<double> type){
 
     vector<double> normal(3*simParams.nb_moving_part,0.0);
     #pragma omp parallel for 
@@ -373,7 +356,7 @@ void surfaceTension(SimulationData& simParams,
                 }
                 
                 r_ab = sqrt(r_ab);
-                double W_ab = W_coh(r_ab,geomParams.kappa*geomParams.h);
+                double W_ab = W_coh(r_ab,geomParams.kappa*geomParams.h, simParams);
                 double m_a = mass[n];
                 double m_b = mass[i_neig];
                 double F_res = 0;
@@ -382,28 +365,15 @@ void surfaceTension(SimulationData& simParams,
                     
                     F_vol[3*n + coord] += -K_ij*(alpha * m_a * m_b * d_xyz[coord]*W_ab/r_ab 
                                     + alpha*(normal[3*n+coord]-normal[3*i_neig+coord]));
+
+                    //cout << "F_vol[3*n + coord] (in surface tension)" << -K_ij*(alpha * m_a * m_b * d_xyz[coord]*W_ab/r_ab 
+                             //       + alpha*(normal[3*n+coord]-normal[3*i_neig+coord])) << endl;
                 
                     F_res += F_vol[3*n + coord]*F_vol[3*n + coord];
                 }
                 
                 simParams.F_st_max = sqrt(F_res);
             }
-        }
-            
-    }
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-    
-*/
+        }     
+    }  
+}

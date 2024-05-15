@@ -6,9 +6,9 @@
 
 using namespace std;
 
-double W_coh(double r, double h){
+double W_coh(double r, double h, SimulationData simParams){
     double W = 0.0;
-    double cst = 32/(M_PI*h*h*h*h*h*h*h*h*h);
+    double cst = (simParams.dimension == 3) ? 32/(M_PI*h*h*h*h*h*h*h*h*h) : 40/(M_PI*h*h*h*h*h*h*h*h);
     if(2.0*r>h && r<=h){
         W = cst*(h-r)*(h-r)*(h-r)*r*r*r;
     }
@@ -20,6 +20,20 @@ double W_coh(double r, double h){
     }
     return W;
 }
+
+double W_adh(double r, double h, SimulationData simParams){
+
+    double W = 0.0;
+    double cst = (simParams.dimension == 2)? 16/(4* M_PI*pow(h, 2.25)): 0.0007/pow(h,3.25);
+
+    if(2.0*r>h && r<=h)
+        W = cst*sqrt(sqrt(-4*r*r/h+6*r-2*h));
+    else
+        W = 0.0;
+    
+    return W;
+}
+
 
 
 double f_gaussian(double r, double h)

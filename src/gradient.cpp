@@ -323,49 +323,39 @@ void momentumEquation(GeomData &geomParams,
                 if(simParams.is_adhesion){
                     
                     double beta_ad = simParams.beta_adh;
-                    double W_adh = 0;
                     double r_ab = 0;
                     vector<double> d_xyz(3);
+
                     for (int coord = 0; coord < 3; coord++){
                     
-                    d_xyz[coord] = pos[3 * n + coord] - pos[3 * i_neig + coord];
-                    r_ab += d_xyz[coord]*d_xyz[coord];
+                        d_xyz[coord] = pos[3 * n + coord] - pos[3 * i_neig + coord];
+                        r_ab += d_xyz[coord]*d_xyz[coord];
                     }
 
                     r_ab = sqrt(r_ab);
                     double kh = geomParams.kappa*geomParams.h;
-                    if(2*r_ab > kh && r_ab<=kh){
-                        
-                        double cst = 0.007/pow(kh,3.25);
-                        double fct = sqrt(sqrt(-4*r_ab*r_ab/kh+6*r_ab-2*kh));
-                        W_adh = cst*fct;
-                    }
+                    double W_ab = W_adh(r_ab, kh, simParams);
+
 
                     for (int coord = 0; coord < 3; coord++){
-                        double boundary = 1-type[i_neig];
+                        double boundary = 1.0 - type[i_neig];
                         
-                    F_vol[3*n + coord] += beta_ad*boundary*mass[n]*m_b*W_adh*d_xyz[coord]/r_ab;
-                    
+                    F_vol[3*n + coord] -= beta_ad*boundary*mass[n]*m_b*W_ab*d_xyz[coord]/r_ab;
+                    //cout << "F_vol[3*n + coord] (adhesion) = " << beta_ad*boundary*mass[n]*m_b*W_adh*d_xyz[coord]/r_ab << endl;
                     }
-                }
-
-
-                
+                }   
             }
 
             dudt[3 * n + coord] *= -1;
             dudt[3 * n + coord] += F_vol[3 * n + coord];
 
-            if(coord == 2){
-                
+            if(coord == 2)
                 dudt[3 * n + coord] += g;
-                //cout << g << endl;
-            }
-                
-            
+              
         }
     }
 
+    //printArray(F_vol, F_vol.size(), "F_vol");
     if (PRINT) cout << "momentumEquation passed" << endl;
 }
 
