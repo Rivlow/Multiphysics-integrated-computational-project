@@ -5,9 +5,10 @@
 #include <cmath>
 #include "structure.h"
 
-double W_coh(double r, double h);
+double W_coh(double r, double h, SimulationData simParams);
 
-double W_coh(double r, double h);
+double W_adh(double r, double h, SimulationData simParams);
+
 
 double f_gaussian(double r, double h);
 double deriv_gaussian(double r, double h);

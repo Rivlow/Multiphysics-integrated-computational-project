@@ -4,7 +4,7 @@ import sys
 
 # Définir les données complètes du JSON
 
-s = 0.01
+s = 0.05
 L = 1.2
 
 data = {
@@ -13,41 +13,33 @@ data = {
         "theta": 0.5,
         "s": s,
         "nstepT": 100000,
-        "dt": 0.0001,
+        "dt": 0.00001,
         "nsave": 100,
         "kappa": 2,
         "alpha": 0.5,
         "beta": 0,
         "alpha_st": 10,
-        "beta_adh": 10,
+        "beta_adh": 1.2,
         "dimension": 2
     },
     
     "domain": {
         "matrix_long": [
-            [L/2, s/2, L/2], # fluid
-            [L+s, s/2, s/2],  
-            [L, s/2, s/2],
-            [s, s/2, L + L/4],
-            [s, s/2, L + L/4 - s],
-            [s, s/2, L + L/4],
-            [s, s/2, L + L/4 - s],
+            [L/2, s/2, L/4], # fluid
+            [2*L+s, s/2, s/2],  
+            [2*L, s/2, s/2],
         ],
         "matrix_orig": [
-            [L/4, 0, L/2], # fluid
+            [0.9*L, 0, s], # fluid
             [0.0, 0, 0], 
-            [s/2, 0, s/2], 
-            [0, 0, s],
-            [s/2, 0, round(s + s/2,4)],
-            [L + s, 0, s],
-            [round(L + s/2, 4), 0, round(s + s/2, 4)]   
+            [s/2, 0, s/2],  
         ],
-        "vector_type": [1, 0, 0, 0, 0, 0, 0],
+        "vector_type": [1, 0, 0],
         "L_d": [3, 3, 3],
         "o_d": [0.0, 0.0, 0.0]
     },
     "post_process": {
-        "do": True,
+        "do": False,
         "xyz_init": [s, 0, L/5],
         "xyz_end": [L+s, 0, L/5]
     },
@@ -65,8 +57,8 @@ data = {
     },
     "forces": {
         "gravity": True,
-        "surface_tension": False,
-        "adhesion": False
+        "surface_tension": True,
+        "adhesion": True
     },
     "condition": {
         "print_debug": False,
@@ -83,7 +75,7 @@ print(f"{current_directory}/..")
 
 
 # Écrire les données dans un fichier JSON
-json_src = "splash/2D_splash.json"
+json_src = "surface_tension/2D_surface_tension.json"
 with open(f'{current_directory}/../tests/{json_src}', 'w') as json_file:
     json.dump(data, json_file, indent=4)
 
