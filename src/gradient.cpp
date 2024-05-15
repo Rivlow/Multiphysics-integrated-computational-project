@@ -24,7 +24,7 @@ void gradW(GeomData &geomParams,
     int nb_part = simParams.nb_part;
 
     // Iterations over each particle
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for (int n = 0; n < nb_part; n++){
 
         vector<double> &gradW = gradW_matrix[n];
@@ -46,11 +46,12 @@ void gradW(GeomData &geomParams,
             r_ab = sqrt(r_ab);
             double deriv = derive_cubic_spline(r_ab, h, simParams);
             double W = f_cubic_spline(r_ab, h);
+            
             W_matrix[n][idx] = W;
 
 
             for (int coord = 0; coord < 3; coord++){
-                gradW[3 * idx + coord] = d_xyz[coord] / r_ab * deriv;
+                gradW[3 * idx + coord] = (d_xyz[coord] / r_ab) * deriv;
             }
         }
     }

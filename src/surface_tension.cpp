@@ -32,10 +32,10 @@ void surfaceTension(SimulationData& simParams,
 
 
     vector<double> normal(3*simParams.nb_moving_part,0.0);
-    vector<double> div_r(3*simParams.nb_moving_part,0.0);
+    vector<double> div_r(simParams.nb_moving_part,0.0);
     vector<double> c(simParams.nb_moving_part,0.0);
     vector<double> R(simParams.nb_moving_part,0.0);
-    vector<double> N(simParams.nb_moving_part,0.0);
+    vector<double> surface_nei(simParams.nb_moving_part,0.0);
 
 
     cout << "first loop " << endl;
@@ -56,30 +56,32 @@ void surfaceTension(SimulationData& simParams,
             int i_neig = neighbours[100*n + idx]; 
             double m_j = mass[i_neig];
             double rho_j = rho[i_neig];
-            double dot_product = 0; //r_ij*gradW_ij
+             //r_ij*gradW_ij
+            double dot_product = 0;
             
             for(int coord = 0; coord < 3; coord ++){
                 
                 double r_ij = pos[3*n+coord] - pos[3*i_neig+coord];
                 
                 double gradW_ij = gradW[3*idx+coord];
-                
-                dot_product += r_ij*m_j*gradW_ij/rho_j;
+                dot_product += r_ij*gradW_ij;
+
                 //normal[3*n+coord] += r_ij*m_j*gradW_ij/rho_j;
                 
             }
             //cout << rho_j << endl;
-           // cout<< " dot_prod : " << dot_product << endl;
-            div_r[n] = dot_product;
+            
+            div_r[n] += m_j*dot_product/rho_j;
             //cout<< " apres dot prot "  << endl;
         }
+        
         //cout<<"après 2eme " << endl;
         // mathematical check
-        if (1){ // particle n is potentially located on free surface
-
+        if (abs(div_r[n]) <=1.7){ // particle n is potentially located on free surface
+            surface_nei[n] = 1;        
             int count = 0; // geom check
 
-            for (int i = 0; i < 8; i++){
+            /*for (int i = 0; i < 8; i++){
 
                 if (track_surface[8*n + i] == 0)
                     count++;   
@@ -89,15 +91,15 @@ void surfaceTension(SimulationData& simParams,
             {
                 N[n] = 1;
                 nb_one++;
-            }
+            }*/
 
         }
         nb_zero++;
         
     }
     //printArray(track_surface,track_surface.size(), "track_surface");
+    printArray(div_r,div_r.size(),"div");
     
-    cout << "nb_one " << nb_one  << " nb_zero " << nb_zero<< endl;
 
     // Second loop evaluated the smoothed color function "c"
     #pragma omp parallel for 
@@ -106,25 +108,34 @@ void surfaceTension(SimulationData& simParams,
         int size_neighbours = nb_neighbours[n];
         double sum = 0;
         
-        if (N[n] == 1){
+            int near_surface = 0;
             for(int idx = 0; idx < size_neighbours; idx++){ 
                 
                 int i_neig = neighbours[100*n + idx];
+                if (surface_nei[i_neig] == 1){
                 double W_ij = W_matrix[n][idx];
+                
                 double m_j = mass[i_neig];
                 double rho_j = rho[i_neig];
 
                 sum += m_j*W_ij/rho_j;
+                if(surface_nei[i_neig]==1){
+                    near_surface = 1;
+                }
             }
             
-            c[n] = sum;
+            
         }
-
-        else
-            c[n] = 1;
+        if(near_surface){
+                c[n] = sum;
+            }
+            else{
+                c[n] = 1;
+            }
+        
     }
-   
-    //cout << "Second loop ok " << endl;
+    
+    cout << "Second loop ok " << endl;
 
 
     // Third loop evaluated the normal vector "n"
@@ -145,8 +156,8 @@ void surfaceTension(SimulationData& simParams,
         }
     }
     
-    //cout << "Third loop ok " << endl;
-    //printArray(N,N.size(),"N");
+    cout << "Third loop ok " << endl;
+    printArray(surface_nei,surface_nei.size(),"N");
     // Fourth loop evaluate the surface curvature
     //#pragma omp parallel for 
     for(int n = 0; n < simParams.nb_moving_part; n++){
@@ -177,8 +188,8 @@ void surfaceTension(SimulationData& simParams,
             int i_neig = neighbours[100*n + idx];
             double m_j = mass[i_neig];
             double rho_j = rho[i_neig];
-            double N_i = N[n];
-            double N_j = N[i_neig];
+            double N_i = surface_nei[n];
+            double N_j = surface_nei[i_neig];
 
             for (int coord = 0; coord < 3; coord++){
                 norm_i +=normal[3*n + coord]*normal[3*n + coord];
@@ -218,7 +229,7 @@ void surfaceTension(SimulationData& simParams,
                 }
 
                 else if (N_j == 1.0 && N_i == 0.0){ 
-                    continue;// (particle j at surface and i in the fluid)
+                    // (particle j at surface and i in the fluid)
                     //cout << "ahhhhh1" << endl;
                     for (int coord = 0; coord < 3; coord++){
                         n_imag[coord] = 2*normal[3*i_neig + coord]/norm_j - normal[3*n + coord]/norm_i;
@@ -228,10 +239,18 @@ void surfaceTension(SimulationData& simParams,
                     norm_imag = sqrt(norm_imag);
                     double R_imag = (norm_imag > 0.01/geomParams.h)? 1 : 0;
                     double dot_product = 0;
-
+                    vector<double> d_xyz_im(3);
+                    double r2 = 0.0;
+                    for (int coord = 0; coord < 3; coord++){
+                        d_xyz_im[coord] = 2.0*(pos[3*n+coord] - pos[3*i_neig+coord]);
+                        r2 += d_xyz_im[coord]*d_xyz_im[coord];
+                    }
+                    r2 = sqrt(r2);
                     for (int coord = 0; coord < 3; coord++){
                         double delta_norm = n_imag[coord]/norm_imag - normal[3*n+coord]/norm_i;
-                        dot_product += delta_norm*(-1*gradW_matrix[n][3*idx+coord]);// a chané ça car grad pas bon
+                        
+                        double gradW_imag_coord = d_xyz_im[coord]*derive_cubic_spline(r2, geomParams.h ,simParams)/r2;
+                        dot_product += delta_norm*(gradW_imag_coord);// à changé ça car grad pas bon
                     }
 
                     k_i -= min(R_i, R_imag)*dot_product*m_j/rho_j;
@@ -257,7 +276,7 @@ void surfaceTension(SimulationData& simParams,
                     k_i -= R_i*R_j*dot_product*m_j/rho_j;
                     L_i += R_i*R_j*m_j*W_matrix[n][idx]/rho_j; 
                     
-                    cout << "   n   "<< n<<  "      dot_product   " << dot_product << "   k_i     "<< k_i << "    R_i     " << R_i << "      R_j     " << R_j << "    m_j    " <<  m_j << endl;// kernel gradient correction to counteract truncated solution
+                    //cout << "   n   "<< n<<  "      dot_product   " << dot_product << "   k_i     "<< k_i << "    R_i     " << R_i << "      R_j     " << R_j << "    m_j    " <<  m_j << endl;// kernel gradient correction to counteract truncated solution
                 }
             }
             if(L_i){
@@ -282,7 +301,7 @@ void surfaceTension(SimulationData& simParams,
         simParams.F_st_max = sqrt(F_res);
             
     }  
-    //cout << "Fourth loop ok " << endl;
+    cout << "Fourth loop ok " << endl;
 
     
 }

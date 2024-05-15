@@ -3,8 +3,8 @@
         "theta": 0.5,
         "s": 0.01,
         "nstepT": 100000,
-        "dt": 0.0001,
-        "nsave": 100,
+        "dt": 1e-06,
+        "nsave": 1000,
         "kappa": 2,
         "alpha": 0.5,
         "beta": 0,
@@ -54,7 +54,7 @@
             [
                 0.3,
                 0,
-                0.6
+                0.3
             ],
             [
                 0.0,
@@ -108,7 +108,7 @@
         ]
     },
     "post_process": {
-        "do": true,
+        "do": false,
         "xyz_init": [
             0.01,
             0,
@@ -134,7 +134,7 @@
         "gamma": 7,
         "M": 0.018,
         "R": 8.314,
-        "sigma": 52000
+        "sigma": 0.72
     },
     "forces": {
         "gravity": true,

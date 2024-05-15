@@ -1,10 +1,10 @@
 {
 
   "domain":{
-    "matrix_long" : [[0.75, 0.75, 0.75]],
-    "matrix_orig" : [[0.5, 0.5, 0.5]],
+    "matrix_long" : [[1, 1, 1]],
+    "matrix_orig" : [[1, 1, 1]],
     "vector_type" : [1],
-    "L_d": [2, 2, 2],
+    "L_d": [3, 3, 3],
     "o_d": [0.0, 0.0, 0.0]
   },
 
@@ -16,7 +16,7 @@
 
   "simulation":{
     "theta" :0.5,
-    "s": 0.05,
+    "s": 0.01,
     "nstepT": 70000,
     "dt": 0.00001,
     "nsave": 100,
@@ -25,7 +25,7 @@
     "beta": 0,
     "alpha_st":10,
     "beta_adh": 10,
-    "dimension": 2
+    "dimension": 3
   },
 
   "thermo":{
@@ -38,7 +38,7 @@
     "gamma": 7, 
     "M": 18e-3, 
     "R":8.314,
-    "sigma":72800
+    "sigma":0.0728
   },
 
   

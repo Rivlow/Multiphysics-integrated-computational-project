@@ -66,8 +66,11 @@ double f_cubic_spline(double r, double h){
     double alpha = 3.0 / (2.0 * M_PI * h * h * h);
     double W;
 
-    if (r / h < 1.0)
-        W = alpha * (2/3- r * r / (h * h) + 0.5 * r * r * r / (h * h * h));
+    if (r / h < 1.0){
+        W = alpha * (2.0/3.0 - r * r / (h * h) + 0.5 * r * r * r / (h * h * h));
+        
+    }
+        
     
     else if (1.0 <= r / h && r / h < 2.0)
         W = alpha * 1.0/6.0 * ((2.0 - r / h) * (2.0 - r / h) * (2.0 - r / h));
@@ -85,7 +88,7 @@ double derive_cubic_spline(double r, double h, SimulationData &simParams)
     //cout << "dim : " << dim << endl;
     double alpha = 0;
     if(dim == 3){
-        alpha = 3 / (2 * M_PI * h * h * h);
+        alpha = 3.0 / (2.0 * M_PI * h * h * h);
     }
     if(dim == 2){
         alpha = 15.0 /( 7.0 * M_PI * h * h );
@@ -103,7 +106,6 @@ double derive_cubic_spline(double r, double h, SimulationData &simParams)
     else 
         DW = 0;
         
-
     return DW;
 }
 

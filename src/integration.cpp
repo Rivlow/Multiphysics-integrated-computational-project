@@ -253,7 +253,7 @@ void checkTimeStep(GeomData &geomParams,
         }
 
         dt_cv = min_a;
-        double dt_final = min(0.25*dt_f, 0.4*dt_cv);
+        double dt_final = min(0.4*dt_f, 0.25*dt_cv);
 
         string state_equation = simParams.state_equation;
 

@@ -114,7 +114,7 @@ void sortedList(GeomData &geomParams,
                                     
                                     neighbours[100*n + it++] = idx_cell;
 
-                                    if (type[n] == 1){ //FP
+                                   /* if (type[n] == 1){ //FP
            
 
                                         double theta = atan2(rz, rx); 
@@ -129,7 +129,7 @@ void sortedList(GeomData &geomParams,
                                         
                                         
                                         track_surface[8*n + i_idx]++;
-                                    }
+                                    }*/
                                     
                                     
                                 }
