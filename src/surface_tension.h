@@ -23,4 +23,5 @@ void surfaceTension(SimulationData& simParams,
                     vector<double> mass,
                     vector<double> rho,
                     vector<double> pos,
-                    vector<double> &F_vol);
+                    vector<double> &F_vol,
+                    vector<double> type);

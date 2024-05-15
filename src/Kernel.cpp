@@ -2,28 +2,42 @@
 #include <cmath>
 #include <stdio.h>
 #include "Kernel.h"
+#include "structure.h"
 
 using namespace std;
 
-double W_coh(double r, double h){
+double W_coh(double r, double h, SimulationData simParams){
+    double W = 0.0;
+    double cst = (simParams.dimension == 3) ? 32/(M_PI*h*h*h*h*h*h*h*h*h) : 40/(M_PI*h*h*h*h*h*h*h*h);
+    if(2.0*r>h && r<=h){
+        W = cst*(h-r)*(h-r)*(h-r)*r*r*r;
+    }
+    else if(r>0 && 2.0*r<=h){
+        W = cst *( 2.0*(h-r)*(h-r)*(h-r)*r*r*r - h*h*h*h*h*h/64);
+    }
+    else{
+        W = 0.0;
+    }
+    return W;
+}
 
-    double W;
-    double cst = 32/(M_PI*h*h*h*h*h*h*h*h*h);
+double W_adh(double r, double h, SimulationData simParams){
+
+    double W = 0.0;
+    double cst = (simParams.dimension == 2)? 16/(4* M_PI*pow(h, 2.25)): 0.0007/pow(h,3.25);
 
     if(2.0*r>h && r<=h)
-        W = cst*(h-r)*(h-r)*(h-r)*r*r*r;
-    
-    else if(r>0 && 2.0*r<=h)
-        W = cst *( 2.0*(h-r)*(h-r)*(h-r)*r*r*r - h*h*h*h*h*h/64);
-    
+        W = cst*sqrt(sqrt(-4*r*r/h+6*r-2*h));
     else
-        W = 0;
+        W = 0.0;
     
     return W;
 }
 
-double f_gaussian(double r, double h){
 
+
+double f_gaussian(double r, double h)
+{
     double alpha = 1 / (M_PI * sqrt(M_PI) * h * h * h);
     double W = alpha * exp(-r * r / (h * h));
     return W;
@@ -78,10 +92,21 @@ double f_cubic_spline(double r, double h){
     return W;
 }
 
-double derive_cubic_spline(double r, double h){
+double derive_cubic_spline(double r, double h, SimulationData &simParams)
+{
 
-    double alpha = 3 / (2 * M_PI * h * h * h);
-    double DW;
+    int dim = simParams.dimension;
+    //cout << "dim : " << dim << endl;
+    double alpha = 0;
+    if(dim == 3){
+        alpha = 3 / (2 * M_PI * h * h * h);
+    }
+    if(dim == 2){
+        alpha = 15.0 /( 7.0 * M_PI * h * h );
+        //cout << "alpha : " << alpha << endl;
+    }
+    
+    double DW = 0;
 
     if (1.0 <= r / h && r / h < 2.0) 
         DW = alpha / h * (-0.5 * (2.0 - r / h) * (2.0 - r / h));

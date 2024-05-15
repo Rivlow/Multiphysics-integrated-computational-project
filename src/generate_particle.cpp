@@ -62,8 +62,8 @@ void meshcube(GeomData &geomParams,
     
     for(int n = 0 ; n < int(vectorType.size()); n++){
 
-        vector<double> &L = matrix_long[n];
-        vector<double> &o = matrix_orig[n];
+        vector<double> &L = matrixLong[n];
+        vector<double> &o = matrixOrig[n];
         int type_val = vectorType[n];
         double dx = 0;
         double dy = 0;
@@ -121,7 +121,7 @@ void meshcube(GeomData &geomParams,
             }
         }
     }
-
+    
     simParams.nb_part = pos.size()/3;
 }
 

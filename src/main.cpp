@@ -75,18 +75,16 @@ int main(int argc, char *argv[])
     getKey(data, state_equation, state_initial_condition, 
            schemeIntegration);
 
-    cout << "kappa" << data["kappa"] << endl;
-    cout << "s" << data["s"] << endl;
-    cout << "o" << data["domain"]["o"] << endl;
-    cout << "L" << data["domain"]["L"] << endl;
-    cout << "o_d" << data["domain"]["o_d"] << endl;
-    cout << "L_d" << data["domain"]["L_d"]<< endl;
-    cout << "do" << data["post_process"]["do"] << endl;
-    cout << "xyz_init" << data["post_process"]["xyz_init"] << endl;
-    cout << "xyz_end" << data["post_process"]["xyz_end"] << endl;
-    cout << "matrix_long" << data["domain"]["matrix_long"] << endl;
-    cout << "matrix_orig" << data["domain"]["matrix_orig"] << endl;
-    cout << "vector_type" << data["domain"]["vector_type"] << endl;
+    cout << "kappa = " << data["simulation"]["kappa"] << endl;
+    cout << "s = " << data["simulation"]["s"] << endl;
+    cout << "o_d = " << data["domain"]["o_d"] << endl;
+    cout << "L_d = " << data["domain"]["L_d"]<< endl;
+    cout << "do = " << data["post_process"]["do"] << endl;
+    cout << "xyz_init = " << data["post_process"]["xyz_init"] << endl;
+    cout << "xyz_end = " << data["post_process"]["xyz_end"] << endl;
+    cout << "matrix_long = " << data["domain"]["matrix_long"] << endl;
+    cout << "matrix_orig = " << data["domain"]["matrix_orig"] << endl;
+    cout << "vector_type = " << data["domain"]["vector_type"] << endl;
 
 
     GeomData geomParams = {
@@ -126,6 +124,7 @@ int main(int argc, char *argv[])
 
     SimulationData simParams = {
 
+        data["simulation"]["dimension"],
         data["simulation"]["nstepT"],
         data["simulation"]["nsave"],
         data["simulation"]["dt"],
@@ -133,16 +132,19 @@ int main(int argc, char *argv[])
         data["simulation"]["alpha"],
         data["simulation"]["beta"],
         data["simulation"]["alpha_st"],
+        data["simulation"]["beta_adh"],
         schemeIntegration,
         data["thermo"]["u_init"],
         state_equation,
         state_initial_condition,
-        false,
-        true,
+        data["forces"]["gravity"],
+        data["forces"]["surface_tension"],
+        data["forces"]["adhesion"],
         data["condition"]["print_debug"],
         evaluateNumberParticles(geomParams),
         0,
         0,
+        
     };
 
 
@@ -166,7 +168,7 @@ int main(int argc, char *argv[])
                    c(nb_tot_part, 0), grad_sum(nb_tot_part, 0);
 
     vector<vector<double>> pi_matrix(nb_tot_part), gradW_matrix(nb_tot_part), W_matrix(nb_tot_part);
-    vector<int> track_surface(16*MP_count, 0);
+    vector<int> track_surface(8*MP_count, 0);
     vector<int> neighbours(100*nb_tot_part);
     vector<double> nb_neighbours(nb_tot_part, 0.0), N_smoothed(MP_count, 0.0); 
 
@@ -187,43 +189,40 @@ int main(int argc, char *argv[])
     cout << "#===============================#" << endl;
     cout << "# General simulation parameters #" << endl;
     cout << "#===============================#" << "\n" << endl;
-    cout << "s =" << geomParams.s << endl;
-    cout << "kappa = " << geomParams.kappa << endl;
-    cout << "h = " << geomParams.h << endl;
-    cout << "nstepT = " << simParams.nstepT << endl;
-    cout << "nsave = " << simParams.nsave << endl;
-    cout << "dt = " << simParams.dt << endl;
-    cout << "theta = " << simParams.theta <<endl;
-    cout << "alpha (artificial viscosity): " << simParams.alpha << endl;
-    cout << "alpha (surface tension): " << simParams.alpha_st << endl;
-    cout << "beta (artificial visocity): " << simParams.beta  << endl;
-    cout << "state equation : " << state_equation << endl;
-    cout << "state initial condition : " << state_initial_condition << "\n" << endl;
+    cout << "s = " << geomParams.s << " [m]" << endl;
+    cout << "kappa = " << geomParams.kappa << " [-]" << endl;
+    cout << "h = " << geomParams.h << " [m]" << endl;
+    cout << "nstepT = " << simParams.nstepT << " [steps]" << endl;
+    cout << "nsave = " << simParams.nsave << " [steps]" << endl;
+    cout << "dt = " << simParams.dt << " [s]" << endl;
+    cout << "theta = " << simParams.theta << " [-]" << endl;
+    cout << "alpha (artificial viscosity) = " << simParams.alpha << " [-]" << endl;
+    cout << "alpha (surface tension) = " << simParams.alpha_st << " [-]" << endl;
+    cout << "beta (artificial viscosity) = " << simParams.beta << " [-]" << endl;
+    cout << "state equation = " << state_equation << endl;
+    cout << "state initial condition = " << state_initial_condition << "\n" << endl;
 
     cout << "#==================#" << endl;
     cout << "# Domain variables #" << endl;
     cout << "#==================#" << "\n" << endl;
-    cout << "Radius of neighbourhood (kappa * h) = " << geomParams.kappa * geomParams.h << endl;
+    cout << "Radius of neighbourhood (kappa * h) = " << geomParams.kappa * geomParams.h << " [m]" << endl;
     cout << "Number of cells in each direction (Nx, Ny, Nz) = (" << geomParams.Nx << ", " << geomParams.Ny << ", " << geomParams.Nz << ")" << endl;
-    cout << "Number of fluid particles = " << MP_count << endl;
-    cout << "Number of fixed particles = " << FP_count << endl;
-    cout << "Number of post process particles = " << GP_count << endl;
-    cout << "Total number of particles = " << nb_tot_part << "\n" << endl;
+    cout << "Number of fluid particles = " << MP_count  << " [-]" << endl;
+    cout << "Number of fixed particles = " << FP_count  << " [-]" << endl;
+    cout << "Number of post process particles = " << GP_count << " [-]" << endl;
+    cout << "Total number of particles = " << nb_tot_part << " [-]" << "\n" << endl;
 
     cout << "#==================#" << endl;
     cout << "# Thermo variables #" << endl;
-    cout << "#==================#" << "\n" << endl; 
-    cout << "Initial speed of sound (c_0) = " << thermoParams.c_0 << endl;
-    cout << "Moving particle density (rho_moving) = " << thermoParams.rho_moving << endl;
-    cout << "Fixed particle density (rho_fixed) = " << thermoParams.rho_fixed << endl;
-    cout << "Initial density (rho_0) = " << thermoParams.rho_0 << endl;
-    cout << "Molar mass (M) = " << thermoParams.M << endl;
-    cout << "Heat capacity ration (gamma) = " << thermoParams.gamma << endl;
-    cout << "Ideal gaz constant (R) = " << thermoParams.R << endl;
-    cout << "Surface tension stress (sigma) = " << thermoParams.R << "\n" << endl;
-
-    
-    
+    cout << "#==================#" << "\n" << endl;
+    cout << "Initial speed of sound (c_0) = " << thermoParams.c_0 << " [m/s]" << endl;
+    cout << "Moving particle density (rho_moving) = " << thermoParams.rho_moving << " [kg/m^3]" << endl;
+    cout << "Fixed particle density (rho_fixed) = " << thermoParams.rho_fixed << " [kg/m^3]" << endl;
+    cout << "Initial density (rho_0) = " << thermoParams.rho_0 << " [kg/m^3]" << endl;
+    cout << "Molar mass (M) = " << thermoParams.M << " [kg/mol]" << endl;
+    cout << "Heat capacity ratio (gamma) = " << thermoParams.gamma << " [-]" << endl;
+    cout << "Ideal gas constant (R) = " << thermoParams.R << " [J/(mol*K)]" << endl;
+    cout << "Surface tension stress (sigma) = " << thermoParams.sigma << " [N/m]" << "\n" << endl;
 
     /*---------------------------- SPH ALGORITHM  ----------------------------*/
 
@@ -250,7 +249,7 @@ int main(int argc, char *argv[])
 
         // Update density, velocity and position (Euler explicit or RK22 scheme)
         updateVariables(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
-                        pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, track_surface, N_smoothed);
+                        pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, track_surface, N_smoothed, type);
 
 
         // Check if timeStep is small enough
