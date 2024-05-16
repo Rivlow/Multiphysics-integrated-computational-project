@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
     //          << data.dump(4) << endl; // print input data to screen
 
     createOutputFolder();
-    //clearOutputFiles();
+    clearOutputFiles();
 
     string state_equation;
     string state_initial_condition;

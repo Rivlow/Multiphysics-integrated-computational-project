@@ -4,8 +4,8 @@ import sys
 
 # Définir les données complètes du JSON
 
-s = 0.05
-L = 1.2
+s = 0.005
+L = 0.12
 
 data = {
     
