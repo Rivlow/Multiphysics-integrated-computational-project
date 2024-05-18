@@ -4,7 +4,7 @@ import sys
 
 # Définir les données complètes du JSON
 
-s = 0.005
+s = 0.001
 L = 0.12
 
 data = {
@@ -25,17 +25,17 @@ data = {
     
     "domain": {
         "matrix_long": [
-            [L/2, s/2, L/4], # fluid
-            [2*L+s, s/2, s/2],  
-            [2*L, s/2, s/2],
+            [L/2, s/2, L/2], # fluid
+            [L+s, s/2, s/2],  
+            [L, s/2, s/2],
         ],
         "matrix_orig": [
-            [0.9*L, 0, s], # fluid
+            [L/4+s/2, 0, L/4], # fluid
             [0.0, 0, 0], 
             [s/2, 0, s/2],  
         ],
         "vector_type": [1, 0, 0],
-        "L_d": [3, 3, 3],
+        "L_d": [(L+s)*1.1, s, (L+s)*1.1],
         "o_d": [0.0, 0.0, 0.0]
     },
     "post_process": {

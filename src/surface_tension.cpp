@@ -343,6 +343,7 @@ void surfaceTension(SimulationData& simParams,
         int size_neighbours = nb_neighbours[n];
         
         for(int idx = 0; idx<size_neighbours; idx++){
+            
             if(type[neighbours[100*n + idx]] == 1){
                 int i_neig = neighbours[100*n + idx];
                 double K_ij = 2*thermoParam.rho_0/(rho[n]+rho[i_neig]);
@@ -357,6 +358,7 @@ void surfaceTension(SimulationData& simParams,
                 
                 r_ab = sqrt(r_ab);
                 double W_ab = W_coh(r_ab,geomParams.kappa*geomParams.h, simParams);
+                
                 double m_a = mass[n];
                 double m_b = mass[i_neig];
                 double F_res = 0;

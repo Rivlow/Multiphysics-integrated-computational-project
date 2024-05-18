@@ -165,7 +165,8 @@ int main(int argc, char *argv[])
     vector<double> mass(nb_tot_part, 0), u(3 * nb_tot_part, 0),
                    drhodt(nb_tot_part, 0), rho(nb_tot_part, 0),
                    dudt(3 * nb_tot_part, 0), p(nb_tot_part, 0),
-                   c(nb_tot_part, 0), grad_sum(nb_tot_part, 0);
+                   c(nb_tot_part, 0), grad_sum(nb_tot_part, 0),
+                   normal(nb_tot_part, 0.0);
 
     vector<vector<double>> pi_matrix(nb_tot_part), gradW_matrix(nb_tot_part), W_matrix(nb_tot_part);
     vector<int> track_surface(8*MP_count, 0);
@@ -243,7 +244,7 @@ int main(int argc, char *argv[])
         // Apply the linked-list algorithm
         sortedList(geomParams, simParams, cell_matrix, neighbours, track_surface,
                    gradW_matrix, W_matrix, pi_matrix, nb_neighbours, type, pos); 
-
+        
         // Compute ∇_a(W_ab) for all particles
         gradW(geomParams, simParams, gradW_matrix, W_matrix, neighbours, nb_neighbours, pos); 
 

@@ -99,7 +99,7 @@ def main():
     outputFile = os.path.dirname(current_directory) + "\\output"  
     all_data = getData(outputFile)
     
-    analysis_type = {"Time":True, "Spacial":False} # chose only one as "True"
+    analysis_type = {"Time":False, "Spacial":True} # chose only one as "True"
     
     print(all_data[1])
     data = all_data[0][1]
