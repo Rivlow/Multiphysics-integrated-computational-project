@@ -16,7 +16,7 @@ double deriv_gaussian(double r, double h);
 double f_bell(double r, double h);
 double derive_bell(double r, double h);
 
-double f_cubic_spline(double r, double h);
+double f_cubic_spline(double r, double h, SimulationData &simParams);
 double derive_cubic_spline(double r, double h, SimulationData &simParams);
 
 double f_quadratic(double r, double h);

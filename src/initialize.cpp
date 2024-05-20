@@ -18,8 +18,13 @@ void initMass(GeomData &geomParams,
               vector<double> &mass){
 
     double s = geomParams.s;  
-    bool PRINT = simParams.PRINT;  
-    double V = s * s * s;
+    bool PRINT = simParams.PRINT; 
+    int dim = simParams.dimension;
+    double V = 0.0;
+    if(dim == 3)
+        V = s * s * s;
+    else
+        V = s*s;
     int rho_size = rho.size();
 
     #pragma omp parallel for   

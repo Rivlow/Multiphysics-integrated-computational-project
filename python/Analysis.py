@@ -5,6 +5,28 @@ import sys
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
+import sys
+import pandas as pd
+
+file = "output/p.csv"
+ite = 49
+pressure = pd.read_csv(file, sep = ',', decimal='.', header=None)
+print(len(pressure))
+
+x = np.arange(0.06, 1.6, 0.02)
+y = np.arange(0.06,1,0.02)
+pressure_th = 10000*y
+pressure = pressure.T
+print(len(pressure))
+plt.plot(x[::-1],pressure[ite])
+plt.plot(y[::-1],pressure_th)
+plt.show()
+maxp = max(pressure[ite])
+print("max", maxp)
+minp = min(pressure[ite])
+print("min", minp)
+deltaP = maxp - minp
+print(deltaP)
 
 """
 def read_vtp(path):
@@ -42,7 +64,7 @@ for i, array_data in enumerate(rho):
     
 plt.plot(val_rho)
 plt.show()
-    """
+    
     
 def getData(directory):
     
@@ -131,7 +153,7 @@ def main():
     
 if __name__ == "__main__":
     main()
-
+"""
 
 
 

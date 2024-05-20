@@ -53,7 +53,8 @@ void Euler(GeomData &geomParams,
     momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours,track_surface, N_smoothed, gradW_matrix, 
                     W_matrix, pi_matrix, mass, dudt, rho, p, c, pos, u, type); 
 
-    
+    checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
+                      neighbours, nb_neighbours, pi_matrix);
     int nb_part = simParams.nb_part;
     #pragma omp parallel for   
     for (int n = 0; n < nb_part; n++){
@@ -113,7 +114,9 @@ void RK22(GeomData &geomParams,
     // Compute D(u)/Dt for all particles
     momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, track_surface, N_smoothed, gradW_matrix, 
                     W_matrix, pi_matrix, mass, dudt_half, rho_half, p, c, pos_half, u_half, type); 
-
+                    
+    checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
+                      neighbours, nb_neighbours, pi_matrix);
     int nb_part = simParams.nb_part;
     #pragma omp parallel for
     for (int n = 0; n < nb_part; n++){

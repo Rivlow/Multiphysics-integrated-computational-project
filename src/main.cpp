@@ -253,15 +253,14 @@ int main(int argc, char *argv[])
                         pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, track_surface, N_smoothed, type);
 
 
-        // Check if timeStep is small enough
-        checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
-                      neighbours, nb_neighbours, pi_matrix);
+        
+        
 
 
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){
                 if (geomParams.post_process_do)
-                    extractData(geomParams, simParams, thermoParams, pos, p, mass, neighbours, nb_neighbours);
+                    extractData(geomParams, simParams, thermoParams, pos, p, mass, neighbours, nb_neighbours, rho);
                 
             export_particles("../../output/sph", t, pos, scalars, vectors, false);
 

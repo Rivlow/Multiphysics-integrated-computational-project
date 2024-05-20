@@ -45,7 +45,7 @@ void gradW(GeomData &geomParams,
 
             r_ab = sqrt(r_ab);
             double deriv = derive_cubic_spline(r_ab, h, simParams);
-            double W = f_cubic_spline(r_ab, h);
+            double W = f_cubic_spline(r_ab, h, simParams);
             
             W_matrix[n][idx] = W;
 
@@ -321,7 +321,7 @@ void momentumEquation(GeomData &geomParams,
                                       p_a / (rho_a * rho_a) + pi_ab)* gradW[3*idx + coord];
                 
                 if(simParams.is_adhesion){
-                    
+                    cout << "oui" << endl;
                     double beta_ad = simParams.beta_adh;
                     double r_ab = 0;
                     vector<double> d_xyz(3);

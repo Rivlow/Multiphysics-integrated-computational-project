@@ -60,7 +60,7 @@
       "print_debug":false,
       "schemeIntegration": {"Euler":true,"RK22":false},
       "stateEquation" : {"Ideal gaz law":false, "Quasi incompresible fluid":true},
-      "initialCondition" : {"Hydrostatic":true, "Constant":false}
+      "initialCondition" : {"Hydrostatic":false, "Constant":true}
     }
   }
   

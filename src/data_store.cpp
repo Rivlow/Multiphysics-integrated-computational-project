@@ -19,7 +19,8 @@ void extractData(GeomData &geomParams,
                  vector<double> &p, 
                  vector<double> &mass,
                  vector<int> &neighbours,
-                 vector<double> &nb_neighbours){
+                 vector<double> &nb_neighbours,
+                 vector<double> rho){
 
     string outputDir = "../../output";
     string outputFile_rho = outputDir + "/" + "rho" +".csv";
@@ -61,31 +62,15 @@ void extractData(GeomData &geomParams,
             }
 
             r_ab = sqrt(r_ab);
-            double W_ab = f_cubic_spline(r_ab, geomParams.h);
+            double W_ab = f_cubic_spline(r_ab, geomParams.h, simParams);
             double m_b = mass[i_neig];
-
+            double rho_b = rho[i_neig];
+            double p_b = p[i_neig];
             rho_tot += m_b*W_ab;
-        }
-
-        string state_equation = simParams.state_equation;
-        double rho_0 = thermoParams.rho_0;
-        double c_0 = thermoParams.c_0;
-        double R = thermoParams.R;
-        double T = thermoParams.T;
-        double M = thermoParams.M;
-        double gamma = thermoParams.gamma;
-
-        if (state_equation == "Ideal gaz law") p_tot = (rho_tot / rho_0 - 1) * (R * T) / M;
-        else if (simParams.state_equation == "Quasi incompresible fluid"){
-            double B = c_0 * c_0 * rho_0 / gamma;
-            p_tot = B * (pow(rho_tot / rho_0, gamma) - 1);
-        }
-        else {
-            cout << "Error : no state equation chosen" << endl;
-            exit(1);
-        }
-
-
+            //cout << p_b <<"         "<< W_ab << endl;
+            p_tot += p_b*(m_b/rho_b)*W_ab;
+        }      
+        
         if (n == end-1){
             output_rho << rho_tot << "\n";
             output_p << p_tot << "\n";

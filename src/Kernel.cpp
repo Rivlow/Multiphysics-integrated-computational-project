@@ -75,9 +75,16 @@ double derive_bell(double r, double h){
     return DW;
 }
 
-double f_cubic_spline(double r, double h){
-
-    double alpha = 3.0 / (2.0 * M_PI * h * h * h);
+double f_cubic_spline(double r, double h, SimulationData &simParams){
+    int dim = simParams.dimension;
+    double alpha = 0;
+    if(dim == 3){
+        alpha = 3.0 / (2.0 * M_PI * h * h * h);
+    }
+    if(dim == 2){
+        alpha = 15.0 /( 7.0 * M_PI * h * h );
+        //cout << "alpha : " << alpha << endl;
+    }
     double W;
 
     if (r / h < 1.0){
