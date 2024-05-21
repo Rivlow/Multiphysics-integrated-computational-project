@@ -9,21 +9,21 @@
   },
 
   "post_process":{
-    "do": false,
-    "xyz_init": [0, 0, 0.75],
-    "xyz_end": [2.8, 2.8, 0.75]
+    "do": true,
+    "xyz_init": [0, 1.5, 1.5],
+    "xyz_end": [3,1.5, 1.5]
   },
 
   "simulation":{
     "theta" :0.5,
-    "s": 0.01,
-    "nstepT": 70000,
-    "dt": 0.00001,
+    "s": 0.125,
+    "nstepT": 100000,
+    "dt": 0.00005,
     "nsave": 100,
     "kappa": 2,
-    "alpha": 0.5,
+    "alpha": 0.01,
     "beta": 0,
-    "alpha_st":10,
+    "alpha_st":1,
     "beta_adh": 10,
     "dimension": 3
   },
@@ -34,7 +34,7 @@
     "rho_fixed" : 1000,
     "T": 298.15,
     "u_init": [0.0, 0.0, 0.0],
-    "c_0": 340, 
+    "c_0": 30, 
     "gamma": 7, 
     "M": 18e-3, 
     "R":8.314,
