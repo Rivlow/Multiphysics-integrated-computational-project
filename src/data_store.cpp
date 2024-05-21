@@ -18,9 +18,9 @@ void extractData(GeomData &geomParams,
                  vector<double> &pos,  
                  vector<double> &p, 
                  vector<double> &mass,
-                 vector<double> &rho,
                  vector<int> &neighbours,
-                 vector<double> &nb_neighbours){
+                 vector<double> &nb_neighbours,
+                 vector<double> rho){
 
     string outputDir = "../../output";
     string outputFile_rho = outputDir + "/" + "rho" +".csv";
@@ -52,33 +52,25 @@ void extractData(GeomData &geomParams,
 
             //cout << "idx : " << idx <<endl;
             int i_neig = neighbours[100*n + idx];
-            double r_ij = 0;
+            double r_ab = 0;
             vector<double> pos_val(3);
 
             for (int coord = 0; coord < 3; coord++){
                 
                 pos_val[coord] = pos[3 * n + coord] - pos[3 * i_neig + coord];
-                r_ij += pos_val[coord]*pos_val[coord];
+                r_ab += pos_val[coord]*pos_val[coord];
             }
 
-            r_ij = sqrt(r_ij);
-            double W_ij = f_cubic_spline(r_ij, geomParams.h);
-            double m_j = mass[i_neig];
-            double p_j = p[i_neig];
-            double rho_j = rho[i_neig];
-
-            p_tot += (m_j/rho_j)*p_j*W_ij;
-            rho_tot += m_j*W_ij;
-        }
-
-        string state_equation = simParams.state_equation;
-        double rho_0 = thermoParams.rho_0;
-        double c_0 = thermoParams.c_0;
-        double R = thermoParams.R;
-        double T = thermoParams.T;
-        double M = thermoParams.M;
-        double gamma = thermoParams.gamma;
-
+            r_ab = sqrt(r_ab);
+            double W_ab = f_cubic_spline(r_ab, geomParams.h, simParams);
+            double m_b = mass[i_neig];
+            double rho_b = rho[i_neig];
+            double p_b = p[i_neig];
+            rho_tot += m_b*W_ab;
+            //cout << p_b <<"         "<< W_ab << endl;
+            p_tot += p_b*(m_b/rho_b)*W_ab;
+        }      
+        
         if (n == end-1){
             output_rho << rho_tot << "\n";
             output_p << p_tot << "\n";

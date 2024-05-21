@@ -3,7 +3,7 @@ import os
 import sys
 
 # Définir les données complètes du JSON
-s = 0.02
+s = 0.01
 L = 1.2
 
 data = {
@@ -58,7 +58,7 @@ data = {
         "rho_fixed": 1000,
         "T": 298.15,
         "u_init": [0.0, 0.0, 0.0],
-        "c_0": 1500,
+        "c_0": 30,
         "gamma": 7,
         "M": 18e-3,
         "R": 8.314,
@@ -77,16 +77,14 @@ data = {
     }
 }
 
+
+    
 current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-print(current_directory)
-
-print(f"{current_directory}/..")
-
-
-# Écrire les données dans un fichier JSON
 json_src = "dam_break/2D_dam_break.json"
+
 with open(f'{current_directory}/../tests/{json_src}', 'w') as json_file:
     json.dump(data, json_file, indent=4)
+
 
 print(f"Data written in '{json_src}'")
 

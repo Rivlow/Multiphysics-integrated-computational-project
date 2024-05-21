@@ -111,7 +111,7 @@ def plotData(all_data):
     
 def main(iteration):
     
-    latex = True
+    latex = False
     isLatex(latex)
     
     # Chemin absolu du répertoire du script actuel
@@ -178,10 +178,10 @@ def main(iteration):
             p_val_end.append(all_data[0][0][iteration,i])
             
         x_val = np.arange(0, len(p_val_end), 1)
-        z = np.linspace(0, 1, len(x_val)-27)
+        z = np.linspace(0, 1, len(x_val))
         p_hydro = rho*g*z
-        plt.plot(x_val[27:], p_hydro, label = "Theoretical pressure")
-        plt.scatter(x_val[27:], p_val_end[27:], label = "SPH pressure", color = "red")
+        plt.plot(x_val, p_hydro, label = "Theoretical pressure")
+        plt.scatter(x_val, p_val_end, label = "SPH pressure", color = "red")
         plt.legend(loc='best')
         plt.xlabel('Ghost particles')
         plt.ylabel('Pressure p [Pa]')

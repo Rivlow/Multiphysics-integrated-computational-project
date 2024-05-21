@@ -17,7 +17,10 @@ void gradW(GeomData &geomParams,
            vector<vector<double>> &W_matrix,
            vector<int> &neighbours,
            vector<double> &nb_neighbours,
-           vector<double> &pos){
+           vector<double> &pos,
+           vector<double> &mass, 
+           vector<double> &rho,
+           vector<double> &normal){
 
 
     double h = geomParams.h;
@@ -34,6 +37,9 @@ void gradW(GeomData &geomParams,
         for (int idx = 0; idx < size_neighbours; idx++){
 
             int i_neig = neighbours[100*n + idx];
+            double m_j = mass[i_neig];
+            double rho_j = rho[i_neig];
+
             double r_ab = 0;
             vector<double> d_xyz(3);
 
@@ -45,12 +51,13 @@ void gradW(GeomData &geomParams,
 
             r_ab = sqrt(r_ab);
             double deriv = derive_cubic_spline(r_ab, h, simParams);
-            double W = f_cubic_spline(r_ab, h);
+            double W = f_cubic_spline(r_ab, h, simParams);
             W_matrix[n][idx] = W;
 
 
             for (int coord = 0; coord < 3; coord++){
                 gradW[3 * idx + coord] = d_xyz[coord] / r_ab * deriv;
+                normal[3*n+coord] += geomParams.h*m_j*gradW[3 * idx + coord]/rho_j;
             }
         }
     }
@@ -208,7 +215,9 @@ void setArtificialViscosity(GeomData &geomParams,
     
 }
 
-void continuityEquation(SimulationData& simParams,
+void continuityEquation(GeomData &geomParams,    
+                        ThermoData &thermoParams,
+                        SimulationData &simParams, 
                         vector<int> &neighbours,
                         vector<double> &nb_neighbours,
                         vector<vector<double>> &gradW_matrix,
@@ -216,7 +225,9 @@ void continuityEquation(SimulationData& simParams,
                         vector<double> &u,
                         vector<double> &drhodt,
                         vector<double> &rho,
-                        vector<double> &mass){
+                        vector<double> &mass,
+                        vector<double> &normal,
+                        vector<double> &F_vol){
 
     bool PRINT = simParams.PRINT;
     int nb_part = simParams.nb_part;
@@ -234,6 +245,11 @@ void continuityEquation(SimulationData& simParams,
             double dot_product = 0;
             int i_neig = neighbours[100*n + idx];
             double m_b = mass[i_neig];
+            double K_ij = 2*thermoParams.rho_0/(rho[n]+rho[i_neig]);
+
+            double r_ab = 0;
+            vector<double> d_xyz(3);
+
 
             // Dot product of u_ab with grad_a(W_ab)
             for (int coord = 0; coord < 3; coord++){
@@ -241,9 +257,34 @@ void continuityEquation(SimulationData& simParams,
                 double u_a = u[3 * n + coord];
                 double u_b = u[3 * i_neig + coord];
                 dot_product += (u_a - u_b) * gradW[3*idx + coord];
+                d_xyz[coord] = pos[3 * n + coord] - pos[3 * i_neig + coord];
+                r_ab += d_xyz[coord]*d_xyz[coord];
             }
             
             drhodt[n] += m_b * dot_product;
+
+            if(simParams.is_surface_tension){
+
+                double alpha_st = simParams.alpha_st;
+
+                r_ab = sqrt(r_ab);
+                double W_ab = W_coh(r_ab,geomParams.kappa*geomParams.h, simParams);
+                double m_a = mass[n];
+                double m_b = mass[i_neig];
+                double F_res = 0;
+                
+                for (int coord = 0; coord < 3; coord++){
+                    
+                    F_vol[3*n + coord] += -K_ij*(alpha_st * m_a * m_b * d_xyz[coord]*W_ab/r_ab 
+                                    + alpha_st*(normal[3*n+coord]-normal[3*i_neig+coord]));
+
+                    F_res += F_vol[3*n + coord]*F_vol[3*n + coord];
+                }
+                
+                simParams.F_st_max = sqrt(F_res);
+            }
+                  
+      
         }
     }
 
@@ -267,7 +308,8 @@ void momentumEquation(GeomData &geomParams,
                       vector<double> &c,
                       vector<double> &pos,
                       vector<double> &u,
-                      vector<double> type){
+                      vector<double> type,
+                      vector<double> &F_vol){
 
 
     double g = (simParams.is_gravity)? -9.81 : 0;
@@ -284,12 +326,9 @@ void momentumEquation(GeomData &geomParams,
     setArtificialViscosity(geomParams, thermoParams, simParams, pi_matrix, 
                            neighbours, nb_neighbours, c, pos, rho, u); 
 
-    vector<double> F_vol(3*simParams.nb_moving_part,0.0);
-    
-    
-    if (simParams.is_surface_tension)
-        surfaceTension(simParams, geomParams,thermoParams, nb_neighbours, neighbours, 
-                       track_surface, N_smoothed, gradW_matrix, W_matrix, mass, rho, pos, F_vol,type);
+  //  if (simParams.is_surface_tension)
+     //   surfaceTension(simParams, geomParams,thermoParams, nb_neighbours, neighbours, 
+     //                  track_surface, N_smoothed, gradW_matrix, W_matrix, mass, rho, pos, F_vol,type);
 
     
     // Iterate over each particle
@@ -318,6 +357,7 @@ void momentumEquation(GeomData &geomParams,
                 dudt[3 * n + coord] += m_b * (p_b / (rho_b * rho_b) +
                                       p_a / (rho_a * rho_a) + pi_ab)* gradW[3*idx + coord];
                 
+                
                 if(simParams.is_adhesion){
                     
                     double beta_ad = simParams.beta_adh;
@@ -336,25 +376,23 @@ void momentumEquation(GeomData &geomParams,
 
 
                     for (int coord = 0; coord < 3; coord++){
+            
                         double boundary = 1.0 - type[i_neig];
-                        
-                    F_vol[3*n + coord] -= beta_ad*boundary*mass[n]*m_b*W_ab*d_xyz[coord]/r_ab;
-                    //cout << "F_vol[3*n + coord] (adhesion) = " << beta_ad*boundary*mass[n]*m_b*W_adh*d_xyz[coord]/r_ab << endl;
+                        F_vol[3*n + coord] -= beta_ad*boundary*mass[n]*m_b*W_ab*d_xyz[coord]/r_ab;
                     }
                 }   
+            
+
+                dudt[3 * n + coord] *= -1;
+                dudt[3 * n + coord] += F_vol[3 * n + coord];
+
+                if(coord == 2)
+                    dudt[3 * n + coord] += g; 
             }
-
-            dudt[3 * n + coord] *= -1;
-            dudt[3 * n + coord] += F_vol[3 * n + coord];
-
-            if(coord == 2)
-                dudt[3 * n + coord] += g;
-              
         }
-    }
 
-    //printArray(F_vol, F_vol.size(), "F_vol");
-    if (PRINT) cout << "momentumEquation passed" << endl;
+        if (PRINT) cout << "momentumEquation passed" << endl;
+    }
 }
 
 

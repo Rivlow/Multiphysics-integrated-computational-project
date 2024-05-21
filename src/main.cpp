@@ -167,6 +167,10 @@ int main(int argc, char *argv[])
                    dudt(3 * nb_tot_part, 0), p(nb_tot_part, 0),
                    c(nb_tot_part, 0), grad_sum(nb_tot_part, 0);
 
+    vector<double> F_vol(3*simParams.nb_moving_part,0.0);
+    vector<double> normal(3*simParams.nb_moving_part,0.0);
+
+
     vector<vector<double>> pi_matrix(nb_tot_part), gradW_matrix(nb_tot_part), W_matrix(nb_tot_part);
     vector<int> track_surface(8*MP_count, 0);
     vector<int> neighbours(100*nb_tot_part);
@@ -245,11 +249,11 @@ int main(int argc, char *argv[])
                    gradW_matrix, W_matrix, pi_matrix, nb_neighbours, type, pos); 
 
         // Compute ∇_a(W_ab) for all particles
-        gradW(geomParams, simParams, gradW_matrix, W_matrix, neighbours, nb_neighbours, pos); 
+        gradW(geomParams, simParams, gradW_matrix, W_matrix, neighbours, nb_neighbours, pos, mass, rho, normal); 
 
         // Update density, velocity and position (Euler explicit or RK22 scheme)
         updateVariables(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
-                        pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, track_surface, N_smoothed, type);
+                        pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, track_surface, N_smoothed, type, normal, F_vol);
 
 
         // Check if timeStep is small enough
@@ -260,7 +264,7 @@ int main(int argc, char *argv[])
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){
                 if (geomParams.post_process_do)
-                    extractData(geomParams, simParams, thermoParams, pos, p, mass, rho, neighbours, nb_neighbours);
+                    extractData(geomParams, simParams, thermoParams, pos, p, mass, neighbours, nb_neighbours, rho);
                 
             export_particles("../../output/sph", t, pos, scalars, vectors, false);
 
@@ -283,7 +287,7 @@ int main(int argc, char *argv[])
 
     auto t1 = chrono::high_resolution_clock::now();
     auto delta_t = chrono::duration_cast<chrono::duration<double>>(t1 - t0).count();
-    cout << "\nduration: " << delta_t << "s (" << int((MP_count+FP_count)/delta_t)<<" particles/s).\n";
+    cout << "\nduration: " << delta_t << "s (" << int((MP_count+FP_count)/delta_t*simParams.nstepT)<<" Updates x particles/s).\n";
     cout << "Simulation done." << endl;
 
     return 0;

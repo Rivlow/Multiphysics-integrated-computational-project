@@ -14,7 +14,10 @@ void gradW(GeomData &geomParams,
            vector<vector<double>> &W_matrix,
            vector<int> &neighbours,
            vector<double> &nb_neighbours,
-           vector<double> &pos);
+           vector<double> &pos,
+           vector<double> &mass, 
+           vector<double> &rho,
+           vector<double> &normal);
 
 void setSpeedOfSound(GeomData &geomParams,    
                      ThermoData &thermoParams,
@@ -39,7 +42,9 @@ void setArtificialViscosity(GeomData &geomParams,
                             vector<double> &rho,
                             vector<double> &u);
 
-void continuityEquation(SimulationData &params,
+void continuityEquation(GeomData &geomParams,    
+                        ThermoData &thermoParams,
+                        SimulationData &simParams, 
                         vector<int> &neighbours,
                         vector<double> &nb_neighbours,
                         vector<vector<double>> &gradW_matrix,
@@ -47,7 +52,9 @@ void continuityEquation(SimulationData &params,
                         vector<double> &u,
                         vector<double> &drhodt,
                         vector<double> &rho,
-                        vector<double> &mass);
+                        vector<double> &mass,
+                        vector<double> &normal,
+                        vector<double> &F_vol);
 
 void momentumEquation(GeomData &geomParams,    
                       ThermoData &thermoParams,
@@ -66,6 +73,7 @@ void momentumEquation(GeomData &geomParams,
                       vector<double> &c,
                       vector<double> &pos,
                       vector<double> &u,
-                      vector<double> type);
+                      vector<double> type,
+                      vector<double> &F_vol);
 
 #endif // GRADIENT_H

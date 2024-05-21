@@ -339,14 +339,12 @@ void surfaceTension(SimulationData& simParams,
                 double m_b = mass[i_neig];
                 double F_res = 0;
                 
+               // cout << "alpha*W_ab = " << alpha * W_ab << endl;
                 for (int coord = 0; coord < 3; coord++){
                     
                     F_vol[3*n + coord] += -K_ij*(alpha * m_a * m_b * d_xyz[coord]*W_ab/r_ab 
                                     + alpha*(normal[3*n+coord]-normal[3*i_neig+coord]));
 
-                    //cout << "F_vol[3*n + coord] (in surface tension)" << -K_ij*(alpha * m_a * m_b * d_xyz[coord]*W_ab/r_ab 
-                             //       + alpha*(normal[3*n+coord]-normal[3*i_neig+coord])) << endl;
-                
                     F_res += F_vol[3*n + coord]*F_vol[3*n + coord];
                 }
                 
