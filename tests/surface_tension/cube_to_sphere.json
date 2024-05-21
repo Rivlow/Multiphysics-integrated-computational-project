@@ -1,24 +1,24 @@
 {
 
   "domain":{
-    "matrix_long" : [[1, 1, 1]],
-    "matrix_orig" : [[1, 1, 1]],
+    "matrix_long" : [[0.01, 0.01, 0.01]],
+    "matrix_orig" : [[0.01, 0.01, 0.01]],
     "vector_type" : [1],
-    "L_d": [3, 3, 3],
+    "L_d": [0.03, 0.03, 0.03],
     "o_d": [0.0, 0.0, 0.0]
   },
 
   "post_process":{
     "do": true,
-    "xyz_init": [0, 1.5, 1.5],
-    "xyz_end": [3,1.5, 1.5]
+    "xyz_init": [0, 0.015, 0.015],
+    "xyz_end": [0.03,0.015, 0.015]
   },
 
   "simulation":{
     "theta" :0.5,
-    "s": 0.125,
-    "nstepT": 100000,
-    "dt": 0.00005,
+    "s": 0.00125,
+    "nstepT": 500000,
+    "dt": 0.0000001,
     "nsave": 100,
     "kappa": 2,
     "alpha": 0.01,

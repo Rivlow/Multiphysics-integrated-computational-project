@@ -33,9 +33,8 @@ void Euler(GeomData &geomParams,
            vector<vector<double>> &W_matrix,
            vector<int> &neighbours,
            vector<double> &nb_neighbours,
-           vector<int> &track_surface,
-           vector<double> &N_smoothed,
-           vector<double> type){
+           vector<double> type,
+           vector<double> normal){
 
     string schemeIntegration = simParams.schemeIntegration;
     double theta = simParams.theta;
@@ -50,8 +49,8 @@ void Euler(GeomData &geomParams,
                        pos, u, drhodt, rho, mass); 
 
     // Compute D(u)/Dt for all particles
-    momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours,track_surface, N_smoothed, gradW_matrix, 
-                    W_matrix, pi_matrix, mass, dudt, rho, p, c, pos, u, type); 
+    momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW_matrix, 
+                    W_matrix, pi_matrix, mass, dudt, rho, p, c, pos, u, type, normal); 
 
     checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
                       neighbours, nb_neighbours, pi_matrix);
@@ -89,9 +88,8 @@ void RK22(GeomData &geomParams,
           vector<vector<double>> &W_matrix,
           vector<int> &neighbours,
           vector<double> &nb_neighbours,
-          vector<int> &track_surface,
-          vector<double> &N_smoothed,
-          vector<double> type){
+          vector<double> type,
+          vector<double> normal){
 
     double dt = simParams.dt;
     double theta = simParams.theta;  
@@ -105,15 +103,15 @@ void RK22(GeomData &geomParams,
                     dudt_half(3*nb_tot_part,0.0);
 
     Euler(geomParams, thermoParams, simParams, pos_half, u_half, rho_half, drhodt_half, c, p, dudt_half, 
-              mass, pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, track_surface, N_smoothed, type);
+              mass, pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, type, normal);
 
     // Compute D(rho)/Dt for all particles
     continuityEquation(simParams, neighbours, nb_neighbours, gradW_matrix, 
                     pos_half, u_half, drhodt_half, rho_half, mass); 
 
     // Compute D(u)/Dt for all particles
-    momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, track_surface, N_smoothed, gradW_matrix, 
-                    W_matrix, pi_matrix, mass, dudt_half, rho_half, p, c, pos_half, u_half, type); 
+    momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW_matrix, 
+                    W_matrix, pi_matrix, mass, dudt_half, rho_half, p, c, pos_half, u_half, type, normal); 
                     
     checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
                       neighbours, nb_neighbours, pi_matrix);
@@ -149,9 +147,8 @@ void updateVariables(GeomData &geomParams,
                      vector<vector<double>> &W_matrix,
                      vector<int> &neighbours,
                      vector<double> &nb_neighbours,
-                     vector<int> &track_surface,
-                     vector<double> &N_smoothed,
-                     vector<double> type){
+                     vector<double> type,
+                     vector<double> normal){
 
     bool PRINT = simParams.PRINT;
     string schemeIntegration = simParams.schemeIntegration;
@@ -159,7 +156,7 @@ void updateVariables(GeomData &geomParams,
 
     if (schemeIntegration == "Euler")
         Euler(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
-              pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, track_surface, N_smoothed, type);
+              pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, type, normal);
     
 
     if (schemeIntegration == "RK22"){
@@ -171,7 +168,7 @@ void updateVariables(GeomData &geomParams,
                         dudt_half(3*nb_tot_part,0.0);
 
         RK22(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass,
-             pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, track_surface, N_smoothed, type);
+             pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, type, normal);
     }
 
     if (PRINT) cout << "update passed" << endl;
@@ -196,7 +193,7 @@ void checkTimeStep(GeomData &geomParams,
     int t = simParams.t;
 
     double F_st_max = simParams.F_st_max;
-    double dt_f = h / sqrt(g*g + F_st_max*F_st_max);
+    double dt_f = h / sqrt(F_st_max*F_st_max);
     double dt_cv;
     double min_a = numeric_limits<double>::max();
     double max_b = numeric_limits<double>::min();

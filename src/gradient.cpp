@@ -15,9 +15,12 @@ void gradW(GeomData &geomParams,
            SimulationData &simParams, 
            vector<vector<double>> &gradW_matrix,
            vector<vector<double>> &W_matrix,
-           vector<int> &neighbours,
-           vector<double> &nb_neighbours,
-           vector<double> &pos){
+           vector<int> neighbours,
+           vector<double> nb_neighbours,
+           vector<double> pos,
+           vector<double> rho,
+           vector<double> &normal,
+           vector<double> mass){
 
 
     double h = geomParams.h;
@@ -46,12 +49,14 @@ void gradW(GeomData &geomParams,
             r_ab = sqrt(r_ab);
             double deriv = derive_cubic_spline(r_ab, h, simParams);
             double W = f_cubic_spline(r_ab, h, simParams);
-            
+            double m_b = mass[i_neig];
+            double rho_b = rho[i_neig];
             W_matrix[n][idx] = W;
 
 
             for (int coord = 0; coord < 3; coord++){
                 gradW[3 * idx + coord] = (d_xyz[coord] / r_ab) * deriv;
+                normal[3 * n + coord] += gradW[3 * idx + coord]*geomParams.h*m_b/rho_b;
             }
         }
     }
@@ -256,8 +261,6 @@ void momentumEquation(GeomData &geomParams,
                       SimulationData &simParams, 
                       vector<int> &neighbours,
                       vector<double> &nb_neighbours,
-                      vector<int> &track_surface,
-                      vector<double> &N_smoothed,
                       vector<vector<double>> &gradW_matrix,
                       vector<vector<double>> W_matrix,
                       vector<vector<double>> &pi_matrix,
@@ -268,10 +271,11 @@ void momentumEquation(GeomData &geomParams,
                       vector<double> &c,
                       vector<double> &pos,
                       vector<double> &u,
-                      vector<double> type){
+                      vector<double> type,
+                      vector<double> normal){
 
 
-    double g = (simParams.is_gravity)? -9.81 : 0;
+    double g = (simParams.is_gravity ? -9.81 : 0.0);
     bool PRINT = simParams.PRINT;
     int nb_moving_part = simParams.nb_moving_part;
 
@@ -288,12 +292,12 @@ void momentumEquation(GeomData &geomParams,
     vector<double> F_vol(3*simParams.nb_moving_part,0.0);
     
     
-    if (simParams.is_surface_tension)
+    /*if (simParams.is_surface_tension)
         surfaceTension(simParams, geomParams,thermoParams, nb_neighbours, neighbours, 
-                       track_surface, N_smoothed, gradW_matrix, W_matrix, mass, rho, pos, F_vol,type);
+                       track_surface, N_smoothed, gradW_matrix, W_matrix, mass, rho, pos, F_vol,type);*/
 
     //printArray(F_vol,F_vol.size(),"fvol0");
-
+    double alpha = simParams.alpha_st;
     // Iterate over each particle
     #pragma omp parallel for
     for (int n = 0; n < nb_moving_part; n++){
@@ -303,8 +307,8 @@ void momentumEquation(GeomData &geomParams,
         
         double rho_a = rho[n];
         double p_a = p[n];
-
-        for (int coord = 0; coord < 3; coord++){
+        
+        
 
             int size_neighbours = nb_neighbours[n];
 
@@ -316,12 +320,43 @@ void momentumEquation(GeomData &geomParams,
                 double rho_b = rho[i_neig];
                 double m_b = mass[i_neig];
                 double p_b = p[i_neig];
-
-                dudt[3 * n + coord] += m_b * (p_b / (rho_b * rho_b) +
+                for (int coord = 0; coord < 3; coord++){
+                    dudt[3 * n + coord] += m_b * (p_b / (rho_b * rho_b) +
                                       p_a / (rho_a * rho_a) + pi_ab)* gradW[3*idx + coord];
+                }
                 
+                if (simParams.is_surface_tension) {
+                        
+                    double K_ij = 2*thermoParams.rho_0/(rho[n]+rho[i_neig]);
+                    double r_ab = 0;
+                    vector<double> d_xyz(3);
+                
+                    for (int coord = 0; coord < 3; coord++){
+                        
+                        d_xyz[coord] = pos[3 * n + coord] - pos[3 * i_neig + coord];
+                        r_ab += d_xyz[coord]*d_xyz[coord];
+                    }
+                    
+                    r_ab = sqrt(r_ab);
+                    double W_ab = W_coh(r_ab,geomParams.kappa*geomParams.h, simParams);
+                    //cout << W_ab << endl;
+                    double m_a = mass[n];
+                    double m_b = mass[i_neig];
+                    double boundary =  type[i_neig];
+                    for (int coord = 0; coord < 3; coord++){
+                        
+                        F_vol[3*n + coord] -= boundary*K_ij*(alpha * m_a * m_b * d_xyz[coord]*W_ab/r_ab 
+                                        + alpha*(normal[3*n+coord]-normal[3*i_neig+coord])); 
+                        /*cout << " F vol = " << boundary*K_ij*(alpha * m_a * m_b * d_xyz[coord]*W_ab/r_ab 
+                                        + alpha*(normal[3*n+coord]-normal[3*i_neig+coord])) << endl;
+                        cout << " normal = " << normal[3*n+coord]-normal[3*i_neig+coord] << endl;
+                        cout << " alpha = " << alpha << endl;*/
+
+                    }
+                }
+
                 if(simParams.is_adhesion){
-                    cout << "oui" << endl;
+                    
                     double beta_ad = simParams.beta_adh;
                     double r_ab = 0;
                     vector<double> d_xyz(3);
@@ -339,21 +374,26 @@ void momentumEquation(GeomData &geomParams,
 
                     for (int coord = 0; coord < 3; coord++){
                         double boundary = 1.0 - type[i_neig];
-                        
-                    F_vol[3*n + coord] -= beta_ad*boundary*mass[n]*m_b*W_ab*d_xyz[coord]/r_ab;
-                    //cout << "F_vol[3*n + coord] (adhesion) = " << beta_ad*boundary*mass[n]*m_b*W_adh*d_xyz[coord]/r_ab << endl;
+                        F_vol[3*n + coord] -= beta_ad*boundary*mass[n]*m_b*W_ab*d_xyz[coord]/r_ab;
                     }
-                }   
+                } 
+
+                
             }
-
-            dudt[3 * n + coord] *= -1;
-            dudt[3 * n + coord] += F_vol[3 * n + coord];
-
-            if(coord == 2)
-                dudt[3 * n + coord] += g;
-              
-        }
+            
+            double F_res = 0;
+            for (int coord = 0; coord < 3; coord++){
+                if(coord == 2)
+                    F_vol[3 * n + coord] += g;
+                
+                dudt[3 * n + coord] *= -1;
+                dudt[3 * n + coord] += F_vol[3 * n + coord];
+                F_res += F_vol[3 * n + coord]*F_vol[3 * n + coord];
+            }
+            simParams.F_st_max = (simParams.F_st_max>F_res ? simParams.F_st_max : F_res );
+            
     }
+    //printArray(F_vol, F_vol.size(),"Fvol");
 
     //printArray(F_vol, F_vol.size(), "F_vol");
     if (PRINT) cout << "momentumEquation passed" << endl;

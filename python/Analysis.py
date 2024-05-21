@@ -9,17 +9,17 @@ import sys
 import pandas as pd
 
 file = "output/p.csv"
-ite = 49
+ite = 800
 pressure = pd.read_csv(file, sep = ',', decimal='.', header=None)
 print(len(pressure))
 
-x = np.arange(0.06, 1.6, 0.02)
-y = np.arange(0.06,1,0.02)
-pressure_th = 10000*y
+x = np.arange(0.0, 0.03, 0.00125)
+
+
 pressure = pressure.T
 print(len(pressure))
-plt.plot(x[::-1],pressure[ite])
-plt.plot(y[::-1],pressure_th)
+plt.plot(x,pressure[ite])
+
 plt.show()
 maxp = max(pressure[ite])
 print("max", maxp)

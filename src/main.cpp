@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
                    drhodt(nb_tot_part, 0), rho(nb_tot_part, 0),
                    dudt(3 * nb_tot_part, 0), p(nb_tot_part, 0),
                    c(nb_tot_part, 0), grad_sum(nb_tot_part, 0),
-                   normal(nb_tot_part, 0.0);
+                   normal(3*nb_tot_part, 0.0);
 
     vector<vector<double>> pi_matrix(nb_tot_part), gradW_matrix(nb_tot_part), W_matrix(nb_tot_part);
     vector<int> track_surface(8*MP_count, 0);
@@ -242,15 +242,15 @@ int main(int argc, char *argv[])
         simParams.t = t;
 
         // Apply the linked-list algorithm
-        sortedList(geomParams, simParams, cell_matrix, neighbours, track_surface,
+        sortedList(geomParams, simParams, cell_matrix, neighbours,
                    gradW_matrix, W_matrix, pi_matrix, nb_neighbours, type, pos); 
-        
+        //printMatrix(pi_matrix, pi_matrix.size(), "pi");
         // Compute ∇_a(W_ab) for all particles
-        gradW(geomParams, simParams, gradW_matrix, W_matrix, neighbours, nb_neighbours, pos); 
-
+        gradW(geomParams, simParams, gradW_matrix, W_matrix, neighbours, nb_neighbours, pos, rho, normal, mass); 
+        //printMatrix(pi_matrix, pi_matrix.size(), "pi");
         // Update density, velocity and position (Euler explicit or RK22 scheme)
         updateVariables(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
-                        pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, track_surface, N_smoothed, type);
+                        pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, type, normal);
 
 
         
@@ -277,7 +277,7 @@ int main(int argc, char *argv[])
 
         // Clear matrices and reset arrays to 0
         clearAllVectors(simParams, pi_matrix, neighbours,
-                        cell_matrix, gradW_matrix, drhodt, dudt, track_surface);
+                        cell_matrix, gradW_matrix, drhodt, dudt, track_surface, normal);
 
     }
 

@@ -177,7 +177,8 @@ void clearAllVectors(SimulationData &simParams,
                      vector<vector<double>> &gradW_matrix, 
                      vector<double> &drhodt,
                      vector<double> &dudt,
-                     vector<int> &track_surface){
+                     vector<int> &track_surface,
+                     vector<double> &normal){
 
     bool PRINT = simParams.PRINT;
     int nb_part = simParams.nb_part;
@@ -196,7 +197,7 @@ void clearAllVectors(SimulationData &simParams,
         gradW_matrix[i].clear();
         pi_matrix[i].clear();
         drhodt[i] = 0.0;
-
+        normal[i] = 0.0;
         for(int coord = 0 ; coord < 3 ; coord ++)
             dudt[3*i+coord] = 0.0;    
     }

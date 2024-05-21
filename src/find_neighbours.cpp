@@ -22,7 +22,6 @@ void sortedList(GeomData &geomParams,
                 SimulationData &simParams, 
                 vector<vector<int>> &cell_matrix,
                 vector<int> &neighbours,
-                vector<int> &track_surface,
                 vector<vector<double>> &gradW_matrix,
                 vector<vector<double>> &W_matrix,
                 vector<vector<double>> &pi_matrix,
@@ -114,25 +113,7 @@ void sortedList(GeomData &geomParams,
 
                                 if (r2 <= kappa * kappa *h * h){
                                     
-                                    neighbours[100*n + it++] = idx_cell;
-
-                                   /* if (type[n] == 1){ //FP
-           
-
-                                        double theta = atan2(rz, rx); 
-                                        //double phi = atan2(ry, rx); 
-                                        
-
-                                        theta = theta * 180.0 / M_PI  + (theta < 0 ? 360.0 : 0);
-                                        //phi = phi * 180.0 / M_PI + (phi < 0 ? 360.0 : 0) ;// phi between 0 et 360 degrees
-                                       
-                                        int i_idx = static_cast<int>(theta / 45.0);
-                                        //int j_idx = static_cast<int>(phi / 45.0);
-                                        
-                                        
-                                        track_surface[8*n + i_idx]++;
-                                    }*/
-                                    
+                                    neighbours[100*n + it++] = idx_cell;                                  
                                     
                                 }
                             
