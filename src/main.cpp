@@ -260,7 +260,7 @@ int main(int argc, char *argv[])
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){
                 if (geomParams.post_process_do)
-                    extractData(geomParams, simParams, thermoParams, pos, p, mass, neighbours, nb_neighbours);
+                    extractData(geomParams, simParams, thermoParams, pos, p, mass, rho, neighbours, nb_neighbours);
                 
             export_particles("../../output/sph", t, pos, scalars, vectors, false);
 

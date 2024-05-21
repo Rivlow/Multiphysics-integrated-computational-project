@@ -43,7 +43,24 @@ for i, array_data in enumerate(rho):
 plt.plot(val_rho)
 plt.show()
     """
+
+def isLatex(latex):
     
+    if latex:
+        SMALL_SIZE = 8
+        MEDIUM_SIZE = 14
+        BIGGER_SIZE = 18
+
+        plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+        plt.rc('axes', titlesize=MEDIUM_SIZE)    # fontsize of the axes title
+        plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+        plt.rc('xtick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
+        plt.rc('ytick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
+        plt.rc('legend', fontsize=MEDIUM_SIZE)   # legend fontsize
+        plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+        plt.rc('text', usetex=True)
+        plt.rc('font', family='lmodern')
+        
 def getData(directory):
     
     df, name = [], []
@@ -92,45 +109,100 @@ def plotData(all_data):
         
     
     
-def main():
+def main(iteration):
+    
+    latex = True
+    isLatex(latex)
     
     # Chemin absolu du répertoire du script actuel
     current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
     outputFile = os.path.dirname(current_directory) + "\\output"  
     all_data = getData(outputFile)
     
-    analysis_type = {"Time":True, "Spacial":False} # chose only one as "True"
+    analysis_type = {"Time":False, "Spacial":True} # chose only one as "True"
     
     print(all_data[1])
-    data = all_data[0][1]
-    # Création des subplots
-    fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+    name = all_data[1]
+    data = all_data[0][0]
+    p_val, rho_val, p_val_init, p_val_end = [], [], [], []
+    
+    #fig, axs = plt.subplots(1, 2, figsize=(12, 6))
 
-    # Plot 2D
-    for i in range(data.shape[1]):
-        axs[0].plot(range(data.shape[0]), data[:, i], label=f'part {i}')
-    axs[0].legend(loc='best')
-    axs[0].set_title('Plot 2D')
-    axs[0].set_xlabel('Iterations')
-    axs[0].set_ylabel('Values')
 
-    # Plot 3D
-    ax = fig.add_subplot(122, projection='3d')
-    for i in range(data.shape[1]):
-        ax.plot(range(data.shape[0]), data[:, i], zs=i)
-    ax.set_title('Plot 3D')
-    ax.set_xlabel('Iterations')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Ghost particles')
+    if analysis_type["Time"]:
+        # Plot 2D
+        for i in range(data.shape[1]):
+            axs[0].plot(range(data.shape[0]), data[:, i], label=f'part {i}')
+        axs[0].legend(loc='best')
+        axs[0].set_title('Plot 2D')
+        axs[0].set_xlabel('Iterations')
+        axs[0].set_ylabel('Values')
+
+        # Plot 3D
+        ax = fig.add_subplot(122, projection='3d')
+        for i in range(data.shape[1]):
+            ax.plot(range(data.shape[0]), data[:, i], zs=i)
+        ax.set_title('Plot 3D')
+        ax.set_xlabel('Iterations')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('Ghost particles')
+
+    elif analysis_type["Spacial"]:
+        '''
+        print(len(all_data[0][0][iteration,:]))
+        for i in range(data.shape[1]):
+            p_val.append(all_data[0][0][iteration,i])
+            rho_val.append(all_data[0][1][iteration,i])
+            
+        x_val = np.arange(0, len(p_val), 1)
+        axs[0].set_title(f"At iteration {iteration}")
+        axs[0].plot(x_val, p_val)
+        axs[0].scatter(x_val, p_val)
+        axs[0].legend(loc='best')
+        axs[0].set_xlabel('Ghost particles')
+        axs[0].set_ylabel('Pressure p [Pa]')
+        
+        axs[1].set_title(f"At iteration {iteration}")
+        axs[1].plot(x_val, rho_val)
+        axs[1].scatter(x_val, rho_val)
+        axs[1].legend(loc='best')
+        axs[1].set_xlabel('Ghost particles')
+        axs[1].set_ylabel('Density ')
+        '''
+        
+        rho = 1000
+        g = 9.81
+        
+        for i in range(data.shape[1]):
+            p_val_init.append(all_data[0][0][0,i])
+            p_val_end.append(all_data[0][0][iteration,i])
+            
+        x_val = np.arange(0, len(p_val_end), 1)
+        z = np.linspace(0, 1, len(x_val)-27)
+        p_hydro = rho*g*z
+        plt.plot(x_val[27:], p_hydro, label = "Theoretical pressure")
+        plt.scatter(x_val[27:], p_val_end[27:], label = "SPH pressure", color = "red")
+        plt.legend(loc='best')
+        plt.xlabel('Ghost particles')
+        plt.ylabel('Pressure p [Pa]')
+        plt.grid(True)
+        state_equation = "Quasi_incompressible_fluid"
+        plt.savefig(f"{current_directory}\Pictures\hydrostatic_{state_equation}.PDF")
+
+        
+        
+    else:
+        print("No plot type chosen")
 
     plt.tight_layout()
     plt.show()
- 
     
+  
     
     
 if __name__ == "__main__":
-    main()
+    iteration = 50
+    main(iteration-1)
 
 
 

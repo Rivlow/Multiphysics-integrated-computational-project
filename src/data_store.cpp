@@ -18,6 +18,7 @@ void extractData(GeomData &geomParams,
                  vector<double> &pos,  
                  vector<double> &p, 
                  vector<double> &mass,
+                 vector<double> &rho,
                  vector<int> &neighbours,
                  vector<double> &nb_neighbours){
 
@@ -51,20 +52,23 @@ void extractData(GeomData &geomParams,
 
             //cout << "idx : " << idx <<endl;
             int i_neig = neighbours[100*n + idx];
-            double r_ab = 0;
+            double r_ij = 0;
             vector<double> pos_val(3);
 
             for (int coord = 0; coord < 3; coord++){
                 
                 pos_val[coord] = pos[3 * n + coord] - pos[3 * i_neig + coord];
-                r_ab += pos_val[coord]*pos_val[coord];
+                r_ij += pos_val[coord]*pos_val[coord];
             }
 
-            r_ab = sqrt(r_ab);
-            double W_ab = f_cubic_spline(r_ab, geomParams.h);
-            double m_b = mass[i_neig];
+            r_ij = sqrt(r_ij);
+            double W_ij = f_cubic_spline(r_ij, geomParams.h);
+            double m_j = mass[i_neig];
+            double p_j = p[i_neig];
+            double rho_j = rho[i_neig];
 
-            rho_tot += m_b*W_ab;
+            p_tot += (m_j/rho_j)*p_j*W_ij;
+            rho_tot += m_j*W_ij;
         }
 
         string state_equation = simParams.state_equation;
@@ -74,17 +78,6 @@ void extractData(GeomData &geomParams,
         double T = thermoParams.T;
         double M = thermoParams.M;
         double gamma = thermoParams.gamma;
-
-        if (state_equation == "Ideal gaz law") p_tot = (rho_tot / rho_0 - 1) * (R * T) / M;
-        else if (simParams.state_equation == "Quasi incompresible fluid"){
-            double B = c_0 * c_0 * rho_0 / gamma;
-            p_tot = B * (pow(rho_tot / rho_0, gamma) - 1);
-        }
-        else {
-            cout << "Error : no state equation chosen" << endl;
-            exit(1);
-        }
-
 
         if (n == end-1){
             output_rho << rho_tot << "\n";
