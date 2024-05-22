@@ -39,7 +39,6 @@ void Euler(GeomData &geomParams,
     string schemeIntegration = simParams.schemeIntegration;
     double theta = simParams.theta;
     double dt = simParams.dt;
-    cout << dt << endl;
     if (schemeIntegration == "RK22") dt = simParams.dt/(2*theta);
     if (schemeIntegration == "Euler") dt = simParams.dt;
     
@@ -195,7 +194,6 @@ void checkTimeStep(GeomData &geomParams,
     int t = simParams.t;
 
     double F_st_max = simParams.F_st_max;
-    cout << "Fst_max " << F_st_max << endl;
     double dt_f = h / sqrt(F_st_max*F_st_max);
     
     double dt_cv = 0;
@@ -258,8 +256,8 @@ void checkTimeStep(GeomData &geomParams,
 
         dt_cv = min_a;
         double dt_final = min(0.4*dt_f, 0.25*dt_cv);
-        cout << "dt final : " << dt_final << endl;
-        cout << " dt_f " << dt_f << " dt_cv " << dt_cv << endl;
+       // cout << "dt final : " << dt_final << endl;
+        //cout << " dt_f " << dt_f << " dt_cv " << dt_cv << endl;
         string state_equation = simParams.state_equation;
 
         if (state_equation == "Ideal gaz law"){

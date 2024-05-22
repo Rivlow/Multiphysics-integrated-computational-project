@@ -35,12 +35,15 @@ int main(int argc, char *argv[])
     /*---------------- SETTING COMPILATION PARAMETERS/FOLDER NEEDED --------------------*/
     auto t0 = chrono::high_resolution_clock::now();
 
+
     #ifdef _OPENMP
         cout << "OpenMP available: OMP_NUM_THREADS=" << omp_get_max_threads() << "\n";
     #else
         cout << "OpenMP not available.\n";
     #endif
 
+    //omp_set_num_threads(12);
+   
     #ifdef NDEBUG
         // code has been configured with "cmake -DCMAKE_BUILD_TYPE=Release .."
         cout << "code built in RELEASE mode.\n";
@@ -146,6 +149,7 @@ int main(int argc, char *argv[])
         0,
         
     };
+    cout << "SimulationData initialized" << endl;
 
 
 
@@ -210,7 +214,7 @@ int main(int argc, char *argv[])
     cout << "Number of fluid particles = " << MP_count  << " [-]" << endl;
     cout << "Number of fixed particles = " << FP_count  << " [-]" << endl;
     cout << "Number of post process particles = " << GP_count << " [-]" << endl;
-    cout << "Total number of particles = " << nb_tot_part << " [-]" << "\n" << endl;
+    cout << "Total number of particles = " << nb_tot_part - GP_count << " [-]" << "\n" << endl;
 
     cout << "#==================#" << endl;
     cout << "# Thermo variables #" << endl;
@@ -266,12 +270,7 @@ int main(int argc, char *argv[])
 
             auto t_act = chrono::high_resolution_clock::now();
             double elapsed_time = double(chrono::duration_cast<chrono::duration<double>>(t_act - t_mid).count());
-            progressBar(double(t)/double(simParams.nstepT), elapsed_time);
-
-                        
-            // Calculer le temps écoulé depuis le début de la simulation
-            
-            
+            progressBar(double(t)/double(simParams.nstepT), elapsed_time);    
         }
 
 
@@ -283,7 +282,7 @@ int main(int argc, char *argv[])
 
     auto t1 = chrono::high_resolution_clock::now();
     auto delta_t = chrono::duration_cast<chrono::duration<double>>(t1 - t0).count();
-    cout << "\nduration: " << delta_t << "s (" << int((MP_count+FP_count)/delta_t)<<" particles/s).\n";
+    cout << "\nduration: " << delta_t << "s (" << int((MP_count+FP_count)/delta_t)*simParams.nstepT<<" [Particles*Updates/s]).\n";
     cout << "Simulation done." << endl;
 
     return 0;
