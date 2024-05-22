@@ -24,7 +24,7 @@ data = {
     
     "domain": {
         "matrix_long": [
-            [0.4*L-2*s, s/2, L-2*s], # fluid
+            [L-2*s, s/2, L-2*s], # fluid
             [L, s/2, s/2],  
             [L, s/2, s/2],
             [s/2, s/2, L],

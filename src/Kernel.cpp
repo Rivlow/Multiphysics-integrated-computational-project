@@ -8,7 +8,7 @@ using namespace std;
 
 double W_coh(double r, double h, SimulationData simParams){
     double W = 0.0;
-    double cst = (simParams.dimension == 3) ? 32/(M_PI*h*h*h*h*h*h*h*h*h) : 40/(M_PI*h*h*h*h*h*h*h*h);
+    double cst = (simParams.dimension == 3) ? 32/(M_PI*h*h*h*h*h*h*h*h*h) : 250/(M_PI*h*h*h*h*h*h*h*h);
     if(2.0*r>h && r<=h){
         W = cst*(h-r)*(h-r)*(h-r)*r*r*r;
     }

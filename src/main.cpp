@@ -258,8 +258,8 @@ int main(int argc, char *argv[])
 
 
         
-        
-
+        //if (t > 200) printMatrix(pi_matrix, pi_matrix.size(), "pi_matrix");
+        //if (t > 200) printArray(u, u.size(), "u");
 
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){

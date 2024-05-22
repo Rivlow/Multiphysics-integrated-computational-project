@@ -31,6 +31,7 @@ void printMatrix(vector<vector<T>> &matrix, int size, string name)
         cout << "For lign " << i << " : (";
         for (int j = 0; j < int(matrix[i].size()); ++j)
         {
+            cout << setprecision(8);
             cout << matrix[i][j];
             if (j != int(matrix[i].size() - 1))
             {
@@ -59,6 +60,7 @@ void printArray(vector<T> &array, int size, string name)
 
     for (int i = 0; i < size; ++i)
     {
+        std::cout << setprecision(8);
         std::cout << array[i];
         if (i != int(array.size() - 1))
         {

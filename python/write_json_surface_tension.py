@@ -2,8 +2,8 @@ import json
 import os
 import sys
 
-s = 0.002
-L = 0.01
+s = 0.1
+L = 1
 dimension = 3
 
 data = {
@@ -29,9 +29,9 @@ data = {
     "dt": 0.00001,
     "nsave": 100,
     "kappa": 2,
-    "alpha": 0.01,
+    "alpha": 10000,
     "beta": 0,
-    "alpha_st":1,
+    "alpha_st":1.5,
     "beta_adh": 10,
     "dimension": dimension
   },
