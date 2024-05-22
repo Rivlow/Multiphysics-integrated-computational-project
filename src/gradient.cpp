@@ -27,7 +27,7 @@ void gradW(GeomData &geomParams,
     int nb_part = simParams.nb_part;
 
     // Iterations over each particle
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (int n = 0; n < nb_part; n++){
 
         vector<double> &gradW = gradW_matrix[n];
@@ -278,7 +278,7 @@ void momentumEquation(GeomData &geomParams,
     double g = (simParams.is_gravity ? -9.81 : 0.0);
     bool PRINT = simParams.PRINT;
     int nb_moving_part = simParams.nb_moving_part;
-
+    simParams.F_st_max = 0;
     // Compute pressure for all particles
     setPressure(geomParams, thermoParams, simParams, p, rho); 
 
@@ -387,6 +387,7 @@ void momentumEquation(GeomData &geomParams,
             dudt[3 * n + coord] += F_vol[3 * n + coord];
             F_res += F_vol[3 * n + coord]*F_vol[3 * n + coord];
         }
+        F_res = sqrt(F_res);
         simParams.F_st_max = (simParams.F_st_max > F_res ? simParams.F_st_max : F_res );
             
     }
