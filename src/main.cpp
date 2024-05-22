@@ -169,9 +169,8 @@ int main(int argc, char *argv[])
                    normal(3*nb_tot_part, 0.0);
 
     vector<vector<double>> pi_matrix(nb_tot_part), gradW_matrix(nb_tot_part), W_matrix(nb_tot_part);
-    vector<int> track_surface(8*MP_count, 0);
     vector<int> neighbours(100*nb_tot_part);
-    vector<double> nb_neighbours(nb_tot_part, 0.0), N_smoothed(MP_count, 0.0); 
+    vector<double> nb_neighbours(nb_tot_part, 0.0); 
 
     // Variables defined to used "export.cpp"
     map<string, vector<double> *> scalars;
@@ -243,7 +242,8 @@ int main(int argc, char *argv[])
 
         // Apply the linked-list algorithm
         sortedList(geomParams, simParams, cell_matrix, neighbours,
-                   gradW_matrix, W_matrix, pi_matrix, nb_neighbours, type, pos); 
+                   gradW_matrix, W_matrix, pi_matrix, nb_neighbours, type, pos);
+
         //printMatrix(pi_matrix, pi_matrix.size(), "pi");
         // Compute ∇_a(W_ab) for all particles
         gradW(geomParams, simParams, gradW_matrix, W_matrix, neighbours, nb_neighbours, pos, rho, normal, mass); 
@@ -277,7 +277,7 @@ int main(int argc, char *argv[])
 
         // Clear matrices and reset arrays to 0
         clearAllVectors(simParams, pi_matrix, neighbours,
-                        cell_matrix, gradW_matrix, drhodt, dudt, track_surface, normal);
+                        cell_matrix, gradW_matrix, drhodt, dudt, normal);
 
     }
 

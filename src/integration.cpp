@@ -39,7 +39,7 @@ void Euler(GeomData &geomParams,
     string schemeIntegration = simParams.schemeIntegration;
     double theta = simParams.theta;
     double dt = simParams.dt;
-
+    cout << dt << endl;
     if (schemeIntegration == "RK22") dt = simParams.dt/(2*theta);
     if (schemeIntegration == "Euler") dt = simParams.dt;
     
@@ -51,7 +51,7 @@ void Euler(GeomData &geomParams,
     // Compute D(u)/Dt for all particles
     momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW_matrix, 
                     W_matrix, pi_matrix, mass, dudt, rho, p, c, pos, u, type, normal); 
-
+    //printArray(dudt, dudt.size(),"dudt");
     checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
                       neighbours, nb_neighbours, pi_matrix);
     int nb_part = simParams.nb_part;
@@ -70,6 +70,8 @@ void Euler(GeomData &geomParams,
             u[3 * n + coord] += dt * dudt[3 * n + coord];
         }
     }
+    
+   //ma printArray(dudt, dudt.size(),"u");
 }
 
 void RK22(GeomData &geomParams,    
@@ -188,13 +190,15 @@ void checkTimeStep(GeomData &geomParams,
     double alpha = simParams.alpha;
     double beta = simParams.beta;
     double h = geomParams.h;
-    double g = (simParams.is_gravity)? -9.81 : 0;
+    
     int nb_moving_part = simParams.nb_moving_part;
     int t = simParams.t;
 
     double F_st_max = simParams.F_st_max;
+    cout << "Fst_max " << F_st_max << endl;
     double dt_f = h / sqrt(F_st_max*F_st_max);
-    double dt_cv;
+    
+    double dt_cv = 0;
     double min_a = numeric_limits<double>::max();
     double max_b = numeric_limits<double>::min();
 
@@ -254,7 +258,8 @@ void checkTimeStep(GeomData &geomParams,
 
         dt_cv = min_a;
         double dt_final = min(0.4*dt_f, 0.25*dt_cv);
-
+        cout << "dt final : " << dt_final << endl;
+        cout << " dt_f " << dt_f << " dt_cv " << dt_cv << endl;
         string state_equation = simParams.state_equation;
 
         if (state_equation == "Ideal gaz law"){

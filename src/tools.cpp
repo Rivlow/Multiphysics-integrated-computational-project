@@ -177,7 +177,6 @@ void clearAllVectors(SimulationData &simParams,
                      vector<vector<double>> &gradW_matrix, 
                      vector<double> &drhodt,
                      vector<double> &dudt,
-                     vector<int> &track_surface,
                      vector<double> &normal){
 
     bool PRINT = simParams.PRINT;
@@ -201,9 +200,6 @@ void clearAllVectors(SimulationData &simParams,
         for(int coord = 0 ; coord < 3 ; coord ++)
             dudt[3*i+coord] = 0.0;    
     }
-    for(int i = 0 ; i < track_surface.size(); i++){
-
-        track_surface[i] = 0.0;
-    }
+    
     if (PRINT) cout << "clearAllVectors passed" << endl;
 }
