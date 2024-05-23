@@ -19,8 +19,6 @@ void surfaceTension(SimulationData& simParams,
                     ThermoData &thermoParam,
                     vector<double> nb_neighbours,
                     vector<int> neighbours,
-                    vector<int> &track_surface,
-                    vector<double> &N_smoothed,
                     vector<vector<double>> gradW_matrix,
                     vector<vector<double>> W_matrix,
                     vector<double> mass,
@@ -29,6 +27,7 @@ void surfaceTension(SimulationData& simParams,
                     vector<double> &F_vol,
                     vector<double> type){
 
+    
     vector<double> normal(3*simParams.nb_moving_part,0.0);
     #pragma omp parallel for 
     for(int n = 0; n<simParams.nb_moving_part; n++){
@@ -50,6 +49,7 @@ void surfaceTension(SimulationData& simParams,
         }
     }
     
+
     double alpha = simParams.alpha_st;
     #pragma omp parallel for 
     for(int n = 0; n<simParams.nb_moving_part; n++){
@@ -80,7 +80,7 @@ void surfaceTension(SimulationData& simParams,
                 for (int coord = 0; coord < 3; coord++){
                     
                     F_vol[3*n + coord] += -K_ij*(alpha * m_a * m_b * d_xyz[coord]*W_ab/r_ab 
-                                    + alpha*(normal[3*n+coord]-normal[3*i_neig+coord]));
+                                  + alpha*(normal[3*n+coord]-normal[3*i_neig+coord]));
 
                     //cout << "F_vol[3*n + coord] (in surface tension)" << -K_ij*(alpha * m_a * m_b * d_xyz[coord]*W_ab/r_ab 
                              //       + alpha*(normal[3*n+coord]-normal[3*i_neig+coord])) << endl;

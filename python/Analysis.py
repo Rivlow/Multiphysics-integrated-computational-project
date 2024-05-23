@@ -8,6 +8,7 @@ import numpy as np
 import sys
 import pandas as pd
 
+'''
 file = "output/p.csv"
 ite = 800
 pressure = pd.read_csv(file, sep = ',', decimal='.', header=None)
@@ -28,7 +29,8 @@ print("min", minp)
 deltaP = maxp - minp
 print(deltaP)
 
-"""
+
+
 def read_vtp(path):
     reader = vtk.vtkXMLPolyDataReader()
     reader.SetFileName(path)
@@ -56,6 +58,7 @@ vtp_files_data = read_vtp_files_in_folder(folder_path)
 rho = vtp_files_data["rho_array"]
 print((len(vtp_files_data)))
 
+
 val_rho = []
 
 for i, array_data in enumerate(rho):
@@ -64,7 +67,7 @@ for i, array_data in enumerate(rho):
     
 plt.plot(val_rho)
 plt.show()
-    
+'''
     
 def getData(directory):
     
@@ -83,77 +86,89 @@ def getData(directory):
     else:
         print(f"No csv files in folder : {directory}.")
 
+def plotSingleVariable(analysis_type, data, particle, iteration, name):
     
-path = os.getcwd()
-
-
-def plotData(all_data):
-    
-    data_tot = all_data[0]
-    names = all_data[1]
-    print(f"Data available : {names}")
-
-    for data, name in zip(data_tot, names):
+    if (analysis_type["Time"]):
         
-        t = np.arange(0, np.shape(data)[0], 1)
-        var = np.zeros(len(t))
-        
-        print(data)
-
-        for i, rows in enumerate(data):
-            var[i] = rows[0]
-        
-        plt.figure()
-        plt.scatter(t, var)
-        plt.xlabel("time [s]")
-        plt.ylabel(f"{name[:-4]}(t)")
-        plt.title(f"{name[:-4]}")
-        plt.tight_layout()
+        plt.plot(range(data.shape[0]), data[:, particle], label=f'test') 
+        plt.legend(loc='best')
+        plt.xlabel('Iterations')
+        plt.ylabel('Values')
+        plt.grid(True)
         plt.show()
+        
+    elif (analysis_type["Spacial"]):
+        
+        x = np.linspace(0.01, 1.2, len(data[iteration, :]))
+        plt.plot(x, data[iteration, :])
+        #plt.scatter(x, data[iteration, :],)
+        plt.xlabel('Height [m]')
+        plt.ylabel(f'{name}')
+        plt.grid(True)
+        plt.show()
+        
+    else:
+        print("Error, choose one type of plot.")
+        
+def plotStateEquation(rho, p, iteration):
+    
+    p_val = p[iteration, :]
+    rho_val = rho[iteration, :]
+    x = np.linspace(0.01, 1.2, len(p_val))
+    
+    c_0 = 30
+    rho_0 = 1000
+    gamma = 7  # Exemple de valeur pour gamma
+    B = (c_0**2)*rho_0/gamma
+    T = 273.15+25
+    M = 18e-3
+    R = 8.314
+  
+    #plt.scatter(x[11:], p_val[11:])
+    #plt.scatter(x[11:], rho_val[11:])
+    p_compare = np.linspace(48.7799, 12397, 100)
+    rho_compare = rho_0 * ((p_compare + 1) / B) ** (1 / gamma)
+    plt.xscale("log")
+    plt.plot(p_val[11:], rho_val[11:], color = 'b', label = 'SPH')
+    #plt.plot(p_compare, rho_compare, color = 'r', label = 'quasi incompressible (theorical)')
+    plt.xlabel("Pressure [Pa]")
+    plt.ylabel(r"Density [kg/$m^3$]")
+    plt.grid(True)
+    plt.legend(loc = "best")
+    plt.show()
+    
+
+
 
         
-    
-    
+
 def main():
     
-    # Chemin absolu du répertoire du script actuel
     current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
     outputFile = os.path.dirname(current_directory) + "\\output"  
     all_data = getData(outputFile)
     
+    print(f"Data available : {all_data[1]}")
+
     analysis_type = {"Time":False, "Spacial":True} # chose only one as "True"
+    particle = 0 # if Time plot desired, have to chose which particle to look at
+    iteration = 399 # if Spacial plot desired, have to chose which iteration to look at
     
-    print(all_data[1])
-    data = all_data[0][1]
-    # Création des subplots
-    fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+    rho = all_data[0][1]
+    p = all_data[0][0]
 
-    # Plot 2D
-    for i in range(data.shape[1]):
-        axs[0].plot(range(data.shape[0]), data[:, i], label=f'part {i}')
-    axs[0].legend(loc='best')
-    axs[0].set_title('Plot 2D')
-    axs[0].set_xlabel('Iterations')
-    axs[0].set_ylabel('Values')
+    
+    #name = "Pressure"
+    name = "Rho"
+    #plotSingleVariable(analysis_type, rho, particle, iteration, name)
+    plotStateEquation(rho, p, iteration)
 
-    # Plot 3D
-    ax = fig.add_subplot(122, projection='3d')
-    for i in range(data.shape[1]):
-        ax.plot(range(data.shape[0]), data[:, i], zs=i)
-    ax.set_title('Plot 3D')
-    ax.set_xlabel('Iterations')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Ghost particles')
-
-    plt.tight_layout()
-    plt.show()
  
-    
-    
+
     
 if __name__ == "__main__":
     main()
-"""
+
 
 
 

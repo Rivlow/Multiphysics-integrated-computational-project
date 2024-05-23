@@ -189,6 +189,7 @@ int main(int argc, char *argv[])
     vectors["position"] = &pos;
     vectors["u"] = &u;
     vectors["dudt"] = &dudt;
+    vectors["normal"] = &normal;
 
     cout << "#===============================#" << endl;
     cout << "# General simulation parameters #" << endl;
@@ -248,10 +249,9 @@ int main(int argc, char *argv[])
         sortedList(geomParams, simParams, cell_matrix, neighbours,
                    gradW_matrix, W_matrix, pi_matrix, nb_neighbours, type, pos);
 
-        //printMatrix(pi_matrix, pi_matrix.size(), "pi");
         // Compute ∇_a(W_ab) for all particles
         gradW(geomParams, simParams, gradW_matrix, W_matrix, neighbours, nb_neighbours, pos, rho, normal, mass); 
-        //printMatrix(pi_matrix, pi_matrix.size(), "pi");
+
         // Update density, velocity and position (Euler explicit or RK22 scheme)
         updateVariables(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
                         pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, type, normal);

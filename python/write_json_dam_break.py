@@ -2,7 +2,7 @@ import json
 import os
 import sys
 
-s = 0.01
+s = 0.03
 L = 1.2
 dimension = 2
 
@@ -11,11 +11,11 @@ data = {
     "simulation": {
         "theta": 0.5,
         "s": s,
-        "nstepT": 20000,
+        "nstepT": 40000,
         "dt": 0.0001,
         "nsave": 100,
         "kappa": 2,
-        "alpha": 5,
+        "alpha": 0.5,
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 1.2,
@@ -24,7 +24,7 @@ data = {
     
     "domain": {
         "matrix_long": [
-            [L-2*s, s/2, L-2*s], # fluid
+            [0.5*L-2*s, s/2, 0.8*L-2*s], # fluid
             [L, s/2, s/2],  
             [L, s/2, s/2],
             [s/2, s/2, L],
