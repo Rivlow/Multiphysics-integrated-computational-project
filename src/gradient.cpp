@@ -17,10 +17,14 @@ void gradW(GeomData &geomParams,
            vector<vector<double>> &gradW_matrix,
            vector<vector<int>> &neighbours_matrix,
            vector<double> &nb_neighbours,
-           vector<double> &pos){
+           vector<double> &pos,
+           vector<double> mass, 
+           vector<double> rho,
+           vector<double> &normal_grad){
 
     double h = geomParams.h;
     int nb_part = simParams.nb_part;
+    vector<double> normal_grad2(3*simParams.nb_moving_part,0.0);
 
     // Iterations over each particle
     #pragma omp parallel for
@@ -45,12 +49,18 @@ void gradW(GeomData &geomParams,
 
             r_ab = sqrt(r_ab);
             double deriv = derive_cubic_spline(r_ab, h);
+            double m_j = mass[i_neig];
+            double rho_j = rho[i_neig];
 
             for (int coord = 0; coord < 3; coord++){
                 gradW[3 * idx + coord] = pos_val[coord] / r_ab * deriv;
+                normal_grad2[3 * n + coord] += gradW[3 * idx + coord]*geomParams.h*(m_j/rho_j);
+               //cout << "gradW[3 * idx + coord]*geomParams.h*(m_j/rho_j) = " << gradW[3 * idx + coord]*geomParams.h*(m_j/rho_j) << endl;
             }
         }
     }
+
+    normal_grad = normal_grad2;
 
     if (simParams.PRINT)cout << "gradW passed" << endl;
     
@@ -262,7 +272,8 @@ void momentumEquation(GeomData &geomParams,
                       vector<double> &p, 
                       vector<double> &c,
                       vector<double> &pos,
-                      vector<double> &u){
+                      vector<double> &u,
+                      vector<double> &normal_print){
 
 
     double g = thermoParams.g;
@@ -282,7 +293,7 @@ void momentumEquation(GeomData &geomParams,
     vector<double> F_vol(3*simParams.nb_moving_part,0.0);
 
     surfaceTension(simParams, geomParams,thermoParams, nb_neighbours, neighbours_matrix, gradW_matrix, mass, 
-                   rho, pos, F_vol);
+                   rho, pos, F_vol, normal_print);
     //printArray(F_vol, F_vol.size(), "fvol");
     // Iterate over each particle
     #pragma omp parallel for

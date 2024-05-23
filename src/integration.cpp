@@ -31,7 +31,8 @@ void Euler(GeomData &geomParams,
             vector<vector<double>> &artificial_visc_matrix,
             vector<vector<double>> &gradW_matrix,
             vector<vector<int>> &neighbours_matrix,
-            vector<double> &nb_neighbours){
+            vector<double> &nb_neighbours,
+            vector<double> &normal_print){
 
 
     string schemeIntegration = simParams.schemeIntegration;
@@ -48,7 +49,7 @@ void Euler(GeomData &geomParams,
 
     // Compute D(u)/Dt for all particles
     momentumEquation(geomParams, thermoParams, simParams, neighbours_matrix, nb_neighbours,
-                     gradW_matrix, artificial_visc_matrix, mass, dudt, rho, p, c, pos, u); 
+                     gradW_matrix, artificial_visc_matrix, mass, dudt, rho, p, c, pos, u, normal_print); 
 
     
     int nb_part = simParams.nb_part;
@@ -83,7 +84,8 @@ void RK22(GeomData &geomParams,
           vector<vector<double>> &artificial_visc_matrix,
           vector<vector<double>> &gradW_matrix,
           vector<vector<int>> &neighbours_matrix,
-          vector<double> &nb_neighbours){
+          vector<double> &nb_neighbours,
+          vector<double> &normal_print){
 
     double dt = simParams.dt;
     double theta = simParams.theta;  
@@ -97,7 +99,7 @@ void RK22(GeomData &geomParams,
                     dudt_half(3*nb_tot_part,0.0);
 
     Euler(geomParams, thermoParams, simParams, pos_half, u_half, rho_half, drhodt_half, c, p, dudt_half, 
-              mass, artificial_visc_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
+              mass, artificial_visc_matrix, gradW_matrix, neighbours_matrix, nb_neighbours, normal_print);
 
     // Compute D(rho)/Dt for all particles
     continuityEquation(simParams, neighbours_matrix, nb_neighbours, gradW_matrix, 
@@ -105,7 +107,7 @@ void RK22(GeomData &geomParams,
 
     // Compute D(u)/Dt for all particles
     momentumEquation(geomParams, thermoParams, simParams, neighbours_matrix, nb_neighbours, gradW_matrix, artificial_visc_matrix,
-                    mass, dudt_half, rho_half, p, c, pos_half, u_half); 
+                    mass, dudt_half, rho_half, p, c, pos_half, u_half, normal_print); 
 
     int nb_part = simParams.nb_part;
     #pragma omp parallel for
@@ -137,7 +139,8 @@ void updateVariables(GeomData &geomParams,
                      vector<vector<double>> &artificial_visc_matrix,
                      vector<vector<double>> &gradW_matrix,
                      vector<vector<int>> &neighbours_matrix,
-                     vector<double> &nb_neighbours){
+                     vector<double> &nb_neighbours,
+                     vector<double> &normal_print){
 
     bool PRINT = simParams.PRINT;
     string schemeIntegration = simParams.schemeIntegration;
@@ -145,7 +148,7 @@ void updateVariables(GeomData &geomParams,
 
     if (schemeIntegration == "Euler")
         Euler(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
-              artificial_visc_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
+              artificial_visc_matrix, gradW_matrix, neighbours_matrix, nb_neighbours, normal_print);
     
 
     if (schemeIntegration == "RK22"){
@@ -157,7 +160,7 @@ void updateVariables(GeomData &geomParams,
                         dudt_half(3*nb_tot_part,0.0);
 
         RK22(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass,
-             artificial_visc_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
+             artificial_visc_matrix, gradW_matrix, neighbours_matrix, nb_neighbours, normal_print);
     }
 
     if (PRINT) cout << "update passed" << endl;

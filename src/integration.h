@@ -18,7 +18,8 @@ void Euler(GeomData &geomParams,
             vector<vector<double>> &artificial_visc_matrix,
             vector<vector<double>> &gradW_matrix,
             vector<vector<int>> &neighbours_matrix,
-            vector<double> &nb_neighbours);
+            vector<double> &nb_neighbours,
+            vector<double> &normal_print);
 
 void RK22(GeomData &geomParams,    
           ThermoData &thermoParams,
@@ -34,7 +35,8 @@ void RK22(GeomData &geomParams,
           vector<vector<double>> &artificial_visc_matrix,
           vector<vector<double>> &gradW_matrix,
           vector<vector<int>> &neighbours_matrix,
-          vector<double> &nb_neighbours);
+          vector<double> &nb_neighbours,
+          vector<double> &normal_print);
 
 void updateVariables(GeomData &geomParams,    
                      ThermoData &thermoParams,
@@ -50,4 +52,5 @@ void updateVariables(GeomData &geomParams,
                      vector<vector<double>> &artificial_visc_matrix,
                      vector<vector<double>> &gradW_matrix,
                      vector<vector<int>> &neighbours_matrix,
-                     vector<double> &nb_neighbours);
+                     vector<double> &nb_neighbours,
+                     vector<double> &normal_print);

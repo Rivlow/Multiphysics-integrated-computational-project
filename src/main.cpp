@@ -143,6 +143,9 @@ int main(int argc, char *argv[])
                    drhodt(nb_tot_part, 0), rho(nb_tot_part, 0),
                    dudt(3 * nb_tot_part, 0), p(nb_tot_part, 0),
                    c(nb_tot_part, 0), grad_sum(nb_tot_part, 0);
+    vector<double> normal_print(3*simParams.nb_moving_part, 0);
+    vector<double> normal_grad(3*nb_tot_part, 0);
+
 
     vector<vector<double>> pi_matrix(nb_tot_part), gradW_matrix(nb_tot_part);
     vector<vector<int>> neighbours_matrix(nb_tot_part, vector<int>(100));
@@ -161,6 +164,10 @@ int main(int argc, char *argv[])
     vectors["position"] = &pos;
     vectors["u"] = &u;
     vectors["dudt"] = &dudt;
+    vectors["normal_grad"] = &normal_grad;
+    vectors["normal_st"] = &normal_print;
+
+
 
     cout << "state equation chosen : " << state_equation << " \n" << endl;
     cout << "kappa * h =" << geomParams.kappa * geomParams.h << endl;
@@ -194,11 +201,11 @@ int main(int argc, char *argv[])
                    gradW_matrix, pi_matrix, nb_neighbours, pos); 
 
         // Compute ∇_a(W_ab) for all particles
-        gradW(geomParams, simParams, gradW_matrix, neighbours_matrix, nb_neighbours, pos); 
+        gradW(geomParams, simParams, gradW_matrix, neighbours_matrix, nb_neighbours, pos, mass, rho, normal_grad); 
 
         // Update density, velocity and position (Euler explicit or RK22 scheme)
         updateVariables(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
-                        pi_matrix, gradW_matrix, neighbours_matrix, nb_neighbours);
+                        pi_matrix, gradW_matrix, neighbours_matrix, nb_neighbours, normal_print);
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){
 
