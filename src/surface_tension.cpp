@@ -19,15 +19,14 @@ void surfaceTension(SimulationData& simParams,
                     ThermoData &thermoParam,
                     vector<double> nb_neighbours,
                     vector<int> neighbours,
-                    vector<int> &track_surface,
-                    vector<double> &N_smoothed,
                     vector<vector<double>> gradW_matrix,
                     vector<vector<double>> W_matrix,
                     vector<double> mass,
                     vector<double> rho,
                     vector<double> pos,
                     vector<double> &F_vol,
-                    vector<double> type){
+                    vector<double> type,
+                    vector<double> normal_grad){
 
     vector<double> normal(3*simParams.nb_moving_part,0.0);
     #pragma omp parallel for 
@@ -49,7 +48,7 @@ void surfaceTension(SimulationData& simParams,
             }
         }
     }
-    
+    //printArray(normal, normal.size(),"normal  2");
     double alpha = simParams.alpha_st;
     #pragma omp parallel for 
     for(int n = 0; n<simParams.nb_moving_part; n++){

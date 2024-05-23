@@ -73,8 +73,8 @@ void initRho(ThermoData &thermoParams,
             double B = c_0 * c_0 * rho_0 / gamma;
             #pragma omp parallel for   
             for (int i = 0; i < rho_size; i++)
-                rho[i] = (i < nb_moving_part) ? rho_0 * (1 + rho_0 
-                                * g * pos[3 * i + 2] / B) : rho_fixed;  
+                rho[i] = (i < nb_moving_part) ? rho_0 * pow((1 + rho_0 
+                                * g * pos[3 * i + 2] / B),gamma) : rho_fixed;  
         }
     }
     else{

@@ -62,7 +62,7 @@ void gradW(GeomData &geomParams,
     }
 
     if (simParams.PRINT)cout << "gradW passed" << endl;
-    
+    //printArray(normal, normal.size(),"normal  1");
 }
 
 
@@ -292,9 +292,9 @@ void momentumEquation(GeomData &geomParams,
     vector<double> F_vol(3*simParams.nb_moving_part,0.0);
     
     
-    /*if (simParams.is_surface_tension)
+    if (simParams.is_surface_tension)
         surfaceTension(simParams, geomParams,thermoParams, nb_neighbours, neighbours, 
-                       track_surface, N_smoothed, gradW_matrix, W_matrix, mass, rho, pos, F_vol,type);*/
+                        gradW_matrix, W_matrix, mass, rho, pos, F_vol,type, normal);
 
     //printArray(F_vol,F_vol.size(),"fvol0");
     double alpha = simParams.alpha_st;
@@ -322,7 +322,7 @@ void momentumEquation(GeomData &geomParams,
                                     p_a / (rho_a * rho_a) + pi_ab)* gradW[3*idx + coord];
             }
             
-            if (simParams.is_surface_tension) {
+            /*if (simParams.is_surface_tension) {
                     
                 double K_ij = 2*thermoParams.rho_0/(rho[n]+rho[i_neig]);
                 double r_ab = 0;
@@ -346,13 +346,10 @@ void momentumEquation(GeomData &geomParams,
                     
                     F_vol[3*n + coord] += -boundary*K_ij*(alpha * m_a * m_b * d_xyz[coord]*W_ab/r_ab 
                                     + alpha*(normal[3*n+coord]-normal[3*i_neig+coord])); 
-                    /*cout << " F vol = " << boundary*K_ij*(alpha * m_a * m_b * d_xyz[coord]*W_ab/r_ab 
-                                    + alpha*(normal[3*n+coord]-normal[3*i_neig+coord])) << endl;
-                    cout << " normal = " << normal[3*n+coord]-normal[3*i_neig+coord] << endl;
-                    cout << " alpha = " << alpha << endl;*/
+                    
 
                 }
-            }
+            }*/
 
             if(simParams.is_adhesion){
                 
