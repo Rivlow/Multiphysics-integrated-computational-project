@@ -197,10 +197,15 @@ def main():
     name = "Pressure"
     #name = "Rho"
     
-    isLatex(True)
+    isLatex(False)
     #plotSingleVariable(analysis_type, rho, particle, iteration, name)
     #plotStateEquation(rho, p, iteration)
-    plotHydrostaticPressure(p[iteration,:], current_directory)
+    #plotHydrostaticPressure(p[iteration,:], current_directory)
+    
+    nstepT = 200000
+    dt = 2.5e-5
+    
+    print(nstepT*dt)
     
     
 
