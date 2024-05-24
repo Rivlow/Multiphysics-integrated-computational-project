@@ -136,14 +136,10 @@ void sortedList(GeomData &geomParams,
 
 void naiveAlgo(GeomData &geomParams,
                SimulationData &simParams, 
-               vector<vector<int>> &neighbours_matrix,
+               vector<int> &neighbours,
                vector<double> &pos){
 
     int pos_size = pos.size()/3; 
-
-    // added by RB
-    //for (int i = 0; i < nb_moving_part; i++)
-        //neighbours_matrix[i].resize(0);
 
     int it_i = 0, it_j = 0;
 
@@ -161,39 +157,66 @@ void naiveAlgo(GeomData &geomParams,
             double h = geomParams.h;
 
             if (r2 <= kappa * kappa *h * h){
-                neighbours_matrix[i][it_i++];
-                neighbours_matrix[j][it_j++];
+                neighbours[100*i + it_i++] = j;
+                neighbours[100*j + it_j++] = i;
             }
         }
     }
 }
 
 
-void printNeighbours(vector<vector<int>> &neighbours_matrix_linked,
-                     vector<vector<int>> &neighbours_matrix_naive){
+void printNeighbours(vector<int> &neighbours_linked,
+                     vector<int> &neighbours_naive,
+                     vector<double> &pos){
+                        
+    
+    int size_pos = pos.size()/3;
+    for (int n = 0; n < size_pos; n++){
 
-    for (int i = 0; i < int(neighbours_matrix_linked.size()); i++){
-        cout << "Particle " << i << " : ";
-
+        cout << "Particle " << n << " : ";
         cout << "{";
-        for (int j = 0; j < int(neighbours_matrix_linked[i].size()); j++){
 
-            cout << neighbours_matrix_linked[i][j];
-            if (j != int(neighbours_matrix_linked[i].size() - 1))
+        for (int it = 0; it < 100; it++){
+
+            cout << neighbours_linked[100*n + it];
+            if (it != 99)
+                cout << ", ";
+        }
+
+        cout << "} (Linked-list) VS {";
+
+        for (int it = 0; it < 100; it++){
+
+            cout << neighbours_naive[100*n + it];
+            if (it != 99)
+                cout << ", ";
+         }
+         cout << "} (naive)\n \n";
+    }
+
+    /*
+    for (int i = 0; i < int(neighbours_linked.size()); i++){
+        cout << "Particle " << i << " : ";
+        cout << "{";
+        for (int j = 0; j < int(neighbours_linked[i].size()); j++){
+
+            cout << neighbours_linked[i][j];
+            if (j != int(neighbours_linked[i].size() - 1))
                 cout << ", ";
             
         }
         cout << "} (Linked-list) VS {";
 
-        for (int j = 0; j < int(neighbours_matrix_naive[i].size()); j++){
+        for (int j = 0; j < int(neighbours_naive[i].size()); j++){
 
-            cout << neighbours_matrix_naive[i][j];
-            if (j != int(neighbours_matrix_naive[i].size() - 1))
+            cout << neighbours_naive[i][j];
+            if (j != int(neighbours_naive[i].size() - 1))
                 cout << ", ";
             
         }
         cout << "} (naive)\n \n";
     }
+    */
 }
 
 void CompareNeighbours( vector<vector<int>> &neighbours_matrix_linked,

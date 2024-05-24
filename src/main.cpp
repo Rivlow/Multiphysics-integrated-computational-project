@@ -174,6 +174,8 @@ int main(int argc, char *argv[])
 
     vector<vector<double>> pi_matrix(nb_tot_part), gradW_matrix(nb_tot_part), W_matrix(nb_tot_part);
     vector<int> neighbours(100*nb_tot_part);
+    vector<int> neighbours_naive(100*nb_tot_part);
+
     vector<double> nb_neighbours(nb_tot_part, 0.0); 
 
     // Variables defined to used "export.cpp"
@@ -249,6 +251,12 @@ int main(int argc, char *argv[])
         sortedList(geomParams, simParams, cell_matrix, neighbours,
                    gradW_matrix, W_matrix, pi_matrix, nb_neighbours, type, pos);
 
+        naiveAlgo(geomParams, simParams, neighbours_naive, pos);
+
+        printNeighbours(neighbours, neighbours_naive, pos);
+
+     
+        /*
         // Compute ∇_a(W_ab) for all particles
         gradW(geomParams, simParams, gradW_matrix, W_matrix, neighbours, nb_neighbours, pos, rho, normal, mass); 
 
@@ -272,7 +280,7 @@ int main(int argc, char *argv[])
             double elapsed_time = double(chrono::duration_cast<chrono::duration<double>>(t_act - t_mid).count());
             progressBar(double(t)/double(simParams.nstepT), elapsed_time);    
         }
-
+        */
 
         // Clear matrices and reset arrays to 0
         clearAllVectors(simParams, pi_matrix, neighbours,

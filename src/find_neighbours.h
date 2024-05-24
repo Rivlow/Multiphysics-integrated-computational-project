@@ -28,11 +28,12 @@ void sortedList(GeomData &geomParams,
 
 void naiveAlgo(GeomData &geomParams,
                SimulationData &simParams, 
-               vector<vector<int>> &neighbours_matrix,
+               vector<int> &neighbours,
                vector<double> &pos);
 
-void printNeighbours(vector<vector<int>> &neighbours_matrix_linked, 
-                     vector<vector<int>> &neighbours_matrix_naive);
+void printNeighbours(vector<int> &neighbours_linked,
+                     vector<int> &neighbours_naive,
+                     vector<double> &pos);
 
 void CompareNeighbours( std::vector<std::vector<int>> &neighbours_matrix_linked,
                         std::vector<std::vector<int>> &neighbours_matrix_naive);
