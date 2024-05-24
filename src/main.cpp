@@ -243,19 +243,27 @@ int main(int argc, char *argv[])
     
     auto t_mid = chrono::high_resolution_clock::now();
 
+    double counter_linked = 0;
+    double counter_naive = 0;
+
     for (int t = 0; t < simParams.nstepT; t++){
 
         simParams.t = t;
 
         // Apply the linked-list algorithm
+        auto t_before_linked = chrono::high_resolution_clock::now();
         sortedList(geomParams, simParams, cell_matrix, neighbours,
                    gradW_matrix, W_matrix, pi_matrix, nb_neighbours, type, pos);
-        cout << "ok linked" << endl;
+        auto t_after_linked = chrono::high_resolution_clock::now();
+        auto delta_t_linked = chrono::duration_cast<chrono::duration<double>>(t_after_linked - t_before_linked).count();
+        counter_linked += delta_t_linked;
 
+        auto t_before_naive= chrono::high_resolution_clock::now();
         naiveAlgo(geomParams, simParams, neighbours_naive, pos);
-        cout << "ok naive" << endl;
+        auto t_after_naive = chrono::high_resolution_clock::now();
+        auto delta_t_naive = chrono::duration_cast<chrono::duration<double>>(t_after_naive - t_before_naive).count();
+        counter_naive += delta_t_naive;
 
-        printNeighbours(neighbours, neighbours_naive, pos);
 
      
         /*
@@ -289,6 +297,11 @@ int main(int argc, char *argv[])
                         cell_matrix, gradW_matrix, drhodt, dudt, normal);
 
     }
+
+    cout << setprecision(15);
+    double divider = simParams.nstepT;
+    cout << "Total time for linked : " << counter_linked/divider << endl;
+    cout << "Total time for naive : " << counter_naive/divider << endl;
 
     auto t1 = chrono::high_resolution_clock::now();
     auto delta_t = chrono::duration_cast<chrono::duration<double>>(t1 - t0).count();

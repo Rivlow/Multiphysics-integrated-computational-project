@@ -142,6 +142,7 @@ void naiveAlgo(GeomData &geomParams,
     int pos_size = pos.size()/3; 
 
     // Find neighbours for each particle
+    #pragma omp parallel for
     for (int i = 0; i < pos_size; i++){
 
         int it = 0;

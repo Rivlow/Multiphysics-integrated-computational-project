@@ -2,7 +2,7 @@ import json
 import os
 import sys
 
-s = 0.5
+s = 0.007
 L = 1.2
 dimension = 2
 
@@ -11,7 +11,7 @@ data = {
     "simulation": {
         "theta": 0.5,
         "s": s,
-        "nstepT": 1,
+        "nstepT": 100,
         "dt": 0.00001,
         "nsave": 100,
         "kappa": 2,
