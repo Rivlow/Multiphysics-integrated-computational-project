@@ -2,7 +2,7 @@ import json
 import os
 import sys
 
-s = 0.03
+s = 0.05
 L = 1.2
 dimension = 2
 
@@ -11,8 +11,8 @@ data = {
     "simulation": {
         "theta": 0.5,
         "s": s,
-        "nstepT": 40000,
-        "dt": 0.0001,
+        "nstepT": 30000,
+        "dt": 0.00001,
         "nsave": 100,
         "kappa": 2,
         "alpha": 0.5,
@@ -24,7 +24,7 @@ data = {
     
     "domain": {
         "matrix_long": [
-            [0.5*L-2*s, s/2, 0.8*L-2*s], # fluid
+            [L-2*s, s/2, L-2*s], # fluid
             [L, s/2, s/2],  
             [L, s/2, s/2],
             [s/2, s/2, L],
@@ -50,7 +50,7 @@ data = {
     "post_process": {
         "do": True,
         "xyz_init": [L/2, 0, s],
-        "xyz_end": [L/2, 0, L]
+        "xyz_end": [L/2, 0, L-2*s]
     },
     "thermo": {
         "rho_0": 1000,
@@ -73,7 +73,7 @@ data = {
         "print_debug": False,
         "schemeIntegration": {"Euler": True, "RK22": False},
         "stateEquation": {"Ideal gaz law": False, "Quasi incompresible fluid": True},
-        "initialCondition": {"Hydrostatic": True, "Constant": False}
+        "initialCondition": {"Hydrostatic": False, "Constant": True}
     }
 }
 

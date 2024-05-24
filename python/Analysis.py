@@ -68,6 +68,22 @@ for i, array_data in enumerate(rho):
 plt.plot(val_rho)
 plt.show()
 '''
+
+def isLatex(latex):
+    if latex:
+        
+        SMALL_SIZE = 8
+        MEDIUM_SIZE = 14
+        BIGGER_SIZE = 18
+        plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+        plt.rc('axes', titlesize=MEDIUM_SIZE)    # fontsize of the axes title
+        plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+        plt.rc('xtick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
+        plt.rc('ytick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
+        plt.rc('legend', fontsize=MEDIUM_SIZE)   # legend fontsize
+        plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+        plt.rc('text', usetex=True)
+        plt.rc('font', family='lmodern')
     
 def getData(directory):
     
@@ -137,6 +153,26 @@ def plotStateEquation(rho, p, iteration):
     plt.legend(loc = "best")
     plt.show()
     
+    
+    
+def plotHydrostaticPressure(p, current_directory):
+    
+    rho_ref = 1000
+    g = 9.81
+    height = np.linspace(0.04, 1, len(p))
+    p_th = rho_ref*g*height
+
+    plt.figure()
+    plt.scatter(height, p, color = 'r', label = 'SPH pressure')
+    plt.plot(height, p_th, color = 'b', label = 'Theoretical hydrostatic pressure')
+
+    plt.ylabel("Pressure [Pa]")
+    plt.xlabel(r"Height [m]")
+    plt.grid(True)
+    plt.legend(loc = "best")
+    plt.tight_layout()
+    plt.savefig(f'{current_directory}/Pictures/hydrostatic_pressure.PDF')
+    plt.show()
 
 
 
@@ -152,16 +188,21 @@ def main():
 
     analysis_type = {"Time":False, "Spacial":True} # chose only one as "True"
     particle = 0 # if Time plot desired, have to chose which particle to look at
-    iteration = 399 # if Spacial plot desired, have to chose which iteration to look at
+    iteration = 400-1 # if Spacial plot desired, have to chose which iteration to look at
     
     rho = all_data[0][1]
     p = all_data[0][0]
 
     
-    #name = "Pressure"
-    name = "Rho"
+    name = "Pressure"
+    #name = "Rho"
+    
+    isLatex(True)
     #plotSingleVariable(analysis_type, rho, particle, iteration, name)
-    plotStateEquation(rho, p, iteration)
+    #plotStateEquation(rho, p, iteration)
+    plotHydrostaticPressure(p[iteration,:], current_directory)
+    
+    
 
  
 
