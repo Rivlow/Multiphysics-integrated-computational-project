@@ -83,7 +83,6 @@ double f_cubic_spline(double r, double h, SimulationData &simParams){
     }
     if(dim == 2){
         alpha = 15.0 /( 7.0 * M_PI * h * h );
-        //cout << "alpha : " << alpha << endl;
     }
     double W;
 
@@ -106,14 +105,12 @@ double derive_cubic_spline(double r, double h, SimulationData &simParams)
 {
 
     int dim = simParams.dimension;
-    //cout << "dim : " << dim << endl;
     double alpha = 0;
     if(dim == 3){
         alpha = 3.0 / (2.0 * M_PI * h * h * h);
     }
     if(dim == 2){
         alpha = 15.0 /( 7.0 * M_PI * h * h );
-        //cout << "alpha : " << alpha << endl;
     }
     
     double DW = 0;

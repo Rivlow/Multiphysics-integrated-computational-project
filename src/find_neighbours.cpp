@@ -49,12 +49,9 @@ void sortedList(GeomData &geomParams,
         j = (j == Ny) ? j - 1 : j;
         k = (k == Nz) ? k - 1 : k;
         
-        cell_matrix[i + Nx * j + Ny * Nx * k].push_back(n);
-        
-        
+        cell_matrix[i + Nx * j + Ny * Nx * k].push_back(n);   
     }
 
-    
     // Find neighbours for each particle
     #pragma omp parallel for
     for (int n = 0; n < size_pos; n++){
@@ -66,7 +63,6 @@ void sortedList(GeomData &geomParams,
         // Skip particules outside of the domain
         if (i_cell < 0 || j_cell < 0 || k_cell < 0 || i_cell > Nx || j_cell > Ny || k_cell > Nz) continue;
         
-
         // Modify index of particules at boundaries
         i_cell = (i_cell >= Nx) ? Nx - 1 : i_cell;
         j_cell = (j_cell >= Ny) ? Ny - 1 : j_cell;
@@ -116,7 +112,6 @@ void sortedList(GeomData &geomParams,
                                     neighbours[100*n + it++] = idx_cell;                                  
                                     
                                 }
-                            
                             }
                         }
                     }

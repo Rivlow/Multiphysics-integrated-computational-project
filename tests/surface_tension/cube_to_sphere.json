@@ -17,13 +17,13 @@
   "simulation":{
     "theta" :0.5,
     "s": 0.1,
-    "nstepT": 100000,
-    "dt": 1e-7,
+    "nstepT": 1000000,
+    "dt": 1e-6,
     "nsave": 1000,
     "kappa": 2,
-    "alpha": 10,
+    "alpha": 0.001,
     "beta": 0,
-    "alpha_st":1,
+    "alpha_st":10,
     "beta_adh": 10,
     "dimension": 3
   },

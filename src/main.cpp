@@ -147,9 +147,6 @@ int main(int argc, char *argv[])
         
     };
 
-
-
-
     /*------------------- INITIALIZATION OF VARIABLES USED -------------------*/
 
     // Vector used (and labelled w.r.t particles location)
@@ -244,18 +241,12 @@ int main(int argc, char *argv[])
         sortedList(geomParams, simParams, cell_matrix, neighbours,
                    gradW_matrix, W_matrix, pi_matrix, nb_neighbours, type, pos);
 
-        //printMatrix(pi_matrix, pi_matrix.size(), "pi");
         // Compute ∇_a(W_ab) for all particles
         gradW(geomParams, simParams, gradW_matrix, W_matrix, neighbours, nb_neighbours, pos, rho, normal, mass); 
-        //printMatrix(pi_matrix, pi_matrix.size(), "pi");
+        
         // Update density, velocity and position (Euler explicit or RK22 scheme)
         updateVariables(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
                         pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, type, normal);
-
-
-        
-        
-
 
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){
@@ -266,19 +257,12 @@ int main(int argc, char *argv[])
 
             auto t_act = chrono::high_resolution_clock::now();
             double elapsed_time = double(chrono::duration_cast<chrono::duration<double>>(t_act - t_mid).count());
-            progressBar(double(t)/double(simParams.nstepT), elapsed_time);
-
-                        
-            // Calculer le temps écoulé depuis le début de la simulation
-            
+            progressBar(double(t)/double(simParams.nstepT), elapsed_time);          
             
         }
-
-
         // Clear matrices and reset arrays to 0
         clearAllVectors(simParams, pi_matrix, neighbours,
                         cell_matrix, gradW_matrix, drhodt, dudt, normal);
-
     }
 
     auto t1 = chrono::high_resolution_clock::now();

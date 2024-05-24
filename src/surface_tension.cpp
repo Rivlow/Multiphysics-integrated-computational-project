@@ -48,7 +48,6 @@ void surfaceTension(SimulationData& simParams,
             }
         }
     }
-    //printArray(normal, normal.size(),"normal  2");
     double alpha = simParams.alpha_st;
     #pragma omp parallel for 
     for(int n = 0; n<simParams.nb_moving_part; n++){
@@ -80,9 +79,6 @@ void surfaceTension(SimulationData& simParams,
                     
                     F_vol[3*n + coord] += -K_ij*(alpha * m_a * m_b * d_xyz[coord]*W_ab/r_ab 
                                     + alpha*(normal[3*n+coord]-normal[3*i_neig+coord]));
-
-                    //cout << "F_vol[3*n + coord] (in surface tension)" << -K_ij*(alpha * m_a * m_b * d_xyz[coord]*W_ab/r_ab 
-                             //       + alpha*(normal[3*n+coord]-normal[3*i_neig+coord])) << endl;
                 
                     F_res += F_vol[3*n + coord]*F_vol[3*n + coord];
                 }

@@ -67,7 +67,6 @@ void extractData(GeomData &geomParams,
             double rho_b = rho[i_neig];
             double p_b = p[i_neig];
             rho_tot += m_b*W_ab;
-            //cout << p_b <<"         "<< W_ab << endl;
             p_tot += p_b*(m_b/rho_b)*W_ab;
         }      
         
