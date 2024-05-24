@@ -2,7 +2,7 @@ import json
 import os
 import sys
 
-s = 0.05
+s = 0.5
 L = 1.2
 dimension = 2
 
@@ -11,7 +11,7 @@ data = {
     "simulation": {
         "theta": 0.5,
         "s": s,
-        "nstepT": 30000,
+        "nstepT": 1,
         "dt": 0.00001,
         "nsave": 100,
         "kappa": 2,
@@ -65,7 +65,7 @@ data = {
         "sigma": 52000
     },
     "forces": {
-        "gravity": True,
+        "gravity": False,
         "surface_tension": False,
         "adhesion": False
     },

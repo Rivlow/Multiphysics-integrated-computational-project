@@ -141,16 +141,13 @@ void naiveAlgo(GeomData &geomParams,
 
     int pos_size = pos.size()/3; 
 
-    int it_i = 0, it_j = 0;
-
     // Find neighbours for each particle
     for (int i = 0; i < pos_size; i++){
 
-        int it_i = 0;
+        int it = 0;
 
-        for (int j = i + 1; j < pos_size; j++){
+        for (int j = 0 ; j < pos_size; j++){
             
-            int it_j = 0;
             double rx, ry, rz, r2;
             rx = (pos[3 * i] - pos[3 * j]);
             ry = (pos[3 * i + 1] - pos[3 * j + 1]);
@@ -160,10 +157,9 @@ void naiveAlgo(GeomData &geomParams,
             int kappa = geomParams.kappa;
             double h = geomParams.h;
 
-            if (r2 <= kappa * kappa *h * h){
-                neighbours[100*i + it_i++] = j;
-                neighbours[100*j + it_j++] = i;
-            }
+            if (r2 <= kappa * kappa *h * h)
+                neighbours[100*i + it++] = j;
+            
         }
     }
 }
