@@ -33,13 +33,13 @@ void Euler(GeomData &geomParams,
            vector<vector<double>> &W_matrix,
            vector<int> &neighbours,
            vector<double> &nb_neighbours,
-           vector<int> &track_surface,
-           vector<double> &N_smoothed){
+           vector<double> type,
+           vector<double> normal){
 
     string schemeIntegration = simParams.schemeIntegration;
     double theta = simParams.theta;
     double dt = simParams.dt;
-
+    //cout << dt << endl;
     if (schemeIntegration == "RK22") dt = simParams.dt/(2*theta);
     if (schemeIntegration == "Euler") dt = simParams.dt;
     
@@ -49,10 +49,11 @@ void Euler(GeomData &geomParams,
                        pos, u, drhodt, rho, mass); 
 
     // Compute D(u)/Dt for all particles
-    momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours,track_surface, N_smoothed, gradW_matrix, 
-                    W_matrix, pi_matrix, mass, dudt, rho, p, c, pos, u); 
-
-    
+    momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW_matrix, 
+                    W_matrix, pi_matrix, mass, dudt, rho, p, c, pos, u, type, normal); 
+    //printArray(dudt, dudt.size(),"dudt");
+    checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
+                      neighbours, nb_neighbours, pi_matrix);
     int nb_part = simParams.nb_part;
     #pragma omp parallel for   
     for (int n = 0; n < nb_part; n++){
@@ -87,8 +88,8 @@ void RK22(GeomData &geomParams,
           vector<vector<double>> &W_matrix,
           vector<int> &neighbours,
           vector<double> &nb_neighbours,
-          vector<int> &track_surface,
-          vector<double> &N_smoothed){
+          vector<double> type,
+          vector<double> normal){
 
     double dt = simParams.dt;
     double theta = simParams.theta;  
@@ -102,16 +103,18 @@ void RK22(GeomData &geomParams,
                     dudt_half(3*nb_tot_part,0.0);
 
     Euler(geomParams, thermoParams, simParams, pos_half, u_half, rho_half, drhodt_half, c, p, dudt_half, 
-              mass, pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, track_surface, N_smoothed);
+              mass, pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, type, normal);
 
     // Compute D(rho)/Dt for all particles
     continuityEquation(simParams, neighbours, nb_neighbours, gradW_matrix, 
                     pos_half, u_half, drhodt_half, rho_half, mass); 
 
     // Compute D(u)/Dt for all particles
-    momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, track_surface, N_smoothed, gradW_matrix, 
-                    W_matrix, pi_matrix, mass, dudt_half, rho_half, p, c, pos_half, u_half); 
-
+    momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW_matrix, 
+                    W_matrix, pi_matrix, mass, dudt_half, rho_half, p, c, pos_half, u_half, type, normal); 
+                    
+    checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
+                      neighbours, nb_neighbours, pi_matrix);
     int nb_part = simParams.nb_part;
     #pragma omp parallel for
     for (int n = 0; n < nb_part; n++){
@@ -144,8 +147,8 @@ void updateVariables(GeomData &geomParams,
                      vector<vector<double>> &W_matrix,
                      vector<int> &neighbours,
                      vector<double> &nb_neighbours,
-                     vector<int> &track_surface,
-                     vector<double> &N_smoothed){
+                     vector<double> type,
+                     vector<double> normal){
 
     bool PRINT = simParams.PRINT;
     string schemeIntegration = simParams.schemeIntegration;
@@ -153,7 +156,7 @@ void updateVariables(GeomData &geomParams,
 
     if (schemeIntegration == "Euler")
         Euler(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
-              pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, track_surface, N_smoothed);
+              pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, type, normal);
     
 
     if (schemeIntegration == "RK22"){
@@ -165,7 +168,7 @@ void updateVariables(GeomData &geomParams,
                         dudt_half(3*nb_tot_part,0.0);
 
         RK22(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass,
-             pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, track_surface, N_smoothed);
+             pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, type, normal);
     }
 
     if (PRINT) cout << "update passed" << endl;
@@ -185,13 +188,13 @@ void checkTimeStep(GeomData &geomParams,
     double alpha = simParams.alpha;
     double beta = simParams.beta;
     double h = geomParams.h;
-    double g = (simParams.is_gravity)? -9.81 : 0;
+    
     int nb_moving_part = simParams.nb_moving_part;
     int t = simParams.t;
 
     double F_st_max = simParams.F_st_max;
-    double dt_f = h / sqrt(g*g + F_st_max*F_st_max);
-    double dt_cv;
+    double dt_f = h / F_st_max;
+    double dt_cv = 0;
     double min_a = numeric_limits<double>::max();
     double max_b = numeric_limits<double>::min();
 
@@ -250,8 +253,7 @@ void checkTimeStep(GeomData &geomParams,
         }
 
         dt_cv = min_a;
-        double dt_final = min(0.25*dt_f, 0.4*dt_cv);
-
+        double dt_final = min(0.4*dt_f, 0.25*dt_cv);
         string state_equation = simParams.state_equation;
 
         if (state_equation == "Ideal gaz law"){
@@ -262,7 +264,7 @@ void checkTimeStep(GeomData &geomParams,
             
             if (simParams.PRINT){
                 if (abs(prev_dt - next_dt) != 0){
-                    cout << setprecision(8);
+                    cout << setprecision(15);
                     cout << "dt modified (t :" << t <<")"<<", was : " << prev_dt
                         << " and is now : " << next_dt << endl;
                 }
@@ -277,7 +279,7 @@ void checkTimeStep(GeomData &geomParams,
 
             if (simParams.PRINT){
                 if (abs(prev_dt - next_dt) != 0){
-                    cout << setprecision(8);
+                    cout << setprecision(15);
                     cout << "dt modified (t :" << t <<")"<<", was : " << prev_dt
                         << " and is now : " << next_dt << endl;
                 }

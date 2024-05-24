@@ -18,8 +18,13 @@ void initMass(GeomData &geomParams,
               vector<double> &mass){
 
     double s = geomParams.s;  
-    bool PRINT = simParams.PRINT;  
-    double V = s * s * s;
+    bool PRINT = simParams.PRINT; 
+    int dim = simParams.dimension;
+    double V = 0.0;
+    if(dim == 3)
+        V = s * s * s;
+    else
+        V = s*s;
     int rho_size = rho.size();
 
     #pragma omp parallel for   
@@ -67,8 +72,8 @@ void initRho(ThermoData &thermoParams,
 
             double B = c_0 * c_0 * rho_0 / gamma;
             for (int i = 0; i < rho_size; i++)
-                rho[i] = (i < nb_moving_part) ? rho_0 * (1 + rho_0 
-                                * g * pos[3 * i + 2] / B) : rho_fixed;  
+                rho[i] = (i < nb_moving_part) ? rho_0 * pow(1 + rho_0 
+                                * g * pos[3 * i + 2] / B, 1/gamma) : rho_fixed;  
         }
     }
     else{

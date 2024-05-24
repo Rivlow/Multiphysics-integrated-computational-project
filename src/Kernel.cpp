@@ -6,9 +6,9 @@
 
 using namespace std;
 
-double W_coh(double r, double h){
+double W_coh(double r, double h, SimulationData simParams){
     double W = 0.0;
-    double cst = 32/(M_PI*h*h*h*h*h*h*h*h*h);
+    double cst = (simParams.dimension == 3) ? 32/(M_PI*h*h*h*h*h*h*h*h*h) : 40/(M_PI*h*h*h*h*h*h*h*h);
     if(2.0*r>h && r<=h){
         W = cst*(h-r)*(h-r)*(h-r)*r*r*r;
     }
@@ -20,6 +20,20 @@ double W_coh(double r, double h){
     }
     return W;
 }
+
+double W_adh(double r, double h, SimulationData simParams){
+
+    double W = 0.0;
+    double cst = (simParams.dimension == 2)? 16/(4* M_PI*pow(h, 2.25)): 0.0007/pow(h,3.25);
+
+    if(2.0*r>h && r<=h)
+        W = cst*sqrt(sqrt(-4*r*r/h+6*r-2*h));
+    else
+        W = 0.0;
+    
+    return W;
+}
+
 
 
 double f_gaussian(double r, double h)
@@ -61,13 +75,22 @@ double derive_bell(double r, double h){
     return DW;
 }
 
-double f_cubic_spline(double r, double h){
-
-    double alpha = 3.0 / (2.0 * M_PI * h * h * h);
+double f_cubic_spline(double r, double h, SimulationData &simParams){
+    int dim = simParams.dimension;
+    double alpha = 0;
+    if(dim == 3){
+        alpha = 3.0 / (2.0 * M_PI * h * h * h);
+    }
+    if(dim == 2){
+        alpha = 15.0 /( 7.0 * M_PI * h * h );
+    }
     double W;
 
-    if (r / h < 1.0)
-        W = alpha * (2/3- r * r / (h * h) + 0.5 * r * r * r / (h * h * h));
+    if (r / h < 1.0){
+        W = alpha * (2.0/3.0 - r * r / (h * h) + 0.5 * r * r * r / (h * h * h));
+        
+    }
+        
     
     else if (1.0 <= r / h && r / h < 2.0)
         W = alpha * 1.0/6.0 * ((2.0 - r / h) * (2.0 - r / h) * (2.0 - r / h));
@@ -82,14 +105,12 @@ double derive_cubic_spline(double r, double h, SimulationData &simParams)
 {
 
     int dim = simParams.dimension;
-    //cout << "dim : " << dim << endl;
     double alpha = 0;
     if(dim == 3){
-        alpha = 3 / (2 * M_PI * h * h * h);
+        alpha = 3.0 / (2.0 * M_PI * h * h * h);
     }
     if(dim == 2){
         alpha = 15.0 /( 7.0 * M_PI * h * h );
-        //cout << "alpha : " << alpha << endl;
     }
     
     double DW = 0;
@@ -103,7 +124,6 @@ double derive_cubic_spline(double r, double h, SimulationData &simParams)
     else 
         DW = 0;
         
-
     return DW;
 }
 
@@ -193,3 +213,4 @@ double derive_quintic_spline(double r, double h){
     
     return DW;
 }
+

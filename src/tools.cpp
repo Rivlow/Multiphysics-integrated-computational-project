@@ -31,6 +31,7 @@ void printMatrix(vector<vector<T>> &matrix, int size, string name)
         cout << "For lign " << i << " : (";
         for (int j = 0; j < int(matrix[i].size()); ++j)
         {
+            cout << setprecision(8);
             cout << matrix[i][j];
             if (j != int(matrix[i].size() - 1))
             {
@@ -59,6 +60,7 @@ void printArray(vector<T> &array, int size, string name)
 
     for (int i = 0; i < size; ++i)
     {
+        std::cout << setprecision(8);
         std::cout << array[i];
         if (i != int(array.size() - 1))
         {
@@ -177,7 +179,7 @@ void clearAllVectors(SimulationData &simParams,
                      vector<vector<double>> &gradW_matrix, 
                      vector<double> &drhodt,
                      vector<double> &dudt,
-                     vector<int> &track_surface){
+                     vector<double> &normal){
 
     bool PRINT = simParams.PRINT;
     int nb_part = simParams.nb_part;
@@ -196,13 +198,10 @@ void clearAllVectors(SimulationData &simParams,
         gradW_matrix[i].clear();
         pi_matrix[i].clear();
         drhodt[i] = 0.0;
-
+        normal[i] = 0.0;
         for(int coord = 0 ; coord < 3 ; coord ++)
             dudt[3*i+coord] = 0.0;    
     }
-    for(int i = 0 ; i < track_surface.size(); i++){
-
-        track_surface[i] = 0.0;
-    }
+    
     if (PRINT) cout << "clearAllVectors passed" << endl;
 }

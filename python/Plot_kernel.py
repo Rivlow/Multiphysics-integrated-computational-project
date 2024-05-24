@@ -7,7 +7,6 @@ import sys
 SMALL_SIZE = 8
 MEDIUM_SIZE = 14
 BIGGER_SIZE = 18
-
 plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
 plt.rc('axes', titlesize=MEDIUM_SIZE)    # fontsize of the axes title
 plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
@@ -55,7 +54,7 @@ plt.grid(True)
 plt.legend(loc = 'best')
 
 plt.tight_layout()
-plt.savefig(f"{current_directory}/Pictures/kernel_cubic_spline.PDF")
+#plt.savefig(f"{current_directory}/Pictures/kernel_cubic_spline.PDF")
 plt.show()
         
  

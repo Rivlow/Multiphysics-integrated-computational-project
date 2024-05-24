@@ -12,9 +12,12 @@ void gradW(GeomData &geomParams,
            SimulationData &simParams, 
            vector<vector<double>> &gradW_matrix,
            vector<vector<double>> &W_matrix,
-           vector<int> &neighbours,
-           vector<double> &nb_neighbours,
-           vector<double> &pos);
+           vector<int> neighbours,
+           vector<double> nb_neighbours,
+           vector<double> pos,
+           vector<double> rho,
+           vector<double> &normal,
+           vector<double> mass);
 
 void setSpeedOfSound(GeomData &geomParams,    
                      ThermoData &thermoParams,
@@ -54,8 +57,6 @@ void momentumEquation(GeomData &geomParams,
                       SimulationData &simParams, 
                       vector<int> &neighbours,
                       vector<double> &nb_neighbours,
-                      vector<int> &track_surface,
-                      vector<double> &N_smoothed,
                       vector<vector<double>> &gradW_matrix,
                       vector<vector<double>> W_matrix,
                       vector<vector<double>> &pi_matrix,
@@ -66,6 +67,7 @@ void momentumEquation(GeomData &geomParams,
                       vector<double> &c,
                       vector<double> &pos,
                       vector<double> &u,
-                      vector<double> type);
+                      vector<double> type,
+                      vector<double> normal);
 
 #endif // GRADIENT_H

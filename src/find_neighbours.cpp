@@ -22,7 +22,6 @@ void sortedList(GeomData &geomParams,
                 SimulationData &simParams, 
                 vector<vector<int>> &cell_matrix,
                 vector<int> &neighbours,
-                vector<int> &track_surface,
                 vector<vector<double>> &gradW_matrix,
                 vector<vector<double>> &W_matrix,
                 vector<vector<double>> &pi_matrix,
@@ -35,14 +34,13 @@ void sortedList(GeomData &geomParams,
     int Nz = geomParams.Nz;
     double Lx = geomParams.L_d[0], Ly = geomParams.L_d[1], Lz = geomParams.L_d[2];
     int size_pos = pos.size() / 3;
-
     // Sort all particles in their corresponding cell
     for (int n = 0; n < size_pos; n++){
 
         int i = pos[3 * n + 0] / (Lx / Nx);
         int j = pos[3 * n + 1] / (Ly / Ny);
         int k = pos[3 * n + 2] / (Lz / Nz);
-
+        
         // Skip particules outside of the domain
         if (i < 0 || j < 0 || k < 0 || i > Nx || j > Ny || k > Nz) continue;
         
@@ -50,8 +48,8 @@ void sortedList(GeomData &geomParams,
         i = (i == Nx) ? i - 1 : i;
         j = (j == Ny) ? j - 1 : j;
         k = (k == Nz) ? k - 1 : k;
-
-        cell_matrix[i + Nx * j + Ny * Nx * k].push_back(n);
+        
+        cell_matrix[i + Nx * j + Ny * Nx * k].push_back(n);   
     }
 
     // Find neighbours for each particle
@@ -65,7 +63,6 @@ void sortedList(GeomData &geomParams,
         // Skip particules outside of the domain
         if (i_cell < 0 || j_cell < 0 || k_cell < 0 || i_cell > Nx || j_cell > Ny || k_cell > Nz) continue;
         
-
         // Modify index of particules at boundaries
         i_cell = (i_cell >= Nx) ? Nx - 1 : i_cell;
         j_cell = (j_cell >= Ny) ? Ny - 1 : j_cell;
@@ -112,28 +109,9 @@ void sortedList(GeomData &geomParams,
 
                                 if (r2 <= kappa * kappa *h * h){
                                     
-                                    neighbours[100*n + it++] = idx_cell;
-
-                                    if (type[n] == 1){ //FP
-           
-
-                                        double theta = acos(rz / sqrt(r2)); 
-                                        double phi = atan2(ry, rx); 
-                                        
-
-                                        theta = theta * 180.0 / M_PI;
-                                        phi = phi * 180.0 / M_PI + (phi < 0 ? 360.0 : 0) ;// phi between 0 et 360 degrees
-                                       
-                                        int i_idx = (theta > 90 ? 0 : 8);
-                                        int j_idx = static_cast<int>(phi / 45.0);
-                                        
-                                        
-                                        track_surface[16*n + (j_idx + i_idx)]++;
-                                    }
-                                    
+                                    neighbours[100*n + it++] = idx_cell;                                  
                                     
                                 }
-                            
                             }
                         }
                     }
@@ -153,24 +131,22 @@ void sortedList(GeomData &geomParams,
 
 }
 
-/*
+
 void naiveAlgo(GeomData &geomParams,
                SimulationData &simParams, 
-               vector<vector<int>> &neighbours_matrix,
+               vector<int> &neighbours,
                vector<double> &pos){
 
     int pos_size = pos.size()/3; 
 
-    // added by RB
-    //for (int i = 0; i < nb_moving_part; i++)
-        //neighbours_matrix[i].resize(0);
-
-    int it_i = 0, it_j = 0;
-
     // Find neighbours for each particle
+    #pragma omp parallel for
     for (int i = 0; i < pos_size; i++){
-        for (int j = i + 1; j < pos_size; j++){
 
+        int it = 0;
+
+        for (int j = 0 ; j < pos_size; j++){
+            
             double rx, ry, rz, r2;
             rx = (pos[3 * i] - pos[3 * j]);
             ry = (pos[3 * i + 1] - pos[3 * j + 1]);
@@ -180,40 +156,66 @@ void naiveAlgo(GeomData &geomParams,
             int kappa = geomParams.kappa;
             double h = geomParams.h;
 
-            if (r2 <= kappa * kappa *h * h){
-                neighbours_matrix[i][it_i++];
-                neighbours_matrix[j][it_j++];
-            }
+            if (r2 <= kappa * kappa *h * h)
+                neighbours[100*i + it++] = j;
+            
         }
     }
 }
-*/
 
-void printNeighbours(vector<vector<int>> &neighbours_matrix_linked,
-                     vector<vector<int>> &neighbours_matrix_naive){
 
-    for (int i = 0; i < int(neighbours_matrix_linked.size()); i++){
-        cout << "Particle " << i << " : ";
+void printNeighbours(vector<int> &neighbours_linked,
+                     vector<int> &neighbours_naive,
+                     vector<double> &pos){
+                        
+    
+    int size_pos = pos.size()/3;
+    for (int n = 0; n < size_pos; n++){
 
+        cout << "Particle " << n << " : ";
         cout << "{";
-        for (int j = 0; j < int(neighbours_matrix_linked[i].size()); j++){
 
-            cout << neighbours_matrix_linked[i][j];
-            if (j != int(neighbours_matrix_linked[i].size() - 1))
+        for (int it = 0; it < 100; it++){
+
+            cout << neighbours_linked[100*n + it];
+            if (it != 99)
+                cout << ", ";
+        }
+
+        cout << "} (Linked-list) VS {";
+
+        for (int it = 0; it < 100; it++){
+
+            cout << neighbours_naive[100*n + it];
+            if (it != 99)
+                cout << ", ";
+         }
+         cout << "} (naive)\n \n";
+    }
+
+    /*
+    for (int i = 0; i < int(neighbours_linked.size()); i++){
+        cout << "Particle " << i << " : ";
+        cout << "{";
+        for (int j = 0; j < int(neighbours_linked[i].size()); j++){
+
+            cout << neighbours_linked[i][j];
+            if (j != int(neighbours_linked[i].size() - 1))
                 cout << ", ";
             
         }
         cout << "} (Linked-list) VS {";
 
-        for (int j = 0; j < int(neighbours_matrix_naive[i].size()); j++){
+        for (int j = 0; j < int(neighbours_naive[i].size()); j++){
 
-            cout << neighbours_matrix_naive[i][j];
-            if (j != int(neighbours_matrix_naive[i].size() - 1))
+            cout << neighbours_naive[i][j];
+            if (j != int(neighbours_naive[i].size() - 1))
                 cout << ", ";
             
         }
         cout << "} (naive)\n \n";
     }
+    */
 }
 
 void CompareNeighbours( vector<vector<int>> &neighbours_matrix_linked,

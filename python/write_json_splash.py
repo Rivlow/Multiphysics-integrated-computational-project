@@ -17,8 +17,8 @@
   "simulation":{
     "theta" :0.5,
     "s": 0.00125,
-    "nstepT": 50000,
-    "dt": 0.00001,
+    "nstepT": 500000,
+    "dt": 0.0000001,
     "nsave": 100,
     "kappa": 2,
     "alpha": 0.01,
@@ -41,7 +41,7 @@
     "sigma":0.0728
   },
 
-  
+
   "forces":{
     "gravity":false,
     "surface_tension":true,
@@ -55,4 +55,3 @@
     "initialCondition" : {"Hydrostatic":false, "Constant":true}
   }
 }
-
