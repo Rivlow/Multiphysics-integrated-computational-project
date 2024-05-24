@@ -37,6 +37,8 @@ void RK22(GeomData &geomParams,
           vector<vector<double>> &pi_matrix,
           vector<vector<double>> &gradW_matrix,
           vector<vector<double>> &W_matrix,
+          vector<int> &neighbours,
+          vector<double> &nb_neighbours,
           vector<double> type,
           vector<double> normal);
 

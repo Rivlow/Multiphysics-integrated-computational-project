@@ -39,6 +39,7 @@ void Euler(GeomData &geomParams,
     string schemeIntegration = simParams.schemeIntegration;
     double theta = simParams.theta;
     double dt = simParams.dt;
+    //cout << dt << endl;
     if (schemeIntegration == "RK22") dt = simParams.dt/(2*theta);
     if (schemeIntegration == "Euler") dt = simParams.dt;
     
@@ -69,8 +70,6 @@ void Euler(GeomData &geomParams,
             u[3 * n + coord] += dt * dudt[3 * n + coord];
         }
     }
-    
-   //ma printArray(dudt, dudt.size(),"u");
 }
 
 void RK22(GeomData &geomParams,    
@@ -194,8 +193,7 @@ void checkTimeStep(GeomData &geomParams,
     int t = simParams.t;
 
     double F_st_max = simParams.F_st_max;
-    double dt_f = h / sqrt(F_st_max*F_st_max);
-    
+    double dt_f = h / F_st_max;
     double dt_cv = 0;
     double min_a = numeric_limits<double>::max();
     double max_b = numeric_limits<double>::min();
@@ -256,8 +254,6 @@ void checkTimeStep(GeomData &geomParams,
 
         dt_cv = min_a;
         double dt_final = min(0.4*dt_f, 0.25*dt_cv);
-       // cout << "dt final : " << dt_final << endl;
-        //cout << " dt_f " << dt_f << " dt_cv " << dt_cv << endl;
         string state_equation = simParams.state_equation;
 
         if (state_equation == "Ideal gaz law"){
@@ -268,7 +264,7 @@ void checkTimeStep(GeomData &geomParams,
             
             if (simParams.PRINT){
                 if (abs(prev_dt - next_dt) != 0){
-                    cout << setprecision(8);
+                    cout << setprecision(15);
                     cout << "dt modified (t :" << t <<")"<<", was : " << prev_dt
                         << " and is now : " << next_dt << endl;
                 }
@@ -283,7 +279,7 @@ void checkTimeStep(GeomData &geomParams,
 
             if (simParams.PRINT){
                 if (abs(prev_dt - next_dt) != 0){
-                    cout << setprecision(8);
+                    cout << setprecision(15);
                     cout << "dt modified (t :" << t <<")"<<", was : " << prev_dt
                         << " and is now : " << next_dt << endl;
                 }

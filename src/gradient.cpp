@@ -23,6 +23,7 @@ void gradW(GeomData &geomParams,
            vector<double> mass){
 
 
+    double h = geomParams.h;
     int nb_part = simParams.nb_part;
 
     // Iterations over each particle
@@ -36,30 +37,31 @@ void gradW(GeomData &geomParams,
         for (int idx = 0; idx < size_neighbours; idx++){
 
             int i_neig = neighbours[100*n + idx];
-            double r_ij = 0;
+            double r_ab = 0;
             vector<double> d_xyz(3);
 
             for (int coord = 0; coord < 3; coord++){
                 
                 d_xyz[coord] = pos[3 * n + coord] - pos[3 * i_neig + coord];
-                r_ij += d_xyz[coord]*d_xyz[coord];
+                r_ab += d_xyz[coord]*d_xyz[coord];
             }
 
-            r_ij = sqrt(r_ij);
-            double deriv = derive_cubic_spline(r_ij, geomParams.h, simParams);
-            W_matrix[n][idx] = f_cubic_spline(r_ij, geomParams.h, simParams);
-            double m_j = mass[i_neig];
-            double rho_j = rho[i_neig];
+            r_ab = sqrt(r_ab);
+            double deriv = derive_cubic_spline(r_ab, h, simParams);
+            double W = f_cubic_spline(r_ab, h, simParams);
+            double m_b = mass[i_neig];
+            double rho_b = rho[i_neig];
+            W_matrix[n][idx] = W;
+            double h = geomParams.h;
 
             for (int coord = 0; coord < 3; coord++){
-                gradW[3 * idx + coord] = (d_xyz[coord] / r_ij) * deriv;
-                normal[3 * n + coord] += gradW[3 * idx + coord]*geomParams.h*(m_j/rho_j);
+                gradW[3 * idx + coord] = (d_xyz[coord] / r_ab) * deriv;
+                normal[3 * n + coord] += gradW[3 * idx + coord]*h*m_b/rho_b;
             }
         }
     }
 
     if (simParams.PRINT)cout << "gradW passed" << endl;
-    
 }
 
 
@@ -275,7 +277,7 @@ void momentumEquation(GeomData &geomParams,
     double g = (simParams.is_gravity ? -9.81 : 0.0);
     bool PRINT = simParams.PRINT;
     int nb_moving_part = simParams.nb_moving_part;
-
+    simParams.F_st_max = 0;
     // Compute pressure for all particles
     setPressure(geomParams, thermoParams, simParams, p, rho); 
 
@@ -290,10 +292,9 @@ void momentumEquation(GeomData &geomParams,
     
     
     if (simParams.is_surface_tension)
-        surfaceTension(simParams, geomParams,thermoParams, nb_neighbours, neighbours,
-                       gradW_matrix, W_matrix, mass, rho, pos, F_vol,type);
+        surfaceTension(simParams, geomParams,thermoParams, nb_neighbours, neighbours, 
+                        gradW_matrix, W_matrix, mass, rho, pos, F_vol, type, normal);
 
-    //printArray(F_vol,F_vol.size(),"fvol0");
     // Iterate over each particle
     #pragma omp parallel for
     for (int n = 0; n < nb_moving_part; n++){
@@ -301,90 +302,44 @@ void momentumEquation(GeomData &geomParams,
         vector<double> &gradW = gradW_matrix[n];
         vector<double> &artificial_visc = pi_matrix[n];
         
-        double rho_i = rho[n];
-        double p_i = p[n];
+        double rho_a = rho[n];
+        double p_a = p[n];
         int size_neighbours = nb_neighbours[n];
 
-            // Summation over b = 1 -> nb_neighbours
+        // Summation over b = 1 -> nb_neighbours
         for (int idx = 0; idx < size_neighbours; idx++){
 
             int i_neig = neighbours[100*n + idx];
-            double pi_ij = artificial_visc[idx];
-            double rho_j = rho[i_neig];
-            double m_j = mass[i_neig];
-            double p_j = p[i_neig];
+            double pi_ab = artificial_visc[idx];
+            double rho_b = rho[i_neig];
+            double m_b = mass[i_neig];
+            double p_b = p[i_neig];
             for (int coord = 0; coord < 3; coord++){
-                dudt[3 * n + coord] += m_j * (p_j / (rho_j * rho_j) +
-                                    p_i / (rho_i * rho_i) + pi_ij)* gradW[3*idx + coord];
+                dudt[3 * n + coord] += m_b * (p_b / (rho_b * rho_b) +
+                                    p_a / (rho_a * rho_a) + pi_ab)* gradW[3*idx + coord];
             }
-            
-            /*
-            if (simParams.is_surface_tension) {
-                    
-                double K_ij = 2*thermoParams.rho_0/(rho[n]+rho[i_neig]);
-                double r_ij = 0;
-                vector<double> d_xyz(3);
-            
-                for (int coord = 0; coord < 3; coord++){
-                    
-                    d_xyz[coord] = pos[3 * n + coord] - pos[3 * i_neig + coord];
-                    r_ij += d_xyz[coord]*d_xyz[coord];
-                }
-
-                double h = geomParams.h;
-                double kappa = geomParams.kappa;
-                r_ij = sqrt(r_ij);
-                double W_coh_ij = W_coh(r_ij,kappa*h, simParams);
-                double m_i = mass[n];
-                double m_j = mass[i_neig];
-                double boundary =  type[i_neig];
-                double alpha_st = simParams.alpha_st;
-
-                vector<double> F_curv(3), F_coh(3);
-
-                for (int coord = 0; coord < 3; coord++){
-
-                    double n_i = normal[3*n+coord];
-                    double n_j = normal[3*i_neig+coord];
-
-                    F_curv[coord] = -alpha_st*m_i*(n_i - n_j);
-                    F_coh[coord] = -alpha_st*m_i*m_j*W_coh_ij*d_xyz[coord]/r_ij;
-
-                    F_vol[3*n + coord] += K_ij*boundary*(F_curv[coord] + F_coh[coord]);
-                    
-  
-                    cout << " F vol = " << boundary*K_ij*(alpha * m_a * m_b * d_xyz[coord]*W_ab/r_ab 
-                                    + alpha*(normal[3*n+coord]-normal[3*i_neig+coord])) << endl;
-                    cout << " normal = " << normal[3*n+coord]-normal[3*i_neig+coord] << endl;
-                    cout << " alpha = " << alpha << endl;
-
-                } 
-            }
-            
-        
             if(simParams.is_adhesion){
                 
                 double beta_ad = simParams.beta_adh;
-                double r_ij = 0;
+                double r_ab = 0;
                 vector<double> d_xyz(3);
 
                 for (int coord = 0; coord < 3; coord++){
                 
                     d_xyz[coord] = pos[3 * n + coord] - pos[3 * i_neig + coord];
-                    r_ij += d_xyz[coord]*d_xyz[coord];
+                    r_ab += d_xyz[coord]*d_xyz[coord];
                 }
 
-                r_ij = sqrt(r_ij);
+                r_ab = sqrt(r_ab);
                 double kh = geomParams.kappa*geomParams.h;
-                double W_adh_ij = W_adh(r_ij, kh, simParams);
+                double W_ab = W_adh(r_ab, kh, simParams);
 
 
                 for (int coord = 0; coord < 3; coord++){
                     double boundary = 1.0 - type[i_neig];
-                    F_vol[3 * n + coord] -= beta_ad*boundary*mass[n]*m_j*W_adh_ij*d_xyz[coord]/r_ij;
+                    F_vol[3 * n + coord] -= beta_ad*boundary*mass[n]*m_b*W_ab*d_xyz[coord]/r_ab;
                 }
             } 
-            */
         }
             
         double F_res = 0;
@@ -396,11 +351,10 @@ void momentumEquation(GeomData &geomParams,
             dudt[3 * n + coord] += F_vol[3 * n + coord];
             F_res += F_vol[3 * n + coord]*F_vol[3 * n + coord];
         }
+        F_res = sqrt(F_res);
         simParams.F_st_max = (simParams.F_st_max > F_res ? simParams.F_st_max : F_res );
             
     }
-    
     if (PRINT) cout << "momentumEquation passed" << endl;
 }
-
 

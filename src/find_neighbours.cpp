@@ -34,7 +34,6 @@ void sortedList(GeomData &geomParams,
     int Nz = geomParams.Nz;
     double Lx = geomParams.L_d[0], Ly = geomParams.L_d[1], Lz = geomParams.L_d[2];
     int size_pos = pos.size() / 3;
-
     // Sort all particles in their corresponding cell
     for (int n = 0; n < size_pos; n++){
 
@@ -50,9 +49,9 @@ void sortedList(GeomData &geomParams,
         j = (j == Ny) ? j - 1 : j;
         k = (k == Nz) ? k - 1 : k;
         
-        cell_matrix[i + Nx * j + Ny * Nx * k].push_back(n); 
+        cell_matrix[i + Nx * j + Ny * Nx * k].push_back(n);   
     }
-    
+
     // Find neighbours for each particle
     #pragma omp parallel for
     for (int n = 0; n < size_pos; n++){
@@ -113,7 +112,6 @@ void sortedList(GeomData &geomParams,
                                     neighbours[100*n + it++] = idx_cell;                                  
                                     
                                 }
-                            
                             }
                         }
                     }

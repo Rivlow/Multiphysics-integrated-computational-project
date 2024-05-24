@@ -174,6 +174,8 @@ int main(int argc, char *argv[])
 
     vector<vector<double>> pi_matrix(nb_tot_part), gradW_matrix(nb_tot_part), W_matrix(nb_tot_part);
     vector<int> neighbours(100*nb_tot_part);
+    vector<int> neighbours_naive(100*nb_tot_part);
+
     vector<double> nb_neighbours(nb_tot_part, 0.0); 
 
     // Variables defined to used "export.cpp"
@@ -241,14 +243,30 @@ int main(int argc, char *argv[])
     
     auto t_mid = chrono::high_resolution_clock::now();
 
+    double counter_linked = 0;
+    double counter_naive = 0;
+
     for (int t = 0; t < simParams.nstepT; t++){
 
         simParams.t = t;
 
         // Apply the linked-list algorithm
+        auto t_before_linked = chrono::high_resolution_clock::now();
         sortedList(geomParams, simParams, cell_matrix, neighbours,
                    gradW_matrix, W_matrix, pi_matrix, nb_neighbours, type, pos);
-    
+        auto t_after_linked = chrono::high_resolution_clock::now();
+        auto delta_t_linked = chrono::duration_cast<chrono::duration<double>>(t_after_linked - t_before_linked).count();
+        counter_linked += delta_t_linked;
+
+        auto t_before_naive= chrono::high_resolution_clock::now();
+        naiveAlgo(geomParams, simParams, neighbours_naive, pos);
+        auto t_after_naive = chrono::high_resolution_clock::now();
+        auto delta_t_naive = chrono::duration_cast<chrono::duration<double>>(t_after_naive - t_before_naive).count();
+        counter_naive += delta_t_naive;
+
+
+     
+        /*
         // Compute ∇_a(W_ab) for all particles
         gradW(geomParams, simParams, gradW_matrix, W_matrix, neighbours, nb_neighbours, pos, rho, normal, mass); 
 
@@ -272,7 +290,7 @@ int main(int argc, char *argv[])
             double elapsed_time = double(chrono::duration_cast<chrono::duration<double>>(t_act - t_mid).count());
             progressBar(double(t)/double(simParams.nstepT), elapsed_time);    
         }
-        
+        */
 
         // Clear matrices and reset arrays to 0
         clearAllVectors(simParams, pi_matrix, neighbours,
@@ -280,6 +298,10 @@ int main(int argc, char *argv[])
 
     }
 
+    cout << setprecision(15);
+    double divider = simParams.nstepT;
+    cout << "Total time for linked : " << counter_linked/divider << endl;
+    cout << "Total time for naive : " << counter_naive/divider << endl;
 
     auto t1 = chrono::high_resolution_clock::now();
     auto delta_t = chrono::duration_cast<chrono::duration<double>>(t1 - t0).count();
