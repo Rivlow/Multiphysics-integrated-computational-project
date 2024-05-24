@@ -2,7 +2,7 @@
     "simulation": {
         "theta": 0.5,
         "s": 0.02,
-        "nstepT": 200000,
+        "nstepT": 1,
         "dt": 2.5e-05,
         "nsave": 500,
         "kappa": 2,

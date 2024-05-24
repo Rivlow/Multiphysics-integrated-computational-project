@@ -250,8 +250,10 @@ int main(int argc, char *argv[])
         // Apply the linked-list algorithm
         sortedList(geomParams, simParams, cell_matrix, neighbours,
                    gradW_matrix, W_matrix, pi_matrix, nb_neighbours, type, pos);
+        cout << "ok linked" << endl;
 
         naiveAlgo(geomParams, simParams, neighbours_naive, pos);
+        cout << "ok naive" << endl;
 
         printNeighbours(neighbours, neighbours_naive, pos);
 

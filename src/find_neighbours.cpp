@@ -145,8 +145,12 @@ void naiveAlgo(GeomData &geomParams,
 
     // Find neighbours for each particle
     for (int i = 0; i < pos_size; i++){
-        for (int j = i + 1; j < pos_size; j++){
 
+        int it_i = 0;
+
+        for (int j = i + 1; j < pos_size; j++){
+            
+            int it_j = 0;
             double rx, ry, rz, r2;
             rx = (pos[3 * i] - pos[3 * j]);
             ry = (pos[3 * i + 1] - pos[3 * j + 1]);
