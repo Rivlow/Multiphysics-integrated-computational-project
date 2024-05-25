@@ -29,9 +29,9 @@ data = {
     "dt": 0.0001,
     "nsave": 100,
     "kappa": 2,
-    "alpha": 1500,
+    "alpha": 0.5,
     "beta": 0,
-    "alpha_st":0.15,
+    "alpha_st":10,
     "beta_adh": 10,
     "dimension": dimension
   },
