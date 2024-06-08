@@ -2,35 +2,35 @@ import json
 import os
 import sys
 
-s = 0.00125
-L = 1e-2
+s = 0.1
+L = 1
 dimension = 3
 
-nb_vtp_output = 250 # the total number of output file desired
-dt = 0.0001
-nstepT = 2500
-nsave = nb_vtp_output/(dt*nstepT)  
+#nb_vtp_output = 250 # the total number of output file desired
+dt = 1e-5
+nstepT = 100000
+nsave = 500 
 
 data = {
 
   "domain":{
     "matrix_long" : [[L, L, L], 
-                     [3*L, 3*L, s/2],
-                     [3*L, 3*L, s/2]
+                     [3*L, 3*L, s/4],
+                     [3*L-s/2, 3*L-s/2, s/4]
                     ],
-    "matrix_orig" : [[L, L, s], 
-                     [0, 0, 0],
-                     [s/2, s/2, s/2]
+    "matrix_orig" : [[L, L, L + s/2], 
+                     [0, 0, 2*L+s+s/4],
+                     [s/2, s/2, 2*L+0.75*s]
                     ],
     "vector_type" : [1, 0, 0],
-    "L_d": [4*L, 4*L, 4*L],
+    "L_d": [3*L, 3*L, 3*L],
     "o_d": [0.0, 0.0, 0.0]
   },
 
   "post_process":{
-    "do": True,
-    "xyz_init": [0, 1.5*L, 1.5*L],
-    "xyz_end": [3*L, 1.5*L, 1.5*L]
+    "do": False,
+    "xyz_init": [0, 0, 1.5*L],
+    "xyz_end": [3*L, 0, 1.5*L]
   },
 
   "simulation":{
@@ -40,10 +40,10 @@ data = {
     "dt": dt,
     "nsave": nsave,
     "kappa": 2,
-    "alpha": 1500,
+    "alpha": 0.5,
     "beta": 0,
-    "alpha_st":0.15,
-    "beta_adh": 10,
+    "alpha_st":0,
+    "beta_adh": 20,
     "dimension": dimension
   },
 
