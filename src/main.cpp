@@ -257,10 +257,6 @@ int main(int argc, char *argv[])
                         pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, type, normal);
 
 
-        
-        //if (t > 200) printMatrix(pi_matrix, pi_matrix.size(), "pi_matrix");
-        //if (t > 200) printArray(u, u.size(), "u");
-
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){
                 if (geomParams.post_process_do)
