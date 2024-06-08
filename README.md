@@ -116,7 +116,8 @@ data = {
 ### Launch simulation
 
 Once everything is ready, one can run the code by the following code line:
-    ```solver.exe ../../json/splash/2D_splash.json```
+
+```solver.exe ../../json/splash/2D_splash.json```
 
 In the example above, a cube of fluid particles will experience a splash. An example of 3D simulation is presented below:
 
@@ -124,11 +125,11 @@ In the example above, a cube of fluid particles will experience a splash. An exa
 
 ### Analyse simulation
 
-The results of the particles variables (position, velocity, pressure, density, speed of sound, number of neighbours, ...) can be visuallized using either Paraview (for nice spatial view) or our python scripts (which are simply reading **.csv** files created during the simulation).
+The results of the particles variables (position, velocity, pressure, density, speed of sound, number of neighbours, ...) can be visuallized using either Paraview (for nice spatial view) or thanks to our python scripts (which are simply reading **.csv** files created during the simulation).
 
-One focused on the density and pressure of particles. The ghost particles are created given a lign (whose coodinates are indicated in the json file) and the associated variable will be evaluated using the **summation method** (explain in the final report).
+One focused on the density and pressure of particles. The ghost particles are created given a lign (whose coordinates are indicated in the json file) and the associated variable will be evaluated using the **summation method** (explain in the final report).
 
-To plot the variables, you will find in the file **Misc_python/Analysis.py** many script allowing the user to plot density and pressure in many ways. Either by plotting one variable with respect to the other, or plotting the pressure/density along the spatial line on which lye ghost particles.
+To plot the variables, you will find in the file **Misc_python/Analysis.py** many scripts allowing the user to plot density and pressure in many ways. Either by plotting one variable with respect to the other, or plotting the pressure/density along the spatial line on which lye the ghost particles.
 
 
 
