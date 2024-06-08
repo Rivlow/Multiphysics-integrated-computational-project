@@ -120,7 +120,7 @@ Once everything is ready, one can run the code by the following code line:
 
 In the example above, a cube of fluid particles will experience a splash. An example of 3D simulation is presented below:
 
-![Test GIF](splash.gif)
+![Splash example in 3D](splash_3D.gif)
 
 ### Analyse simulation
 
