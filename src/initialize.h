@@ -25,9 +25,6 @@ void initVelocity(ThermoData &thermoParams,
                   SimulationData &simParams, 
                   vector<double> &u);
 
-void initViscosity(SimulationData &simParams, 
-                   vector<vector<double>> &pi_matrix);
-
 void initKernelCoef(GeomData &geomParams, 
                     SimulationData &simParams);
 

@@ -20,7 +20,6 @@ void computeGradW(GeomData &geomParams,
                    vector<double> pos){
 
 
-    double h = geomParams.h;
     int nb_tot_part = simParams.nb_tot_part;
 
     // Iterations over each particle
@@ -138,22 +137,10 @@ void setArtificialViscosity(GeomData &geomParams,
     double beta = simParams.beta;
     double alpha = simParams.alpha;
     double h = geomParams.h;
-    bool PRINT = simParams.PRINT;
     int nb_moving_part = simParams.nb_moving_part;
     int t = simParams.t;
 
-    if (t == 0){
-        #pragma omp parallel for
-        for (int n = 0; n < nb_moving_part; n++){
-
-            int size_neighbours = nb_neighbours[n];
-
-            for (int idx = 0; idx < size_neighbours; idx++)
-                viscosity[100*n + idx] = 0;
-        }
-    }
-
-    else{
+    if (t > 0){
 
         vector<double> rel_displ(3), rel_vel(3);
 
@@ -200,7 +187,7 @@ void setArtificialViscosity(GeomData &geomParams,
         }
     }
     
-    if (PRINT) cout << "setArtificialViscosity passed" << endl;
+    if (simParams.PRINT) cout << "setArtificialViscosity passed" << endl;
     
 }
 
@@ -264,10 +251,10 @@ void momentumEquation(GeomData &geomParams,
                       vector<int> &track_particle){
 
 
-    double g = (simParams.is_gravity ? -9.81 : 0.0);
     bool PRINT = simParams.PRINT;
     int nb_moving_part = simParams.nb_moving_part;
     simParams.F_st_max = 0;
+
     // Compute pressure for all particles
     setPressure(geomParams, thermoParams, simParams, p, rho); 
 
@@ -290,8 +277,6 @@ void momentumEquation(GeomData &geomParams,
                               gradW, W, mass, rho, pos, F_vol, type, track_particle);
     }
     
-
-    //printArray(F_vol, F_vol.size(), "F_vol");
     // Iterate over each particle
     #pragma omp parallel for
     for (int n = 0; n < nb_moving_part; n++){
@@ -300,7 +285,7 @@ void momentumEquation(GeomData &geomParams,
         double p_a = p[n];
         int size_neighbours = nb_neighbours[n];
 
-        // Summation over b = 1 -> nb_neighbours
+        // Summation over neighbours
         for (int idx = 0; idx < size_neighbours; idx++){
 
             int i_neig = neighbours[100*n + idx];
@@ -308,11 +293,12 @@ void momentumEquation(GeomData &geomParams,
             double rho_b = rho[i_neig];
             double m_b = mass[i_neig];
             double p_b = p[i_neig];
-            for (int coord = 0; coord < 3; coord++){
+
+            for (int coord = 0; coord < 3; coord++)
                 dudt[3 * n + coord] += m_b * (p_b / (rho_b * rho_b) +
                                     p_a / (rho_a * rho_a) + pi_ab)* gradW[100*n + 3*idx + coord];
-            }
-            if(simParams.is_adhesion){
+            
+            if (simParams.is_adhesion){
                 
                 double beta_ad = simParams.beta_adh;
                 double r_ab = 0;
@@ -335,7 +321,9 @@ void momentumEquation(GeomData &geomParams,
             } 
         }
             
+        double g = (simParams.is_gravity ? -9.81 : 0.0);
         double F_res = 0;
+
         for (int coord = 0; coord < 3; coord++){
             if(coord == 2)
                 F_vol[3 * n + coord] += g;
@@ -344,6 +332,7 @@ void momentumEquation(GeomData &geomParams,
             dudt[3 * n + coord] += F_vol[3 * n + coord];
             F_res += F_vol[3 * n + coord]*F_vol[3 * n + coord];
         }
+
         F_res = sqrt(F_res);
         simParams.F_st_max = (simParams.F_st_max > F_res ? simParams.F_st_max : F_res );
             

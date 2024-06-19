@@ -152,15 +152,14 @@ int main(int argc, char *argv[])
     };
     cout << "SimulationData initialized" << endl;
 
-    /*------------------- INITIALIZATION OF VARIABLES USED -------------------*/
+    /*------------------- INITIALIZATION OF VARIABLES USED -------------------*/    
 
-    // Vector used (and labelled w.r.t particles location)
+    // Initialize particles
+    int MP_count = 0, FP_count = 0, GP_count = 0;
     vector<double> pos;
     vector<int> type;
     vector<vector<int>> cell_matrix(geomParams.Nx * geomParams.Ny * geomParams.Nz);
 
-    // Initialize particles
-    int MP_count = 0, FP_count = 0, GP_count = 0;
     meshcube(geomParams, simParams, pos, type, MP_count, FP_count); 
     meshPostProcess(geomParams, simParams, pos, type, GP_count);
     
@@ -169,18 +168,17 @@ int main(int argc, char *argv[])
                    drhodt(nb_tot_part, 0), rho(nb_tot_part, 0),
                    dudt(3 * nb_tot_part, 0), p(nb_tot_part, 0),
                    c(nb_tot_part, 0), grad_sum(nb_tot_part, 0),
-                   normal(3*nb_tot_part, 0.0);
-
-    vector<vector<double>> pi_matrix(nb_tot_part), gradW_matrix(nb_tot_part), W_matrix(nb_tot_part);
-    vector<int> neighbours(100*nb_tot_part), nb_neighbours(nb_tot_part, 0);
-    vector<double> viscosity(100*nb_tot_part),  gradW(3*100*nb_tot_part), W(100*nb_tot_part);  
+                   normal(3*nb_tot_part, 0.0),
+                   viscosity(100*nb_tot_part, 0.0),
+                   gradW(3*100*nb_tot_part),
+                   W(100*nb_tot_part);
 
     int nb_sector = (simParams.dimension == 3)? 32: 8;
-    vector<int> free_surface(nb_sector*nb_tot_part, 0);
-    vector<int> track_particle(simParams.nb_moving_part, 0);
-
-    
-
+    vector<int> neighbours(100*nb_tot_part), 
+                nb_neighbours(nb_tot_part, 0),
+                free_surface(nb_sector*nb_tot_part, 0),
+                track_particle(simParams.nb_moving_part, 0);
+  
     // Variables defined to used "export.cpp"
     map<string, vector<double> *> scalars_double;
     map<string, vector<int> *> scalars_int;
@@ -198,7 +196,6 @@ int main(int argc, char *argv[])
     vectors_double["dudt"] = &dudt;
     vectors_double["normal"] = &normal;
 
-
     printParams(geomParams, thermoParams, simParams,
                 state_equation, state_initial_condition,
                 MP_count, FP_count, GP_count, nb_tot_part);
@@ -209,7 +206,6 @@ int main(int argc, char *argv[])
     initRho(thermoParams, simParams, pos, rho);
     initMass(geomParams, simParams, rho, mass);
     initVelocity(thermoParams, simParams, u);
-    initViscosity(simParams, pi_matrix);
     setPressure(geomParams, thermoParams, simParams, p, rho); 
     setSpeedOfSound(geomParams, thermoParams, simParams, c, rho);
     initKernelCoef(geomParams, simParams);

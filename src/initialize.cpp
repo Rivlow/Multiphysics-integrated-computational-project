@@ -117,26 +117,6 @@ void initVelocity(ThermoData &thermoParams,
     
 }
 
-void initViscosity(SimulationData &simParams, 
-                   vector<vector<double>> &pi_matrix){
-
-    bool PRINT = simParams.PRINT;
-    int size_pi_matrix = pi_matrix.size();
-    #pragma omp parallel for   
-    for (int i = 0; i < size_pi_matrix; i++){
-
-        int size_artificial_visc = pi_matrix[i].size();
-
-        for (int j = 0; j < size_artificial_visc; j++){
-            pi_matrix[i][j] = 0.0;
-        }
-    }
-
-    if (PRINT)
-        cout << "initViscosity passed" << endl;
-    
-}
-
 
 
 void initKernelCoef(GeomData &geomParams, 
