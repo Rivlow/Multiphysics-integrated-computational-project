@@ -22,12 +22,13 @@ void sortedList(GeomData &geomParams,
                 SimulationData &simParams, 
                 vector<vector<int>> &cell_matrix,
                 vector<int> &neighbours,
-                vector<vector<double>> &gradW_matrix,
-                vector<vector<double>> &W_matrix,
-                vector<vector<double>> &pi_matrix,
-                vector<double> &nb_neighbours,
-                vector<double> &type,
-                vector<double> &pos){
+                vector<double> &gradW,
+                vector<double> &W,
+                vector<double> &viscosity,
+                vector<int> &nb_neighbours,
+                vector<int> &type,
+                vector<double> &pos,
+                vector<int> &free_surface){
     
     int Nx = geomParams.Nx;
     int Ny = geomParams.Ny;
@@ -93,7 +94,7 @@ void sortedList(GeomData &geomParams,
 
                         int idx_cell = cell[idx];
 
-                        if (type[idx_cell] == 2.0) continue;
+                        if (type[idx_cell] == 2) continue;
                         else{
 
                             if (idx_cell != n){
@@ -109,7 +110,27 @@ void sortedList(GeomData &geomParams,
 
                                 if (r2 <= kappa * kappa *h * h){
                                     
-                                    neighbours[100*n + it++] = idx_cell;                                  
+                                    neighbours[100*n + it++] = idx_cell;     
+
+                                    /*
+                                    if (simParams.is_surface_tension &&  type[idx_cell] == 1.0){
+                                        
+                                        double x, y, z = pos[3*idx_cell + 0], pos[3*idx_cell + 1], pos[3*idx_cell + 2];
+                                        
+                                        // Compute spherical coordinates of neighbour
+                                        double theta = atan2(y, x);
+                                        double phi = (simParams.dimension == 3)? acos(z/r2): 0;
+
+                                        theta += (theta < 0)? 2*M_PI : 0;
+                                        int theta_sector = int(theta/(2*M_PI / 8));
+                                        int phi_sector = int(phi/(M_PI / 4));
+
+                                        int sector = 8*phi_sector + theta_sector;
+
+                                        int nb_sector = (simParams.dimension == 3)? 32: 8;
+                                        free_surface[nb_sector*n + sector]++;
+                                    }    
+                                    */                 
                                     
                                 }
                             }
@@ -118,12 +139,8 @@ void sortedList(GeomData &geomParams,
                 }
             }
         }
-        
-        gradW_matrix[n].resize(3*it);
-        W_matrix[n].resize(it);
-        pi_matrix[n].resize(it);
+
         nb_neighbours[n] = it;
-       
     }
 
     if (simParams.PRINT) cout << "findNeighbours passed" << endl;

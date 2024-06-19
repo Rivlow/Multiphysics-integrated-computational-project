@@ -13,7 +13,7 @@
 
 #include "generate_particle.h"
 #include "find_neighbours.h"
-#include "gradient.h"
+#include "NavierStokes.h"
 #include "initialize.h"
 #include "export.h"
 #include "Kernel.h"
@@ -21,6 +21,7 @@
 #include "structure.h"
 #include "integration.h"
 #include "data_store.h"
+#include "surface_tension.h"
 
 
 #include "nlohmann/json.hpp"
@@ -151,13 +152,11 @@ int main(int argc, char *argv[])
     };
     cout << "SimulationData initialized" << endl;
 
-
-
-
     /*------------------- INITIALIZATION OF VARIABLES USED -------------------*/
 
     // Vector used (and labelled w.r.t particles location)
-    vector<double> pos, type;
+    vector<double> pos;
+    vector<int> type;
     vector<vector<int>> cell_matrix(geomParams.Nx * geomParams.Ny * geomParams.Nz);
 
     // Initialize particles
@@ -173,61 +172,36 @@ int main(int argc, char *argv[])
                    normal(3*nb_tot_part, 0.0);
 
     vector<vector<double>> pi_matrix(nb_tot_part), gradW_matrix(nb_tot_part), W_matrix(nb_tot_part);
-    vector<int> neighbours(100*nb_tot_part);
-    vector<double> nb_neighbours(nb_tot_part, 0.0); 
+    vector<int> neighbours(100*nb_tot_part), nb_neighbours(nb_tot_part, 0);
+    vector<double> viscosity(100*nb_tot_part),  gradW(3*100*nb_tot_part), W(100*nb_tot_part);  
+
+    int nb_sector = (simParams.dimension == 3)? 32: 8;
+    vector<int> free_surface(nb_sector*nb_tot_part, 0);
+    vector<int> track_particle(simParams.nb_moving_part, 0);
+
+    
 
     // Variables defined to used "export.cpp"
-    map<string, vector<double> *> scalars;
-    map<string, vector<double> *> vectors;
-    scalars["type"] = &type;
-    scalars["mass"] = &mass;
-    scalars["rho"] = &rho;
-    scalars["p"] = &p;
-    scalars["drhodt"] = &drhodt;
-    scalars["nb_neighbours"] = &nb_neighbours;
-    scalars["grad_sum"] = &grad_sum;
-    vectors["position"] = &pos;
-    vectors["u"] = &u;
-    vectors["dudt"] = &dudt;
-    vectors["normal"] = &normal;
+    map<string, vector<double> *> scalars_double;
+    map<string, vector<int> *> scalars_int;
+    map<string, vector<double> *> vectors_double;
+    map<string, vector<int> *> vectors_int;
+    scalars_int["type"] = &type;
+    scalars_int["nb_neighbours"] = &nb_neighbours;
+    scalars_double["mass"] = &mass;
+    scalars_double["rho"] = &rho;
+    scalars_double["p"] = &p;
+    scalars_double["drhodt"] = &drhodt;
+    scalars_double["grad_sum"] = &grad_sum;
+    vectors_double["position"] = &pos;
+    vectors_double["u"] = &u;
+    vectors_double["dudt"] = &dudt;
+    vectors_double["normal"] = &normal;
 
-    cout << "#===============================#" << endl;
-    cout << "# General simulation parameters #" << endl;
-    cout << "#===============================#" << "\n" << endl;
-    cout << "s = " << geomParams.s << " [m]" << endl;
-    cout << "kappa = " << geomParams.kappa << " [-]" << endl;
-    cout << "h = " << geomParams.h << " [m]" << endl;
-    cout << "nstepT = " << simParams.nstepT << " [steps]" << endl;
-    cout << "nsave = " << simParams.nsave << " [steps]" << endl;
-    cout << "dt = " << simParams.dt << " [s]" << endl;
-    cout << "theta = " << simParams.theta << " [-]" << endl;
-    cout << "alpha (artificial viscosity) = " << simParams.alpha << " [-]" << endl;
-    cout << "alpha (surface tension) = " << simParams.alpha_st << " [-]" << endl;
-    cout << "beta (artificial viscosity) = " << simParams.beta << " [-]" << endl;
-    cout << "state equation = " << state_equation << endl;
-    cout << "state initial condition = " << state_initial_condition << "\n" << endl;
 
-    cout << "#==================#" << endl;
-    cout << "# Domain variables #" << endl;
-    cout << "#==================#" << "\n" << endl;
-    cout << "Radius of neighbourhood (kappa * h) = " << geomParams.kappa * geomParams.h << " [m]" << endl;
-    cout << "Number of cells in each direction (Nx, Ny, Nz) = (" << geomParams.Nx << ", " << geomParams.Ny << ", " << geomParams.Nz << ")" << endl;
-    cout << "Number of fluid particles = " << MP_count  << " [-]" << endl;
-    cout << "Number of fixed particles = " << FP_count  << " [-]" << endl;
-    cout << "Number of post process particles = " << GP_count << " [-]" << endl;
-    cout << "Total number of particles = " << nb_tot_part - GP_count << " [-]" << "\n" << endl;
-
-    cout << "#==================#" << endl;
-    cout << "# Thermo variables #" << endl;
-    cout << "#==================#" << "\n" << endl;
-    cout << "Initial speed of sound (c_0) = " << thermoParams.c_0 << " [m/s]" << endl;
-    cout << "Moving particle density (rho_moving) = " << thermoParams.rho_moving << " [kg/m^3]" << endl;
-    cout << "Fixed particle density (rho_fixed) = " << thermoParams.rho_fixed << " [kg/m^3]" << endl;
-    cout << "Initial density (rho_0) = " << thermoParams.rho_0 << " [kg/m^3]" << endl;
-    cout << "Molar mass (M) = " << thermoParams.M << " [kg/mol]" << endl;
-    cout << "Heat capacity ratio (gamma) = " << thermoParams.gamma << " [-]" << endl;
-    cout << "Ideal gas constant (R) = " << thermoParams.R << " [J/(mol*K)]" << endl;
-    cout << "Surface tension stress (sigma) = " << thermoParams.sigma << " [N/m]" << "\n" << endl;
+    printParams(geomParams, thermoParams, simParams,
+                state_equation, state_initial_condition,
+                MP_count, FP_count, GP_count, nb_tot_part);
 
     /*---------------------------- SPH ALGORITHM  ----------------------------*/
 
@@ -238,6 +212,7 @@ int main(int argc, char *argv[])
     initViscosity(simParams, pi_matrix);
     setPressure(geomParams, thermoParams, simParams, p, rho); 
     setSpeedOfSound(geomParams, thermoParams, simParams, c, rho);
+    initKernelCoef(geomParams, simParams);
     
     auto t_mid = chrono::high_resolution_clock::now();
 
@@ -247,14 +222,14 @@ int main(int argc, char *argv[])
 
         // Apply the linked-list algorithm
         sortedList(geomParams, simParams, cell_matrix, neighbours,
-                   gradW_matrix, W_matrix, pi_matrix, nb_neighbours, type, pos);
+                   gradW, W, viscosity, nb_neighbours, type, pos, free_surface);
     
         // Compute ∇_a(W_ab) for all particles
-        gradW(geomParams, simParams, gradW_matrix, W_matrix, neighbours, nb_neighbours, pos, rho, normal, mass); 
+        computeGradW(geomParams, simParams, gradW, W, neighbours, nb_neighbours, pos);
 
         // Update density, velocity and position (Euler explicit or RK22 scheme)
         updateVariables(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
-                        pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, type, normal);
+                        viscosity, gradW, W, neighbours, nb_neighbours, type, track_particle);
 
 
         // Save data each "nsave" iterations
@@ -262,7 +237,7 @@ int main(int argc, char *argv[])
                 if (geomParams.post_process_do)
                     extractData(geomParams, simParams, thermoParams, pos, p, mass, neighbours, nb_neighbours, rho);
                 
-            export_particles("../../output/sph", t, pos, scalars, vectors, false);
+            export_particles("../../output/sph", t, pos, scalars_double, vectors_double, false);
 
             auto t_act = chrono::high_resolution_clock::now();
             double elapsed_time = double(chrono::duration_cast<chrono::duration<double>>(t_act - t_mid).count());
@@ -271,8 +246,8 @@ int main(int argc, char *argv[])
         
 
         // Clear matrices and reset arrays to 0
-        clearAllVectors(simParams, pi_matrix, neighbours,
-                        cell_matrix, gradW_matrix, drhodt, dudt, normal);
+        clearAllVectors(simParams, viscosity, neighbours,
+                        cell_matrix, gradW, drhodt, dudt, track_particle);
 
     }
 

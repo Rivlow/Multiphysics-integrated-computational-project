@@ -25,7 +25,7 @@ void printMatrix(vector<vector<T>> &matrix, int size, string name)
          << "\n"
          << endl;
 
-    for (int i = 0; i <= size; ++i)
+    for (int i = 0; i < size; ++i)
     {
 
         cout << "For lign " << i << " : (";
@@ -173,35 +173,98 @@ void progressBar(double ratio, double elapsed_time) {
 
 
 void clearAllVectors(SimulationData &simParams,
-                     vector<vector<double>> &pi_matrix,
+                     vector<double> &viscosity,
                      vector<int> &neighbours,
                      vector<vector<int>> &cell_matrix,
-                     vector<vector<double>> &gradW_matrix, 
+                     vector<double> &gradW, 
                      vector<double> &drhodt,
                      vector<double> &dudt,
-                     vector<double> &normal){
+                     vector<int> &track_particle){
 
     bool PRINT = simParams.PRINT;
-    int nb_part = simParams.nb_part;
+    int nb_tot_part = simParams.nb_tot_part;
     int cell_size = cell_matrix.size();
     int neighbours_size = neighbours.size();
+
 
     for (int i = 0; i < cell_size; i++)
         cell_matrix[i].clear();
     
 
-    for (int i = 0; i < neighbours_size; i++)
-        neighbours[i] = 0;
+    #pragma omp parallel for
+    for (int idx = 0; idx < neighbours_size; idx++){
         
-    for (int i = 0; i < nb_part; i++){
+        neighbours[idx] = 0;
+        viscosity[idx] = 0;
 
-        gradW_matrix[i].clear();
-        pi_matrix[i].clear();
-        drhodt[i] = 0.0;
-        normal[i] = 0.0;
-        for(int coord = 0 ; coord < 3 ; coord ++)
-            dudt[3*i+coord] = 0.0;    
+        for (int coord = 0; coord < 3; coord++)
+            gradW[3*idx + coord] = 0;
     }
-    
+
+
+    #pragma omp parallel for
+    for (int i = 0; i < nb_tot_part; i++){
+
+        if (i <simParams.nb_moving_part)
+            track_particle[i] = 0;
+
+        drhodt[i] = 0.0;
+
+        for(int coord = 0 ; coord < 3 ; coord ++)
+            dudt[3*i+coord] = 0.0;  
+        
+    }    
+
     if (PRINT) cout << "clearAllVectors passed" << endl;
+}
+
+void printParams(GeomData geomParams,    
+                 ThermoData thermoParams,
+                 SimulationData simParams,
+                 string state_equation,
+                 string state_initial_condition,
+                 int MP_count,
+                 int FP_count,
+                 int GP_count,
+                 int nb_tot_part){
+
+    cout << "#===============================#" << endl;
+    cout << "# General simulation parameters #" << endl;
+    cout << "#===============================#" << "\n" << endl;
+    cout << "s = " << geomParams.s << " [m]" << endl;
+    cout << "kappa = " << geomParams.kappa << " [-]" << endl;
+    cout << "h = " << geomParams.h << " [m]" << endl;
+    cout << "nstepT = " << simParams.nstepT << " [steps]" << endl;
+    cout << "nsave = " << simParams.nsave << " [steps]" << endl;
+    cout << "dt = " << simParams.dt << " [s]" << endl;
+    cout << "theta = " << simParams.theta << " [-]" << endl;
+    cout << "alpha (artificial viscosity) = " << simParams.alpha << " [-]" << endl;
+    cout << "alpha (surface tension) = " << simParams.alpha_st << " [-]" << endl;
+    cout << "beta (artificial viscosity) = " << simParams.beta << " [-]" << endl;
+    cout << "state equation = " << state_equation << endl;
+    cout << "state initial condition = " << state_initial_condition << "\n" << endl;
+
+    cout << "#==================#" << endl;
+    cout << "# Domain variables #" << endl;
+    cout << "#==================#" << "\n" << endl;
+    cout << "Radius of neighbourhood (kappa * h) = " << geomParams.kappa * geomParams.h << " [m]" << endl;
+    cout << "Number of cells in each direction (Nx, Ny, Nz) = (" << geomParams.Nx << ", " << geomParams.Ny << ", " << geomParams.Nz << ")" << endl;
+    cout << "Number of fluid particles = " << MP_count  << " [-]" << endl;
+    cout << "Number of fixed particles = " << FP_count  << " [-]" << endl;
+    cout << "Number of post process particles = " << GP_count << " [-]" << endl;
+    cout << "Total number of particles = " << nb_tot_part - GP_count << " [-]" << "\n" << endl;
+
+    cout << "#==================#" << endl;
+    cout << "# Thermo variables #" << endl;
+    cout << "#==================#" << "\n" << endl;
+    cout << "Initial speed of sound (c_0) = " << thermoParams.c_0 << " [m/s]" << endl;
+    cout << "Moving particle density (rho_moving) = " << thermoParams.rho_moving << " [kg/m^3]" << endl;
+    cout << "Fixed particle density (rho_fixed) = " << thermoParams.rho_fixed << " [kg/m^3]" << endl;
+    cout << "Initial density (rho_0) = " << thermoParams.rho_0 << " [kg/m^3]" << endl;
+    cout << "Molar mass (M) = " << thermoParams.M << " [kg/mol]" << endl;
+    cout << "Heat capacity ratio (gamma) = " << thermoParams.gamma << " [-]" << endl;
+    cout << "Ideal gas constant (R) = " << thermoParams.R << " [J/(mol*K)]" << endl;
+    cout << "Surface tension stress (sigma) = " << thermoParams.sigma << " [N/m]" << "\n" << endl;
+
+                
 }

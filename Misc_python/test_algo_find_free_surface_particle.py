@@ -2,103 +2,95 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-def generate_points_inside_sphere(num_points, radius, num_segments_longitudinaux, num_segments_latitudinaux):
+def generate_random_points_3d(n):
     points = []
-    np.random.seed(5)
-    while len(points) < num_points:
-        # Generate random points inside a cube
-        x = np.random.uniform(-radius, radius)
-        y = np.random.uniform(-radius, radius)
-        z = np.random.uniform(-radius, radius)
-        
-        # Check if the point is inside the sphere
-        if x**2 + y**2 + z**2 <= radius**2:
-            # Calculate spherical coordinates
-            r = np.sqrt(x**2 + y**2 + z**2)
-            theta = np.arccos(z / r)  # Polar angle
-            phi = np.arctan2(y, x)     # Azimuthal angle
-            
-            # Convert angles to degrees and ensure they are positive
-            theta_deg = np.degrees(theta)
-            phi_deg = np.degrees(phi)
-            
-            # Ensure angles are positive and within [0, 360)
-            theta_deg_positif = (theta_deg + 360) % 360
-            phi_deg_positif = (phi_deg + 360) % 360
-            
-            points.append((x, y, z, theta_deg_positif, phi_deg_positif, False))  # Set initial color to False
-            
-            # Generate points on the surfaces of segments
-            for i in range(num_segments_longitudinaux):
-                for j in range(1, num_segments_latitudinaux):
-                    phi_segment = np.radians(i * 360 / num_segments_longitudinaux)
-                    theta_segment = np.radians(j * 180 / num_segments_latitudinaux)
-                    x_seg = radius * np.cos(phi_segment) * np.sin(theta_segment)
-                    y_seg = radius * np.sin(phi_segment) * np.sin(theta_segment)
-                    z_seg = radius * np.cos(theta_segment)
-                    points.append((x_seg, y_seg, z_seg, np.degrees(theta_segment), np.degrees(phi_segment), True))  # Set color to True for points at intersections
-    
+    for _ in range(n):
+        u = np.random.rand()
+        v = np.random.rand()
+        theta = 2 * np.pi * u
+        phi = np.arccos(2 * v - 1)
+        r = np.cbrt(np.random.rand())  
+        x = r * np.sin(phi) * np.cos(theta)
+        y = r * np.sin(phi) * np.sin(theta)
+        z = r * np.cos(phi)
+        points.append((x, y, z))
     return points
 
-# Parameters
-radius = 5
-num_points_inside = 8
-num_segments_longitudinaux = 8
-num_segments_latitudinaux = 4
+def determine_sector(points):
+    sectors = []
+    for x, y, z in points:
+        theta = np.arctan2(y, x)
+        if theta < 0:
+            theta += 2 * np.pi
+        phi = np.arccos(z / np.sqrt(x**2 + y**2 + z**2))
+        
+        theta_sector = int(theta // (2 * np.pi / 8))
+        phi_sector = int(phi // (np.pi / 4))
+        
+        sector_number = phi_sector * 8 + theta_sector + 1
+        sectors.append(sector_number)
+    return sectors
 
-# Generate points inside the sphere
-inside_points = generate_points_inside_sphere(num_points_inside, radius, num_segments_longitudinaux, num_segments_latitudinaux)
-inside_points = np.array(inside_points)
+def plot_sphere_with_sectors(points, sector_numbers):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.set_aspect('auto')
 
-# Plot
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
+    u = np.linspace(0, 2 * np.pi, 100)
+    v = np.linspace(0, np.pi, 100)
+    x = np.outer(np.cos(u), np.sin(v))
+    y = np.outer(np.sin(u), np.sin(v))
+    z = np.outer(np.ones(np.size(u)), np.cos(v))
 
-# Plot sphere
-u = np.linspace(0, 2 * np.pi, 100)
-v = np.linspace(0, np.pi, 100)
-x = radius * np.outer(np.cos(u), np.sin(v))
-y = radius * np.outer(np.sin(u), np.sin(v))
-z = radius * np.outer(np.ones(np.size(u)), np.cos(v))
-ax.plot_surface(x, y, z, color='b', alpha=0.3)
+    ax.plot_surface(x, y, z, color='b', alpha=0.1, rstride=5, cstride=5, linewidth=0)
 
-# Plot points inside the sphere
-for point in inside_points:
-    ax.scatter(point[0], point[1], point[2], color='k')
+    for i in range(8):
+        theta = i * (2 * np.pi / 8)
+        x = np.cos(theta) * np.sin(v)
+        y = np.sin(theta) * np.sin(v)
+        z = np.cos(v)
+        ax.plot(x, y, z, color='k', linewidth=0.5)
 
-# Plot lines connecting intersections to origin
-for point in inside_points:
-    ax.plot([0, point[0]], [0, point[1]], [0, point[2]], color='k')
+    for j in range(1, 4):
+        phi = j * (np.pi / 4)
+        x = np.outer(np.cos(u), np.sin(phi))
+        y = np.outer(np.sin(u), np.sin(phi))
+        z = np.outer(np.ones(np.size(u)), np.cos(phi))
+        ax.plot_wireframe(x, y, z, color='k', linewidth=0.5, rstride=10, cstride=10)
+    
+    x_points, y_points, z_points = zip(*points)
+    ax.scatter(x_points, y_points, z_points, s=20, c='red')
 
-# Plot cones
-for i in range(num_segments_longitudinaux):
-    phi = np.radians(i * 360 / num_segments_longitudinaux)
-    x_vals = radius * np.cos(phi) * np.sin(u)
-    y_vals = radius * np.sin(phi) * np.sin(u)
-    z_vals = radius * np.cos(u)
-    ax.plot(x_vals, y_vals, z_vals, color='k')
+    for i, (x, y, z) in enumerate(points):
+        ax.text(x, y, z, str(sector_numbers[i]), color='blue', fontsize=9, ha='center', va='center')
 
-for j in range(1, num_segments_latitudinaux):
-    theta = np.radians(j * 180 / num_segments_latitudinaux)
-    x_vals = radius * np.cos(u) * np.sin(theta)
-    y_vals = radius * np.sin(u) * np.sin(theta)
-    z_vals = radius * np.cos(theta)
-    ax.plot(x_vals, y_vals, z_vals, color='k')
+    max_range = 1.0
+    ax.set_xlim([-max_range, max_range])
+    ax.set_ylim([-max_range, max_range])
+    ax.set_zlim([-max_range, max_range])
 
-'''
-# Add numbering to sectors
-for j in range(num_segments_latitudinaux):
-    for i in range(num_segments_longitudinaux):
-        phi = np.radians(i * 360 / num_segments_longitudinaux)
-        theta = np.radians(j * 360 / num_segments_latitudinaux)
-        x_text = 1.1 * radius * np.cos(phi+0.5) * np.sin(theta+0.5)  # Adjust position for text
-        y_text = 1.1 * radius * np.sin(phi+0.5) * np.sin(theta+0.5)  # Adjust position for text
-        z_text = 1.1 * radius * np.cos(theta)  # Adjust position for text
-        ax.text(x_text, y_text, z_text, str(j+i + 1), color='r', fontsize=10)
-'''
+def main(n):
+    points = generate_random_points_3d(n)
+    sector_numbers = determine_sector(points)
+    
+    print(sector_numbers)
+    
+    for i, (part, point) in enumerate(zip(sector_numbers, points)):
+        print(f"Point {i} : sector {part}")
+    
+    plot_sphere_with_sectors(points, sector_numbers)
+    plt.show()
+    
+    
+    free_surf = np.zeros(32)
+    
+    for val in sector_numbers:
+        free_surf[val] += 1
+        
+    for i in range(len(free_surf)):
+        if free_surf[i] != 0:
+            print(f"Particules present in sector {i}")
+            
+    print(free_surf)
 
-ax.set_xlabel('X')
-ax.set_ylabel('Y')
-ax.set_zlabel('Z')
-
-plt.show()
+main(6)

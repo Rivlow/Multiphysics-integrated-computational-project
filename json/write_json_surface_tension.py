@@ -3,26 +3,26 @@ import os
 import sys
 
 s = 0.1
-L = 1
-dimension = 3
+L = 0.5
+dimension = 2
 
 nb_vtp_output = 250 # the total number of output file desired
 dt = 0.0001
-nstepT = 2500
+nstepT = 250000/2
 nsave = nb_vtp_output/(dt*nstepT)  
 
 data = {
 
   "domain":{
-    "matrix_long" : [[L, L, L]],
-    "matrix_orig" : [[L, L, L]],
+    "matrix_long" : [[L, s/2, L]],
+    "matrix_orig" : [[L, 0, L]],
     "vector_type" : [1],
     "L_d": [3*L, 3*L, 3*L],
     "o_d": [0.0, 0.0, 0.0]
   },
 
   "post_process":{
-    "do": True,
+    "do": False,
     "xyz_init": [0, 1.5*L, 1.5*L],
     "xyz_end": [3*L, 1.5*L, 1.5*L]
   },
@@ -51,7 +51,7 @@ data = {
     "gamma": 7, 
     "M": 18e-3, 
     "R":8.314,
-    "sigma":0.0728
+    "sigma":72.8
   },
 
 

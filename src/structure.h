@@ -62,11 +62,13 @@ struct SimulationData {
     bool is_adhesion;
     bool PRINT;
     int nb_moving_part;
-    int nb_part;
+    int nb_tot_part;
     int t;
     double F_st_max;
-    
- 
+    double cubic_kernel_coef;
+    double adh_kernel_coef;
+    double coh_kernel_coef;
+
 };
 
 #endif // STRUCTURE_H

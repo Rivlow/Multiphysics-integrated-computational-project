@@ -51,7 +51,7 @@ int evaluateNumberParticles(GeomData &geomParams){
 void meshcube(GeomData &geomParams,
               SimulationData &simParams,
               vector<double> &pos,
-              vector<double> &type,
+              vector<int> &type,
               int &MP_count,
               int &FP_count){
 
@@ -122,14 +122,14 @@ void meshcube(GeomData &geomParams,
         }
     }
     
-    simParams.nb_part = pos.size()/3;
+    simParams.nb_tot_part = pos.size()/3;
 }
 
 
 void meshPostProcess(GeomData &geomParams,
                      SimulationData &simParams,
                      vector<double> &pos, 
-                     vector<double> &type,
+                     vector<int> &type,
                      int &GP_count){
 
     if(geomParams.post_process_do){
