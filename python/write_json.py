@@ -2,8 +2,8 @@ import json
 import os
 import sys
 
-s = 0.00125
-L = 1e-2
+s = 0.1
+L = 1
 
 dimension = 3
 
@@ -14,9 +14,9 @@ data = {
                      [3*L, 3*L, s/2],
                      [3*L, 3*L, s/2]
                     ],
-    "matrix_orig" : [[L, L, s], 
-                     [0, 0, 0],
-                     [s/2, s/2, s/2]
+    "matrix_orig" : [[L, L, L], 
+                     [0, 0, 2*L+s],
+                     [s/2, s/2, 2*L+s/2]
                     ],
     "vector_type" : [1, 0, 0],
     "L_d": [4*L, 4*L, 4*L],
@@ -32,14 +32,14 @@ data = {
   "simulation":{
     "theta" :0.5,
     "s": s,
-    "nstepT": 500000,
-    "dt": 0.000001,
-    "nsave": 100,
+    "nstepT": 100000,
+    "dt": 0.00001,
+    "nsave": 1000,
     "kappa": 2,
     "alpha": 0.5,
     "beta": 0,
     "alpha_st":0.15,
-    "beta_adh": 1,
+    "beta_adh": 20,
     "dimension": dimension
   },
 
@@ -59,7 +59,7 @@ data = {
 
   "forces":{
     "gravity":True,
-    "surface_tension":True,
+    "surface_tension":False,
     "adhesion":True
   },
 
