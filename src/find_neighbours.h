@@ -19,20 +19,22 @@ void sortedList(GeomData &geomParams,
                 SimulationData &simParams, 
                 vector<vector<int>> &cell_matrix,
                 vector<int> &neighbours,
-                vector<vector<double>> &gradW_matrix,
-                vector<vector<double>> &W_matrix,
-                vector<vector<double>> &pi_matrix,
-                vector<double> &nb_neighbours,
-                vector<double> &type,
-                vector<double> &pos);
+                vector<double> &gradW,
+                vector<double> &W,
+                vector<double> &viscosity,
+                vector<int> &nb_neighbours,
+                vector<int> &type,
+                vector<double> &pos,
+                vector<int> &free_surface);
 
 void naiveAlgo(GeomData &geomParams,
                SimulationData &simParams, 
-               vector<vector<int>> &neighbours_matrix,
+               vector<int> &neighbours,
                vector<double> &pos);
 
-void printNeighbours(vector<vector<int>> &neighbours_matrix_linked, 
-                     vector<vector<int>> &neighbours_matrix_naive);
+void printNeighbours(vector<int> &neighbours_linked,
+                     vector<int> &neighbours_naive,
+                     vector<double> &pos);
 
 void CompareNeighbours( std::vector<std::vector<int>> &neighbours_matrix_linked,
                         std::vector<std::vector<int>> &neighbours_matrix_naive);

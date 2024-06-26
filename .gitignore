@@ -40,7 +40,6 @@ build/
 output/
 
 # Pictures
-*.PDF
 *.vtp
 
 # Text files

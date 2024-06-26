@@ -5,27 +5,11 @@
 #include <cmath>
 #include "structure.h"
 
-double W_coh(double r, double h, SimulationData simParams);
+double W_coh(double r, GeomData &geomParams, SimulationData simParams);
 
-double W_adh(double r, double h, SimulationData simParams);
+double W_adh(double r, GeomData &geomParams, SimulationData simParams);
 
-
-double f_gaussian(double r, double h);
-double deriv_gaussian(double r, double h);
-
-double f_bell(double r, double h);
-double derive_bell(double r, double h);
-
-double f_cubic_spline(double r, double h, SimulationData &simParams);
-double derive_cubic_spline(double r, double h, SimulationData &simParams);
-
-double f_quadratic(double r, double h);
-double derive_quadratic(double r, double h);
-
-double f_quintic(double r, double h);
-double derive_quintic(double r, double h);
-
-double f_quinitc_spline(double r, double h);
-double derive_quintic_spline(double r, double h);
+double f_cubic_spline(double r, GeomData &geomParams, SimulationData &simParams);
+double derive_cubic_spline(double r, GeomData &geomParams, SimulationData &simParams);
 
 #endif // KERNEL_FUNCTIONS_H

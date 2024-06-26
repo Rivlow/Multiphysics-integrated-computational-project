@@ -13,123 +13,10 @@
 #include "find_neighbours.h"
 #include "integration.h"
 #include "structure.h"
-#include "gradient.h"
+#include "NavierStokes.h"
 #include "tools.h"
 #include <omp.h>
 
-void Euler(GeomData &geomParams,    
-           ThermoData &thermoParams,
-           SimulationData &simParams, 
-           vector<double> &pos,
-           vector<double> &u,
-           vector<double> &rho,
-           vector<double> &drhodt,
-           vector<double> &c,
-           vector<double> &p,
-           vector<double> &dudt,
-           vector<double> &mass,
-           vector<vector<double>> &pi_matrix,
-           vector<vector<double>> &gradW_matrix,
-           vector<vector<double>> &W_matrix,
-           vector<int> &neighbours,
-           vector<double> &nb_neighbours,
-           vector<double> type,
-           vector<double> normal){
-
-    string schemeIntegration = simParams.schemeIntegration;
-    double theta = simParams.theta;
-    double dt = simParams.dt;
-    //cout << dt << endl;
-    if (schemeIntegration == "RK22") dt = simParams.dt/(2*theta);
-    if (schemeIntegration == "Euler") dt = simParams.dt;
-    
-
-    // Compute D(rho)/Dt for all particles
-    continuityEquation(simParams, neighbours, nb_neighbours, gradW_matrix, 
-                       pos, u, drhodt, rho, mass); 
-
-    // Compute D(u)/Dt for all particles
-    momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW_matrix, 
-                    W_matrix, pi_matrix, mass, dudt, rho, p, c, pos, u, type, normal); 
-    //printArray(dudt, dudt.size(),"dudt");
-    checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
-                      neighbours, nb_neighbours, pi_matrix);
-    int nb_part = simParams.nb_part;
-    #pragma omp parallel for   
-    for (int n = 0; n < nb_part; n++){
-
-        rho[n] += dt * drhodt[n];
-        if (rho[n] < 0){
-            cout << "Rho negative (" << rho[n] << ") at t:" << simParams.t << endl;
-            exit(1);
-        }
-
-        for (int coord = 0; coord < 3; coord++){
-
-            pos[3 * n + coord] += dt * u[3 * n + coord];
-            u[3 * n + coord] += dt * dudt[3 * n + coord];
-        }
-    }
-}
-
-void RK22(GeomData &geomParams,    
-          ThermoData &thermoParams,
-          SimulationData &simParams, 
-          vector<double> &pos,
-          vector<double> &u,
-          vector<double> &rho,
-          vector<double> &drhodt,
-          vector<double> &c,           
-          vector<double> &p,
-          vector<double> &dudt,
-          vector<double> &mass,
-          vector<vector<double>> &pi_matrix,
-          vector<vector<double>> &gradW_matrix,
-          vector<vector<double>> &W_matrix,
-          vector<int> &neighbours,
-          vector<double> &nb_neighbours,
-          vector<double> type,
-          vector<double> normal){
-
-    double dt = simParams.dt;
-    double theta = simParams.theta;  
-    string schemeIntegration = simParams.schemeIntegration;
-    int nb_tot_part = pos.size()/3;
-
-    vector<double>  u_half = u,
-                    rho_half = rho,
-                    pos_half = pos,
-                    drhodt_half(nb_tot_part,0.0),
-                    dudt_half(3*nb_tot_part,0.0);
-
-    Euler(geomParams, thermoParams, simParams, pos_half, u_half, rho_half, drhodt_half, c, p, dudt_half, 
-              mass, pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, type, normal);
-
-    // Compute D(rho)/Dt for all particles
-    continuityEquation(simParams, neighbours, nb_neighbours, gradW_matrix, 
-                    pos_half, u_half, drhodt_half, rho_half, mass); 
-
-    // Compute D(u)/Dt for all particles
-    momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW_matrix, 
-                    W_matrix, pi_matrix, mass, dudt_half, rho_half, p, c, pos_half, u_half, type, normal); 
-                    
-    checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
-                      neighbours, nb_neighbours, pi_matrix);
-    int nb_part = simParams.nb_part;
-    #pragma omp parallel for
-    for (int n = 0; n < nb_part; n++){
-
-        rho[n] += dt * ((1-theta)*drhodt[n] + theta*drhodt_half[n]);
-
-        for (int coord = 0; coord < 3; coord++){
-
-            double u_temp = u[3 * n + coord] + dt*dudt_half[3 * n + coord];
-            pos[3 * n + coord] += dt * ((1-theta)*u[3 * n + coord] + theta*u_temp);
-            u[3 * n + coord] += dt *  ((1-theta)*dudt[3 * n + coord] + theta*dudt_half[3 * n + coord]);
-
-        }
-    } 
-}
 
 void updateVariables(GeomData &geomParams,    
                      ThermoData &thermoParams,
@@ -142,33 +29,121 @@ void updateVariables(GeomData &geomParams,
                      vector<double> &p,
                      vector<double> &dudt,
                      vector<double> &mass,
-                     vector<vector<double>> &pi_matrix,
-                     vector<vector<double>> &gradW_matrix,
-                     vector<vector<double>> &W_matrix,
+                     vector<double> &viscosity,
+                     vector<double> &gradW,
+                     vector<double> &W,
                      vector<int> &neighbours,
-                     vector<double> &nb_neighbours,
-                     vector<double> type,
-                     vector<double> normal){
+                     vector<int> &nb_neighbours,
+                     vector<int> type,
+                     vector<int> &track_particle){
 
     bool PRINT = simParams.PRINT;
     string schemeIntegration = simParams.schemeIntegration;
     int nb_tot_part = pos.size()/3;
 
-    if (schemeIntegration == "Euler")
-        Euler(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
-              pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, type, normal);
+    if (schemeIntegration == "Euler"){
+
+        // Compute D(rho)/Dt for all particles
+        continuityEquation(simParams, neighbours, nb_neighbours, gradW, 
+                           pos, u, drhodt, rho, mass); 
+
+        // Compute D(u)/Dt for moving particles
+        momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW, 
+                         W, viscosity, mass, dudt, rho, p, c, pos, u, type, track_particle); 
+
+        checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
+                      neighbours, nb_neighbours);
+
+        double dt = simParams.dt;
+
+        #pragma omp parallel for   
+        for (int n = 0; n < simParams.nb_tot_part; n++){
+
+            rho[n] += dt * drhodt[n];
+
+            if (rho[n] < 0){
+                cerr << "Rho negative (" << rho[n] << ") at t:" << simParams.t << endl;
+                exit(EXIT_FAILURE);
+            }
+
+            for (int coord = 0; coord < 3; coord++){
+
+                pos[3 * n + coord] += dt * u[3 * n + coord];
+                u[3 * n + coord] += dt * dudt[3 * n + coord];
+            }
+        }
+    }
+
+    else if (schemeIntegration == "RK22"){
     
+        vector<double> u_half = u,
+                       rho_half = rho,
+                       pos_half = pos,
+                       drhodt_half(nb_tot_part,0.0),
+                       dudt_half(3*nb_tot_part,0.0);
 
-    if (schemeIntegration == "RK22"){
+        // First time step of RK22
+        
+        continuityEquation(simParams, neighbours, nb_neighbours, gradW, 
+                           pos_half, u_half, drhodt_half, rho_half, mass); 
 
-        vector<double>  u_half = u,
-                        rho_half = rho,
-                        pos_half = pos,
-                        drhodt_half(nb_tot_part,0.0),
-                        dudt_half(3*nb_tot_part,0.0);
+        momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW, 
+                         W, viscosity, mass, dudt_half, rho_half, p, c, pos_half, u_half, type, track_particle); 
+                        
+        checkTimeStep(geomParams, thermoParams, simParams, pos_half, u_half, c,
+                      neighbours, nb_neighbours);
 
-        RK22(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass,
-             pi_matrix, gradW_matrix, W_matrix, neighbours, nb_neighbours, type, normal);
+
+        double dt_half = simParams.dt/2;
+
+        #pragma omp parallel for   
+        for (int n = 0; n < simParams.nb_tot_part; n++){
+
+            rho_half[n] += dt_half * drhodt[n];
+            if (rho_half[n] < 0){
+                cout << "Rho negative (" << rho[n] << ") at t:" << simParams.t << endl;
+                exit(1);
+            }
+
+            for (int coord = 0; coord < 3; coord++){
+
+                pos_half[3 * n + coord] += dt_half * u[3 * n + coord];
+                u_half[3 * n + coord] += dt_half * dudt[3 * n + coord];
+            }
+        }
+
+        // Second time step of RK22
+
+        continuityEquation(simParams, neighbours, nb_neighbours, gradW, 
+                        pos_half, u_half, drhodt_half, rho_half, mass); 
+
+        momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW, 
+                        W, viscosity, mass, dudt_half, rho_half, p, c, pos_half, u_half, type, track_particle); 
+                        
+        checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
+                        neighbours, nb_neighbours);
+
+        double dt = simParams.dt;
+        double theta = simParams.theta;  
+
+
+        #pragma omp parallel for
+        for (int n = 0; n < simParams.nb_tot_part; n++){
+
+            rho[n] += dt * ((1-theta)*drhodt[n] + theta*drhodt_half[n]);
+
+            for (int coord = 0; coord < 3; coord++){
+
+                double u_temp = u[3 * n + coord] + dt*dudt_half[3 * n + coord];
+                pos[3 * n + coord] += dt * ((1-theta)*u[3 * n + coord] + theta*u_temp);
+                u[3 * n + coord] += dt *  ((1-theta)*dudt[3 * n + coord] + theta*dudt_half[3 * n + coord]);
+
+            }
+        }
+    }
+    else{
+        cerr << "No scheme integration chosen" << endl;
+        exit(EXIT_FAILURE);
     }
 
     if (PRINT) cout << "update passed" << endl;
@@ -182,8 +157,7 @@ void checkTimeStep(GeomData &geomParams,
                    vector<double> &u,
                    vector<double> &c,
                    vector<int> &neighbours,
-                   vector<double> &nb_neighbours,
-                   vector<vector<double>> &pi_matrix){
+                   vector<int> &nb_neighbours){
 
     double alpha = simParams.alpha;
     double beta = simParams.beta;
