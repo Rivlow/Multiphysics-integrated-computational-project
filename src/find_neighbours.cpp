@@ -25,8 +25,8 @@ void sortedList(GeomData &geomParams,
                 vector<double> &gradW,
                 vector<double> &W,
                 vector<double> &viscosity,
-                vector<int> &nb_neighbours,
-                vector<int> &type,
+                vector<double> &nb_neighbours,
+                vector<double> &type,
                 vector<double> &pos,
                 vector<int> &free_surface){
     

@@ -19,7 +19,7 @@ void extractData(GeomData &geomParams,
                  vector<double> &p, 
                  vector<double> &mass,
                  vector<int> &neighbours,
-                 vector<int> &nb_neighbours,
+                 vector<double> &nb_neighbours,
                  vector<double> rho){
 
     string outputDir = "../../output";

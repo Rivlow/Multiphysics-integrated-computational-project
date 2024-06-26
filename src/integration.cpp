@@ -33,8 +33,8 @@ void updateVariables(GeomData &geomParams,
                      vector<double> &gradW,
                      vector<double> &W,
                      vector<int> &neighbours,
-                     vector<int> &nb_neighbours,
-                     vector<int> type,
+                     vector<double> &nb_neighbours,
+                     vector<double> type,
                      vector<int> &track_particle){
 
     bool PRINT = simParams.PRINT;
@@ -157,7 +157,7 @@ void checkTimeStep(GeomData &geomParams,
                    vector<double> &u,
                    vector<double> &c,
                    vector<int> &neighbours,
-                   vector<int> &nb_neighbours){
+                   vector<double> &nb_neighbours){
 
     double alpha = simParams.alpha;
     double beta = simParams.beta;

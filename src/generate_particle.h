@@ -15,14 +15,14 @@ int evaluateNumberParticles(GeomData &geomParams);
 void meshcube(GeomData &geomParams,
               SimulationData &simParams,
               vector<double> &pos,
-              vector<int> &type,
+              vector<double> &type,
               int &MP_count,
               int &FP_count);
 
 void meshPostProcess(GeomData &geomParams,
                      SimulationData &simParams,
                      vector<double> &pos, 
-                     vector<int> &type,
+                     vector<double> &type,
                      int &GP_count);
 
 #endif // GENERATE_PARTICLE_H

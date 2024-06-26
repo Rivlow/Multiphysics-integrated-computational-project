@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
     // Initialize particles
     int MP_count = 0, FP_count = 0, GP_count = 0;
     vector<double> pos;
-    vector<int> type;
+    vector<double> type;
     vector<vector<int>> cell_matrix(geomParams.Nx * geomParams.Ny * geomParams.Nz);
 
     meshcube(geomParams, simParams, pos, type, MP_count, FP_count); 
@@ -171,11 +171,11 @@ int main(int argc, char *argv[])
                    normal(3*nb_tot_part, 0.0),
                    viscosity(100*nb_tot_part, 0.0),
                    gradW(3*100*nb_tot_part),
-                   W(100*nb_tot_part);
+                   W(100*nb_tot_part),
+                   nb_neighbours(nb_tot_part, 0);
 
     int nb_sector = (simParams.dimension == 3)? 32: 8;
-    vector<int> neighbours(100*nb_tot_part), 
-                nb_neighbours(nb_tot_part, 0),
+    vector<int> neighbours(100*nb_tot_part),
                 free_surface(nb_sector*nb_tot_part, 0),
                 track_particle(simParams.nb_moving_part, 0);
   
@@ -184,8 +184,8 @@ int main(int argc, char *argv[])
     map<string, vector<int> *> scalars_int;
     map<string, vector<double> *> vectors_double;
     map<string, vector<int> *> vectors_int;
-    scalars_int["type"] = &type;
-    scalars_int["nb_neighbours"] = &nb_neighbours;
+    scalars_double["type"] = &type;
+    scalars_double["nb_neighbours"] = &nb_neighbours;
     scalars_double["mass"] = &mass;
     scalars_double["rho"] = &rho;
     scalars_double["p"] = &p;

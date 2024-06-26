@@ -2,7 +2,7 @@ import json
 import os
 import sys
 
-s = 0.05
+s = 0.025
 L = 1.2
 dimension = 2
 
@@ -30,13 +30,13 @@ data = {
     
     "domain": {
         "matrix_long": [
-            [L-3*s, s/2, 0.9*L], # fluid
-            [L, s/2, s/2], # floor 1
+            [L-3*s, s/2, L-s], # fluid
+            [L+s, s/2, s/2], # floor 1
             [L, s/2, s/2], # floor 2
             [s/2, s/2, L], # left wall 1
             [s/2, s/2, L], # left wall 2
             [s/2, s/2, L], # right wall 1
-            [s/2, s/2, L-s/2], # right wall 2
+            [s/2, s/2, L], # right wall 2
 
         ],
         "matrix_orig": [
@@ -45,12 +45,12 @@ data = {
             [s/2, 0, s/2], # floor 2
             [s/2, 0, 3*s/2],# left wall 1
             [0, 0, s], # left wall 2
-            [L, 0, s], # right wall 1
-            [L+s/2, 0, 1.5*s], # right wall 2
+            [L+s, 0, s], # right wall 1
+            [L+s/2, 0, 3*s/2], # right wall 2
 
         ],
         "vector_type": [1, 0, 0, 0, 0, 0, 0],
-        "L_d": [2*L, 2*L, 2*L],
+        "L_d": [2*L, 4.1*s, 2*L],
         "o_d": [0.0, 0.0, 0.0]
     },
     "post_process": {
