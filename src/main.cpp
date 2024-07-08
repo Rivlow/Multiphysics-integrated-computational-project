@@ -170,12 +170,12 @@ int main(int argc, char *argv[])
                    c(nb_tot_part, 0), grad_sum(nb_tot_part, 0),
                    normal(3*nb_tot_part, 0.0),
                    viscosity(100*nb_tot_part, 0.0),
-                   gradW(3*100*nb_tot_part),
-                   W(100*nb_tot_part),
-                   nb_neighbours(nb_tot_part, 0);
+                   gradW(3*100*nb_tot_part,0.0),
+                   W(100*nb_tot_part,0.0),
+                   nb_neighbours(nb_tot_part, 0.0);
 
     int nb_sector = (simParams.dimension == 3)? 32: 8;
-    vector<int> neighbours(100*nb_tot_part),
+    vector<int> neighbours(100*nb_tot_part,0),
                 free_surface(nb_sector*nb_tot_part, 0),
                 track_particle(simParams.nb_moving_part, 0);
   
@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
     
         // Compute ∇_a(W_ab) for all particles
         computeGradW(geomParams, simParams, gradW, W, neighbours, nb_neighbours, pos);
-
+        
         // Update density, velocity and position (Euler explicit or RK22 scheme)
         updateVariables(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
                         viscosity, gradW, W, neighbours, nb_neighbours, type, track_particle);
@@ -244,7 +244,7 @@ int main(int argc, char *argv[])
         // Clear matrices and reset arrays to 0
         clearAllVectors(simParams, viscosity, neighbours,
                         cell_matrix, gradW, drhodt, dudt, track_particle);
-
+        
     }
 
 

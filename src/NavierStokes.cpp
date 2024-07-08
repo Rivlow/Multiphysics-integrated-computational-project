@@ -323,10 +323,9 @@ void momentumEquation(GeomData &geomParams,
             
         double g = (simParams.is_gravity ? -9.81 : 0.0);
         double F_res = 0;
-
+        
+        F_vol[3 * n + 2] += g;
         for (int coord = 0; coord < 3; coord++){
-            if(coord == 2)
-                F_vol[3 * n + coord] += g;
             
             dudt[3 * n + coord] *= -1;
             dudt[3 * n + coord] += F_vol[3 * n + coord];

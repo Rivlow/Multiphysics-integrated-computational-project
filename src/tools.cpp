@@ -198,9 +198,9 @@ void clearAllVectors(SimulationData &simParams,
         viscosity[idx] = 0;
 
         for (int coord = 0; coord < 3; coord++)
-            gradW[3*idx + coord] = 0;
+            gradW[3*(idx) + coord] = 0;
     }
-
+    
 
     #pragma omp parallel for
     for (int i = 0; i < nb_tot_part; i++){
@@ -214,7 +214,7 @@ void clearAllVectors(SimulationData &simParams,
             dudt[3*i+coord] = 0.0;  
         
     }    
-
+    
     if (PRINT) cout << "clearAllVectors passed" << endl;
 }
 
