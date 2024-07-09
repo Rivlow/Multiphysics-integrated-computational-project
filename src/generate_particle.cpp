@@ -1,9 +1,13 @@
 #include <iostream>
 #include <cmath> // ceil
+#include <vector>
+#include <unordered_set>
+#include <tuple>
+#include <stdio.h>
+#include <string.h>
 
 #include "generate_particle.h"
 #include "structure.h"
-
 
 using namespace std;
 
@@ -51,7 +55,7 @@ int evaluateNumberParticles(GeomData &geomParams){
 void meshcube(GeomData &geomParams,
               SimulationData &simParams,
               vector<double> &pos,
-              vector<int> &type,
+              vector<double> &type,
               int &MP_count,
               int &FP_count){
 
@@ -129,7 +133,7 @@ void meshcube(GeomData &geomParams,
 void meshPostProcess(GeomData &geomParams,
                      SimulationData &simParams,
                      vector<double> &pos, 
-                     vector<int> &type,
+                     vector<double> &type,
                      int &GP_count){
 
     if(geomParams.post_process_do){
@@ -158,4 +162,39 @@ void meshPostProcess(GeomData &geomParams,
             type.push_back(2.0);
         }
     }
+}
+
+
+struct TupleHash {
+    template <class T1, class T2, class T3>
+    size_t operator()(const tuple<T1, T2, T3>& t) const {
+        auto h1 = hash<T1>{}(get<0>(t));
+        auto h2 = hash<T2>{}(get<1>(t));
+        auto h3 = hash<T3>{}(get<2>(t));
+        return h1 ^ h2 ^ h3;
+    }
+};
+
+bool checkParticleGeneration(vector<double> pos){
+
+    int pos_size = pos.size() / 3;
+    unordered_set<tuple<double, double, double>, TupleHash> uniqueTriplets;
+
+    for (int n = 0; n < pos_size; n++) {
+        double x = pos[3 * n];
+        double y = pos[3 * n + 1];
+        double z = pos[3 * n + 2];
+
+        tuple<double, double, double> triplet = make_tuple(x, y, z);
+
+        if (uniqueTriplets.find(triplet) != uniqueTriplets.end()) {
+            cout << "Error : non unique triplet at " << n << " : (" << x << ", " << y << ", " << z << ")\n";
+            return false;
+        }
+
+        uniqueTriplets.insert(triplet);
+    }
+
+    cout << "All triplets are unique.\n";
+    return true;
 }

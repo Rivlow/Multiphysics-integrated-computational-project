@@ -179,7 +179,7 @@ void clearAllVectors(SimulationData &simParams,
                      vector<double> &gradW, 
                      vector<double> &drhodt,
                      vector<double> &dudt,
-                     vector<int> &track_particle){
+                     vector<double> &track_particle){
 
     bool PRINT = simParams.PRINT;
     int nb_tot_part = simParams.nb_tot_part;
@@ -264,7 +264,8 @@ void printParams(GeomData geomParams,
     cout << "Molar mass (M) = " << thermoParams.M << " [kg/mol]" << endl;
     cout << "Heat capacity ratio (gamma) = " << thermoParams.gamma << " [-]" << endl;
     cout << "Ideal gas constant (R) = " << thermoParams.R << " [J/(mol*K)]" << endl;
-    cout << "Surface tension stress (sigma) = " << thermoParams.sigma << " [N/m]" << "\n" << endl;
-
-                
+    cout << "Surface tension stress (sigma) = " << thermoParams.sigma << " [N/m]" << "\n" << endl;            
 }
+
+
+

@@ -16,7 +16,7 @@ void computeGradW(GeomData &geomParams,
                    vector<double> &gradW,
                    vector<double> &W,
                    vector<int> neighbours,
-                   vector<int> nb_neighbours,
+                   vector<double> nb_neighbours,
                    vector<double> pos){
 
 
@@ -128,7 +128,7 @@ void setArtificialViscosity(GeomData &geomParams,
                             SimulationData &simParams, 
                             vector<double> &viscosity,
                             vector<int> &neighbours,
-                            vector<int> &nb_neighbours,
+                            vector<double> &nb_neighbours,
                             vector<double> &c,
                             vector<double> &pos,
                             vector<double> &rho,
@@ -193,7 +193,7 @@ void setArtificialViscosity(GeomData &geomParams,
 
 void continuityEquation(SimulationData& simParams,
                         vector<int> &neighbours,
-                        vector<int> &nb_neighbours,
+                        vector<double> &nb_neighbours,
                         vector<double> &gradW,
                         vector<double> &pos,
                         vector<double> &u,
@@ -236,7 +236,7 @@ void momentumEquation(GeomData &geomParams,
                       ThermoData &thermoParams,
                       SimulationData &simParams, 
                       vector<int> &neighbours,
-                      vector<int> &nb_neighbours,
+                      vector<double> &nb_neighbours,
                       vector<double> &gradW,
                       vector<double> W,
                       vector<double> &viscosity,
@@ -247,8 +247,8 @@ void momentumEquation(GeomData &geomParams,
                       vector<double> &c,
                       vector<double> &pos,
                       vector<double> &u,
-                      vector<int> type,
-                      vector<int> &track_particle){
+                      vector<double> type,
+                      vector<double> &track_particle){
 
 
     bool PRINT = simParams.PRINT;
@@ -289,7 +289,8 @@ void momentumEquation(GeomData &geomParams,
         for (int idx = 0; idx < size_neighbours; idx++){
 
             int i_neig = neighbours[100*n + idx];
-            double pi_ab = viscosity[100*n + idx];
+            //double pi_ab = viscosity[100*n + idx];
+            double pi_ab = 0;
             double rho_b = rho[i_neig];
             double m_b = mass[i_neig];
             double p_b = p[i_neig];
@@ -334,9 +335,9 @@ void momentumEquation(GeomData &geomParams,
         }
 
         F_res = sqrt(F_res);
-        simParams.F_st_max = (simParams.F_st_max > F_res ? simParams.F_st_max : F_res );
-            
+        simParams.F_st_max = (simParams.F_st_max > F_res ? simParams.F_st_max : F_res );     
     }
+
     if (PRINT) cout << "momentumEquation passed" << endl;
 }
 

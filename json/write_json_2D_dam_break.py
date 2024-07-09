@@ -2,9 +2,8 @@ import json
 import os
 import sys
 
-s = 0.01
+s = 0.1
 L = 1.2
-dimension = 2
 
 nb_vtp_output = 250 # the total number of output file desired
 dt = 0.0001
@@ -25,7 +24,7 @@ data = {
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 1.2,
-        "dimension": dimension
+        "dimension": 2
     },
     
     "domain": {
@@ -86,7 +85,7 @@ data = {
 
 # Do not modify what is below    
 current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-json_src = f"dam_break/{dimension}D_dam_break.json"
+json_src = f"dam_break/2D_dam_break.json"
 
 with open(f'{current_directory}/{json_src}', 'w') as json_file:
     json.dump(data, json_file, indent=4)

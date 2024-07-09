@@ -2,14 +2,14 @@ import json
 import os
 import sys
 
-s = 0.03
+s = 0.1
 L = 1.2
-dimension = 2
 
 nb_vtp_output = 250 # the total number of output file desired
-dt = 0.0001
-nstepT = 25000
+dt = 0.0001/2
+nstepT = 250000
 nsave = nb_vtp_output/(dt*nstepT)  
+
 
 data = {
     
@@ -24,31 +24,43 @@ data = {
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 1.2,
-        "dimension": dimension
+        "dimension": 3
     },
     
     "domain": {
         "matrix_long": [
-            [0.3*L, s/2, 0.3*L], # fluid
-            [L, s/2, s/2], # floor 1
-            [L, s/2, s/2], # floor 2
-            [s/2, s/2, L], # left wall 1
-            [s/2, s/2, L], # left wall 2
-            [s/2, s/2, L], # right wall 1
-            [s/2, s/2, L-s/2], # right wall 2
+            [0.4*L, 0.4*L, 0.8*L], # fluid
+            [L, L, s/2], # floor 1
+            [L, L, s/2], # floor 2
+            
+            [L, s/2, L], # left wall 1
+            [L, s/2, L], # left wall 2
+            [L, s/2, L], # right wall 1
+            [L, s/2, L-s/2], # right wall 2
+            
+            [s/2, L-s/2, L], # back wall 1
+            [s/2, L-s/2, L-s/2], # back wall 2
+            [s/2, L-s/2, L], # front wall 1
+            [s/2, L-s/2, L-s/2], # front wall 2
 
         ],
         "matrix_orig": [
-            [0.35*L, 0, L], # fluid
+            [2*s, 2*s, 20*s], # fluid
             [0, 0, 0], # floor 1
-            [s/2, 0, s/2], # floor 2
-            [s/2, 0, 3*s/2],# left wall 1
-            [0, 0, s], # left wall 2
-            [L, 0, s], # right wall 1
-            [L+s/2, 0, 1.5*s], # right wall 2
+            [s/2, s/2, s/2], # floor 2
+            
+            [0, 0, s], # left wall 1
+            [s/2, s/2, 1.5*s],# left wall 2
+            [0, L, s], # right wall 1
+            [s/2, L+s/2, 1.5*s], # right wall 2
+            
+            [0, s/2, s], # back wall 1
+            [s/2, s, 1.5*s], # back wall 2
+            [L, 0, s], # front wall 1
+            [L+s/2, s/2, 1.5*s], # front wall 2
 
         ],
-        "vector_type": [1, 0, 0, 0, 0, 0, 0],
+        "vector_type": [1, 0, 0],
         "L_d": [2*L, 2*L, 2*L],
         "o_d": [0.0, 0.0, 0.0]
     },
@@ -83,12 +95,13 @@ data = {
 }
 
 
-# Do not modify what is below
+# Do not modify what is below    
 current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-json_src = f"splash/{dimension}D_splash.json"
+json_src = f"dam_break/3D_dam_break.json"
 
 with open(f'{current_directory}/{json_src}', 'w') as json_file:
     json.dump(data, json_file, indent=4)
 
 
 print(f"Data written in '{json_src}'")
+

@@ -95,14 +95,14 @@ void surfaceTension(SimulationData& simParams,
 void InterfaceTrackingMath(SimulationData simParams,
                            GeomData geomParams,
                            ThermoData thermoParams,
-                           vector<int> nb_neighbours,
+                           vector<double> nb_neighbours,
                            vector<int> neighbours,
                            vector<double> gradW,
                            vector<double> mass,
                            vector<double> rho,
-                           vector<int> type,
+                           vector<double> type,
                            vector<double> pos,
-                           vector<int> &track_particle){
+                           vector<double> &track_particle){
     
 
     #pragma omp parallel for 
@@ -146,7 +146,7 @@ void InterfaceTrackingMath(SimulationData simParams,
 void surfaceTensionImprove(SimulationData& simParams,
                            GeomData &geomParams,
                            ThermoData &thermoParams,
-                           vector<int> &nb_neighbours,
+                           vector<double> &nb_neighbours,
                            vector<int> &neighbours,
                            vector<double> &gradW,
                            vector<double> &W,
@@ -154,8 +154,8 @@ void surfaceTensionImprove(SimulationData& simParams,
                            vector<double> &rho,
                            vector<double> &pos,
                            vector<double> &F_vol,
-                           vector<int> type,
-                           vector<int> &track_particle){
+                           vector<double> type,
+                           vector<double> &track_particle){
 
 
 
@@ -174,12 +174,16 @@ void surfaceTensionImprove(SimulationData& simParams,
         for(int idx = 0; idx < size_neighbours; idx++){
 
             int i_neig = neighbours[100*n + idx];
-            if (track_particle[i_neig]){
+
+            if (track_particle[i_neig]){ // if boundary part. in neighbourhood -> assigned 1 to part. "n"
                 N[n] = 1;
                 continue;
             }
         }
     }
+
+    printArray(N, N.size(), "N");
+
 
 
     // Calculation of color function

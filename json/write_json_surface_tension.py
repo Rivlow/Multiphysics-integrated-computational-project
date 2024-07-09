@@ -8,7 +8,7 @@ dimension = 2
 
 nb_vtp_output = 250 # the total number of output file desired
 dt = 0.0001
-nstepT = 250000/2
+nstepT = 1
 nsave = nb_vtp_output/(dt*nstepT)  
 
 data = {

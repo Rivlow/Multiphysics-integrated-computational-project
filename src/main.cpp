@@ -19,7 +19,7 @@
 #include "Kernel.h"
 #include "tools.h"
 #include "structure.h"
-#include "integration.h"
+#include "time_integration.h"
 #include "data_store.h"
 #include "surface_tension.h"
 
@@ -157,11 +157,16 @@ int main(int argc, char *argv[])
     // Initialize particles
     int MP_count = 0, FP_count = 0, GP_count = 0;
     vector<double> pos;
-    vector<int> type;
+    vector<double> type;
     vector<vector<int>> cell_matrix(geomParams.Nx * geomParams.Ny * geomParams.Nz);
 
     meshcube(geomParams, simParams, pos, type, MP_count, FP_count); 
     meshPostProcess(geomParams, simParams, pos, type, GP_count);
+
+    checkParticleGeneration(pos);
+    
+    
+    
     
     int nb_tot_part = pos.size()/3;
     vector<double> mass(nb_tot_part, 0), u(3 * nb_tot_part, 0),
@@ -171,30 +176,29 @@ int main(int argc, char *argv[])
                    normal(3*nb_tot_part, 0.0),
                    viscosity(100*nb_tot_part, 0.0),
                    gradW(3*100*nb_tot_part),
-                   W(100*nb_tot_part);
+                   W(100*nb_tot_part),
+                   track_particle(simParams.nb_moving_part, 0),
+                   nb_neighbours(nb_tot_part, 0);
 
     int nb_sector = (simParams.dimension == 3)? 32: 8;
     vector<int> neighbours(100*nb_tot_part), 
-                nb_neighbours(nb_tot_part, 0),
-                free_surface(nb_sector*nb_tot_part, 0),
-                track_particle(simParams.nb_moving_part, 0);
+                free_surface(nb_sector*nb_tot_part, 0);
   
     // Variables defined to used "export.cpp"
-    map<string, vector<double> *> scalars_double;
-    map<string, vector<int> *> scalars_int;
-    map<string, vector<double> *> vectors_double;
-    map<string, vector<int> *> vectors_int;
-    scalars_int["type"] = &type;
-    scalars_int["nb_neighbours"] = &nb_neighbours;
-    scalars_double["mass"] = &mass;
-    scalars_double["rho"] = &rho;
-    scalars_double["p"] = &p;
-    scalars_double["drhodt"] = &drhodt;
-    scalars_double["grad_sum"] = &grad_sum;
-    vectors_double["position"] = &pos;
-    vectors_double["u"] = &u;
-    vectors_double["dudt"] = &dudt;
-    vectors_double["normal"] = &normal;
+    map<string, vector<double> *> scalars;
+    map<string, vector<double> *> vectors;
+    scalars["type"] = &type;
+    //scalars["track_particle"] = &track_particle;
+    scalars["nb_neighbours"] = &nb_neighbours;
+    scalars["mass"] = &mass;
+    scalars["rho"] = &rho;
+    scalars["p"] = &p;
+    scalars["drhodt"] = &drhodt;
+    scalars["grad_sum"] = &grad_sum;
+    vectors["position"] = &pos;
+    vectors["u"] = &u;
+    vectors["dudt"] = &dudt;
+    vectors["normal"] = &normal;
 
     printParams(geomParams, thermoParams, simParams,
                 state_equation, state_initial_condition,
@@ -209,6 +213,9 @@ int main(int argc, char *argv[])
     setPressure(geomParams, thermoParams, simParams, p, rho); 
     setSpeedOfSound(geomParams, thermoParams, simParams, c, rho);
     initKernelCoef(geomParams, simParams);
+
+    printArray(rho, rho.size(), "rho");
+    printArray(mass, mass.size(), "mass");
     
     auto t_mid = chrono::high_resolution_clock::now();
 
@@ -233,7 +240,7 @@ int main(int argc, char *argv[])
                 if (geomParams.post_process_do)
                     extractData(geomParams, simParams, thermoParams, pos, p, mass, neighbours, nb_neighbours, rho);
                 
-            export_particles("../../output/sph", t, pos, scalars_double, vectors_double, false);
+            export_particles("../../output/sph", t, pos, scalars, vectors, false);
 
             auto t_act = chrono::high_resolution_clock::now();
             double elapsed_time = double(chrono::duration_cast<chrono::duration<double>>(t_act - t_mid).count());

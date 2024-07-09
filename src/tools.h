@@ -35,7 +35,7 @@ void clearAllVectors(SimulationData &simParams,
                      vector<double> &gradW, 
                      vector<double> &drhodt,
                      vector<double> &dudt,
-                     vector<int> &track_particle);
+                     vector<double> &track_particle);
 
 void printParams(GeomData geomParams,    
                  ThermoData thermoParams,
