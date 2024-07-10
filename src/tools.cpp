@@ -166,7 +166,7 @@ void progressBar(double ratio, double elapsed_time) {
         }
     }
 
-    cout << "] " << fixed << setprecision(2) << ratio * 100 << "% (approximated remaining time = "<< remain_time << "s \r";
+    cout << "] " << fixed << setprecision(2) << ratio * 100 << "% (approximated remaining time = "<< remain_time << "s) \r";
     cout.flush();
 }
 
