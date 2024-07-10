@@ -99,16 +99,12 @@ void sortedList(GeomData &geomParams,
 
                             if (idx_cell != n){
 
-                                double rx, ry, rz, r2;
-                                rx = (pos[3 * n + 0] - pos[3 * idx_cell + 0]);
-                                ry = (pos[3 * n + 1] - pos[3 * idx_cell + 1]);
-                                rz = (pos[3 * n + 2] - pos[3 * idx_cell + 2]);
-                                r2 = rx*rx + ry*ry + rz*rz;
+                                double r_ab = dist(pos, n, idx_cell);
 
                                 int kappa = geomParams.kappa;
                                 double h = geomParams.h;
 
-                                if (r2 <= kappa * kappa *h * h){
+                                if (r_ab*r_ab <= kappa * kappa *h * h){
                                     
                                     neighbours[100*n + it++] = idx_cell;     
 

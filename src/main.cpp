@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 
     };
     cout << "GeomData initialized" << endl;
-
+    
     ThermoData thermoParams = {
         data["thermo"]["c_0"],
         data["thermo"]["rho_moving"],
@@ -163,7 +163,9 @@ int main(int argc, char *argv[])
     meshcube(geomParams, simParams, pos, type, MP_count, FP_count); 
     meshPostProcess(geomParams, simParams, pos, type, GP_count);
 
-    checkParticleGeneration(pos);
+    if (!checkParticleGeneration(pos))
+        exit(1);
+
     
     
     
@@ -214,8 +216,6 @@ int main(int argc, char *argv[])
     setSpeedOfSound(geomParams, thermoParams, simParams, c, rho);
     initKernelCoef(geomParams, simParams);
 
-    printArray(rho, rho.size(), "rho");
-    printArray(mass, mass.size(), "mass");
     
     auto t_mid = chrono::high_resolution_clock::now();
 

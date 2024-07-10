@@ -48,4 +48,9 @@ void printParams(GeomData geomParams,
                  int nb_tot_part);
 
 
+double dotProduct(vector<double> a, vector<double> b);
+
+double dist(vector<double> &pos, int n_1, int n_2);
+
+
 #endif // TOOLS_H

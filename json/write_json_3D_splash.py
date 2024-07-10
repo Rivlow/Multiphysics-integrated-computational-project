@@ -2,11 +2,11 @@ import json
 import os
 import sys
 
-s = 0.1
+s = 0.3
 L = 1.2
 
 nb_vtp_output = 250 # the total number of output file desired
-dt = 0.0001/2
+dt = 0.00005
 nstepT = 25000
 nsave = nb_vtp_output/(dt*nstepT)  
 
@@ -29,7 +29,7 @@ data = {
     
     "domain": {
         "matrix_long": [
-            [0.4*L, 0.4*L, 0.8*L], # fluid
+            [0.4*L, 0.4*L, 0.4*L], # fluid
             [L, L, s/2], # floor 1
             [L, L, s/2], # floor 2
             
@@ -45,7 +45,7 @@ data = {
 
         ],
         "matrix_orig": [
-            [s, s, 2*s], # fluid
+            [s, s, 10*s], # fluid
             [0, 0, 0], # floor 1
             [s/2, s/2, s/2], # floor 2
             
@@ -90,14 +90,14 @@ data = {
         "print_debug": False,
         "schemeIntegration": {"Euler": True, "RK22": False},
         "stateEquation": {"Ideal gaz law": False, "Quasi incompresible fluid": True},
-        "initialCondition": {"Hydrostatic": True, "Constant": False}
+        "initialCondition": {"Hydrostatic": False, "Constant": True}
     }
 }
 
 
 # Do not modify what is below    
 current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-json_src = f"dam_break/3D_dam_break.json"
+json_src = f"dam_break/3D_splash.json"
 
 with open(f'{current_directory}/{json_src}', 'w') as json_file:
     json.dump(data, json_file, indent=4)

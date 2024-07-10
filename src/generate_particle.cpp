@@ -188,13 +188,13 @@ bool checkParticleGeneration(vector<double> pos){
         tuple<double, double, double> triplet = make_tuple(x, y, z);
 
         if (uniqueTriplets.find(triplet) != uniqueTriplets.end()) {
-            cout << "Error : non unique triplet at " << n << " : (" << x << ", " << y << ", " << z << ")\n";
+            cout << "Error : non unique position triplet at " << n << " : (" << x << ", " << y << ", " << z << ")\n";
             return false;
         }
 
         uniqueTriplets.insert(triplet);
     }
 
-    cout << "All triplets are unique.\n";
+    cout << "All position triplets are unique.\n";
     return true;
 }

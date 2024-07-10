@@ -166,7 +166,7 @@ void progressBar(double ratio, double elapsed_time) {
         }
     }
 
-    cout << "] " << fixed << setprecision(2) << ratio * 100 << "% (approximated remaining time = "<< remain_time << "s )\r";
+    cout << "] " << fixed << setprecision(2) << ratio * 100 << "% (approximated remaining time = "<< remain_time << "s \r";
     cout.flush();
 }
 
@@ -265,6 +265,30 @@ void printParams(GeomData geomParams,
     cout << "Heat capacity ratio (gamma) = " << thermoParams.gamma << " [-]" << endl;
     cout << "Ideal gas constant (R) = " << thermoParams.R << " [J/(mol*K)]" << endl;
     cout << "Surface tension stress (sigma) = " << thermoParams.sigma << " [N/m]" << "\n" << endl;            
+}
+
+double dotProduct(vector<double> a, vector<double> b){
+
+    double dot_product = 0;
+
+    for (int coord = 0; coord < 3; coord++)
+        dot_product += a[coord]*b[coord];
+
+    return dot_product;
+
+
+}
+
+double dist(vector<double> &pos, int n_1, int n_2){
+
+    double r_ab = 0;
+
+    for (int coord = 0; coord < 3; coord++)
+        r_ab += (pos[3*n_1 + coord] - pos[3*n_2 + coord])*(pos[3*n_1 + coord] - pos[3*n_2 + coord]);
+        
+    r_ab = sqrt(r_ab);
+
+    return r_ab;
 }
 
 
