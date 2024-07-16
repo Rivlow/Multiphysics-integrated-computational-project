@@ -158,17 +158,13 @@ int main(int argc, char *argv[])
     int MP_count = 0, FP_count = 0, GP_count = 0;
     vector<double> pos;
     vector<double> type;
-    vector<vector<int>> cell_matrix(geomParams.Nx * geomParams.Ny * geomParams.Nz);
+    
 
     meshcube(geomParams, simParams, pos, type, MP_count, FP_count); 
     meshPostProcess(geomParams, simParams, pos, type, GP_count);
 
     if (!checkParticleGeneration(pos))
         exit(1);
-
-    
-    
-    
     
     int nb_tot_part = pos.size()/3;
     vector<double> mass(nb_tot_part, 0), u(3 * nb_tot_part, 0),
@@ -176,11 +172,13 @@ int main(int argc, char *argv[])
                    dudt(3 * nb_tot_part, 0), p(nb_tot_part, 0),
                    c(nb_tot_part, 0), grad_sum(nb_tot_part, 0),
                    normal(3*nb_tot_part, 0.0),
-                   viscosity(100*nb_tot_part, 0.0),
-                   gradW(3*100*nb_tot_part),
-                   W(100*nb_tot_part),
                    track_particle(simParams.nb_moving_part, 0),
                    nb_neighbours(nb_tot_part, 0);
+
+    vector<vector<int>> cell_matrix(geomParams.Nx * geomParams.Ny * geomParams.Nz);
+    vector<vector<double>> gradW(nb_tot_part),
+                           W(nb_tot_part),
+                           viscosity(nb_tot_part);
 
     int nb_sector = (simParams.dimension == 3)? 32: 8;
     vector<int> neighbours(100*nb_tot_part), 
@@ -250,7 +248,7 @@ int main(int argc, char *argv[])
 
         // Clear matrices and reset arrays to 0
         clearAllVectors(simParams, viscosity, neighbours,
-                        cell_matrix, gradW, drhodt, dudt, track_particle);
+                        cell_matrix, gradW, W, drhodt, dudt, track_particle);
 
     }
 

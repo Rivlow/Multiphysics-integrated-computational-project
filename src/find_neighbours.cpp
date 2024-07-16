@@ -22,9 +22,9 @@ void sortedList(GeomData &geomParams,
                 SimulationData &simParams, 
                 vector<vector<int>> &cell_matrix,
                 vector<int> &neighbours,
-                vector<double> &gradW,
-                vector<double> &W,
-                vector<double> &viscosity,
+                vector<vector<double>> &gradW,
+                vector<vector<double>> &W,
+                vector<vector<double>> &viscosity,
                 vector<double> &nb_neighbours,
                 vector<double> &type,
                 vector<double> &pos,
@@ -137,6 +137,10 @@ void sortedList(GeomData &geomParams,
         }
 
         nb_neighbours[n] = it;
+        gradW[n].resize(3*it);
+        W[n].resize(it);
+        viscosity[n].resize(it);
+
     }
 
     if (simParams.PRINT) cout << "findNeighbours passed" << endl;

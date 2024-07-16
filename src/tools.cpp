@@ -173,10 +173,11 @@ void progressBar(double ratio, double elapsed_time) {
 
 
 void clearAllVectors(SimulationData &simParams,
-                     vector<double> &viscosity,
+                     vector<vector<double>> &viscosity,
                      vector<int> &neighbours,
                      vector<vector<int>> &cell_matrix,
-                     vector<double> &gradW, 
+                     vector<vector<double>> &gradW, 
+                     vector<vector<double>>&W,
                      vector<double> &drhodt,
                      vector<double> &dudt,
                      vector<double> &track_particle){
@@ -195,15 +196,16 @@ void clearAllVectors(SimulationData &simParams,
     for (int idx = 0; idx < neighbours_size; idx++){
         
         neighbours[idx] = 0;
-        viscosity[idx] = 0;
-
-        for (int coord = 0; coord < 3; coord++)
-            gradW[3*idx + coord] = 0;
     }
 
 
     #pragma omp parallel for
     for (int i = 0; i < nb_tot_part; i++){
+
+        gradW[i].clear();
+        W[i].clear();
+        viscosity[i].clear();
+
 
         if (i <simParams.nb_moving_part)
             track_particle[i] = 0;

@@ -2,7 +2,7 @@ import json
 import os
 import sys
 
-s = 0.1
+s = 0.05
 L = 1.2
 
 nb_vtp_output = 250 # the total number of output file desired
@@ -60,7 +60,7 @@ data = {
             [L+s/2, s, 1.5*s], # front wall 2
 
         ],
-        "vector_type": [1, 0, 0],
+        "vector_type": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         "L_d": [2*L, 2*L, 2*L],
         "o_d": [0.0, 0.0, 0.0]
     },

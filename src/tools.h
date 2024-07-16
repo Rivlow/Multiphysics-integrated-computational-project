@@ -29,10 +29,11 @@ void clearOutputFiles();
 void progressBar(double ratio, double elapsed_time);
 
 void clearAllVectors(SimulationData &simParams,
-                     vector<double> &viscosity,
+                     vector<vector<double>> &viscosity,
                      vector<int> &neighbours,
                      vector<vector<int>> &cell_matrix,
-                     vector<double> &gradW, 
+                     vector<vector<double>> &gradW, 
+                     vector<vector<double>>&W,
                      vector<double> &drhodt,
                      vector<double> &dudt,
                      vector<double> &track_particle);

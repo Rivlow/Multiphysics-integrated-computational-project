@@ -12,12 +12,12 @@ using namespace std;
 
 
 void computeGradW(GeomData &geomParams,    
-                   SimulationData &simParams, 
-                   vector<double> &gradW,
-                   vector<double> &W,
-                   vector<int> neighbours,
-                   vector<double> nb_neighbours,
-                   vector<double> pos){
+                  SimulationData &simParams, 
+                  vector<vector<double>> &gradW,
+                  vector<vector<double>> &W,
+                  vector<int> neighbours,
+                  vector<double> nb_neighbours,
+                  vector<double> pos){
 
 
     int nb_tot_part = simParams.nb_tot_part;
@@ -40,10 +40,10 @@ void computeGradW(GeomData &geomParams,
 
             double r_ab = dist(pos, n, i_neig);
             double deriv = derive_cubic_spline(r_ab, geomParams, simParams);
-            W[100*n + idx] = f_cubic_spline(r_ab, geomParams, simParams);;
+            W[n][idx] = f_cubic_spline(r_ab, geomParams, simParams);;
 
             for (int coord = 0; coord < 3; coord++)
-                gradW[300*n + 3*idx + coord] = (d_pos[coord] / r_ab) * deriv;
+                gradW[n][3*idx + coord] = (d_pos[coord] / r_ab) * deriv;
             
         }
     }
@@ -121,7 +121,7 @@ void setPressure(GeomData &geomParams,
 void setArtificialViscosity(GeomData &geomParams,    
                             ThermoData &thermoParams,
                             SimulationData &simParams, 
-                            vector<double> &viscosity,
+                            vector<vector<double>> &viscosity,
                             vector<int> &neighbours,
                             vector<double> &nb_neighbours,
                             vector<double> &c,
@@ -168,7 +168,7 @@ void setArtificialViscosity(GeomData &geomParams,
                 double x_ab_x_ab = dotProduct(d_pos, d_pos);
                 double mu_ab = (h * u_ab_x_ab) / (x_ab_x_ab + nu_2);
 
-                viscosity[100*n + idx] = (u_ab_x_ab < 0) ? 
+                viscosity[n][idx] = (u_ab_x_ab < 0) ? 
                 (-alpha * c_ab * mu_ab + beta * mu_ab * mu_ab) / rho_ab : 0;
             }
         }
@@ -181,7 +181,7 @@ void setArtificialViscosity(GeomData &geomParams,
 void continuityEquation(SimulationData& simParams,
                         vector<int> &neighbours,
                         vector<double> &nb_neighbours,
-                        vector<double> &gradW,
+                        vector<vector<double>> &gradW,
                         vector<double> &pos,
                         vector<double> &u,
                         vector<double> &drhodt,
@@ -208,7 +208,7 @@ void continuityEquation(SimulationData& simParams,
 
                 double u_a = u[3 * n + coord];
                 double u_b = u[3 * i_neig + coord];
-                dot_product += (u_a - u_b) * gradW[300*n + 3*idx + coord];
+                dot_product += (u_a - u_b) * gradW[n][3*idx + coord];
             }
             
             drhodt[n] += m_b * dot_product;
@@ -223,9 +223,9 @@ void momentumEquation(GeomData &geomParams,
                       SimulationData &simParams, 
                       vector<int> &neighbours,
                       vector<double> &nb_neighbours,
-                      vector<double> &gradW,
-                      vector<double> W,
-                      vector<double> &viscosity,
+                      vector<vector<double>> &gradW,
+                      vector<vector<double>> W,
+                      vector<vector<double>> &viscosity,
                       vector<double> &mass,
                       vector<double> &dudt,
                       vector<double> &rho,
@@ -274,15 +274,14 @@ void momentumEquation(GeomData &geomParams,
         for (int idx = 0; idx < size_neighbours; idx++){
 
             int i_neig = neighbours[100*n + idx];
-            //double pi_ab = viscosity[100*n + idx];
-            double pi_ab = 0;
+            double pi_ab = viscosity[n][idx];
             double rho_b = rho[i_neig];
             double m_b = mass[i_neig];
             double p_b = p[i_neig];
 
             for (int coord = 0; coord < 3; coord++)
                 dudt[3*n + coord] -= m_b * (p_b / (rho_b * rho_b) +
-                                    p_a / (rho_a * rho_a) + pi_ab)* gradW[300*n + 3*idx + coord];
+                                    p_a / (rho_a * rho_a) + pi_ab)* gradW[n][3*idx + coord];
             
             if (simParams.is_adhesion){
                 
