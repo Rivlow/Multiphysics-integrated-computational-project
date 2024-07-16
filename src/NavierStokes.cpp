@@ -22,31 +22,67 @@ void computeGradW(GeomData &geomParams,
 
     int nb_tot_part = simParams.nb_tot_part;
 
-    // Iterations over each particle
-    #pragma omp parallel for
-    for (int n = 0; n < nb_tot_part; n++){
+    if (!simParams.is_surface_tension){
 
-        int size_neighbours = nb_neighbours[n];
+        // Iterations over each particle
+        #pragma omp parallel for
+        for (int n = 0; n < nb_tot_part; n++){
 
-        // Iterations over each associated neighbours 
-        for (int idx = 0; idx < size_neighbours; idx++){
+            int size_neighbours = nb_neighbours[n];
 
-            int i_neig = neighbours[100*n + idx];
+            // Iterations over each associated neighbours 
+            for (int idx = 0; idx < size_neighbours; idx++){
 
-            vector<double> d_pos(3);
-            for (int coord = 0; coord < 3; coord++)
-                d_pos[coord] = pos[3*n + coord] - pos[3*i_neig + coord];
-            
+                int i_neig = neighbours[100*n + idx];
 
-            double r_ab = dist(pos, n, i_neig);
-            double deriv = derive_cubic_spline(r_ab, geomParams, simParams);
-            W[n][idx] = f_cubic_spline(r_ab, geomParams, simParams);;
+                vector<double> d_pos(3);
+                for (int coord = 0; coord < 3; coord++)
+                    d_pos[coord] = pos[3*n + coord] - pos[3*i_neig + coord];
+                
 
-            for (int coord = 0; coord < 3; coord++)
-                gradW[n][3*idx + coord] = (d_pos[coord] / r_ab) * deriv;
-            
+                double r_ab = dist(pos, n, i_neig);
+                double deriv = derive_cubic_spline(r_ab, geomParams, simParams);
+                W[n][idx] = f_cubic_spline(r_ab, geomParams, simParams);;
+
+                for (int coord = 0; coord < 3; coord++)
+                    gradW[n][3*idx + coord] = (d_pos[coord] / r_ab) * deriv;
+                
+            }
         }
     }
+    else{
+
+        // Iterations over each particle
+        #pragma omp parallel for
+        for (int n = 0; n < nb_tot_part; n++){
+
+            int size_neighbours = nb_neighbours[n];
+
+            // Iterations over each associated neighbours 
+            for (int idx = 0; idx < size_neighbours; idx++){
+
+                int i_neig = neighbours[100*n + idx];
+
+                vector<double> d_pos(3);
+                for (int coord = 0; coord < 3; coord++)
+                    d_pos[coord] = pos[3*n + coord] - pos[3*i_neig + coord];
+                
+                double r_ab = dist(pos, n, i_neig);
+                double deriv = derive_wendland_quintic(r_ab, geomParams, simParams);
+                W[n][idx] = f_wendland_quintic(r_ab, geomParams, simParams);;
+
+                for (int coord = 0; coord < 3; coord++)
+                    gradW[n][3*idx + coord] = (d_pos[coord] / r_ab) * deriv;
+                
+            }
+        }
+    }
+
+
+
+
+
+
 
     if (simParams.PRINT)cout << "gradW passed" << endl;
 }
@@ -261,6 +297,8 @@ void momentumEquation(GeomData &geomParams,
         surfaceTensionImprove(simParams, geomParams,thermoParams, nb_neighbours, neighbours, 
                               gradW, W, mass, rho, pos, F_vol, type, track_particle);
     }
+
+    printArray(F_vol, F_vol.size(), "F_vol");
     
     // Iterate over each particle
     #pragma omp parallel for

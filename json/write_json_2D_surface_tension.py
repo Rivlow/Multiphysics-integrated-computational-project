@@ -4,11 +4,10 @@ import sys
 
 s = 0.1
 L = 0.5
-dimension = 2
 
 nb_vtp_output = 250 # the total number of output file desired
-dt = 0.0001
-nstepT = 1
+dt = 0.00001
+nstepT = 2
 nsave = nb_vtp_output/(dt*nstepT)  
 
 data = {
@@ -38,7 +37,7 @@ data = {
     "beta": 0,
     "alpha_st":10,
     "beta_adh": 10,
-    "dimension": dimension
+    "dimension": 2
   },
 
   "thermo":{
@@ -51,7 +50,7 @@ data = {
     "gamma": 7, 
     "M": 18e-3, 
     "R":8.314,
-    "sigma":72.8
+    "sigma":72800
   },
 
 
@@ -71,7 +70,7 @@ data = {
 
 # Do not modify what is below
 current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-json_src = f"surface_tension/{dimension}D_cube_to_sphere.json"
+json_src = f"surface_tension/2D_cube_to_sphere.json"
 
 with open(f'{current_directory}/{json_src}', 'w') as json_file:
     json.dump(data, json_file, indent=4)

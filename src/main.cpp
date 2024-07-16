@@ -178,6 +178,8 @@ int main(int argc, char *argv[])
     vector<vector<int>> cell_matrix(geomParams.Nx * geomParams.Ny * geomParams.Nz);
     vector<vector<double>> gradW(nb_tot_part),
                            W(nb_tot_part),
+                           gradW_st(nb_tot_part),
+                           W_st(nb_tot_part),
                            viscosity(nb_tot_part);
 
     int nb_sector = (simParams.dimension == 3)? 32: 8;
@@ -231,6 +233,7 @@ int main(int argc, char *argv[])
         // Update density, velocity and position (Euler explicit or RK22 scheme)
         updateVariables(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
                         viscosity, gradW, W, neighbours, nb_neighbours, type, track_particle);
+
 
 
         // Save data each "nsave" iterations
