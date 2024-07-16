@@ -2,14 +2,14 @@ import json
 import os
 import sys
 
-s = 0.005
+s = 0.1
 L = 1.2
-dimension = 2
 
 nb_vtp_output = 250 # the total number of output file desired
-dt = 0.001
-nstepT = 50000
-nsave = nb_vtp_output/(nstepT)  
+dt = 0.0001
+nstepT = 100000
+nsave = nb_vtp_output/(dt*nstepT)  
+
 
 data = {
     
@@ -24,12 +24,12 @@ data = {
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 1.2,
-        "dimension": dimension
+        "dimension": 2
     },
     
     "domain": {
         "matrix_long": [
-            [0.3*L, s/2, 0.3*L], # fluid
+            [0.4*L, s/2, 0.5*L], # fluid
             [L+s, s/2, s/2], # floor 1
             [L, s/2, s/2], # floor 2
             [s/2, s/2, L], # left wall 1
@@ -39,7 +39,7 @@ data = {
 
         ],
         "matrix_orig": [
-            [0.35*L, 0, L], # fluid
+            [2*s, 0, 2*s], # fluid
             [0, 0, 0], # floor 1
             [s/2, 0, s/2], # floor 2
             [s/2, 0, 3*s/2],# left wall 1
@@ -78,17 +78,18 @@ data = {
         "print_debug": False,
         "schemeIntegration": {"Euler": True, "RK22": False},
         "stateEquation": {"Ideal gaz law": False, "Quasi incompresible fluid": True},
-        "initialCondition": {"Hydrostatic": False, "Constant": True}
+        "initialCondition": {"Hydrostatic": True, "Constant": False}
     }
 }
 
 
-# Do not modify what is below
+# Do not modify what is below    
 current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-json_src = f"splash/{dimension}D_splash.json"
+json_src = f"dam_break/2D_dam_break.json"
 
 with open(f'{current_directory}/{json_src}', 'w') as json_file:
     json.dump(data, json_file, indent=4)
 
 
 print(f"Data written in '{json_src}'")
+

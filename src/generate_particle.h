@@ -25,4 +25,6 @@ void meshPostProcess(GeomData &geomParams,
                      vector<double> &type,
                      int &GP_count);
 
+bool checkParticleGeneration(vector<double> pos);
+
 #endif // GENERATE_PARTICLE_H

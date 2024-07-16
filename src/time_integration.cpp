@@ -11,7 +11,7 @@
 #include <algorithm>
 
 #include "find_neighbours.h"
-#include "integration.h"
+#include "time_integration.h"
 #include "structure.h"
 #include "NavierStokes.h"
 #include "tools.h"
@@ -29,13 +29,13 @@ void updateVariables(GeomData &geomParams,
                      vector<double> &p,
                      vector<double> &dudt,
                      vector<double> &mass,
-                     vector<double> &viscosity,
-                     vector<double> &gradW,
-                     vector<double> &W,
+                     vector<vector<double>> &viscosity,
+                     vector<vector<double>> &gradW,
+                     vector<vector<double>> &W,
                      vector<int> &neighbours,
                      vector<double> &nb_neighbours,
                      vector<double> type,
-                     vector<int> &track_particle){
+                     vector<double> &track_particle){
 
     bool PRINT = simParams.PRINT;
     string schemeIntegration = simParams.schemeIntegration;

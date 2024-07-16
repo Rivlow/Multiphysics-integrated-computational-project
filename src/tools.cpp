@@ -166,20 +166,21 @@ void progressBar(double ratio, double elapsed_time) {
         }
     }
 
-    cout << "] " << fixed << setprecision(2) << ratio * 100 << "% (approximated remaining time = "<< remain_time << "s )\r";
+    cout << "] " << fixed << setprecision(2) << ratio * 100 << "% (approximated remaining time = "<< remain_time << "s) \r";
     cout.flush();
 }
 
 
 
 void clearAllVectors(SimulationData &simParams,
-                     vector<double> &viscosity,
+                     vector<vector<double>> &viscosity,
                      vector<int> &neighbours,
                      vector<vector<int>> &cell_matrix,
-                     vector<double> &gradW, 
+                     vector<vector<double>> &gradW, 
+                     vector<vector<double>>&W,
                      vector<double> &drhodt,
                      vector<double> &dudt,
-                     vector<int> &track_particle){
+                     vector<double> &track_particle){
 
     bool PRINT = simParams.PRINT;
     int nb_tot_part = simParams.nb_tot_part;
@@ -195,15 +196,16 @@ void clearAllVectors(SimulationData &simParams,
     for (int idx = 0; idx < neighbours_size; idx++){
         
         neighbours[idx] = 0;
-        viscosity[idx] = 0;
-
-        for (int coord = 0; coord < 3; coord++)
-            gradW[3*(idx) + coord] = 0;
     }
     
 
     #pragma omp parallel for
     for (int i = 0; i < nb_tot_part; i++){
+
+        gradW[i].clear();
+        W[i].clear();
+        viscosity[i].clear();
+
 
         if (i <simParams.nb_moving_part)
             track_particle[i] = 0;
@@ -264,7 +266,32 @@ void printParams(GeomData geomParams,
     cout << "Molar mass (M) = " << thermoParams.M << " [kg/mol]" << endl;
     cout << "Heat capacity ratio (gamma) = " << thermoParams.gamma << " [-]" << endl;
     cout << "Ideal gas constant (R) = " << thermoParams.R << " [J/(mol*K)]" << endl;
-    cout << "Surface tension stress (sigma) = " << thermoParams.sigma << " [N/m]" << "\n" << endl;
-
-                
+    cout << "Surface tension stress (sigma) = " << thermoParams.sigma << " [N/m]" << "\n" << endl;            
 }
+
+double dotProduct(vector<double> a, vector<double> b){
+
+    double dot_product = 0;
+
+    for (int coord = 0; coord < 3; coord++)
+        dot_product += a[coord]*b[coord];
+
+    return dot_product;
+
+
+}
+
+double dist(vector<double> &pos, int n_1, int n_2){
+
+    double r_ab = 0;
+
+    for (int coord = 0; coord < 3; coord++)
+        r_ab += (pos[3*n_1 + coord] - pos[3*n_2 + coord])*(pos[3*n_1 + coord] - pos[3*n_2 + coord]);
+        
+    r_ab = sqrt(r_ab);
+
+    return r_ab;
+}
+
+
+

@@ -29,13 +29,14 @@ void clearOutputFiles();
 void progressBar(double ratio, double elapsed_time);
 
 void clearAllVectors(SimulationData &simParams,
-                     vector<double> &viscosity,
+                     vector<vector<double>> &viscosity,
                      vector<int> &neighbours,
                      vector<vector<int>> &cell_matrix,
-                     vector<double> &gradW, 
+                     vector<vector<double>> &gradW, 
+                     vector<vector<double>>&W,
                      vector<double> &drhodt,
                      vector<double> &dudt,
-                     vector<int> &track_particle);
+                     vector<double> &track_particle);
 
 void printParams(GeomData geomParams,    
                  ThermoData thermoParams,
@@ -46,6 +47,11 @@ void printParams(GeomData geomParams,
                  int FP_count,
                  int GP_count,
                  int nb_tot_part);
+
+
+double dotProduct(vector<double> a, vector<double> b);
+
+double dist(vector<double> &pos, int n_1, int n_2);
 
 
 #endif // TOOLS_H

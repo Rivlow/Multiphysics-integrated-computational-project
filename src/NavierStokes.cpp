@@ -12,12 +12,12 @@ using namespace std;
 
 
 void computeGradW(GeomData &geomParams,    
-                   SimulationData &simParams, 
-                   vector<double> &gradW,
-                   vector<double> &W,
-                   vector<int> neighbours,
-                   vector<double> nb_neighbours,
-                   vector<double> pos){
+                  SimulationData &simParams, 
+                  vector<vector<double>> &gradW,
+                  vector<vector<double>> &W,
+                  vector<int> neighbours,
+                  vector<double> nb_neighbours,
+                  vector<double> pos){
 
 
     int nb_tot_part = simParams.nb_tot_part;
@@ -32,21 +32,18 @@ void computeGradW(GeomData &geomParams,
         for (int idx = 0; idx < size_neighbours; idx++){
 
             int i_neig = neighbours[100*n + idx];
-            double r_ab = 0;
-            vector<double> d_xyz(3);
 
-            for (int coord = 0; coord < 3; coord++){
-                
-                d_xyz[coord] = pos[3 * n + coord] - pos[3 * i_neig + coord];
-                r_ab += d_xyz[coord]*d_xyz[coord];
-            }
+            vector<double> d_pos(3);
+            for (int coord = 0; coord < 3; coord++)
+                d_pos[coord] = pos[3*n + coord] - pos[3*i_neig + coord];
+            
 
-            r_ab = sqrt(r_ab);
+            double r_ab = dist(pos, n, i_neig);
             double deriv = derive_cubic_spline(r_ab, geomParams, simParams);
-            W[100*n + idx] = f_cubic_spline(r_ab, geomParams, simParams);;
+            W[n][idx] = f_cubic_spline(r_ab, geomParams, simParams);;
 
             for (int coord = 0; coord < 3; coord++)
-                gradW[100*n + 3 * idx + coord] = (d_xyz[coord] / r_ab) * deriv;
+                gradW[n][3*idx + coord] = (d_pos[coord] / r_ab) * deriv;
             
         }
     }
@@ -65,7 +62,6 @@ void setSpeedOfSound(GeomData &geomParams,
     double c_0 = thermoParams.c_0;
     double rho_0 = thermoParams.rho_0;
     double gamma = thermoParams.gamma;
-    bool PRINT = simParams.PRINT;
     int nb_part = simParams.nb_tot_part;
 
     #pragma omp parallel for
@@ -79,13 +75,13 @@ void setSpeedOfSound(GeomData &geomParams,
         } 
 
         if (c[n] < 0){
-            cout << "c ="<< c[n]<< " at timestep : " <<simParams.t << endl;
+            cout << "Error, c ="<< c[n]<< " at timestep : " <<simParams.t << endl;
             exit(1);
         }
     
     }
 
-        if (PRINT) cout << "setSpeedOfSound passed" << endl;
+        if (simParams.PRINT) cout << "setSpeedOfSound passed" << endl;
 }
 
 void setPressure(GeomData &geomParams,    
@@ -100,14 +96,13 @@ void setPressure(GeomData &geomParams,
     double R = thermoParams.R;
     double T = thermoParams.T;
     double M = thermoParams.M;
-    bool PRINT = simParams.PRINT;
     int nb_moving_part = simParams.nb_moving_part;
     string state_equation = simParams.state_equation;
 
     #pragma omp parallel for
     for (int n = 0; n < nb_moving_part; n++){
 
-        if (state_equation == "Ideal gaz law") p[n] = (rho[n] / rho_0 - 1) * (R * T) / M;
+        if (state_equation == "Ideal gaz law") p[n] =  (R * T / M) * (rho[n] / rho_0 - 1);
 
         else if (state_equation == "Quasi incompresible fluid"){
             double B = c_0 * c_0 * rho_0 / gamma;
@@ -119,14 +114,14 @@ void setPressure(GeomData &geomParams,
         }
     }
 
-    if (PRINT) cout << "setPressure passed" << endl;
+    if (simParams.PRINT) cout << "setPressure passed" << endl;
     
 }
 
 void setArtificialViscosity(GeomData &geomParams,    
                             ThermoData &thermoParams,
                             SimulationData &simParams, 
-                            vector<double> &viscosity,
+                            vector<vector<double>> &viscosity,
                             vector<int> &neighbours,
                             vector<double> &nb_neighbours,
                             vector<double> &c,
@@ -142,7 +137,7 @@ void setArtificialViscosity(GeomData &geomParams,
 
     if (t > 0){
 
-        vector<double> rel_displ(3), rel_vel(3);
+        
 
         // Iterations over each particle
         #pragma omp parallel for
@@ -153,35 +148,27 @@ void setArtificialViscosity(GeomData &geomParams,
             // Iteration over each associated neighbours
             for (int idx = 0; idx < size_neighbours; idx++){
 
+                vector<double> d_pos(3), d_u(3);
                 int i_neig = neighbours[100*n + idx];
 
-                rel_displ[0] = (pos[3 * n + 0] - pos[3 * i_neig + 0]);
-                rel_displ[1] = (pos[3 * n + 1] - pos[3 * i_neig + 1]);
-                rel_displ[2] = (pos[3 * n + 2] - pos[3 * i_neig + 2]);
-
-                rel_vel[0] = (u[3 * n + 0] - u[3 * i_neig + 0]);
-                rel_vel[1] = (u[3 * n + 1] - u[3 * i_neig + 1]);
-                rel_vel[2] = (u[3 * n + 2] - u[3 * i_neig + 2]);
-
-                double u_ab_x_ab = 0, x_ab_2 = 0;
-
-                // Dot product
                 for (int coord = 0; coord < 3; coord++){
-                    u_ab_x_ab += rel_vel[coord] * rel_displ[coord];
-                    x_ab_2 += rel_displ[coord] * rel_displ[coord];
+                    d_pos[coord] = (pos[3*n + coord] - pos[3*i_neig + coord]);
+                    d_u[coord] = (u[3*n + coord] - u[3*i_neig + coord]);
                 }
 
                 double c_a = c[n];
                 double c_b = c[i_neig];
                 double rho_a = rho[n];
                 double rho_b = rho[i_neig];
-
                 double c_ab = 0.5 * (c_a + c_b);
                 double rho_ab = 0.5 * (rho_a + rho_b);
                 double nu_2 = 0.01 * h * h;
-                double mu_ab = (h * u_ab_x_ab) / (x_ab_2 + nu_2);
+                
+                double u_ab_x_ab = dotProduct(d_u, d_pos);
+                double x_ab_x_ab = dotProduct(d_pos, d_pos);
+                double mu_ab = (h * u_ab_x_ab) / (x_ab_x_ab + nu_2);
 
-                viscosity[100*n + idx] = (u_ab_x_ab < 0) ? 
+                viscosity[n][idx] = (u_ab_x_ab < 0) ? 
                 (-alpha * c_ab * mu_ab + beta * mu_ab * mu_ab) / rho_ab : 0;
             }
         }
@@ -194,14 +181,13 @@ void setArtificialViscosity(GeomData &geomParams,
 void continuityEquation(SimulationData& simParams,
                         vector<int> &neighbours,
                         vector<double> &nb_neighbours,
-                        vector<double> &gradW,
+                        vector<vector<double>> &gradW,
                         vector<double> &pos,
                         vector<double> &u,
                         vector<double> &drhodt,
                         vector<double> &rho,
                         vector<double> &mass){
 
-    bool PRINT = simParams.PRINT;
     int nb_part = simParams.nb_tot_part;
              
     // Iterations over each particle
@@ -222,14 +208,14 @@ void continuityEquation(SimulationData& simParams,
 
                 double u_a = u[3 * n + coord];
                 double u_b = u[3 * i_neig + coord];
-                dot_product += (u_a - u_b) * gradW[100*n + 3*idx + coord];
+                dot_product += (u_a - u_b) * gradW[n][3*idx + coord];
             }
             
             drhodt[n] += m_b * dot_product;
         }
     }
 
-    if (PRINT) cout << "continuityEquation passed" << endl;
+    if (simParams.PRINT) cout << "continuityEquation passed" << endl;
 }
 
 void momentumEquation(GeomData &geomParams,    
@@ -237,9 +223,9 @@ void momentumEquation(GeomData &geomParams,
                       SimulationData &simParams, 
                       vector<int> &neighbours,
                       vector<double> &nb_neighbours,
-                      vector<double> &gradW,
-                      vector<double> W,
-                      vector<double> &viscosity,
+                      vector<vector<double>> &gradW,
+                      vector<vector<double>> W,
+                      vector<vector<double>> &viscosity,
                       vector<double> &mass,
                       vector<double> &dudt,
                       vector<double> &rho,
@@ -248,10 +234,9 @@ void momentumEquation(GeomData &geomParams,
                       vector<double> &pos,
                       vector<double> &u,
                       vector<double> type,
-                      vector<int> &track_particle){
+                      vector<double> &track_particle){
 
 
-    bool PRINT = simParams.PRINT;
     int nb_moving_part = simParams.nb_moving_part;
     simParams.F_st_max = 0;
 
@@ -289,14 +274,14 @@ void momentumEquation(GeomData &geomParams,
         for (int idx = 0; idx < size_neighbours; idx++){
 
             int i_neig = neighbours[100*n + idx];
-            double pi_ab = viscosity[100*n + idx];
+            double pi_ab = viscosity[n][idx];
             double rho_b = rho[i_neig];
             double m_b = mass[i_neig];
             double p_b = p[i_neig];
 
             for (int coord = 0; coord < 3; coord++)
-                dudt[3 * n + coord] += m_b * (p_b / (rho_b * rho_b) +
-                                    p_a / (rho_a * rho_a) + pi_ab)* gradW[100*n + 3*idx + coord];
+                dudt[3*n + coord] -= m_b * (p_b / (rho_b * rho_b) +
+                                    p_a / (rho_a * rho_a) + pi_ab)* gradW[n][3*idx + coord];
             
             if (simParams.is_adhesion){
                 
@@ -306,7 +291,7 @@ void momentumEquation(GeomData &geomParams,
 
                 for (int coord = 0; coord < 3; coord++){
                 
-                    d_xyz[coord] = pos[3 * n + coord] - pos[3 * i_neig + coord];
+                    d_xyz[coord] = pos[3*n + coord] - pos[3*i_neig + coord];
                     r_ab += d_xyz[coord]*d_xyz[coord];
                 }
 
@@ -316,7 +301,7 @@ void momentumEquation(GeomData &geomParams,
 
                 for (int coord = 0; coord < 3; coord++){
                     double boundary = 1.0 - type[i_neig];
-                    F_vol[3 * n + coord] -= beta_ad*boundary*mass[n]*m_b*W_ab*d_xyz[coord]/r_ab;
+                    F_vol[3*n + coord] -= beta_ad*boundary*mass[n]*m_b*W_ab*d_xyz[coord]/r_ab;
                 }
             } 
         }
@@ -327,15 +312,14 @@ void momentumEquation(GeomData &geomParams,
         F_vol[3 * n + 2] += g;
         for (int coord = 0; coord < 3; coord++){
             
-            dudt[3 * n + coord] *= -1;
             dudt[3 * n + coord] += F_vol[3 * n + coord];
-            F_res += F_vol[3 * n + coord]*F_vol[3 * n + coord];
+            F_res += F_vol[3*n + coord]*F_vol[3*n + coord];
         }
 
         F_res = sqrt(F_res);
-        simParams.F_st_max = (simParams.F_st_max > F_res ? simParams.F_st_max : F_res );
-            
+        simParams.F_st_max = (simParams.F_st_max > F_res ? simParams.F_st_max : F_res );     
     }
-    if (PRINT) cout << "momentumEquation passed" << endl;
+
+    if (simParams.PRINT) cout << "momentumEquation passed" << endl;
 }
 

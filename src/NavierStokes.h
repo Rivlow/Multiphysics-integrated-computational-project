@@ -9,12 +9,12 @@
 using namespace std;
 
 void computeGradW(GeomData &geomParams,    
-                   SimulationData &simParams, 
-                   vector<double> &gradW,
-                   vector<double> &W,
-                   vector<int> neighbours,
-                   vector<double> nb_neighbours,
-                   vector<double> pos);
+                  SimulationData &simParams, 
+                  vector<vector<double>> &gradW,
+                  vector<vector<double>> &W,
+                  vector<int> neighbours,
+                  vector<double> nb_neighbours,
+                  vector<double> pos);
 
 void setSpeedOfSound(GeomData &geomParams,    
                      ThermoData &thermoParams,
@@ -31,7 +31,7 @@ void setPressure(GeomData &geomParams,
 void setArtificialViscosity(GeomData &geomParams,    
                             ThermoData &thermoParams,
                             SimulationData &simParams, 
-                            vector<double> &viscosity,
+                            vector<vector<double>> &viscosity,
                             vector<int> &neighbours,
                             vector<double> &nb_neighbours,
                             vector<double> &c,
@@ -39,10 +39,10 @@ void setArtificialViscosity(GeomData &geomParams,
                             vector<double> &rho,
                             vector<double> &u);
 
-void continuityEquation(SimulationData &params,
+void continuityEquation(SimulationData& simParams,
                         vector<int> &neighbours,
                         vector<double> &nb_neighbours,
-                        vector<double> &gradW,
+                        vector<vector<double>> &gradW,
                         vector<double> &pos,
                         vector<double> &u,
                         vector<double> &drhodt,
@@ -54,9 +54,9 @@ void momentumEquation(GeomData &geomParams,
                       SimulationData &simParams, 
                       vector<int> &neighbours,
                       vector<double> &nb_neighbours,
-                      vector<double> &gradW,
-                      vector<double> W,
-                      vector<double> &viscosity,
+                      vector<vector<double>> &gradW,
+                      vector<vector<double>> W,
+                      vector<vector<double>> &viscosity,
                       vector<double> &mass,
                       vector<double> &dudt,
                       vector<double> &rho,
@@ -65,6 +65,6 @@ void momentumEquation(GeomData &geomParams,
                       vector<double> &pos,
                       vector<double> &u,
                       vector<double> type,
-                      vector<int> &track_particle);
+                      vector<double> &track_particle);
 
 #endif // GRADIENT_H

@@ -97,12 +97,12 @@ void InterfaceTrackingMath(SimulationData simParams,
                            ThermoData thermoParams,
                            vector<double> nb_neighbours,
                            vector<int> neighbours,
-                           vector<double> gradW,
+                           vector<vector<double>> gradW,
                            vector<double> mass,
                            vector<double> rho,
                            vector<double> type,
                            vector<double> pos,
-                           vector<int> &track_particle){
+                           vector<double> &track_particle){
     
 
     #pragma omp parallel for 
@@ -122,7 +122,7 @@ void InterfaceTrackingMath(SimulationData simParams,
                     double dot_product = 0;
                     
                     for (int coord = 0; coord < 3; coord++)
-                        dot_product += (pos[3 * n + coord] - pos[3 * i_neig + coord])*gradW[100*n + 3*idx+coord];
+                        dot_product += (pos[3 * n + coord] - pos[3 * i_neig + coord])*gradW[n][3*idx+coord];
 
                     double m_j = mass[i_neig];
                     double rho_j = rho[i_neig];   
@@ -148,14 +148,14 @@ void surfaceTensionImprove(SimulationData& simParams,
                            ThermoData &thermoParams,
                            vector<double> &nb_neighbours,
                            vector<int> &neighbours,
-                           vector<double> &gradW,
-                           vector<double> &W,
+                           vector<vector<double>> &gradW,
+                           vector<vector<double>> &W,
                            vector<double> &mass,
                            vector<double> &rho,
                            vector<double> &pos,
                            vector<double> &F_vol,
                            vector<double> type,
-                           vector<int> &track_particle){
+                           vector<double> &track_particle){
 
 
 
@@ -174,12 +174,16 @@ void surfaceTensionImprove(SimulationData& simParams,
         for(int idx = 0; idx < size_neighbours; idx++){
 
             int i_neig = neighbours[100*n + idx];
-            if (track_particle[i_neig]){
+
+            if (track_particle[i_neig]){ // if boundary part. in neighbourhood -> assigned 1 to part. "n"
                 N[n] = 1;
                 continue;
             }
         }
     }
+
+    printArray(N, N.size(), "N");
+
 
 
     // Calculation of color function
@@ -193,7 +197,7 @@ void surfaceTensionImprove(SimulationData& simParams,
             for(int idx = 0; idx < size_neighbours; idx++){
 
                 int i_neig = neighbours[100*n + idx];
-                color[n] += (mass[i_neig]/rho[i_neig])*W[100*n + idx]; // c_j^0 = 1 for fluid (to be checked)
+                color[n] += (mass[i_neig]/rho[i_neig])*W[n][idx]; // c_j^0 = 1 for fluid (to be checked)
                 
             }
         }
@@ -216,14 +220,14 @@ void surfaceTensionImprove(SimulationData& simParams,
 
             // classic normal calculation 
             for (int coord = 0; coord < 3; coord++)
-                normal[3*n+coord] -= (color[i_neig] - color[n]) * (mass[i_neig] / rho[i_neig]) * gradW[100*n + 3*idx+coord];
+                normal[3*n+coord] -= (color[i_neig] - color[n]) * (mass[i_neig] / rho[i_neig]) * gradW[n][3*idx+coord];
             
             // imaginary particle contribution
             if (track_particle[n] == 1 && track_particle[i_neig] == 0){ // particle on free surface but not neighbour 
 
 
                 for (int coord = 0; coord < 3; coord++){
-                    normal[3*n+coord] -= (0 - color[n])*(mass[i_neig]/rho[i_neig])*(-1*gradW[100*n + 3*idx+coord]);
+                    normal[3*n+coord] -= (0 - color[n])*(mass[i_neig]/rho[i_neig])*(-1*gradW[n][3*idx+coord]);
 
                 }
                                    
@@ -313,13 +317,13 @@ void surfaceTensionImprove(SimulationData& simParams,
              //   cout << "normal[3*i_neig+coord] - normal[3*n+coord] = " << normal[3*i_neig+coord] - normal[3*n+coord] << endl;
              //   cout << "gradW_matrix[n][3*idx+coord] = " << gradW_matrix[n][3*idx+coord] << endl;
                 
-                dot_product += (normal[3*i_neig+coord] - normal[3*n+coord])*gradW[100*n + 3*idx+coord];
+                dot_product += (normal[3*i_neig+coord] - normal[3*n+coord])*gradW[n][3*idx+coord];
             }
 
          //   cout << "dot_product = " << dot_product << endl;
         //    cout << "\n";
             Kappa += (R[n]*R[i_neig])*(mass[i_neig]/rho[i_neig])*dot_product;
-            L += (R[n]*R[i_neig])*(mass[i_neig]/rho[i_neig])*W[100*n + idx];
+            L += (R[n]*R[i_neig])*(mass[i_neig]/rho[i_neig])*W[n][idx];
 
             
             // imaginary particle contribution
@@ -341,13 +345,13 @@ void surfaceTensionImprove(SimulationData& simParams,
                 double dot_product = 0;
 
                 for (int coord = 0; coord < 3; coord++)
-                    dot_product += (new_normal[coord] - normal[3*n+coord])*gradW[100*n + 3*idx+coord];
+                    dot_product += (new_normal[coord] - normal[3*n+coord])*gradW[n][3*idx+coord];
 
                 Kappa += (R[n]*R[i_neig])*(mass[i_neig]/rho[i_neig])*dot_product;
 
                 
 
-                L += (R[n]*R[i_neig])*(mass[i_neig]/rho[i_neig])*W[100*n + idx];
+                L += (R[n]*R[i_neig])*(mass[i_neig]/rho[i_neig])*W[n][idx];
                 
                 continue;   
             }
@@ -371,11 +375,11 @@ void surfaceTensionImprove(SimulationData& simParams,
                     double dot_product = 0;
 
                     for (int coord = 0; coord < 3; coord++)
-                        dot_product += (new_normal[coord] - normal[3*n+coord])*gradW[100*n  + 3*idx+coord];
+                        dot_product += (new_normal[coord] - normal[3*n+coord])*gradW[n][3*idx+coord];
 
                     Kappa += (R[n]*R[i_neig])*(mass[i_neig]/rho[i_neig])*dot_product;
 
-                    L += (R[n]*R[i_neig])*(mass[i_neig]/rho[i_neig])*W[100*n + idx];
+                    L += (R[n]*R[i_neig])*(mass[i_neig]/rho[i_neig])*W[n][idx];
 
                 }
             }              
