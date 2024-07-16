@@ -214,9 +214,7 @@ void setArtificialViscosity(GeomData &geomParams,
     
 }
 
-void continuityEquation(GeomData &geomParams,    
-                        ThermoData &thermoParams,
-                        SimulationData &simParams, 
+void continuityEquation(SimulationData &simParams, 
                         vector<int> &neighbours,
                         vector<double> &nb_neighbours,
                         vector<vector<double>> &gradW,
@@ -224,9 +222,7 @@ void continuityEquation(GeomData &geomParams,
                         vector<double> &u,
                         vector<double> &drhodt,
                         vector<double> &rho,
-                        vector<double> &mass,
-                        vector<double> &normal,
-                        vector<double> &F_vol){
+                        vector<double> &mass){
 
     int nb_part = simParams.nb_tot_part;
              
@@ -242,11 +238,6 @@ void continuityEquation(GeomData &geomParams,
             double dot_product = 0;
             int i_neig = neighbours[100*n + idx];
             double m_b = mass[i_neig];
-            double K_ij = 2*thermoParams.rho_0/(rho[n]+rho[i_neig]);
-
-            double r_ab = 0;
-            vector<double> d_xyz(3);
-
 
             // Dot product of u_ab with grad_a(W_ab)
             for (int coord = 0; coord < 3; coord++){
@@ -258,26 +249,6 @@ void continuityEquation(GeomData &geomParams,
             
             drhodt[n] += m_b * dot_product;
 
-            if(simParams.is_surface_tension){
-
-                double alpha_st = simParams.alpha_st;
-
-                r_ab = sqrt(r_ab);
-                double W_ab = W_coh(r_ab,geomParams.kappa*geomParams.h, simParams);
-                double m_a = mass[n];
-                double m_b = mass[i_neig];
-                double F_res = 0;
-                
-                for (int coord = 0; coord < 3; coord++){
-                    
-                    F_vol[3*n + coord] += -K_ij*(alpha_st * m_a * m_b * d_xyz[coord]*W_ab/r_ab 
-                                    + alpha_st*(normal[3*n+coord]-normal[3*i_neig+coord]));
-
-                    F_res += F_vol[3*n + coord]*F_vol[3*n + coord];
-                }
-                
-                simParams.F_st_max = sqrt(F_res);
-            }
                   
       
         }

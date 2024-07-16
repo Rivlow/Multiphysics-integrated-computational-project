@@ -47,9 +47,7 @@ void continuityEquation(SimulationData& simParams,
                         vector<double> &u,
                         vector<double> &drhodt,
                         vector<double> &rho,
-                        vector<double> &mass,
-                        vector<double> &normal,
-                        vector<double> &F_vol);
+                        vector<double> &mass);
 
 void momentumEquation(GeomData &geomParams,    
                       ThermoData &thermoParams,

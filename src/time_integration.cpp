@@ -45,7 +45,7 @@ void updateVariables(GeomData &geomParams,
 
         // Compute D(rho)/Dt for all particles
         continuityEquation(simParams, neighbours, nb_neighbours, gradW, 
-                           pos, u, drhodt, rho, mass); 
+                           pos, u, drhodt, rho, mass);
 
         // Compute D(u)/Dt for moving particles
         momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW, 
@@ -85,7 +85,7 @@ void updateVariables(GeomData &geomParams,
         // First time step of RK22
         
         continuityEquation(simParams, neighbours, nb_neighbours, gradW, 
-                           pos_half, u_half, drhodt_half, rho_half, mass); 
+                           pos, u, drhodt, rho, mass);
 
         momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW, 
                          W, viscosity, mass, dudt_half, rho_half, p, c, pos_half, u_half, type, track_particle); 
@@ -115,7 +115,7 @@ void updateVariables(GeomData &geomParams,
         // Second time step of RK22
 
         continuityEquation(simParams, neighbours, nb_neighbours, gradW, 
-                        pos_half, u_half, drhodt_half, rho_half, mass); 
+                           pos, u, drhodt, rho, mass);
 
         momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW, 
                         W, viscosity, mass, dudt_half, rho_half, p, c, pos_half, u_half, type, track_particle); 
