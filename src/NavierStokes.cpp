@@ -100,23 +100,21 @@ void setSpeedOfSound(GeomData &geomParams,
     double gamma = thermoParams.gamma;
     int nb_part = simParams.nb_tot_part;
 
-    #pragma omp parallel for
-    for (int n = 0; n < nb_part; n++){
+    if (state_equation == "Quasi incompresible fluid"){
 
-        if (state_equation == "Ideal gaz law") c[n] = c_0;        
-        else if (state_equation == "Quasi incompresible fluid") c[n] = c_0 * pow(rho[n] / rho_0, 0.5 * (gamma - 1));
-        else {
-            cout << "Error : no state equation chosen" << endl;
-            exit(1);
-        } 
-
-        if (c[n] < 0){
-            cout << "Error, c ="<< c[n]<< " at timestep : " <<simParams.t << endl;
-            exit(1);
-        }
-    
+        #pragma omp parallel for
+        for (int n = 0; n < nb_part; n++){
+            c[n] = c_0 * pow(rho[n] / rho_0, 0.5 * (gamma - 1));
+        }   
     }
 
+    else if (state_equation == "Ideal gaz law"){
+        #pragma omp parallel for
+        for (int n = 0; n < nb_part; n++){
+            c[n] = c_0; 
+        }
+    }
+    
         if (simParams.PRINT) cout << "setSpeedOfSound passed" << endl;
 }
 
@@ -135,20 +133,28 @@ void setPressure(GeomData &geomParams,
     int nb_moving_part = simParams.nb_moving_part;
     string state_equation = simParams.state_equation;
 
-    #pragma omp parallel for
-    for (int n = 0; n < nb_moving_part; n++){
+    
+    if (state_equation == "Quasi incompresible fluid"){
 
-        if (state_equation == "Ideal gaz law") p[n] =  (R * T / M) * (rho[n] / rho_0 - 1);
-
-        else if (state_equation == "Quasi incompresible fluid"){
-            double B = c_0 * c_0 * rho_0 / gamma;
+        
+        double B = c_0 * c_0 * rho_0 / gamma;
+        #pragma omp parallel for
+        for (int n = 0; n < nb_moving_part; n++){
             p[n] = B * (pow(rho[n] / rho_0, gamma) - 1);
+        }   
+    }
+
+    else if (state_equation == "Ideal gaz law"){
+        #pragma omp parallel for
+        for (int n = 0; n < nb_moving_part; n++){
+            p[n] =  (R * T / M) * (rho[n] / rho_0 - 1);
         }
+    }
         else {
             cout << "Error : no state equation chosen" << endl;
             exit(1);
         }
-    }
+    
 
     if (simParams.PRINT) cout << "setPressure passed" << endl;
     
@@ -301,7 +307,7 @@ void momentumEquation(GeomData &geomParams,
                               gradW, W, mass, rho, pos, F_vol, type, track_particle);
     }
 
-    printArray(F_vol, F_vol.size(), "F_vol");
+    //printArray(F_vol, F_vol.size(), "F_vol");
     
     // Iterate over each particle
     #pragma omp parallel for

@@ -148,7 +148,8 @@ void meshPostProcess(GeomData &geomParams,
         double dist = sqrt(dx * dx + dy * dy + dz * dz);
 
         // Particules created between initial and last particule
-        int nb_points = static_cast<int>(dist / s);
+        double nb_points = (dist / s);
+        nb_points += 1;
 
         double step_x = dx / nb_points;
         double step_y = dy / nb_points;

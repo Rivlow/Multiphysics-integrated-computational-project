@@ -8,29 +8,24 @@ import numpy as np
 import sys
 import pandas as pd
 
-'''
+
 file = "output/p.csv"
-ite = 800
+ite = 199
 pressure = pd.read_csv(file, sep = ',', decimal='.', header=None)
 print(len(pressure))
 
-x = np.arange(0.0, 0.03, 0.00125)
+x = np.arange(0.1, 0.7, 0.05)
 
 
 pressure = pressure.T
-print(len(pressure))
+print(x)
 plt.plot(x,pressure[ite])
 
 plt.show()
-maxp = max(pressure[ite])
-print("max", maxp)
-minp = min(pressure[ite])
-print("min", minp)
-deltaP = maxp - minp
-print(deltaP)
 
 
 
+'''
 def read_vtp(path):
     reader = vtk.vtkXMLPolyDataReader()
     reader.SetFileName(path)
@@ -67,7 +62,7 @@ for i, array_data in enumerate(rho):
     
 plt.plot(val_rho)
 plt.show()
-'''
+
 
 def isLatex(latex):
     if latex:
@@ -221,5 +216,5 @@ if __name__ == "__main__":
     main()
 
 
-
+'''
 
