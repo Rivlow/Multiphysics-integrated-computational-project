@@ -12,21 +12,21 @@
 using namespace std;
 
 void initMass(GeomData &geomParams,
-                    SimulationData &simParams, 
-                    vector<double> &rho,
-                    vector<double> &mass);
+              SimulationData &simParams, 
+              vector<double> &rho,
+              vector<double> &mass);
 
 void initRho(ThermoData &thermoParams,
-                   SimulationData &simParams,
-                   vector<double> &pos,
-                   vector<double> &rho);
+             SimulationData &simParams,
+             vector<double> &pos,
+             vector<double> &rho);
 
 void initVelocity(ThermoData &thermoParams,
-                        SimulationData &simParams, 
-                        vector<double> &u);
+                  SimulationData &simParams, 
+                  vector<double> &u);
 
-void initViscosity(SimulationData &simParams, 
-                         vector<vector<double>> &pi_matrix);
+void initKernelCoef(GeomData &geomParams, 
+                    SimulationData &simParams);
 
 
 #endif // INITIALIZE_H

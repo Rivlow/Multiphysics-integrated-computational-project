@@ -13,8 +13,8 @@ namespace fs = filesystem;
 
 
 void extractData(GeomData &geomParams,  
-                 SimulationData& simParams,
-                 ThermoData& thermoParams,
+                 SimulationData &simParams,
+                 ThermoData &thermoParams,
                  vector<double> &pos,  
                  vector<double> &p, 
                  vector<double> &mass,
@@ -40,7 +40,7 @@ void extractData(GeomData &geomParams,
         return;
     }
 
-    int init = simParams.nb_part;
+    int init = simParams.nb_tot_part;
     int end = pos.size()/3;
 
     for (int n = init; n < end; n++){
@@ -62,12 +62,11 @@ void extractData(GeomData &geomParams,
             }
 
             r_ab = sqrt(r_ab);
-            double W_ab = f_cubic_spline(r_ab, geomParams.h, simParams);
+            double W_ab = f_cubic_spline(r_ab, geomParams, simParams);
             double m_b = mass[i_neig];
             double rho_b = rho[i_neig];
             double p_b = p[i_neig];
             rho_tot += m_b*W_ab;
-            //cout << p_b <<"         "<< W_ab << endl;
             p_tot += p_b*(m_b/rho_b)*W_ab;
         }      
         

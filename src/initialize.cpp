@@ -6,7 +6,7 @@
 
 #include "initialize.h"
 #include "structure.h"
-#include "gradient.h"
+#include "NavierStokes.h"
 #include "tools.h"
 
 using namespace std;
@@ -18,8 +18,15 @@ void initMass(GeomData &geomParams,
               vector<double> &mass){
 
     double s = geomParams.s;  
-    bool PRINT = simParams.PRINT;  
-    double V = (simParams.dimension == 3)? s * s * s : s * s;
+    bool PRINT = simParams.PRINT; 
+    int dim = simParams.dimension;
+    double V = 0.0;
+
+    if (dim == 3)
+        V = s * s * s;
+    else
+        V = s*s;
+
     int rho_size = rho.size();
 
     #pragma omp parallel for   
@@ -67,8 +74,8 @@ void initRho(ThermoData &thermoParams,
 
             double B = c_0 * c_0 * rho_0 / gamma;
             for (int i = 0; i < rho_size; i++)
-                rho[i] = (i < nb_moving_part) ? rho_0 * (1 + rho_0 
-                                * g * pos[3 * i + 2] / B) : rho_fixed;  
+                rho[i] = (i < nb_moving_part) ? rho_0 * pow(1 + rho_0 
+                                * g * pos[3 * i + 2] / B, 1/gamma) : rho_fixed;  
         }
     }
     else{
@@ -84,8 +91,8 @@ void initRho(ThermoData &thermoParams,
 }
 
 void initVelocity(ThermoData &thermoParams,
-                        SimulationData &simParams, 
-                        vector<double> &u){
+                  SimulationData &simParams, 
+                  vector<double> &u){
 
 
     bool PRINT = simParams.PRINT;
@@ -107,28 +114,22 @@ void initVelocity(ThermoData &thermoParams,
         }
     }
 
-    if (PRINT){
+    if (PRINT)
        cout << "initVelocity passed" << endl;
-    }
+    
 }
 
-void initViscosity(SimulationData &simParams, 
-                         vector<vector<double>> &pi_matrix){
 
-    bool PRINT = simParams.PRINT;
-    int size_pi_matrix = pi_matrix.size();
-    #pragma omp parallel for   
-    for (int i = 0; i < size_pi_matrix; i++){
 
-        int size_artificial_visc = pi_matrix[i].size();
+void initKernelCoef(GeomData &geomParams, 
+                    SimulationData &simParams){
 
-        for (int j = 0; j < size_artificial_visc; j++){
-            pi_matrix[i][j] = 0.0;
-        }
-    }
+    double h = geomParams.h;
 
-    if (PRINT){
-        cout << "initViscosity passed" << endl;
-    }
+    simParams.cubic_kernel_coef = (simParams.dimension == 2)? 15.0 /( 7.0 * M_PI * h * h ) : 3.0 / (2.0 * M_PI * h * h * h);
+    simParams.adh_kernel_coef = (simParams.dimension == 2)? 16/(4* M_PI*pow(h, 2.25)): 0.0007/pow(h,3.25);;
+    simParams.coh_kernel_coef = (simParams.dimension == 2) ? 40/(M_PI*h*h*h*h*h*h*h*h) : 32/(M_PI*h*h*h*h*h*h*h*h*h);
+    simParams.quintic_kernel_coef = (simParams.dimension == 2)? 7.0 /( 4.0 * M_PI * h * h ) : 0;
+
+
 }
-
