@@ -75,3 +75,33 @@ double derive_cubic_spline(double r, GeomData &geomParams, SimulationData &simPa
         
     return DW;
 }
+
+double f_wendland_quintic(double r, GeomData &geomParams, SimulationData &simParams){
+
+    double alpha = simParams.quintic_kernel_coef;
+    double W = 0.0;
+    double h = geomParams.h;
+    double q = r / h;
+
+    if (q < 2.0) {
+        double factor = (1.0 - 0.5 * q);
+        W = alpha * pow(factor, 4) * (2.0 * q + 1.0);
+    }
+
+    return W;
+}
+
+double derive_wendland_quintic(double r, GeomData &geomParams, SimulationData &simParams){
+
+    double alpha = simParams.quintic_kernel_coef;
+    double DW = 0.0;
+    double h = geomParams.h;
+    double q = r / h;
+
+    if (q < 2.0) {
+        double factor = (1.0 - 0.5*q);
+        DW = -(5/4)*alpha * pow(factor, 3) * q ;
+    }
+
+    return DW;
+}

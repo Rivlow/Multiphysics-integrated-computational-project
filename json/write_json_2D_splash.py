@@ -19,7 +19,7 @@ data = {
         "dt": dt,
         "nsave": nsave,
         "kappa": 2,
-        "alpha": 0.5,
+        "alpha": 5,
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 1.2,
@@ -77,7 +77,7 @@ data = {
         "print_debug": False,
         "schemeIntegration": {"Euler": True, "RK22": False},
         "stateEquation": {"Ideal gaz law": False, "Quasi incompresible fluid": True},
-        "initialCondition": {"Hydrostatic": False, "Constant": True}
+        "initialCondition": {"Hydrostatic": True, "Constant": False}
     }
 }
 

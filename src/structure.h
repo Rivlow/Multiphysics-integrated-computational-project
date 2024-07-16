@@ -68,6 +68,7 @@ struct SimulationData {
     double cubic_kernel_coef;
     double adh_kernel_coef;
     double coh_kernel_coef;
+    double quintic_kernel_coef;
 
 };
 

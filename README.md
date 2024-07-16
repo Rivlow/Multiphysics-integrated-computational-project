@@ -123,6 +123,8 @@ In the example above, a cube of fluid particles will experience a splash. An exa
 
 ![Splash example in 3D](splash_3D.gif)
 
+
+
 ### Analyse simulation
 
 The results of the particles variables (position, velocity, pressure, density, speed of sound, number of neighbours, ...) can be visuallized using either Paraview (for nice spatial view) or thanks to our python scripts (which are simply reading **.csv** files created during the simulation).

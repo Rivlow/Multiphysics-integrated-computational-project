@@ -12,4 +12,7 @@ double W_adh(double r, GeomData &geomParams, SimulationData simParams);
 double f_cubic_spline(double r, GeomData &geomParams, SimulationData &simParams);
 double derive_cubic_spline(double r, GeomData &geomParams, SimulationData &simParams);
 
+double f_wendland_quintic(double r, GeomData &geomParams, SimulationData &simParams);
+double derive_wendland_quintic(double r, GeomData &geomParams, SimulationData &simParams);
+
 #endif // KERNEL_FUNCTIONS_H

@@ -14,8 +14,8 @@ plt.rc('xtick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
 plt.rc('ytick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
 plt.rc('legend', fontsize=MEDIUM_SIZE)   # legend fontsize
 plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
-#plt.rc('text', usetex=True)
-#plt.rc('font', family='lmodern')
+plt.rc('text', usetex=True)
+plt.rc('font', family='lmodern')
 
 
 s = 0.25
@@ -46,7 +46,7 @@ for idx, r in enumerate(r_span):
 current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
 print(current_directory)
 
-plt.figure()
+plt.figure(figsize=(6.9, 4))
 plt.plot(r_span, W/alpha, label=r'W(r,h)$ / \alpha$', c='b')
 plt.plot(r_span, dW/(alpha/h), ls = "--", label=r'dW(r,h)/dr/($\alpha$/h)', c='r')
 plt.xlabel('r/h')
