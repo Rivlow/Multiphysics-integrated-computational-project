@@ -73,19 +73,19 @@ void meshcube(GeomData &geomParams,
         double dy = 0;
         double dz = 0;
 
-        int ni = int(ceil(L[0] / s));
+        double ni = ceil(L[0] / s);
         if(ni != 1){
             dx = L[0] / ni;
             ++ni;
         }
         
-        int nj = int(ceil(L[1] / s));
+        double nj = ceil(L[1] / s);
         if(nj != 1){
             dy = L[1] / nj;
             ++nj;
         }
         
-        int nk = int(ceil(L[2] / s));
+        double nk = ceil(L[2] / s);
         if(nk != 1){
             dz = L[2] / nk;
             ++nk;
@@ -176,12 +176,13 @@ struct TupleHash {
     }
 };
 
-bool checkParticleGeneration(vector<double> pos){
+bool checkParticleGeneration(vector<double> pos, SimulationData &simParams){
 
-    int pos_size = pos.size() / 3;
+    int nb_part = simParams.nb_tot_part; 
+    cout << "number of particle is  "<< nb_part << endl;
     unordered_set<tuple<double, double, double>, TupleHash> uniqueTriplets;
 
-    for (int n = 0; n < pos_size; n++) {
+    for (int n = 0; n < nb_part; n++) {
         double x = pos[3 * n];
         double y = pos[3 * n + 1];
         double z = pos[3 * n + 2];
