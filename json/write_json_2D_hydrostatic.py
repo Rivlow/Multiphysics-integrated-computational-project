@@ -2,7 +2,7 @@ import json
 import os
 import sys
 
-s = 0.05
+s = 0.025
 L = 1.2
 Lz = 2
 dimension = 2
