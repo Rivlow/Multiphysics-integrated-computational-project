@@ -3,11 +3,11 @@ import os
 import sys
 
 s = 0.1
-L = 0.5
+L = 1
 
 nb_vtp_output = 250 # the total number of output file desired
-dt = 0.00001
-nstepT = 2
+dt = 0.000001
+nstepT = 300000
 nsave = nb_vtp_output/(dt*nstepT)  
 
 data = {

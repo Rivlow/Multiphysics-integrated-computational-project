@@ -82,6 +82,7 @@ void updateVariables(GeomData &geomParams,
                        drhodt_half(nb_tot_part,0.0),
                        dudt_half(3*nb_tot_part,0.0);
 
+
         // First time step of RK22
         
         continuityEquation(simParams, neighbours, nb_neighbours, gradW, 

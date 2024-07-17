@@ -2,12 +2,12 @@ import json
 import os
 import sys
 
-s = 0.1
+s = 0.002
 L = 1.2
 
 nb_vtp_output = 250 # the total number of output file desired
 dt = 0.0001
-nstepT = 25000
+nstepT = 35000
 nsave = nb_vtp_output/(dt*nstepT)  
 
 
@@ -29,7 +29,7 @@ data = {
     
     "domain": {
         "matrix_long": [
-            [0.4*L, s/2, 0.8*L], # fluid
+            [0.3*L, s/2, 0.8*L], # fluid
             [L, s/2, s/2], # floor 1
             [L, s/2, s/2], # floor 2
             [s/2, s/2, L], # left wall 1
