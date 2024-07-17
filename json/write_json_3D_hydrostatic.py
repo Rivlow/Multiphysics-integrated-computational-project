@@ -3,7 +3,7 @@ import os
 import sys
 
 s = 0.05
-L = 1
+L = 0.7
 
 nb_vtp_output = 250 # the total number of output file desired
 dt = 0.0001/2
@@ -29,7 +29,7 @@ data = {
     
     "domain": {
         "matrix_long": [
-            [0.4*L, 0.4*L, 0.8*L], # fluid
+            [L, L, L], # fluid
             [L+3*s, L+3*s, s/2], # floor 1
             [L+2*s, L+2*s, s/2], # floor 2
             
@@ -45,7 +45,7 @@ data = {
 
         ],
         "matrix_orig": [
-            [s, s, 2*s], # fluid
+            [s*3/2, s*3/2, 1.5*s], # fluid
             [0, 0, 0], # floor 1
             [s/2, s/2, s/2], # floor 2
             
@@ -65,9 +65,9 @@ data = {
         "o_d": [0.0, 0.0, 0.0]
     },
     "post_process": {
-        "do": False,
-        "xyz_init": [L/2, 0, s],
-        "xyz_end": [L/2, 0, L-2*s]
+        "do": True,
+        "xyz_init": [L/2 +3*s/2, L/2 +3*s/2, s],
+        "xyz_end": [L/2 +3*s/2, L/2 +3*s/2, L]
     },
     "thermo": {
         "rho_0": 1000,
@@ -90,14 +90,14 @@ data = {
         "print_debug": False,
         "schemeIntegration": {"Euler": True, "RK22": False},
         "stateEquation": {"Ideal gaz law": False, "Quasi incompresible fluid": True},
-        "initialCondition": {"Hydrostatic": True, "Constant": False}
+        "initialCondition": {"Hydrostatic": False, "Constant": True}
     }
 }
 
 
 # Do not modify what is below    
 current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-json_src = f"dam_break/3D_dam_break.json"
+json_src = f"hydrostatic/3D_hydrostatic.json"
 
 with open(f'{current_directory}/{json_src}', 'w') as json_file:
     json.dump(data, json_file, indent=4)
