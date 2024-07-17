@@ -10,16 +10,16 @@ import pandas as pd
 
 
 file = "output/p.csv"
-ite = 100
+ite = 149
 pressure = pd.read_csv(file, sep = ',', decimal='.', header=None)
-print(len(pressure))
+pressure = np.array(pressure)
+print(pressure[ite])
+print(len(pressure[ite]))
+x = np.arange(0.1, 1.3, 0.05)
+print(len(x))
+x1 = np.arange(0,1.2,0.05)
 
-x = np.arange(0.05, 0.7, 0.05)
-
-x1 = np.arange(0,0.65,0.05)
-pressure = pressure.T
-print(x)
-plt.plot(x,pressure[ite])
+plt.plot(x,pressure[ite][::-1])
 plt.plot(x,1000*9.81*x1)
 
 plt.show()

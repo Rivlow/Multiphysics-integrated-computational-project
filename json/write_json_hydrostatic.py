@@ -2,8 +2,9 @@ import json
 import os
 import sys
 
-s = 0.025
+s = 0.05
 L = 1.2
+Lz = 2
 dimension = 2
 
 nb_vtp_output = 250 # the total number of output file desired
@@ -30,13 +31,13 @@ data = {
     
     "domain": {
         "matrix_long": [
-            [L-3*s, s/2, L-s], # fluid
+            [L-3*s, s/2, Lz-s], # fluid
             [L+s, s/2, s/2], # floor 1
             [L, s/2, s/2], # floor 2
-            [s/2, s/2, L], # left wall 1
-            [s/2, s/2, L], # left wall 2
-            [s/2, s/2, L], # right wall 1
-            [s/2, s/2, L], # right wall 2
+            [s/2, s/2, Lz], # left wall 1
+            [s/2, s/2, Lz], # left wall 2
+            [s/2, s/2, Lz], # right wall 1
+            [s/2, s/2, Lz], # right wall 2
 
         ],
         "matrix_orig": [
@@ -50,13 +51,13 @@ data = {
 
         ],
         "vector_type": [1, 0, 0, 0, 0, 0, 0],
-        "L_d": [2*L, 4.1*s, 2*L],
+        "L_d": [2*L, 4.1*s, 2*Lz],
         "o_d": [0.0, 0.0, 0.0]
     },
     "post_process": {
         "do": True,
         "xyz_init": [L/2, 0, 5*s],
-        "xyz_end": [L/2, 0, L-6*s]
+        "xyz_end": [L/2, 0, Lz-6*s]
     },
     "thermo": {
         "rho_0": 1000,

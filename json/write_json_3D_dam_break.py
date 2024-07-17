@@ -2,7 +2,7 @@ import json
 import os
 import sys
 
-s = 0.05
+s = 0.1
 L = 1.2
 
 nb_vtp_output = 250 # the total number of output file desired
@@ -30,18 +30,18 @@ data = {
     "domain": {
         "matrix_long": [
             [0.4*L, 0.4*L, 0.8*L], # fluid
-            [L, L, s/2], # floor 1
-            [L, L, s/2], # floor 2
+            [L+3*s, L+3*s, s/2], # floor 1
+            [L+2*s, L+2*s, s/2], # floor 2
             
-            [L, s/2, L], # left wall 1
-            [L, s/2, L], # left wall 2
-            [L, s/2, L], # right wall 1
-            [L, s/2, L-s/2], # right wall 2
+            [s/2, L+3*s, L+2*s], # left wall 1
+            [s/2, L+2*s, L+s], # left wall 2
+            [s/2, L+3*s, L+2*s], # right wall 1
+            [s/2, L+2*s, L+s], # right wall 2
             
-            [s/2, L-s, L], # back wall 1
-            [s/2, L-s, L-s/2], # back wall 2
-            [s/2, L-s, L], # front wall 1
-            [s/2, L-s, L-s/2], # front wall 2
+            [L+s, s/2, L+2*s], # back wall 1
+            [L, s/2, L+s], # back wall 2
+            [L+s, s/2, L+2*s], # front wall 1
+            [L, s/2, L+s], # front wall 2
 
         ],
         "matrix_orig": [
@@ -51,13 +51,13 @@ data = {
             
             [0, 0, s], # left wall 1
             [s/2, s/2, 1.5*s],# left wall 2
-            [0, L, s], # right wall 1
-            [s/2, L+s/2, 1.5*s], # right wall 2
+            [L+3*s, 0, s], # right wall 1
+            [L+5*s/2, s/2, 1.5*s], # right wall 2
             
-            [0, s/2, s], # back wall 1
-            [s/2, s, 1.5*s], # back wall 2
-            [L, s/2, s], # front wall 1
-            [L+s/2, s, 1.5*s], # front wall 2
+            [s, 0, s], # back wall 1
+            [s*3/2, s/2, 1.5*s], # back wall 2
+            [s, L+3*s, s], # front wall 1
+            [3*s/2,L+5*s/2, 1.5*s], # front wall 2
 
         ],
         "vector_type": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
