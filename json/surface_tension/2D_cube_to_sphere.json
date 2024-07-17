@@ -45,10 +45,10 @@
         "theta": 0.5,
         "s": 0.1,
         "nstepT": 300000,
-        "dt": 1e-06,
-        "nsave": 833.3333333333334,
+        "dt": 1e-05,
+        "nsave": 83.33333333333331,
         "kappa": 2,
-        "alpha": 0.5,
+        "alpha": 50,
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 10,
@@ -68,7 +68,7 @@
         "gamma": 7,
         "M": 0.018,
         "R": 8.314,
-        "sigma": 72.8
+        "sigma": 72800
     },
     "forces": {
         "gravity": false,

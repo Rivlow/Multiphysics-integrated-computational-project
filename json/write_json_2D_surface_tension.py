@@ -6,7 +6,7 @@ s = 0.1
 L = 1
 
 nb_vtp_output = 250 # the total number of output file desired
-dt = 0.000001
+dt = 0.00001
 nstepT = 300000
 nsave = nb_vtp_output/(dt*nstepT)  
 
@@ -33,7 +33,7 @@ data = {
     "dt": dt,
     "nsave": nsave,
     "kappa": 2,
-    "alpha": 0.5,
+    "alpha": 50,
     "beta": 0,
     "alpha_st":10,
     "beta_adh": 10,

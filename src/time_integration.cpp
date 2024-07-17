@@ -35,7 +35,13 @@ void updateVariables(GeomData &geomParams,
                      vector<int> &neighbours,
                      vector<double> &nb_neighbours,
                      vector<double> type,
-                     vector<double> &track_particle){
+                     vector<double> &colour,
+                     vector<double> &R,
+                     vector<double> &N,
+                     vector<double> &normal,
+                     vector<double> &track_particle,
+                     vector<double> &Kappa,
+                     vector<double> &dot_product){
 
     bool PRINT = simParams.PRINT;
     string schemeIntegration = simParams.schemeIntegration;
@@ -49,7 +55,7 @@ void updateVariables(GeomData &geomParams,
 
         // Compute D(u)/Dt for moving particles
         momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW, 
-                         W, viscosity, mass, dudt, rho, p, c, pos, u, type, track_particle); 
+                         W, viscosity, mass, dudt, rho, p, c, pos, u, type, colour, R, N, normal, track_particle, Kappa, dot_product); 
 
         checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
                       neighbours, nb_neighbours);
@@ -74,6 +80,8 @@ void updateVariables(GeomData &geomParams,
         }
     }
 
+    /*
+
     else if (schemeIntegration == "RK22"){
     
         vector<double> u_half = u,
@@ -89,7 +97,7 @@ void updateVariables(GeomData &geomParams,
                            pos_half, u_half, drhodt_half, rho_half, mass); 
 
         momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW, 
-                         W, viscosity, mass, dudt_half, rho_half, p, c, pos_half, u_half, type, track_particle); 
+                         W, viscosity, mass, dudt_half, rho_half, p, c, pos_half, u_half, type, colour, R, N, normal, track_particle, Kappa); 
                         
         checkTimeStep(geomParams, thermoParams, simParams, pos_half, u_half, c,
                       neighbours, nb_neighbours);
@@ -119,7 +127,7 @@ void updateVariables(GeomData &geomParams,
                         pos_half, u_half, drhodt_half, rho_half, mass); 
 
         momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW, 
-                        W, viscosity, mass, dudt_half, rho_half, p, c, pos_half, u_half, type, track_particle); 
+                        W, viscosity, mass, dudt_half, rho_half, p, c, pos_half, u_half, type, colour, R, N, normal, track_particle, Kappa); 
                         
         checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
                         neighbours, nb_neighbours);
@@ -142,6 +150,8 @@ void updateVariables(GeomData &geomParams,
             }
         }
     }
+    */
+   
     else{
         cerr << "No scheme integration chosen" << endl;
         exit(EXIT_FAILURE);

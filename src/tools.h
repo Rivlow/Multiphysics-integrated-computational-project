@@ -36,7 +36,13 @@ void clearAllVectors(SimulationData &simParams,
                      vector<vector<double>>&W,
                      vector<double> &drhodt,
                      vector<double> &dudt,
-                     vector<double> &track_particle);
+                     vector<double> &colour,
+                     vector<double> &R,
+                     vector<double> &N,
+                     vector<double> &normal,
+                     vector<double> &track_particle,
+                     vector<double> &Kappa,
+                     vector<double> &dot_produc);
 
 void printParams(GeomData geomParams,    
                  ThermoData thermoParams,

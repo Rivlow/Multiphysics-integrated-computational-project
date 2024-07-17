@@ -171,7 +171,6 @@ int main(int argc, char *argv[])
                    drhodt(nb_tot_part, 0), rho(nb_tot_part, 0),
                    dudt(3 * nb_tot_part, 0), p(nb_tot_part, 0),
                    c(nb_tot_part, 0), grad_sum(nb_tot_part, 0),
-                   normal(3*nb_tot_part, 0.0),
                    track_particle(simParams.nb_moving_part, 0),
                    nb_neighbours(nb_tot_part, 0);
 
@@ -185,6 +184,13 @@ int main(int argc, char *argv[])
     int nb_sector = (simParams.dimension == 3)? 32: 8;
     vector<int> neighbours(100*nb_tot_part), 
                 free_surface(nb_sector*nb_tot_part, 0);
+
+    vector<double> N(simParams.nb_moving_part, 0);
+    vector<double> colour(simParams.nb_moving_part, 0);
+    vector<double> normal(3*simParams.nb_moving_part, 0);
+    vector<double> R(simParams.nb_moving_part, 0);
+    vector<double> Kappa(simParams.nb_moving_part, 0);
+    vector<double> dot_product(simParams.nb_moving_part, 0);
   
     // Variables defined to used "export.cpp"
     map<string, vector<double> *> scalars;
@@ -200,7 +206,14 @@ int main(int argc, char *argv[])
     vectors["position"] = &pos;
     vectors["u"] = &u;
     vectors["dudt"] = &dudt;
-    vectors["normal"] = &normal;
+    scalars["colour"] = &colour;
+    scalars["R"] = &R;
+    scalars["N"] = &N;
+    scalars["track_particle"] = &track_particle;
+    scalars["Kappa"] = &Kappa;
+    scalars["dot_product"] = &dot_product;
+    vectors["normal"]= &normal;
+
 
     printParams(geomParams, thermoParams, simParams,
                 state_equation, state_initial_condition,
@@ -232,7 +245,7 @@ int main(int argc, char *argv[])
 
         // Update density, velocity and position (Euler explicit or RK22 scheme)
         updateVariables(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
-                        viscosity, gradW, W, neighbours, nb_neighbours, type, track_particle);
+                        viscosity, gradW, W, neighbours, nb_neighbours, type, colour, R, N, normal, track_particle, Kappa, dot_product);
 
 
 
@@ -251,7 +264,7 @@ int main(int argc, char *argv[])
 
         // Clear matrices and reset arrays to 0
         clearAllVectors(simParams, viscosity, neighbours,
-                        cell_matrix, gradW, W, drhodt, dudt, track_particle);
+                        cell_matrix, gradW, W, drhodt, dudt, colour, R, N, normal, track_particle, Kappa, dot_product);
 
     }
 

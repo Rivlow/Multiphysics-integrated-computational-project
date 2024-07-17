@@ -272,7 +272,13 @@ void momentumEquation(GeomData &geomParams,
                       vector<double> &pos,
                       vector<double> &u,
                       vector<double> type,
-                      vector<double> &track_particle){
+                      vector<double> &colour,
+                      vector<double> &R,
+                      vector<double> &N,
+                      vector<double> &normal,
+                      vector<double> &track_particle,
+                      vector<double> &Kappa,
+                      vector<double> &dot_product){
 
 
     int nb_moving_part = simParams.nb_moving_part;
@@ -297,7 +303,7 @@ void momentumEquation(GeomData &geomParams,
                               mass,rho,type,pos, track_particle);
 
         surfaceTensionImprove(simParams, geomParams,thermoParams, nb_neighbours, neighbours, 
-                              gradW, W, mass, rho, pos, F_vol, type, track_particle);
+                              gradW, W, mass, rho, pos, F_vol, type, colour, R, N, normal, track_particle, Kappa, dot_product);
     }
     
     // Iterate over each particle

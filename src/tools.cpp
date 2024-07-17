@@ -180,7 +180,13 @@ void clearAllVectors(SimulationData &simParams,
                      vector<vector<double>>&W,
                      vector<double> &drhodt,
                      vector<double> &dudt,
-                     vector<double> &track_particle){
+                     vector<double> &colour,
+                     vector<double> &R,
+                     vector<double> &N,
+                     vector<double> &normal,
+                     vector<double> &track_particle,
+                     vector<double> &Kappa,
+                     vector<double> &dot_product){
 
     bool PRINT = simParams.PRINT;
     int nb_tot_part = simParams.nb_tot_part;
@@ -207,14 +213,22 @@ void clearAllVectors(SimulationData &simParams,
         viscosity[i].clear();
 
 
-        if (i <simParams.nb_moving_part)
+        if (i <simParams.nb_moving_part){
             track_particle[i] = 0;
+            colour[i] = 0;
+            R[i] = 0;
+            N[i] = 0;
+            Kappa[i]= 0;
+            dot_product[i]= 0;
+
+            for(int coord = 0 ; coord < 3 ; coord ++){
+                dudt[3*i + coord] = 0.0;  
+                normal[3*i + coord] = 0;
+            }
+        }
 
         drhodt[i] = 0.0;
 
-        for(int coord = 0 ; coord < 3 ; coord ++)
-            dudt[3*i+coord] = 0.0;  
-        
     }    
 
     if (PRINT) cout << "clearAllVectors passed" << endl;

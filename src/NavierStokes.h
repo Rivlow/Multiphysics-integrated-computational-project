@@ -65,6 +65,12 @@ void momentumEquation(GeomData &geomParams,
                       vector<double> &pos,
                       vector<double> &u,
                       vector<double> type,
-                      vector<double> &track_particle);
+                      vector<double> &colour,
+                      vector<double> &R,
+                      vector<double> &N,
+                      vector<double> &normal,
+                      vector<double> &track_particle,
+                      vector<double> &Kappa,
+                      vector<double> &dot_product);
 
 #endif // GRADIENT_H
