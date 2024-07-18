@@ -26,6 +26,14 @@ struct GeomData {
     int Nx;
     int Ny;
     int Nz;
+    bool following_part_bool;
+    bool following_part_min;
+    bool following_part_max;
+    int following_part_part;
+    int following_part_p;
+    int following_part_rho;
+    vector<int> following_part_pos;
+    vector<int> following_part_u;
 
 };
 

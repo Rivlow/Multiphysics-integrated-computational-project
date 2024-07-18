@@ -107,6 +107,14 @@ int main(int argc, char *argv[])
         int(geomParams.L_d[0] / (geomParams.kappa * geomParams.h)),
         int(geomParams.L_d[1] / (geomParams.kappa * geomParams.h)),
         int(geomParams.L_d[2] / (geomParams.kappa * geomParams.h)),
+        data["following_part"]["part"],
+        data["following_part"]["min"],
+        data["following_part"]["max"],
+        data["following_part"]["particle"],
+        data["following_part"]["pressure"],
+        data["following_part"]["rho"],
+        data["following_part"]["position"],
+        data["following_part"]["velocity"],
 
     };
     cout << "GeomData initialized" << endl;
@@ -240,7 +248,8 @@ int main(int argc, char *argv[])
         if(t % simParams.nsave == 0){
                 if (geomParams.post_process_do)
                     extractData(geomParams, simParams, thermoParams, pos, p, mass, neighbours, nb_neighbours, rho);
-                
+                if (geomParams.following_part_bool)
+                    follow_part_data(geomParams, p, rho, pos, u);
             export_particles("../../output/sph", t, pos, scalars, vectors, false);
 
             auto t_act = chrono::high_resolution_clock::now();

@@ -26,3 +26,15 @@ void extractData(GeomData &geomParams,
                  vector<int> &neighbours,
                  vector<double> &nb_neighbours,
                  vector<double> rho);
+
+void writing_in_file(string name, 
+                     vector<double> data, 
+                     int particle, 
+                     int scalar_or_vector, 
+                     int xyz);
+
+void follow_part_data(GeomData &geomParams,
+                      vector<double> p,
+                      vector<double> rho,
+                      vector<double> pos,
+                      vector<double> u);

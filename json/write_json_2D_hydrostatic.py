@@ -2,13 +2,13 @@ import json
 import os
 import sys
 
-s = 0.025
-L = 1.2
-Lz = 2
+s = 0.02
+L = 0.7
+Lz = 0.62
 dimension = 2
 
-nb_vtp_output = 250 # the total number of output file desired
-dt = 0.0001
+nb_vtp_output = 100 # the total number of output file desired
+dt = 0.00001
 nstepT = 2*25000
 nsave = nb_vtp_output/(dt*nstepT)  
 
@@ -56,8 +56,19 @@ data = {
     },
     "post_process": {
         "do": True,
-        "xyz_init": [L/2, 0, 5*s],
-        "xyz_end": [L/2, 0, Lz-6*s]
+        "xyz_init": [L/2, 0, 3*s],
+        "xyz_end": [L/2, 0, Lz+3*s]
+    },
+
+    "following_part": {
+        "part": False,
+        "min": False,
+        "max": True,
+        "particle" : 50,
+        "pressure" : 0,
+        "rho" : 0,
+        "position" :[0, 0, 1],
+        "velocity" :[0, 0, 0]
     },
     "thermo": {
         "rho_0": 1000,

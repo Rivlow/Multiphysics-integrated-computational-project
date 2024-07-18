@@ -56,6 +56,17 @@ data = {
         "xyz_init": [L/2, 0, s],
         "xyz_end": [L/2, 0, L-2*s]
     },
+    "following_part": {
+        "part": False,
+        "min": False,
+        "max": True,
+        "particle" : 50,
+        "pressure" : 0,
+        "rho" : 0,
+        "position" :[0, 0, 1],
+        "velocity" :[0, 0, 0]
+    },
+
     "thermo": {
         "rho_0": 1000,
         "rho_moving": 1000,

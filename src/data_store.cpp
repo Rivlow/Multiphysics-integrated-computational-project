@@ -84,3 +84,110 @@ void extractData(GeomData &geomParams,
     output_p.close();
 
 }
+
+
+void writing_in_file(string name, 
+                     vector<double> data, 
+                     int particle, 
+                     int scalar_or_vector, 
+                     int xyz){
+
+    ofstream output_name(name, ios::app);
+
+    if (!output_name.is_open()){
+        cerr << "Error while opening CSV file." << endl;
+        return;
+    }
+
+    double data_part = 0;
+    if(scalar_or_vector ){
+        data_part = data[particle];
+    }
+    else{
+        data_part = data[3*particle + xyz];
+    }
+    
+    ostringstream oss;
+    oss << fixed << setprecision(6) << data_part;
+    string data_part_str = oss.str();
+
+    for (char& ch : data_part_str) {
+        if (ch == '.') {
+            ch = ',';
+        }
+    }
+
+    output_name << "\"" << data_part_str << "\"" << "\n";
+
+    output_name.close();
+
+}
+
+void follow_part_data(GeomData &geomParams,
+                      vector<double> p,
+                      vector<double> rho,
+                      vector<double> pos,
+                      vector<double> u){
+
+    string outputDir = "../../output";
+
+    int particle = geomParams.following_part_part;
+    if (!fs::exists(outputDir)){
+        fs::create_directories(outputDir);
+        cout << "Create following particle files" <<endl;
+    }
+    string outputFile_part = outputDir + "/" + std::to_string(particle);
+
+
+    if(geomParams.following_part_p){
+
+        string outputFile_part_press = outputFile_part +"_pressure" + ".csv";
+        writing_in_file(outputFile_part_press, p, particle,  1, 0);
+
+    }
+
+    if(geomParams.following_part_rho){
+        
+        string outputFile_part_rho = outputFile_part +"_rho" + ".csv";
+        writing_in_file(outputFile_part_rho, rho, particle,  1, 0);
+    }
+
+    if(geomParams.following_part_pos[0]){
+        
+        string outputFile_part_pos_x = outputFile_part +"_pos_x" + ".csv";
+        writing_in_file(outputFile_part_pos_x, pos, particle,  0, 0);
+    }
+
+    if(geomParams.following_part_pos[1]){
+        
+        string outputFile_part_pos_y = outputFile_part +"_pos_y" + ".csv";
+        writing_in_file(outputFile_part_pos_y, pos, particle,  0, 1);
+    }
+
+    if(geomParams.following_part_pos[2]){
+        
+        string outputFile_part_pos_z = outputFile_part +"_pos_z" + ".csv";
+        writing_in_file(outputFile_part_pos_z, pos, particle,  0, 2);
+    }
+
+    if(geomParams.following_part_u[0]){
+        
+        string outputFile_part_u_x = outputFile_part +"_u_x" + ".csv";
+        writing_in_file(outputFile_part_u_x, u, particle,  0, 0);
+    }
+
+    if(geomParams.following_part_u[1]){
+        
+        string outputFile_part_u_y = outputFile_part +"_u_y" + ".csv";
+        writing_in_file(outputFile_part_u_y, u, particle,  0, 1);
+    }
+
+    if(geomParams.following_part_u[2]){
+        
+        string outputFile_part_u_z = outputFile_part +"_u_z" + ".csv";
+        writing_in_file(outputFile_part_u_z, u, particle,  0, 2);
+    }
+
+
+    
+}
