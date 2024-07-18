@@ -226,7 +226,7 @@ int main(int argc, char *argv[])
 
     
     auto t_mid = chrono::high_resolution_clock::now();
-
+    double sim_time = 0.0;
     for (int t = 0; t < simParams.nstepT; t++){
 
         simParams.t = t;
@@ -243,15 +243,17 @@ int main(int argc, char *argv[])
                         viscosity, gradW, W, neighbours, nb_neighbours, type, track_particle);
 
 
-
+        sim_time += simParams.dt;
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){
                 if (geomParams.post_process_do)
                     extractData(geomParams, simParams, thermoParams, pos, p, mass, neighbours, nb_neighbours, rho);
                 if (geomParams.following_part_bool)
                     follow_part_data(geomParams, p, rho, pos, u);
+                
             export_particles("../../output/sph", t, pos, scalars, vectors, false);
-
+            writing_time(sim_time);
+            
             auto t_act = chrono::high_resolution_clock::now();
             double elapsed_time = double(chrono::duration_cast<chrono::duration<double>>(t_act - t_mid).count());
             progressBar(double(t)/double(simParams.nstepT), elapsed_time);    

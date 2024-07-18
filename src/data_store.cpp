@@ -188,6 +188,36 @@ void follow_part_data(GeomData &geomParams,
         writing_in_file(outputFile_part_u_z, u, particle,  0, 2);
     }
 
+}
 
-    
+void writing_time(double sim_time){
+
+    string outputDir = "../../output";
+
+    if (!fs::exists(outputDir)){
+        fs::create_directories(outputDir);
+        cout << "Create following particle files" <<endl;
+    }
+    string outputFile_part = outputDir + "/" + "time" + ".csv";
+
+    ofstream output_name(outputFile_part, ios::app);
+
+    if (!output_name.is_open()){
+        cerr << "Error while opening CSV file." << endl;
+        return;
+    }
+
+    ostringstream oss;
+    oss << fixed << setprecision(6) << sim_time;
+    string data_part_str = oss.str();
+
+    for (char& ch : data_part_str) {
+        if (ch == '.') {
+            ch = ',';
+        }
+    }
+
+    output_name << "\"" << data_part_str << "\"" << "\n";
+
+    output_name.close();
 }

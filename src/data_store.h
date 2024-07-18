@@ -38,3 +38,5 @@ void follow_part_data(GeomData &geomParams,
                       vector<double> rho,
                       vector<double> pos,
                       vector<double> u);
+
+void writing_time(double sim_time);
