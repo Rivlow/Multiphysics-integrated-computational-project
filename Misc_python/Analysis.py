@@ -8,23 +8,51 @@ import numpy as np
 import sys
 import pandas as pd
 
+def fonction():
+    file = "output/p.csv"
+    ite = 99
+    pressure = pd.read_csv(file, sep = ',', decimal='.', header=None)
+    pressure = np.array(pressure)
+    print(pressure[ite])
+    print(len(pressure[ite]))
+    x = np.arange(0.125, 1.875, 0.025)
+    print(len(x))
+    x1 = np.arange(0.1,1.85,0.025)
 
-file = "output/p.csv"
-ite = 99
-pressure = pd.read_csv(file, sep = ',', decimal='.', header=None)
-pressure = np.array(pressure)
-print(pressure[ite])
-print(len(pressure[ite]))
-x = np.arange(0.125, 1.875, 0.025)
-print(len(x))
-x1 = np.arange(0.1,1.85,0.025)
+    plt.plot(x,pressure[ite][::-1])
+    plt.plot(x,1000*9.81*x1)
 
-plt.plot(x,pressure[ite][::-1])
-plt.plot(x,1000*9.81*x1)
+    plt.show()
 
-plt.show()
+def mrua():
+    file = "output/p.csv"
+    pos = pd.read_csv("output/50_pos_z.csv",sep = '.', decimal=',', header=None)
+    time = pd.read_csv("output/time.csv",sep = '.', decimal=',', header=None)
+    pos =  np.transpose(np.asarray(pos))
+    time =  np.transpose(np.asarray(time))
+   
+    print(time)
+    plt.scatter(time[0],pos[0], color = "red", label = "particle")
+    time = np.array(time)
+    pos= np.array(pos)
+    
+    i = 0
+    time_2 = np.zeros(len(time[0]))
+    while(i<len(time_2)):
+        time_2[i] = time[0][i] *   time[0][i]
+        i =i + 1
+    y = pos[0][0] - (9.81/2) * time_2
 
+    
+    plt.plot(time[0], y, label = "theorie")
+    plt.legend()
+    plt.xlabel("time")
+    plt.ylabel("z position")
+    plt.ylim(-0.01,1.3)
+    plt.xlim(0.01,0.5)
+    plt.show()
 
+mrua()    
 
 '''
 def read_vtp(path):
