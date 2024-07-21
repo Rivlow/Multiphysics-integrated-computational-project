@@ -233,7 +233,7 @@ void continuityEquation(SimulationData &simParams,
     int nb_part = simParams.nb_tot_part;
              
     // Iterations over each particle
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for (int n = 0; n < nb_part; n++){
 
         int size_neighbours = nb_neighbours[n];
@@ -251,6 +251,7 @@ void continuityEquation(SimulationData &simParams,
                 double u_a = u[3 * n + coord];
                 double u_b = u[3 * i_neig + coord];
                 dot_product += (u_a - u_b) * gradW[n][3*idx + coord];
+                
             }
             
             drhodt[n] += m_b * dot_product;
@@ -299,6 +300,7 @@ void momentumEquation(GeomData &geomParams,
     
     
     if (simParams.is_surface_tension){
+        cout << " tension " << endl;
         InterfaceTrackingMath(simParams, geomParams, thermoParams,
                               nb_neighbours,neighbours, gradW,
                               mass,rho,type,pos, track_particle);
@@ -310,7 +312,7 @@ void momentumEquation(GeomData &geomParams,
     //printArray(F_vol, F_vol.size(), "F_vol");
     
     // Iterate over each particle
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for (int n = 0; n < nb_moving_part; n++){
         
         double rho_a = rho[n];
@@ -326,12 +328,13 @@ void momentumEquation(GeomData &geomParams,
             double m_b = mass[i_neig];
             double p_b = p[i_neig];
 
-            for (int coord = 0; coord < 3; coord++)
+            for (int coord = 0; coord < 3; coord++){
                 dudt[3*n + coord] -= m_b * (p_b / (rho_b * rho_b) +
-                                    p_a / (rho_a * rho_a) + pi_ab)* gradW[n][3*idx + coord];
-            
-            if (simParams.is_adhesion){
+                                    p_a / (rho_a * rho_a) + pi_ab)* gradW[n][3*idx + coord];                    
+            }
                 
+            if (simParams.is_adhesion){
+                cout << " adhesion " << endl;
                 double beta_ad = simParams.beta_adh;
                 double r_ab = 0;
                 vector<double> d_xyz(3);
@@ -359,6 +362,7 @@ void momentumEquation(GeomData &geomParams,
         F_vol[3 * n + 2] += g;
         for (int coord = 0; coord < 3; coord++){
             
+            
             dudt[3 * n + coord] += F_vol[3 * n + coord];
             F_res += F_vol[3*n + coord]*F_vol[3*n + coord];
         }
@@ -366,7 +370,7 @@ void momentumEquation(GeomData &geomParams,
         F_res = sqrt(F_res);
         simParams.F_st_max = (simParams.F_st_max > F_res ? simParams.F_st_max : F_res );     
     }
-
+    
     if (simParams.PRINT) cout << "momentumEquation passed" << endl;
 }
 

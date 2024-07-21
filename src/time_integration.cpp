@@ -52,7 +52,7 @@ void updateVariables(GeomData &geomParams,
                          W, viscosity, mass, dudt, rho, p, c, pos, u, type, track_particle); 
 
         checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
-                      neighbours, nb_neighbours);
+                    neighbours, nb_neighbours);
 
         double dt = simParams.dt;
 
@@ -83,63 +83,66 @@ void updateVariables(GeomData &geomParams,
                        dudt_half(3*nb_tot_part,0.0);
 
         // First time step of RK22
-        
+       
         continuityEquation(simParams, neighbours, nb_neighbours, gradW, 
                            pos, u, drhodt, rho, mass);
-
+        //printArray(drhodt,drhodt.size(), "drhodt");
         momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW, 
-                         W, viscosity, mass, dudt_half, rho_half, p, c, pos_half, u_half, type, track_particle); 
+                         W, viscosity, mass, dudt, rho, p, c, pos, u, type, track_particle); 
                         
-        checkTimeStep(geomParams, thermoParams, simParams, pos_half, u_half, c,
-                      neighbours, nb_neighbours);
+        //checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
+        //              neighbours, nb_neighbours);
 
+        double theta = simParams.theta;
+        double dt_half = simParams.dt/(2*theta);
 
-        double dt_half = simParams.dt/2;
-
-        #pragma omp parallel for   
+        
         for (int n = 0; n < simParams.nb_tot_part; n++){
 
             rho_half[n] += dt_half * drhodt[n];
+            
+                
             if (rho_half[n] < 0){
                 cout << "Rho negative (" << rho[n] << ") at t:" << simParams.t << endl;
                 exit(1);
             }
 
             for (int coord = 0; coord < 3; coord++){
-
+                
                 pos_half[3 * n + coord] += dt_half * u[3 * n + coord];
                 u_half[3 * n + coord] += dt_half * dudt[3 * n + coord];
             }
         }
-
+        
         // Second time step of RK22
-
+    
         continuityEquation(simParams, neighbours, nb_neighbours, gradW, 
-                           pos, u, drhodt, rho, mass);
+                           pos_half, u_half, drhodt_half, rho_half, mass);
 
         momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW, 
                         W, viscosity, mass, dudt_half, rho_half, p, c, pos_half, u_half, type, track_particle); 
-                        
+
+
         checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
-                        neighbours, nb_neighbours);
+                      neighbours, nb_neighbours);
 
         double dt = simParams.dt;
-        double theta = simParams.theta;  
-
-
-        #pragma omp parallel for
+       
         for (int n = 0; n < simParams.nb_tot_part; n++){
-
+            
             rho[n] += dt * ((1-theta)*drhodt[n] + theta*drhodt_half[n]);
-
+            //cout << "for part " << n << " drhodt is " << drhodt[n]  << " and drhodt_half " << drhodt_half[n] <<" and rho " << rho[n]<< endl;
             for (int coord = 0; coord < 3; coord++){
-
+                
                 double u_temp = u[3 * n + coord] + dt*dudt_half[3 * n + coord];
+                
+                
                 pos[3 * n + coord] += dt * ((1-theta)*u[3 * n + coord] + theta*u_temp);
                 u[3 * n + coord] += dt *  ((1-theta)*dudt[3 * n + coord] + theta*dudt_half[3 * n + coord]);
 
             }
         }
+        
     }
     else{
         cerr << "No scheme integration chosen" << endl;

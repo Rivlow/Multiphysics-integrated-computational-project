@@ -2,13 +2,13 @@ import json
 import os
 import sys
 
-s = 0.03
+s = 0.025
 L = 1.2
 
 nb_vtp_output = 250 # the total number of output file desired
-dt = 0.0001
-nstepT = 25000
-nsave = nb_vtp_output/(dt*nstepT)  
+dt = 1e-5
+nstepT = 100000
+nsave = 1000
 
 data = {
     
@@ -19,7 +19,7 @@ data = {
         "dt": dt,
         "nsave": nsave,
         "kappa": 2,
-        "alpha": 5,
+        "alpha": 0.5,
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 1.2,
@@ -59,7 +59,7 @@ data = {
     "following_part": {
         "part": False,
         "min": False,
-        "max": True,
+        "max": False,
         "particle" : 50,
         "pressure" : 0,
         "rho" : 0,
@@ -88,7 +88,7 @@ data = {
         "print_debug": False,
         "schemeIntegration": {"Euler": True, "RK22": False},
         "stateEquation": {"Ideal gaz law": False, "Quasi incompresible fluid": True},
-        "initialCondition": {"Hydrostatic": True, "Constant": False}
+        "initialCondition": {"Hydrostatic": False, "Constant": True}
     }
 }
 
