@@ -2,12 +2,12 @@ import json
 import os
 import sys
 
-s = 0.05
+s = 0.025
 L = 1.2
 
 nb_vtp_output = 250 # the total number of output file desired
 dt = 1e-5
-nstepT = 500000
+nstepT = 200000
 nsave = 1000
 
 
