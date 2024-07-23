@@ -52,7 +52,7 @@ int evaluateNumberParticles(GeomData &geomParams){
     return nbpart;
 }
 
-void meshcube(GeomData &geomParams,
+void meshCube(GeomData &geomParams,
               SimulationData &simParams,
               vector<double> &pos,
               vector<double> &type,
@@ -121,6 +121,98 @@ void meshcube(GeomData &geomParams,
                         MP_count++;
                     else if (type_val == 0)
                         FP_count++;
+                }
+            }
+        }
+    }
+    
+    simParams.nb_tot_part = pos.size()/3;
+}
+
+void meshSphere(GeomData &geomParams,
+              SimulationData &simParams,
+              vector<double> &pos,
+              vector<double> &type,
+              int &MP_count,
+              int &FP_count){
+
+    vector<double> matrixLong = geomParams.matrix_long_sphere;
+    vector<double> matrixOrig = geomParams.matrix_orig_sphere;
+    vector<int> vectorType = geomParams.vector_type;
+    double s = geomParams.s;
+    
+    for(int n = 0 ; n < int(vectorType.size()); n++){
+
+        vector<double> &L = matrixLong;
+        vector<double> &o = matrixOrig;
+        int type_val = vectorType[n];
+        double dx = 0;
+        double dy = 0;
+        double dz = 0;
+
+        int ni = int(ceil(L[0] / s));
+        if(ni != 1){
+            dx = L[0] / ni;
+            ++ni;
+        }
+        
+        int nj = int(ceil(L[1] / s));
+        if(nj != 1){
+            dy = L[1] / nj;
+            ++nj;
+        }
+        
+        int nk = int(ceil(L[2] / s));
+        if(nk != 1){
+            dz = L[2] / nk;
+            ++nk;
+        }
+                
+        // output
+        cout << "meshing sphere at o=(" << o[0] << "," << o[1] << "," << o[2] << ") ";
+        cout << "of size L=(" << L[0] << "," << L[1] << "," << L[2] << ")\n";
+        cout << "\tparticle spacing s=(" << dx << "," << dy << "," << dz << ") [target was s=" << s << "]\n";
+        cout << "\t=> " << ni << "*" << nj << "*" << nk << " = " << ni * nj * nk << " particles to be generated\n";
+        cout <<"\n"<< endl;
+
+        // memory allocation
+        pos.reserve(pos.size() + ni * nj * nk * 3);
+
+        double x_center = ceil(L[0])/2;
+        double y_center = ceil(L[1])/2;
+        double z_center = ceil(L[2])/2;
+
+        double radius_2 = x_center*x_center + y_center*y_center * z_center*z_center;
+
+
+        // particle generation
+        for (int i = 0; i < ni; ++i)
+        {
+            double x = o[0] + i * dx;
+            for (int j = 0; j < nj; ++j)
+            {
+                double y = o[1] + j * dy;
+                for (int k = 0; k < nk; ++k)
+                {
+                    double z = o[2] + k * dz;
+
+            
+
+                    double new_dist = (x_center - x)*(x_center - x) + (y_center - y)*(y_center - y) + (z_center - z)*(z_center - z);
+
+
+                    if (new_dist <= radius_2){
+                    
+                        
+                        pos.push_back(x);
+                        pos.push_back(y);
+                        pos.push_back(z);
+                        type.push_back(type_val);
+
+                        MP_count++;
+              
+                        
+                    }
                 }
             }
         }

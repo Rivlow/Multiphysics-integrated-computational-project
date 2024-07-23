@@ -26,6 +26,9 @@ struct GeomData {
     int Nx;
     int Ny;
     int Nz;
+    vector<double> matrix_long_sphere;
+    vector<double> matrix_orig_sphere;
+
 
 };
 

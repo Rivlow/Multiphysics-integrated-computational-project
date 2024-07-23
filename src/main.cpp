@@ -22,6 +22,7 @@
 #include "time_integration.h"
 #include "data_store.h"
 #include "surface_tension.h"
+#include "PoiseuilleFlow.h"
 
 
 #include "nlohmann/json.hpp"
@@ -62,8 +63,12 @@ int main(int argc, char *argv[])
 
     /*---------------------- INPUT PARAMETERS FROM JSON FILES --------------------------*/
 
+
+
     ifstream inputf(argv[1]);
     json data = json::parse(inputf);
+
+
 
     //cout << argv[1] << ":\n"
     //          << data.dump(4) << endl; // print input data to screen
@@ -78,6 +83,9 @@ int main(int argc, char *argv[])
     // Structure to store parameters
     getKey(data, state_equation, state_initial_condition, 
            schemeIntegration);
+
+
+
 
     cout << "kappa = " << data["simulation"]["kappa"] << endl;
     cout << "s = " << data["simulation"]["s"] << endl;
@@ -107,6 +115,8 @@ int main(int argc, char *argv[])
         int(geomParams.L_d[0] / (geomParams.kappa * geomParams.h)),
         int(geomParams.L_d[1] / (geomParams.kappa * geomParams.h)),
         int(geomParams.L_d[2] / (geomParams.kappa * geomParams.h)),
+        data["domain"]["matrix_long_sphere"],
+        data["domain"]["matrix_orig_sphere"],
 
     };
     cout << "GeomData initialized" << endl;
@@ -159,12 +169,12 @@ int main(int argc, char *argv[])
     vector<double> pos;
     vector<double> type;
     
-
-    meshcube(geomParams, simParams, pos, type, MP_count, FP_count); 
+    meshSphere(geomParams, simParams, pos, type, MP_count, FP_count); 
+    meshCube(geomParams, simParams, pos, type, MP_count, FP_count); 
     meshPostProcess(geomParams, simParams, pos, type, GP_count);
 
-    if (!checkParticleGeneration(pos))
-        exit(1);
+    //if (!checkParticleGeneration(pos))
+    //    exit(1);
     
     int nb_tot_part = pos.size()/3;
     vector<double> mass(nb_tot_part, 0), u(3 * nb_tot_part, 0),
@@ -206,13 +216,13 @@ int main(int argc, char *argv[])
     vectors["position"] = &pos;
     vectors["u"] = &u;
     vectors["dudt"] = &dudt;
-    scalars["colour"] = &colour;
-    scalars["R"] = &R;
-    scalars["N"] = &N;
-    scalars["track_particle"] = &track_particle;
-    scalars["Kappa"] = &Kappa;
-    scalars["dot_product"] = &dot_product;
-    vectors["normal"]= &normal;
+    //scalars["colour"] = &colour;
+    ///scalars["R"] = &R;
+    //scalars["N"] = &N;
+    //scalars["track_particle"] = &track_particle;
+    //scalars["Kappa"] = &Kappa;
+    //scalars["dot_product"] = &dot_product;
+    //vectors["normal"]= &normal;
 
 
     printParams(geomParams, thermoParams, simParams,
@@ -261,6 +271,7 @@ int main(int argc, char *argv[])
             progressBar(double(t)/double(simParams.nstepT), elapsed_time);    
         }
         
+        respawnParticle(pos, geomParams, simParams);
 
         // Clear matrices and reset arrays to 0
         clearAllVectors(simParams, viscosity, neighbours,

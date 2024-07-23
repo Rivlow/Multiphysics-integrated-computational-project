@@ -99,9 +99,14 @@ void initVelocity(ThermoData &thermoParams,
     int nb_moving_part = simParams.nb_moving_part;
     int u_size = u.size();
 
-    #pragma omp parallel for   
-    for (int i = 0; i < u_size / 3; i++){
 
+    cout << "Nb moving particles = " << nb_moving_part << endl;
+    cout << "Nb fixed particles = " << simParams.nb_tot_part << endl;
+
+    #pragma omp parallel for   
+    for (int i = simParams.nb_moving_part; i < simParams.nb_tot_part; i++){
+
+        /*
         if (i < nb_moving_part){
             u[3 * i] = simParams.u_init[0];
             u[3 * i + 1] = simParams.u_init[1];
@@ -112,6 +117,10 @@ void initVelocity(ThermoData &thermoParams,
             u[3 * i + 1] = 0;
             u[3 * i + 2] = 0;
         }
+        */
+            u[3 * i] = simParams.u_init[0];
+            u[3 * i + 1] = simParams.u_init[1];
+            u[3 * i + 2] = simParams.u_init[2];
     }
 
     if (PRINT)
