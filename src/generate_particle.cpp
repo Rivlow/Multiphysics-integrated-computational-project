@@ -129,7 +129,7 @@ void meshCube(GeomData &geomParams,
     simParams.nb_tot_part = pos.size()/3;
 }
 
-void meshSphere(GeomData &geomParams,
+/*void meshSphere(GeomData &geomParams,
               SimulationData &simParams,
               vector<double> &pos,
               vector<double> &type,
@@ -219,7 +219,7 @@ void meshSphere(GeomData &geomParams,
     }
     
     simParams.nb_tot_part = pos.size()/3;
-}
+}*/
 
 
 void meshPostProcess(GeomData &geomParams,

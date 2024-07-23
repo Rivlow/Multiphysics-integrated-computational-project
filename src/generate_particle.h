@@ -19,12 +19,12 @@ void meshCube(GeomData &geomParams,
               int &MP_count,
               int &FP_count);
 
-void meshSphere(GeomData &geomParams,
+/*void meshSphere(GeomData &geomParams,
                 SimulationData &simParams,
                 vector<double> &pos,
                 vector<double> &type,
                 int &MP_count,
-                int &FP_count);
+                int &FP_count);*/
 
 void meshPostProcess(GeomData &geomParams,
                      SimulationData &simParams,

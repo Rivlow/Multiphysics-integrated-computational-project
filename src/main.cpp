@@ -115,8 +115,8 @@ int main(int argc, char *argv[])
         int(geomParams.L_d[0] / (geomParams.kappa * geomParams.h)),
         int(geomParams.L_d[1] / (geomParams.kappa * geomParams.h)),
         int(geomParams.L_d[2] / (geomParams.kappa * geomParams.h)),
-        data["domain"]["matrix_long_sphere"],
-        data["domain"]["matrix_orig_sphere"],
+        //data["domain"]["matrix_long_sphere"],
+        //data["domain"]["matrix_orig_sphere"],
 
     };
     cout << "GeomData initialized" << endl;
@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
     vector<double> pos;
     vector<double> type;
     
-    meshSphere(geomParams, simParams, pos, type, MP_count, FP_count); 
+    //meshSphere(geomParams, simParams, pos, type, MP_count, FP_count); 
     meshCube(geomParams, simParams, pos, type, MP_count, FP_count); 
     meshPostProcess(geomParams, simParams, pos, type, GP_count);
 
@@ -206,7 +206,7 @@ int main(int argc, char *argv[])
     map<string, vector<double> *> scalars;
     map<string, vector<double> *> vectors;
     scalars["type"] = &type;
-    //scalars["track_particle"] = &track_particle;
+    scalars["track_particle"] = &track_particle;
     scalars["nb_neighbours"] = &nb_neighbours;
     scalars["mass"] = &mass;
     scalars["rho"] = &rho;
@@ -216,13 +216,13 @@ int main(int argc, char *argv[])
     vectors["position"] = &pos;
     vectors["u"] = &u;
     vectors["dudt"] = &dudt;
-    //scalars["colour"] = &colour;
-    ///scalars["R"] = &R;
-    //scalars["N"] = &N;
-    //scalars["track_particle"] = &track_particle;
-    //scalars["Kappa"] = &Kappa;
-    //scalars["dot_product"] = &dot_product;
-    //vectors["normal"]= &normal;
+    scalars["colour"] = &colour;
+    scalars["R"] = &R;
+    scalars["N"] = &N;
+    scalars["track_particle"] = &track_particle;
+    scalars["Kappa"] = &Kappa;
+    scalars["dot_product"] = &dot_product;
+    vectors["normal"]= &normal;
 
 
     printParams(geomParams, thermoParams, simParams,
