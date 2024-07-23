@@ -33,17 +33,20 @@ void writing_in_file(string name,
                      int scalar_or_vector, 
                      int xyz);
 
-void finding_max(string name, 
+void finding_max(string name,
+                 SimulationData& simParams, 
                  vector<double> data,  
                  int scalar_or_vector, 
                  int xyz);
 
 void finding_min(string name, 
+                 SimulationData& simParams,  
                  vector<double> data,  
                  int scalar_or_vector, 
                  int xyz);
 
 void follow_part_data(GeomData &geomParams,
+                      SimulationData& simParams,
                       vector<double> p,
                       vector<double> rho,
                       vector<double> pos,

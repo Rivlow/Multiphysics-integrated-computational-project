@@ -124,6 +124,7 @@ void writing_in_file(string name,
 }
 
 void finding_max(string name, 
+                 SimulationData& simParams,
                  vector<double> data,  
                  int scalar_or_vector, 
                  int xyz){
@@ -137,7 +138,7 @@ void finding_max(string name,
     int multiple = (scalar_or_vector == 1) ? 1 : 3;
     
     max = data[0 + xyz];
-    for(int i = 1; i < data.size(); i++){
+    for(int i = 1; i < simParams.nb_moving_part; i++){
         max = (max < data[multiple*i+xyz])? data[multiple*i+xyz] : max;
     }
     ostringstream oss;
@@ -156,6 +157,7 @@ void finding_max(string name,
 }
 
 void finding_min(string name, 
+                 SimulationData& simParams,
                  vector<double> data,  
                  int scalar_or_vector, 
                  int xyz){
@@ -169,8 +171,9 @@ void finding_min(string name,
     int multiple = (scalar_or_vector == 1) ? 1 : 3;
     
     double min = data[0 + xyz];
-    for(int i = 1; i < data.size(); i++){
+    for(int i = 1; i < simParams.nb_moving_part; i++){
         min = (min > data[multiple*i+xyz])? data[multiple*i+xyz] : min;
+        
     }
     ostringstream oss;
     oss << fixed << setprecision(6) << min;
@@ -188,6 +191,7 @@ void finding_min(string name,
 }
 
 void follow_part_data(GeomData &geomParams,
+                      SimulationData& simParams,
                       vector<double> p,
                       vector<double> rho,
                       vector<double> pos,
@@ -210,12 +214,12 @@ void follow_part_data(GeomData &geomParams,
         }
         if(geomParams.following_part_max){
             string outputFile_part_press = outputFile_part + "max_pressure" + ".csv";
-            finding_max(outputFile_part_press, p, 1, 0);
+            finding_max(outputFile_part_press,simParams, p, 1, 0);
         }
 
         if(geomParams.following_part_min){
             string outputFile_part_press = outputFile_part + "min_pressure" + ".csv";
-            finding_max(outputFile_part_press, p, 1, 0);
+            finding_min(outputFile_part_press,simParams, p, 1, 0);
         }
         
 
@@ -228,12 +232,12 @@ void follow_part_data(GeomData &geomParams,
         }
         if(geomParams.following_part_max){
             string outputFile_part_rho = outputFile_part + "max_rho" + ".csv";
-            finding_max(outputFile_part_rho, rho, 1, 0);
+            finding_max(outputFile_part_rho,simParams, rho, 1, 0);
         }
 
         if(geomParams.following_part_min){
             string outputFile_part_rho = outputFile_part + "min_rho" + ".csv";
-            finding_max(outputFile_part_rho, rho, 1, 0);
+            finding_min(outputFile_part_rho,simParams, rho, 1, 0);
         }
     }
 
@@ -245,12 +249,12 @@ void follow_part_data(GeomData &geomParams,
         }
         if(geomParams.following_part_max){
             string outputFile_part_pos_x = outputFile_part + "max_pos_x" + ".csv";
-            finding_max(outputFile_part_pos_x, pos, 0, 0);
+            finding_max(outputFile_part_pos_x,simParams, pos, 0, 0);
         }
 
         if(geomParams.following_part_min){
             string outputFile_part_pos_x = outputFile_part + "min_pos_x" + ".csv";
-            finding_max(outputFile_part_pos_x, pos, 0, 0);
+            finding_min(outputFile_part_pos_x,simParams, pos, 0, 0);
         }
   
     }
@@ -263,12 +267,12 @@ void follow_part_data(GeomData &geomParams,
         }
         if(geomParams.following_part_max){
             string outputFile_part_pos_y = outputFile_part + "max_pos_y" + ".csv";
-            finding_max(outputFile_part_pos_y, pos, 0, 1);
+            finding_max(outputFile_part_pos_y,simParams, pos, 0, 1);
         }
 
         if(geomParams.following_part_min){
             string outputFile_part_pos_y = outputFile_part + "min_pos_y" + ".csv";
-            finding_max(outputFile_part_pos_y, pos, 0, 1);
+            finding_min(outputFile_part_pos_y,simParams, pos, 0, 1);
         }
         
     }
@@ -280,12 +284,12 @@ void follow_part_data(GeomData &geomParams,
         }
         if(geomParams.following_part_max){
             string outputFile_part_pos_z = outputFile_part + "max_pos_z" + ".csv";
-            finding_max(outputFile_part_pos_z, pos, 0, 2);
+            finding_max(outputFile_part_pos_z,simParams, pos, 0, 2);
         }
 
         if(geomParams.following_part_min){
             string outputFile_part_pos_z = outputFile_part + "min_pos_z" + ".csv";
-            finding_max(outputFile_part_pos_z, pos, 0, 2);
+            finding_min(outputFile_part_pos_z,simParams, pos, 0, 2);
         }
         
         
@@ -298,12 +302,12 @@ void follow_part_data(GeomData &geomParams,
         }
         if(geomParams.following_part_max){
             string outputFile_part_u_x = outputFile_part + "max_u_x" + ".csv";
-            finding_max(outputFile_part_u_x, u, 0, 0);
+            finding_max(outputFile_part_u_x,simParams, u, 0, 0);
         }
 
         if(geomParams.following_part_min){
             string outputFile_part_u_x = outputFile_part + "min_u_x" + ".csv";
-            finding_max(outputFile_part_u_x, u, 0, 0);
+            finding_min(outputFile_part_u_x,simParams, u, 0, 0);
         }
         
     }
@@ -315,12 +319,12 @@ void follow_part_data(GeomData &geomParams,
         }
         if(geomParams.following_part_max){
             string outputFile_part_u_y = outputFile_part + "max_u_y" + ".csv";
-            finding_max(outputFile_part_u_y, u, 0, 1);
+            finding_max(outputFile_part_u_y,simParams, u, 0, 1);
         }
 
         if(geomParams.following_part_min){
             string outputFile_part_u_y = outputFile_part + "min_u_y" + ".csv";
-            finding_max(outputFile_part_u_y, u, 0, 1);
+            finding_min(outputFile_part_u_y,simParams, u, 0, 1);
         }
         
     }
@@ -332,12 +336,12 @@ void follow_part_data(GeomData &geomParams,
         }
         if(geomParams.following_part_max){
             string outputFile_part_u_z = outputFile_part + "max_u_z" + ".csv";
-            finding_max(outputFile_part_u_z, u, 0, 2);
+            finding_max(outputFile_part_u_z,simParams, u, 0, 2);
         }
 
         if(geomParams.following_part_min){
             string outputFile_part_u_z = outputFile_part + "min_u_z" + ".csv";
-            finding_max(outputFile_part_u_z, u, 0, 2);
+            finding_min(outputFile_part_u_z,simParams, u, 0, 2);
         }
     }
 
