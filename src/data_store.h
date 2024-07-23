@@ -33,6 +33,16 @@ void writing_in_file(string name,
                      int scalar_or_vector, 
                      int xyz);
 
+void finding_max(string name, 
+                 vector<double> data,  
+                 int scalar_or_vector, 
+                 int xyz);
+
+void finding_min(string name, 
+                 vector<double> data,  
+                 int scalar_or_vector, 
+                 int xyz);
+
 void follow_part_data(GeomData &geomParams,
                       vector<double> p,
                       vector<double> rho,

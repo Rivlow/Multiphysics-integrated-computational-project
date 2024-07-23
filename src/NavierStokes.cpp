@@ -233,7 +233,7 @@ void continuityEquation(SimulationData &simParams,
     int nb_part = simParams.nb_tot_part;
              
     // Iterations over each particle
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (int n = 0; n < nb_part; n++){
 
         int size_neighbours = nb_neighbours[n];
@@ -312,7 +312,7 @@ void momentumEquation(GeomData &geomParams,
     //printArray(F_vol, F_vol.size(), "F_vol");
     
     // Iterate over each particle
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (int n = 0; n < nb_moving_part; n++){
         
         double rho_a = rho[n];

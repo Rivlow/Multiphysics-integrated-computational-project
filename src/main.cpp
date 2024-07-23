@@ -248,7 +248,7 @@ int main(int argc, char *argv[])
         if(t % simParams.nsave == 0){
                 if (geomParams.post_process_do)
                     extractData(geomParams, simParams, thermoParams, pos, p, mass, neighbours, nb_neighbours, rho);
-                if (geomParams.following_part_bool)
+                if (geomParams.following_part_bool || geomParams.following_part_max || geomParams.following_part_min)
                     follow_part_data(geomParams, p, rho, pos, u);
                 
             export_particles("../../output/sph", t, pos, scalars, vectors, false);

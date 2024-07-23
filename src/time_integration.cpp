@@ -96,7 +96,7 @@ void updateVariables(GeomData &geomParams,
         double theta = simParams.theta;
         double dt_half = simParams.dt/(2*theta);
 
-        
+        #pragma omp parallel for
         for (int n = 0; n < simParams.nb_tot_part; n++){
 
             rho_half[n] += dt_half * drhodt[n];
@@ -127,7 +127,7 @@ void updateVariables(GeomData &geomParams,
                       neighbours, nb_neighbours);
 
         double dt = simParams.dt;
-       
+        #pragma omp parallel for
         for (int n = 0; n < simParams.nb_tot_part; n++){
             
             rho[n] += dt * ((1-theta)*drhodt[n] + theta*drhodt_half[n]);
