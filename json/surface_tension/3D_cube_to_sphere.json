@@ -26,7 +26,11 @@
             0.0,
             0.0,
             0.0
-        ]
+        ],
+        "sphere":{
+            "do" : [0],
+            "radius": [0.3]
+        }
     },
     "post_process": {
         "do": true,

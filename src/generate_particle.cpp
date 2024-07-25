@@ -112,6 +112,23 @@ void meshcube(GeomData &geomParams,
                 {
                     double z = o[2] + k * dz;
                     
+                    if(geomParams.sphere_do[n]){
+                        double r = geomParams.radius[n];
+                        vector<double> center(3);
+                        
+                        for(int coord = 0; coord <3; coord++){
+                            center[coord] = o[coord] + L[coord]/2;
+                        }
+                        double hyp_coord_x = (center[0]-x)*(center[0]-x);
+                        double hyp_coord_y = (center[1]-y)*(center[1]-y);
+                        double hyp_coord_z = (center[2]-z)*(center[2]-z);
+                        double hyp_radius = hyp_coord_x + hyp_coord_y + hyp_coord_z;
+                        
+                        if(hyp_radius>r*r){ 
+                            continue;
+                        }
+                    }
+                    
                     pos.push_back(x);
                     pos.push_back(y);
                     pos.push_back(z);
@@ -125,8 +142,9 @@ void meshcube(GeomData &geomParams,
             }
         }
     }
+    simParams.nb_moving_part=MP_count;
+    simParams.nb_tot_part = MP_count+FP_count;
     
-    simParams.nb_tot_part = pos.size()/3;
 }
 
 

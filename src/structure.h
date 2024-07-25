@@ -20,6 +20,8 @@ struct GeomData {
     vector<vector<double>> matrix_long;
     vector<vector<double>> matrix_orig;
     vector<int> vector_type; 
+    vector<int> sphere_do;
+    vector<double> radius;
     vector<double> xyz_init;
     vector<double> xyz_end;
     bool post_process_do;

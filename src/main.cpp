@@ -101,6 +101,8 @@ int main(int argc, char *argv[])
         data["domain"]["matrix_long"],
         data["domain"]["matrix_orig"],
         data["domain"]["vector_type"],
+        data["domain"]["sphere"]["do"],
+        data["domain"]["sphere"]["radius"],
         data["post_process"]["xyz_init"],
         data["post_process"]["xyz_end"],
         data["post_process"]["do"],
@@ -153,7 +155,7 @@ int main(int argc, char *argv[])
         data["forces"]["surface_tension"],
         data["forces"]["adhesion"],
         data["condition"]["print_debug"],
-        evaluateNumberParticles(geomParams),
+        0,
         0,
         0,
         
@@ -170,7 +172,7 @@ int main(int argc, char *argv[])
 
     meshcube(geomParams, simParams, pos, type, MP_count, FP_count); 
     meshPostProcess(geomParams, simParams, pos, type, GP_count);
-
+    
     if (!checkParticleGeneration(pos, simParams))
         exit(1);
     
@@ -218,9 +220,13 @@ int main(int argc, char *argv[])
 
     // Initialize variables of the problem
     initRho(thermoParams, simParams, pos, rho);
+    //printArray(rho,rho.size(),"rho");
     initMass(geomParams, simParams, rho, mass);
+    //printArray(mass, mass.size(),"mass");
     initVelocity(thermoParams, simParams, u);
+    //printArray(u, u.size(),"u");
     setPressure(geomParams, thermoParams, simParams, p, rho); 
+    
     setSpeedOfSound(geomParams, thermoParams, simParams, c, rho);
     initKernelCoef(geomParams, simParams);
 

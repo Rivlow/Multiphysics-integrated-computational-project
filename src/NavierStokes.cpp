@@ -141,11 +141,12 @@ void setPressure(GeomData &geomParams,
         #pragma omp parallel for
         for (int n = 0; n < nb_moving_part; n++){
             p[n] = B * (pow(rho[n] / rho_0, gamma) - 1);
+            
         }   
     }
 
     else if (state_equation == "Ideal gaz law"){
-        #pragma omp parallel for
+        //#pragma omp parallel for
         for (int n = 0; n < nb_moving_part; n++){
             p[n] =  (R * T / M) * (rho[n] / rho_0 - 1);
         }
@@ -360,6 +361,7 @@ void momentumEquation(GeomData &geomParams,
         double F_res = 0;
         
         F_vol[3 * n + 2] += g;
+        
         for (int coord = 0; coord < 3; coord++){
             
             
