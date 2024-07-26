@@ -277,8 +277,6 @@ void surfaceTensionImprove(SimulationData& simParams,
         
     }
 
-  
-    
 
     // Calculation of curvature
     #pragma omp parallel for
