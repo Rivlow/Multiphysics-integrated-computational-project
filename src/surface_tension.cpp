@@ -225,15 +225,17 @@ void surfaceTensionImprove(SimulationData& simParams,
             /* imaginary particle contribution */
             /*---------------------------------*/
 
-            
-
-            if (track_particle[n] == 1 && track_particle[i_neig] == 0){  // case 1: part. i on free surface but not j
+            /*
+            // case 1: part. i on free surface but not j
+            if (track_particle[n] == 1 && track_particle[i_neig] == 0){  
 
                 for (int coord = 0; coord < 3; coord++)
                     normal[3*n+coord] -= (0 - colour[n])*(mass[n]/rho[n])*(-1*gradW[n][3*idx+coord]);
             }
 
-            if (track_particle[n] == 0 && track_particle[i_neig] == 1){  // case 2 : part. j on free surface but not i
+
+              // case 2 : part. j on free surface but not i
+            if (track_particle[n] == 0 && track_particle[i_neig] == 1){
 
                 //new gradient kernel has to be computed
                 vector<double> d_pos(3);
@@ -258,7 +260,7 @@ void surfaceTensionImprove(SimulationData& simParams,
 
                     }
                 }
-            }          
+            }*/          
         }
 
 
@@ -304,7 +306,7 @@ void surfaceTensionImprove(SimulationData& simParams,
             /*---------------------------------*/
             /* imaginary particle contribution */
             /*---------------------------------*/
-            
+            /*
             // case 1: part. i on free surface but not j
             if (track_particle[n] == 1 && track_particle[i_neig] == 0){ 
                
@@ -376,7 +378,7 @@ void surfaceTensionImprove(SimulationData& simParams,
                 Kappa[n] -= (R[n]*new_R) * (mass[n]/rho[n]) * dot_product;
                 L += (R[n]*new_R) * (mass[n]/rho[n]) * new_W;
 
-            }   
+            }   */
         }
 
         Kappa[n] /= (L > 0)? L : 1; // correction of the truncated kernel support domain
