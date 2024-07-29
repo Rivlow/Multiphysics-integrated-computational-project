@@ -368,11 +368,7 @@ void writing_time(double sim_time){
     oss << fixed << setprecision(6) << sim_time;
     string data_part_str = oss.str();
 
-    for (char& ch : data_part_str) {
-        if (ch == '.') {
-            ch = ',';
-        }
-    }
+    
 
     output_name << "\"" << data_part_str << "\"" << "\n";
 

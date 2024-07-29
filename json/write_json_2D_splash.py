@@ -2,7 +2,7 @@ import json
 import os
 import sys
 
-s = 0.01
+s = 0.5
 L = 1.2
 
 nb_vtp_output = 250 # the total number of output file desired

@@ -32,7 +32,7 @@ dW = np.zeros(len(r_span))
 for idx, r in enumerate(r_span):
     
     if (r/h < 1.0):
-        W[idx] = alpha * (2/3 - r * r / (h * h) + 0.5 * r * r * r / (h * h * h))
+        W[idx] = alpha * (2.0/3.0 - r * r / (h * h) + 0.5 * r * r * r / (h * h * h))
         dW[idx] = alpha / h * (1.5 * r * r / (h * h) - 2.0 * r / h)
         
     elif (r/h >= 1.0 and r/h <= 2.0):
