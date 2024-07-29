@@ -12,12 +12,19 @@ using namespace std;
 
 int evaluateNumberParticles(GeomData &geomParams);
 
-void meshcube(GeomData &geomParams,
+void meshCube(GeomData &geomParams,
               SimulationData &simParams,
               vector<double> &pos,
               vector<double> &type,
               int &MP_count,
               int &FP_count);
+
+void meshSphere(GeomData &geomParams,
+                SimulationData &simParams,
+                vector<double> &pos,
+                vector<double> &type,
+                int &MP_count,
+                int &FP_count);
 
 void meshPostProcess(GeomData &geomParams,
                      SimulationData &simParams,

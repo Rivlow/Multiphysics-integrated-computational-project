@@ -22,6 +22,7 @@
 #include "time_integration.h"
 #include "data_store.h"
 #include "surface_tension.h"
+#include "PoiseuilleFlow.h"
 
 
 #include "nlohmann/json.hpp"
@@ -62,8 +63,12 @@ int main(int argc, char *argv[])
 
     /*---------------------- INPUT PARAMETERS FROM JSON FILES --------------------------*/
 
+
+
     ifstream inputf(argv[1]);
     json data = json::parse(inputf);
+
+
 
     //cout << argv[1] << ":\n"
     //          << data.dump(4) << endl; // print input data to screen
@@ -161,12 +166,12 @@ int main(int argc, char *argv[])
     vector<double> pos;
     vector<double> type;
     
-
-    meshcube(geomParams, simParams, pos, type, MP_count, FP_count); 
+    meshSphere(geomParams, simParams, pos, type, MP_count, FP_count); 
+    meshCube(geomParams, simParams, pos, type, MP_count, FP_count); 
     meshPostProcess(geomParams, simParams, pos, type, GP_count);
 
-    if (!checkParticleGeneration(pos))
-        exit(1);
+    //if (!checkParticleGeneration(pos))
+    //    exit(1);
     
     int nb_tot_part = pos.size()/3;
     vector<double> mass(nb_tot_part, 0), u(3 * nb_tot_part, 0),
@@ -265,6 +270,7 @@ int main(int argc, char *argv[])
             progressBar(double(t)/double(simParams.nstepT), elapsed_time);    
         }
         
+        respawnParticle(pos, geomParams, simParams);
 
         // Clear matrices and reset arrays to 0
         clearAllVectors(simParams, viscosity, neighbours,
