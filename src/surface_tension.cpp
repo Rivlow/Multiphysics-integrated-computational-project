@@ -225,7 +225,7 @@ void surfaceTensionImprove(SimulationData& simParams,
             /* imaginary particle contribution */
             /*---------------------------------*/
 
-            /*
+            
             // case 1: part. i on free surface but not j
             if (track_particle[n] == 1 && track_particle[i_neig] == 0){  
 
