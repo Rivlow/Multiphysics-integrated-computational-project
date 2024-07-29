@@ -260,7 +260,7 @@ void surfaceTensionImprove(SimulationData& simParams,
 
                     }
                 }
-            }*/          
+            }         
         }
 
 
@@ -306,7 +306,7 @@ void surfaceTensionImprove(SimulationData& simParams,
             /*---------------------------------*/
             /* imaginary particle contribution */
             /*---------------------------------*/
-            /*
+            
             // case 1: part. i on free surface but not j
             if (track_particle[n] == 1 && track_particle[i_neig] == 0){ 
                
@@ -378,7 +378,7 @@ void surfaceTensionImprove(SimulationData& simParams,
                 Kappa[n] -= (R[n]*new_R) * (mass[n]/rho[n]) * dot_product;
                 L += (R[n]*new_R) * (mass[n]/rho[n]) * new_W;
 
-            }   */
+            }   
         }
 
         Kappa[n] /= (L > 0)? L : 1; // correction of the truncated kernel support domain
