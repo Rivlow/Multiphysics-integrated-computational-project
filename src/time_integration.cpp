@@ -45,7 +45,6 @@ void updateVariables(GeomData &geomParams,
 
     bool PRINT = simParams.PRINT;
     string schemeIntegration = simParams.schemeIntegration;
-    int nb_tot_part = pos.size()/3;
 
     if (schemeIntegration == "Euler"){
 
@@ -63,19 +62,19 @@ void updateVariables(GeomData &geomParams,
         double dt = simParams.dt;
 
         #pragma omp parallel for   
-        for (int n = 0; n < simParams.nb_tot_part; n++){
+        for (int i = 0; i < simParams.nb_tot_part; i++){
 
-            rho[n] += dt * drhodt[n];
+            rho[i] += dt * drhodt[i];
 
-            if (rho[n] < 0){
-                cerr << "Rho negative (" << rho[n] << ") at t:" << simParams.t << endl;
+            if (rho[i] < 0){
+                cerr << "Rho negative (" << rho[i] << ") at t:" << simParams.t << endl;
                 exit(EXIT_FAILURE);
             }
 
             for (int coord = 0; coord < 3; coord++){
 
-                pos[3 * n + coord] += dt * u[3 * n + coord];
-                u[3 * n + coord] += dt * dudt[3 * n + coord];
+                pos[3*i + coord] += dt * u[3*i + coord];
+                u[3*i + coord] += dt * dudt[3*i + coord];
             }
         }
     }
@@ -106,18 +105,18 @@ void updateVariables(GeomData &geomParams,
         double dt_half = simParams.dt/2;
 
         #pragma omp parallel for   
-        for (int n = 0; n < simParams.nb_tot_part; n++){
+        for (int i = 0; i < simParams.nb_tot_part; i++){
 
-            rho_half[n] += dt_half * drhodt[n];
-            if (rho_half[n] < 0){
-                cout << "Rho negative (" << rho[n] << ") at t:" << simParams.t << endl;
+            rho_half[i] += dt_half * drhodt[i];
+            if (rho_half[i] < 0){
+                cout << "Rho negative (" << rho[i] << ") at t:" << simParams.t << endl;
                 exit(1);
             }
 
             for (int coord = 0; coord < 3; coord++){
 
-                pos_half[3 * n + coord] += dt_half * u[3 * n + coord];
-                u_half[3 * n + coord] += dt_half * dudt[3 * n + coord];
+                pos_half[3 * i + coord] += dt_half * u[3 * i + coord];
+                u_half[3 * i + coord] += dt_half * dudt[3 * i + coord];
             }
         }
 
@@ -137,15 +136,15 @@ void updateVariables(GeomData &geomParams,
 
 
         #pragma omp parallel for
-        for (int n = 0; n < simParams.nb_tot_part; n++){
+        for (int i = 0; i < simParams.nb_tot_part; i++){
 
-            rho[n] += dt * ((1-theta)*drhodt[n] + theta*drhodt_half[n]);
+            rho[i] += dt * ((1-theta)*drhodt[i] + theta*drhodt_half[i]);
 
             for (int coord = 0; coord < 3; coord++){
 
-                double u_temp = u[3 * n + coord] + dt*dudt_half[3 * n + coord];
-                pos[3 * n + coord] += dt * ((1-theta)*u[3 * n + coord] + theta*u_temp);
-                u[3 * n + coord] += dt *  ((1-theta)*dudt[3 * n + coord] + theta*dudt_half[3 * n + coord]);
+                double u_temp = u[3 * i + coord] + dt*dudt_half[3 * i + coord];
+                pos[3 * i + coord] += dt * ((1-theta)*u[3 * i + coord] + theta*u_temp);
+                u[3 * i + coord] += dt *  ((1-theta)*dudt[3 * i + coord] + theta*dudt_half[3 * i + coord]);
 
             }
         }
@@ -197,9 +196,9 @@ void checkTimeStep(GeomData &geomParams,
     else{
 
         #pragma omp parallel for   
-        for (int n = 0; n < nb_moving_part; n++){
+        for (int i = 0; i < nb_moving_part; i++){
 
-            int size_neighbours = nb_neighbours[n];
+            int size_neighbours = nb_neighbours[i];
 
             
 
@@ -207,12 +206,12 @@ void checkTimeStep(GeomData &geomParams,
                 // Iteration over each associated neighbours
                 for (int idx = 0; idx < size_neighbours; idx++){
 
-                    int i_neig = neighbours[100*n + idx];
+                    int i_neig = neighbours[100*i + idx];
                     vector<double> rel_displ(3), rel_vel(3);
 
                     for (int coord = 0; coord < 3; coord++){
-                        rel_displ[coord] = (pos[3 * n + coord] - pos[3 * i_neig + coord]);
-                        rel_vel[coord] = (u[3 * n + coord] - u[3 * i_neig + coord]);
+                        rel_displ[coord] = (pos[3 * i + coord] - pos[3 * i_neig + coord]);
+                        rel_vel[coord] = (u[3 * i + coord] - u[3 * i_neig + coord]);
                     }
 
                     double u_ab_x_ab = 0, x_ab_2 = 0;
@@ -232,7 +231,7 @@ void checkTimeStep(GeomData &geomParams,
             else
                 max_b = 0;
         
-            double c_a = c[n];
+            double c_a = c[i];
             double val = geomParams.h/(c_a + 0.6*(alpha*c_a + beta*max_b));
             min_a = (val < min_a) ? val : min_a;
         }

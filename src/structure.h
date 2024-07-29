@@ -57,6 +57,7 @@ struct SimulationData {
     vector<double> u_init;
     string state_equation; 
     string state_initial_condition;
+    string kernel;
     bool is_gravity;
     bool is_surface_tension;
     bool is_adhesion;

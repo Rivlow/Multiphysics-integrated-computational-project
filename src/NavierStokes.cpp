@@ -22,67 +22,31 @@ void computeGradW(GeomData &geomParams,
 
     int nb_tot_part = simParams.nb_tot_part;
 
-    if (simParams.is_surface_tension){
-
         // Iterations over each particle
         #pragma omp parallel for
-        for (int n = 0; n < nb_tot_part; n++){
+        for (int i = 0; i < nb_tot_part; i++){
 
-            int size_neighbours = nb_neighbours[n];
+            int size_neighbours = nb_neighbours[i];
 
             // Iterations over each associated neighbours 
             for (int idx = 0; idx < size_neighbours; idx++){
 
-                int i_neig = neighbours[100*n + idx];
+                int j = neighbours[100*i + idx];
 
                 vector<double> d_pos(3);
                 for (int coord = 0; coord < 3; coord++)
-                    d_pos[coord] = pos[3*n + coord] - pos[3*i_neig + coord];
+                    d_pos[coord] = pos[3*i + coord] - pos[3*j + coord];
                 
 
-                double r_ab = dist(pos, n, i_neig);
-                double deriv = derive_cubic_spline(r_ab, geomParams, simParams);
-                W[n][idx] = f_cubic_spline(r_ab, geomParams, simParams);;
+                double r_ij = dist(pos, i, j);
+                double deriv = derive_cubic_spline(r_ij, geomParams, simParams);
+                W[i][idx] = f_cubic_spline(r_ij, geomParams, simParams);;
 
                 for (int coord = 0; coord < 3; coord++)
-                    gradW[n][3*idx + coord] = (d_pos[coord] / r_ab) * deriv;
+                    gradW[i][3*idx + coord] = (d_pos[coord] / r_ij) * deriv;
                 
             }
         }
-    }
-    else{
-
-        // Iterations over each particle
-        #pragma omp parallel for
-        for (int n = 0; n < nb_tot_part; n++){
-
-            int size_neighbours = nb_neighbours[n];
-
-            // Iterations over each associated neighbours 
-            for (int idx = 0; idx < size_neighbours; idx++){
-
-                int i_neig = neighbours[100*n + idx];
-
-                vector<double> d_pos(3);
-                for (int coord = 0; coord < 3; coord++)
-                    d_pos[coord] = pos[3*n + coord] - pos[3*i_neig + coord];
-                
-                double r_ab = dist(pos, n, i_neig);
-                double deriv = derive_wendland_quintic(r_ab, geomParams, simParams);
-                W[n][idx] = f_wendland_quintic(r_ab, geomParams, simParams);;
-
-                for (int coord = 0; coord < 3; coord++)
-                    gradW[n][3*idx + coord] = (d_pos[coord] / r_ab) * deriv;
-                
-            }
-        }
-    }
-
-
-
-
-
-
 
     if (simParams.PRINT)cout << "gradW passed" << endl;
 }
@@ -101,17 +65,17 @@ void setSpeedOfSound(GeomData &geomParams,
     int nb_part = simParams.nb_tot_part;
 
     #pragma omp parallel for
-    for (int n = 0; n < nb_part; n++){
+    for (int i = 0; i < nb_part; i++){
 
-        if (state_equation == "Ideal gaz law") c[n] = c_0;        
-        else if (state_equation == "Quasi incompresible fluid") c[n] = c_0 * pow(rho[n] / rho_0, 0.5 * (gamma - 1));
+        if (state_equation == "Ideal gaz law") c[i] = c_0;        
+        else if (state_equation == "Quasi incompresible fluid") c[i] = c_0 * pow(rho[i] / rho_0, 0.5 * (gamma - 1));
         else {
             cout << "Error : no state equation chosen" << endl;
             exit(1);
         } 
 
-        if (c[n] < 0){
-            cout << "Error, c ="<< c[n]<< " at timestep : " <<simParams.t << endl;
+        if (c[i] < 0){
+            cout << "Error, c ="<< c[i]<< " at timestep : " <<simParams.t << endl;
             exit(1);
         }
     
@@ -136,13 +100,13 @@ void setPressure(GeomData &geomParams,
     string state_equation = simParams.state_equation;
 
     #pragma omp parallel for
-    for (int n = 0; n < nb_moving_part; n++){
+    for (int i = 0; i < nb_moving_part; i++){
 
-        if (state_equation == "Ideal gaz law") p[n] =  (R * T / M) * (rho[n] / rho_0 - 1);
+        if (state_equation == "Ideal gaz law") p[i] =  (R * T / M) * (rho[i] / rho_0 - 1);
 
         else if (state_equation == "Quasi incompresible fluid"){
             double B = c_0 * c_0 * rho_0 / gamma;
-            p[n] = B * (pow(rho[n] / rho_0, gamma) - 1);
+            p[i] = B * (pow(rho[i] / rho_0, gamma) - 1);
         }
         else {
             cout << "Error : no state equation chosen" << endl;
@@ -177,35 +141,31 @@ void setArtificialViscosity(GeomData &geomParams,
 
         // Iterations over each particle
         #pragma omp parallel for
-        for (int n = 0; n < nb_moving_part; n++){
+        for (int i = 0; i < nb_moving_part; i++){
 
-            int size_neighbours = nb_neighbours[n];
+            int size_neighbours = nb_neighbours[i];
 
             // Iteration over each associated neighbours
             for (int idx = 0; idx < size_neighbours; idx++){
 
                 vector<double> d_pos(3), d_u(3);
-                int i_neig = neighbours[100*n + idx];
+                int j = neighbours[100*i + idx];
 
                 for (int coord = 0; coord < 3; coord++){
-                    d_pos[coord] = (pos[3*n + coord] - pos[3*i_neig + coord]);
-                    d_u[coord] = (u[3*n + coord] - u[3*i_neig + coord]);
+                    d_pos[coord] = (pos[3*i + coord] - pos[3*j + coord]);
+                    d_u[coord] = (u[3*i + coord] - u[3*j + coord]);
                 }
 
-                double c_a = c[n];
-                double c_b = c[i_neig];
-                double rho_a = rho[n];
-                double rho_b = rho[i_neig];
-                double c_ab = 0.5 * (c_a + c_b);
-                double rho_ab = 0.5 * (rho_a + rho_b);
+                double c_ij = 0.5 * (c[i] + c[j]);
+                double rho_ij = 0.5 * (rho[i] + rho[j]);
                 double nu_2 = 0.01 * h * h;
                 
-                double u_ab_x_ab = dotProduct(d_u, d_pos);
-                double x_ab_x_ab = dotProduct(d_pos, d_pos);
-                double mu_ab = (h * u_ab_x_ab) / (x_ab_x_ab + nu_2);
+                double u_ij_x_ij = dotProduct(d_u, d_pos);
+                double x_ij_x_ij = dotProduct(d_pos, d_pos);
+                double mu_ab = (h * u_ij_x_ij) / (x_ij_x_ij + nu_2);
 
-                viscosity[n][idx] = (u_ab_x_ab < 0) ? 
-                (-alpha * c_ab * mu_ab + beta * mu_ab * mu_ab) / rho_ab : 0;
+                viscosity[i][idx] = (u_ij_x_ij < 0) ? 
+                (-alpha * c_ij * mu_ab + beta * mu_ab * mu_ab) / rho_ij : 0;
             }
         }
     }
@@ -228,26 +188,25 @@ void continuityEquation(SimulationData &simParams,
              
     // Iterations over each particle
     #pragma omp parallel for
-    for (int n = 0; n < nb_part; n++){
+    for (int i = 0; i < nb_part; i++){
 
-        int size_neighbours = nb_neighbours[n];
+        int size_neighbours = nb_neighbours[i];
 
         // Summation over b = 1 -> nb_neighbours
         for (int idx = 0; idx < size_neighbours; idx++){
 
+            int j = neighbours[100*i + idx];
             double dot_product = 0;
-            int i_neig = neighbours[100*n + idx];
-            double m_b = mass[i_neig];
-
+            
             // Dot product of u_ab with grad_a(W_ab)
             for (int coord = 0; coord < 3; coord++){
 
-                double u_a = u[3 * n + coord];
-                double u_b = u[3 * i_neig + coord];
-                dot_product += (u_a - u_b) * gradW[n][3*idx + coord];
+                double u_i = u[3*i + coord];
+                double u_j = u[3*j + coord];
+                dot_product += (u_i - u_j) * gradW[i][3*idx + coord];
             }
             
-            drhodt[n] += m_b * dot_product;
+            drhodt[i] += mass[j] * dot_product;
      
       
         }
@@ -274,7 +233,7 @@ void momentumEquation(GeomData &geomParams,
                       vector<double> type,
                       vector<double> &colour,
                       vector<double> &R,
-                      vector<double> &N,
+                      vector<double> &i,
                       vector<double> &normal,
                       vector<double> &track_particle,
                       vector<double> &Kappa,
@@ -303,49 +262,49 @@ void momentumEquation(GeomData &geomParams,
                               mass,rho,type,pos, track_particle);
 
         surfaceTensionImprove(simParams, geomParams,thermoParams, nb_neighbours, neighbours, 
-                              gradW, W, mass, rho, pos, F_vol, type, colour, R, N, normal, track_particle, Kappa, dot_product);
+                              gradW, W, mass, rho, pos, F_vol, type, colour, R, i, normal, track_particle, Kappa, dot_product);
     }
     
     // Iterate over each particle
     #pragma omp parallel for
-    for (int n = 0; n < nb_moving_part; n++){
+    for (int i = 0; i < nb_moving_part; i++){
         
-        double rho_a = rho[n];
-        double p_a = p[n];
-        int size_neighbours = nb_neighbours[n];
+        double rho_i = rho[i];
+        double p_i = p[i];
+        int size_neighbours = nb_neighbours[i];
 
         // Summation over neighbours
         for (int idx = 0; idx < size_neighbours; idx++){
 
-            int i_neig = neighbours[100*n + idx];
-            double pi_ab = viscosity[n][idx];
-            double rho_b = rho[i_neig];
-            double m_b = mass[i_neig];
-            double p_b = p[i_neig];
+            int j = neighbours[100*i + idx];
+            double pi_ij = viscosity[i][idx];
+            double rho_j = rho[j];
+            double m_j = mass[j];
+            double p_j = p[j];
 
             for (int coord = 0; coord < 3; coord++)
-                dudt[3*n + coord] -= m_b * (p_b / (rho_b * rho_b) +
-                                    p_a / (rho_a * rho_a) + pi_ab)* gradW[n][3*idx + coord];
+                dudt[3*i + coord] -= m_j * (p_j / (rho_j * rho_j) +
+                                    p_i / (rho_i * rho_i) + pi_ij)* gradW[i][3*idx + coord];
             
             if (simParams.is_adhesion){
                 
                 double beta_ad = simParams.beta_adh;
-                double r_ab = 0;
+                double r_ij = 0;
                 vector<double> d_xyz(3);
 
                 for (int coord = 0; coord < 3; coord++){
                 
-                    d_xyz[coord] = pos[3*n + coord] - pos[3*i_neig + coord];
-                    r_ab += d_xyz[coord]*d_xyz[coord];
+                    d_xyz[coord] = pos[3*i + coord] - pos[3*j + coord];
+                    r_ij += d_xyz[coord]*d_xyz[coord];
                 }
 
-                r_ab = sqrt(r_ab);
-                double W_ab = W_adh(r_ab, geomParams, simParams);
+                r_ij = sqrt(r_ij);
+                double W_ij = W_adh(r_ij, geomParams, simParams);
 
 
                 for (int coord = 0; coord < 3; coord++){
-                    double boundary = 1.0 - type[i_neig];
-                    F_vol[3*n + coord] -= beta_ad*boundary*mass[n]*m_b*W_ab*d_xyz[coord]/r_ab;
+                    double boundary = 1.0 - type[j];
+                    F_vol[3*i + coord] -= beta_ad*boundary*mass[i]*m_j*W_ij*d_xyz[coord]/r_ij;
                 }
             } 
         }
@@ -355,10 +314,10 @@ void momentumEquation(GeomData &geomParams,
 
         for (int coord = 0; coord < 3; coord++){
             if(coord == 2)
-                F_vol[3 * n + coord] += g;
+                F_vol[3 * i + coord] += g;
             
-            dudt[3 * n + coord] += F_vol[3 * n + coord];
-            F_res += F_vol[3*n + coord]*F_vol[3*n + coord];
+            dudt[3 * i + coord] += F_vol[3 * i + coord];
+            F_res += F_vol[3*i + coord]*F_vol[3*i + coord];
         }
 
         F_res = sqrt(F_res);

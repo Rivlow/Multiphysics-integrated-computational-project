@@ -74,10 +74,11 @@ int main(int argc, char *argv[])
     string state_equation;
     string state_initial_condition;
     string schemeIntegration;
+    string kernel;
 
     // Structure to store parameters
     getKey(data, state_equation, state_initial_condition, 
-           schemeIntegration);
+           schemeIntegration, kernel);
 
     cout << "kappa = " << data["simulation"]["kappa"] << endl;
     cout << "s = " << data["simulation"]["s"] << endl;
@@ -107,8 +108,8 @@ int main(int argc, char *argv[])
         int(geomParams.L_d[0] / (geomParams.kappa * geomParams.h)),
         int(geomParams.L_d[1] / (geomParams.kappa * geomParams.h)),
         int(geomParams.L_d[2] / (geomParams.kappa * geomParams.h)),
-
     };
+
     cout << "GeomData initialized" << endl;
     
     ThermoData thermoParams = {
@@ -121,8 +122,8 @@ int main(int argc, char *argv[])
         data["thermo"]["gamma"],
         data["thermo"]["R"],
         data["thermo"]["sigma"],
-
     };
+
     cout << "ThermoData initialized" << endl;
 
 
@@ -141,15 +142,16 @@ int main(int argc, char *argv[])
         data["thermo"]["u_init"],
         state_equation,
         state_initial_condition,
+        kernel,
         data["forces"]["gravity"],
         data["forces"]["surface_tension"],
         data["forces"]["adhesion"],
         data["condition"]["print_debug"],
         evaluateNumberParticles(geomParams),
         0,
-        0,
-        
+        0,  
     };
+
     cout << "SimulationData initialized" << endl;
 
     /*------------------- INITIALIZATION OF VARIABLES USED -------------------*/    
@@ -213,6 +215,8 @@ int main(int argc, char *argv[])
     scalars["Kappa"] = &Kappa;
     scalars["dot_product"] = &dot_product;
     vectors["normal"]= &normal;
+
+    cout << "kernel used = " << simParams.kernel << endl;
 
 
     printParams(geomParams, thermoParams, simParams,

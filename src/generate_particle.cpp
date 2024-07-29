@@ -27,9 +27,9 @@ int evaluateNumberParticles(GeomData &geomParams){
     double s = geomParams.s;
     int nbpart = 0;
 
-    for(int n = 0; n < int(vectorType.size()); n++){
-        if(vectorType[n]){
-            vector<double> &L = matrixLong[n];    
+    for(int i = 0; i < int(vectorType.size()); i++){
+        if(vectorType[i]){
+            vector<double> &L = matrixLong[i];    
             int ni = int(ceil(L[0] / s));
             if(ni != 1){
                 ++ni;
@@ -64,11 +64,11 @@ void meshcube(GeomData &geomParams,
     vector<int> vectorType = geomParams.vector_type;
     double s = geomParams.s;
     
-    for(int n = 0 ; n < int(vectorType.size()); n++){
+    for(int i = 0 ; i < int(vectorType.size()); i++){
 
-        vector<double> &L = matrixLong[n];
-        vector<double> &o = matrixOrig[n];
-        int type_val = vectorType[n];
+        vector<double> &L = matrixLong[i];
+        vector<double> &o = matrixOrig[i];
+        int type_val = vectorType[i];
         double dx = 0;
         double dy = 0;
         double dz = 0;
@@ -180,15 +180,15 @@ bool checkParticleGeneration(vector<double> pos){
     int pos_size = pos.size() / 3;
     unordered_set<tuple<double, double, double>, TupleHash> uniqueTriplets;
 
-    for (int n = 0; n < pos_size; n++) {
-        double x = pos[3 * n];
-        double y = pos[3 * n + 1];
-        double z = pos[3 * n + 2];
+    for (int i = 0; i < pos_size; i++) {
+        double x = pos[3 * i];
+        double y = pos[3 * i + 1];
+        double z = pos[3 * i + 2];
 
         tuple<double, double, double> triplet = make_tuple(x, y, z);
 
         if (uniqueTriplets.find(triplet) != uniqueTriplets.end()) {
-            cout << "Error : non unique position triplet at " << n << " : (" << x << ", " << y << ", " << z << ")\n";
+            cout << "Error : non unique position triplet at " << i << " : (" << x << ", " << y << ", " << z << ")\n";
             return false;
         }
 

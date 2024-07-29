@@ -81,7 +81,8 @@ template void printArray<double>(vector<double> &, int, string);
 void getKey(json data,
             string &state_equation,
             string &state_initial_condition,
-            string &schemeIntegration){
+            string &schemeIntegration,
+            string &kernel){
 
     
     for (auto &it : data["condition"]["stateEquation"].items())
@@ -92,7 +93,17 @@ void getKey(json data,
         }
     };
 
-    for (auto &it : data["condition"]["schemeIntegration"].items())
+    for (auto &it : data["simulation"]["kernel"].items())
+    {
+                cout << "ahahaha" << endl;
+
+        if (it.value() == true)
+        {
+            kernel = it.key();
+        }
+    };
+
+    for (auto &it : data["simulation"]["schemeIntegration"].items())
     {
         if (it.value() == true)
         {

@@ -2,13 +2,12 @@ import json
 import os
 import sys
 
-s = 0.1
-L = 1
+s = 0.001
+L = 0.01
 
-nb_vtp_output = 250 # the total number of output file desired
-dt = 0.00001
-nstepT = 300000
-nsave = nb_vtp_output/(dt*nstepT)  
+dt = 0.0001
+nsave = 200
+nstepT = nsave*400*20
 
 data = {
 
@@ -33,24 +32,26 @@ data = {
     "dt": dt,
     "nsave": nsave,
     "kappa": 2,
-    "alpha": 50,
+    "alpha": 0.5,
     "beta": 0,
     "alpha_st":10,
     "beta_adh": 10,
-    "dimension": 2
+    "dimension": 2,
+    "schemeIntegration": {"Euler":True, "RK22":False},
+
   },
 
   "thermo":{
     "rho_0": 1000,
     "rho_moving": 1000,
     "rho_fixed" : 1000,
-    "T": 298.15,
+    "T": 300,
     "u_init": [0.0, 0.0, 0.0],
-    "c_0": 30, 
+    "c_0": 1, 
     "gamma": 7, 
     "M": 18e-3, 
     "R":8.314,
-    "sigma":72800
+    "sigma":0.01
   },
 
 
@@ -62,7 +63,6 @@ data = {
 
   "condition":{
     "print_debug":False,
-    "schemeIntegration": {"Euler":True,"RK22":False},
     "stateEquation" : {"Ideal gaz law":False, "Quasi incompresible fluid":True},
     "initialCondition" : {"Hydrostatic":False, "Constant":True}
   }
