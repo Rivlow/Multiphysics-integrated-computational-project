@@ -142,7 +142,7 @@ void meshcube(GeomData &geomParams,
             }
         }
     }
-    simParams.nb_moving_part=MP_count;
+    simParams.nb_moving_part = MP_count;
     simParams.nb_tot_part = MP_count+FP_count;
     
 }
