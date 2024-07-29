@@ -3,7 +3,7 @@
         "matrix_long": [
             [
                 1,
-                0.05,
+                0.0125,
                 1
             ]
         ],
@@ -44,7 +44,7 @@
     "simulation": {
         "theta": 0.5,
         "s": 0.1,
-        "nstepT": 1000000,
+        "nstepT": 500000,
         "dt": 1e-05,
         "nsave": 2000,
         "kappa": 2,

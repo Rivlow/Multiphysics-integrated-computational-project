@@ -202,9 +202,9 @@ void surfaceTensionImprove(SimulationData& simParams,
             colour[n] = 1;
             
     }
-
+    vector<double> normal_normali(3*simParams.nb_moving_part,0.0);
     // Calculation of normal vector
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for (int n = 0; n < simParams.nb_moving_part; n++){
 
         int size_neighbours = nb_neighbours[n];
@@ -272,16 +272,21 @@ void surfaceTensionImprove(SimulationData& simParams,
             norm += normal[3*n+coord]*normal[3*n+coord];
         
         norm = sqrt(norm);
+        
         R[n] = (norm <= 0.01/geomParams.h)? 0: 1;
-
-        for (int coord = 0; coord < 3; coord++)
-            normal[3*n+coord] /= (norm > 0)? norm : 1;
+        //cout << "norm " << norm << endl;
+        
+        for (int coord = 0; coord < 3; coord++){
+            normal_normali[3*n+coord] = (norm > 0)? normal[3*n+coord]/norm : normal[3*n+coord];
+            //normal_normali[3*n+coord] = normal[3*n+coord];
+        }
+            
         
     }
 
 
     // Calculation of curvature
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for (int n = 0; n < simParams.nb_moving_part; n++){
 
         double L = 0;
@@ -297,7 +302,7 @@ void surfaceTensionImprove(SimulationData& simParams,
             dot_product[n] = 0;
 
             for (int coord = 0; coord < 3; coord++)
-                dot_product[n] += (normal[3*i_neig + coord] - normal[3*n + coord]) * gradW[n][3*idx + coord];
+                dot_product[n] += (normal_normali[3*i_neig + coord] - normal_normali[3*n + coord]) * gradW[n][3*idx + coord];
 
             Kappa[n] -= (R[n]*R[i_neig]) * (mass[i_neig]/rho[i_neig]) * dot_product[n];
             L += (R[n]*R[i_neig]) * (mass[i_neig]/rho[i_neig]) * W[n][idx];
@@ -314,7 +319,7 @@ void surfaceTensionImprove(SimulationData& simParams,
                 double norm = 0;
 
                 for (int coord = 0; coord < 3; coord++){
-                    new_normal[coord] = 2 * normal[3*n+coord] - normal[3*i_neig+coord]; 
+                    new_normal[coord] = 2 * normal_normali[3*n+coord] - normal_normali[3*i_neig+coord]; 
                     norm += new_normal[coord] * new_normal[coord];
                 }
 
@@ -329,10 +334,11 @@ void surfaceTensionImprove(SimulationData& simParams,
                 double dot_product = 0;
 
                 for (int coord = 0; coord < 3; coord++)
-                    dot_product += (new_normal[coord] - normal[3*n+coord]) * (-1*gradW[n][3*idx+coord]);
+                    dot_product += (new_normal[coord] - normal_normali[3*n+coord]) * (-1*gradW[n][3*idx+coord]);
 
                 Kappa[n] -= (R[n]*new_R) * (mass[n]/rho[n]) * dot_product;
                 L += (R[n]*new_R) * (mass[n]/rho[n]) * W[n][idx];
+                
                 
                 continue;   
             }
@@ -345,7 +351,7 @@ void surfaceTensionImprove(SimulationData& simParams,
                 double norm = 0, r_ij = 0;
                 
                 for (int coord = 0; coord < 3; coord++){
-                    new_normal[coord] = 2 * normal[3*i_neig+coord] - normal[3*n+coord]; 
+                    new_normal[coord] = 2 * normal_normali[3*i_neig+coord] - normal_normali[3*n+coord]; 
                    
                     norm += new_normal[coord] * new_normal[coord];
                     d_pos[coord] = 2*(pos[3*n + coord] - pos[3*i_neig + coord]); // vector ij' twice the lenght of classical ij vector
@@ -370,23 +376,24 @@ void surfaceTensionImprove(SimulationData& simParams,
                 
                     for (int coord = 0; coord < 3; coord++){
                         new_gradW[coord] = (d_pos[coord] / r_ij) * deriv;
-                        dot_product += (new_normal[coord] - normal[3*n+coord])*new_gradW[coord];
+                        dot_product += (new_normal[coord] - normal_normali[3*n+coord])*new_gradW[coord];
                     }
                 }
 
                 double new_W = f_cubic_spline(r_ij, geomParams, simParams);
                 Kappa[n] -= (R[n]*new_R) * (mass[n]/rho[n]) * dot_product;
                 L += (R[n]*new_R) * (mass[n]/rho[n]) * new_W;
-
+                
             }   
         }
 
         Kappa[n] /= (L > 0)? L : 1; // correction of the truncated kernel support domain
+        
         double F_res = 0;
 
         for (int coord = 0; coord < 3; coord++){
 
-            F_vol[3*n+coord] += (thermoParams.sigma/rho[n])*Kappa[n]*normal[3*n+coord];
+            F_vol[3*n+coord] += (thermoParams.sigma/rho[n])*Kappa[n]*normal_normali[3*n+coord];
             F_res += F_vol[3*n + coord]*F_vol[3*n + coord];
         }
 
