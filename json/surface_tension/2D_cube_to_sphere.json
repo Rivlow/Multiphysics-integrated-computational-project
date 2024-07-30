@@ -43,12 +43,12 @@
     },
     "simulation": {
         "theta": 0.5,
-        "s": 0.1,
-        "nstepT": 500000,
+        "s": 0.05,
+        "nstepT": 1000000,
         "dt": 1e-05,
         "nsave": 2000,
         "kappa": 2,
-        "alpha": 5,
+        "alpha": 25,
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 10,
@@ -64,11 +64,11 @@
             0.0,
             0.0
         ],
-        "c_0": 30,
+        "c_0": 2,
         "gamma": 7,
         "M": 0.018,
         "R": 8.314,
-        "sigma": 728
+        "sigma": 72.8
     },
     "forces": {
         "gravity": false,
