@@ -172,9 +172,6 @@ void setArtificialViscosity(GeomData &geomParams,
     int t = simParams.t;
 
     if (t > 0){
-
-        
-
         // Iterations over each particle
         #pragma omp parallel for
         for (int n = 0; n < nb_moving_part; n++){

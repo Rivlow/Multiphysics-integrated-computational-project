@@ -2,25 +2,25 @@
     "domain": {
         "matrix_long": [
             [
-                1,
-                0.0125,
-                1
+                1e-2,
+                2.5e-4,
+                1e-2
             ]
         ],
         "matrix_orig": [
             [
-                1,
+                1e-2,
                 0,
-                1
+                1e-2
             ]
         ],
         "vector_type": [
             1
         ],
         "L_d": [
-            3,
-            3,
-            3
+            3e-2,
+            5e-3,
+            3e-2
         ],
         "o_d": [
             0.0,
@@ -43,12 +43,12 @@
     },
     "simulation": {
         "theta": 0.5,
-        "s": 0.05,
-        "nstepT": 1000000,
-        "dt": 1e-05,
-        "nsave": 2000,
+        "s": 5e-4,
+        "nstepT": 2500000,
+        "dt": 1e-06,
+        "nsave": 5000,
         "kappa": 2,
-        "alpha": 25,
+        "alpha": 0.01,
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 10,
@@ -64,11 +64,11 @@
             0.0,
             0.0
         ],
-        "c_0": 2,
+        "c_0": 13.33,
         "gamma": 7,
         "M": 0.018,
         "R": 8.314,
-        "sigma": 72.8
+        "sigma": 0.1
     },
     "forces": {
         "gravity": false,
