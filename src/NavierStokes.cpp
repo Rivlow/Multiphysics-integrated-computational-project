@@ -200,9 +200,10 @@ void setArtificialViscosity(GeomData &geomParams,
                 double u_ab_x_ab = dotProduct(d_u, d_pos);
                 double x_ab_x_ab = dotProduct(d_pos, d_pos);
                 double mu_ab = (h * u_ab_x_ab) / (x_ab_x_ab + nu_2);
-
+                double nu = 0.000001;
                 viscosity[n][idx] = (u_ab_x_ab < 0) ? 
-                (-alpha * c_ab * mu_ab + beta * mu_ab * mu_ab) / rho_ab : 0;
+                (- 16* nu  * mu_ab/h + beta * mu_ab * mu_ab) / rho_ab : 0;
+                //cout << " (- 16* nu  * mu_ab/ + beta * mu_ab * mu_ab) / rho_ab " << (- 16* nu  * mu_ab/ + beta * mu_ab * mu_ab) / rho_ab << endl;
             }
         }
     }
