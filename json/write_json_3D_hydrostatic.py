@@ -2,7 +2,7 @@ import json
 import os
 import sys
 
-s = 0.05
+s = 0.1
 L = 0.7
 
 nb_vtp_output = 250 # the total number of output file desired
@@ -62,7 +62,15 @@ data = {
         ],
         "vector_type": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         "L_d": [2*L, 2*L, 2*L],
-        "o_d": [0.0, 0.0, 0.0]
+        "o_d": [0.0, 0.0, 0.0],
+        "sphere": {
+            "do": [
+                0,0,0,0,0,0,0,0,0,0,0
+            ],
+            "radius": [
+                0.3
+            ]
+        }
     },
     "post_process": {
         "do": True,
@@ -73,7 +81,7 @@ data = {
     "following_part": {
         "part": False,
         "min": False,
-        "max": True,
+        "max": False,
         "particle" : 50,
         "pressure" : 0,
         "rho" : 0,

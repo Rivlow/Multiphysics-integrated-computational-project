@@ -2,9 +2,9 @@ import json
 import os
 import sys
 
-s = 0.02
+s = 0.025
 L = 0.7
-Lz = 0.62
+Lz = 0.65
 dimension = 2
 
 nb_vtp_output = 100 # the total number of output file desired
@@ -52,18 +52,40 @@ data = {
         ],
         "vector_type": [1, 0, 0, 0, 0, 0, 0],
         "L_d": [2*L, 4.1*s, 2*Lz],
-        "o_d": [0.0, 0.0, 0.0]
+        "o_d": [0.0, 0.0, 0.0],
+        "sphere":{
+            "do" : [0,0,0,0,0,0,0],
+            "radius": [0.3]
+        }
     },
     "post_process": {
         "do": True,
         "xyz_init": [L/2, 0, 3*s],
         "xyz_end": [L/2, 0, Lz+3*s]
     },
+    "following_part": {
+        "part": False,
+        "min": False,
+        "max": False,
+        "particle": 50,
+        "pressure": 0,
+        "rho": 0,
+        "position": [
+            0,
+            0,
+            1
+        ],
+        "velocity": [
+            0,
+            0,
+            0
+        ]
+    },
 
     "following_part": {
         "part": False,
         "min": False,
-        "max": True,
+        "max": False,
         "particle" : 50,
         "pressure" : 0,
         "rho" : 0,
