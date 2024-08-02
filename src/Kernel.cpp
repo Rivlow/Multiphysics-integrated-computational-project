@@ -100,7 +100,7 @@ double derive_wendland_quintic(double r, GeomData &geomParams, SimulationData &s
 
     if (q < 2.0) {
         double factor = (1.0 - 0.5*q);
-        DW = -(5/4)*alpha * pow(factor, 3) * q ;
+        DW = -(5)*alpha * pow(factor, 3) * q ;
     }
 
     return DW;

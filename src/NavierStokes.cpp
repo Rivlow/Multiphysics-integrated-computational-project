@@ -199,10 +199,10 @@ void setArtificialViscosity(GeomData &geomParams,
                 
                 double u_ab_x_ab = dotProduct(d_u, d_pos);
                 double x_ab_x_ab = dotProduct(d_pos, d_pos);
-                double mu_ab = (h * u_ab_x_ab) / (x_ab_x_ab + nu_2);
-                double nu = 0.0001;
+                double mu_ab = (u_ab_x_ab) / (x_ab_x_ab + nu_2);
+                double nu = 0.000001;
                 viscosity[n][idx] = (u_ab_x_ab < 0) ? 
-                (- 16* nu  * mu_ab/h + beta * mu_ab * mu_ab) / rho_ab : 0;
+                (- 16* nu  * mu_ab + beta * mu_ab * mu_ab) / rho_ab : 0;
                 //cout << " (- 16* nu  * mu_ab/ + beta * mu_ab * mu_ab) / rho_ab " << (- 16* nu  * mu_ab/ + beta * mu_ab * mu_ab) / rho_ab << endl;
             }
         }
@@ -303,7 +303,7 @@ void momentumEquation(GeomData &geomParams,
         surfaceTensionImprove(simParams, geomParams,thermoParams, nb_neighbours, neighbours, 
                               gradW, W, mass, rho, pos, F_vol, type, colour, R, N, normal, track_particle, Kappa, dot_product);
     }
-    
+    //printMatrix(gradW,gradW.size(),"F_vol");
     // Iterate over each particle
     #pragma omp parallel for
     for (int n = 0; n < nb_moving_part; n++){

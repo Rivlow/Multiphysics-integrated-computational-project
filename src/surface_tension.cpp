@@ -204,7 +204,10 @@ void surfaceTensionImprove(SimulationData& simParams,
     }
     vector<double> normal_normali(3*simParams.nb_moving_part,0.0);
     // Calculation of normal vector
-    //#pragma omp parallel for
+
+
+    vector<double> imaginary_part1(simParams.nb_moving_part,0.0);
+    #pragma omp parallel for
     for (int n = 0; n < simParams.nb_moving_part; n++){
 
         int size_neighbours = nb_neighbours[n];
@@ -228,7 +231,7 @@ void surfaceTensionImprove(SimulationData& simParams,
             
             // case 1: part. i on free surface but not j
             if (track_particle[n] == 1 && track_particle[i_neig] == 0){  
-
+                imaginary_part1[n] +=1;
                 for (int coord = 0; coord < 3; coord++)
                     normal[3*n+coord] -= (0 - colour[n])*(mass[n]/rho[n])*(-1*gradW[n][3*idx+coord]);
             }
@@ -236,7 +239,7 @@ void surfaceTensionImprove(SimulationData& simParams,
 
               // case 2 : part. j on free surface but not i
             if (track_particle[n] == 0 && track_particle[i_neig] == 1){
-
+                
                 //new gradient kernel has to be computed
                 vector<double> d_pos(3);
                 double r_ij = 0;
@@ -250,7 +253,7 @@ void surfaceTensionImprove(SimulationData& simParams,
                 r_ij = sqrt(r_ij);
 
                 if (r_ij < geomParams.kappa*geomParams.h){ // if new imaginary j' particle in support domain of i
-
+                    imaginary_part1[n] +=1;
                     vector<double> new_gradW(3);
                     double deriv = derive_cubic_spline(r_ij, geomParams, simParams);
                 
@@ -284,9 +287,9 @@ void surfaceTensionImprove(SimulationData& simParams,
         
     }
 
-
+    vector<double> imaginary_part2(simParams.nb_moving_part,0.0);
     // Calculation of curvature
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (int n = 0; n < simParams.nb_moving_part; n++){
 
         double L = 0;
@@ -314,7 +317,7 @@ void surfaceTensionImprove(SimulationData& simParams,
             
             // case 1: part. i on free surface but not j
             if (track_particle[n] == 1 && track_particle[i_neig] == 0){ 
-               
+                imaginary_part2[n] +=1;
                 vector<double> new_normal(3);
                 double norm = 0;
 
@@ -346,6 +349,7 @@ void surfaceTensionImprove(SimulationData& simParams,
             // case 2: part. j on free surface but not i
             if (track_particle[n] == 0 && track_particle[i_neig] == 1){ 
                 
+                
                 //new normal and gradient kernel have to be computed
                 vector<double> new_normal(3), d_pos(3);
                 double norm = 0, r_ij = 0;
@@ -370,7 +374,7 @@ void surfaceTensionImprove(SimulationData& simParams,
                 r_ij = sqrt(r_ij);
 
                 if (r_ij < geomParams.kappa*geomParams.h){ // if part. j'  in support domain of i
-
+                    imaginary_part2[n] +=1;
                     vector<double> new_gradW(3);
                     double deriv = derive_cubic_spline(r_ij, geomParams, simParams);
                 
@@ -378,12 +382,10 @@ void surfaceTensionImprove(SimulationData& simParams,
                         new_gradW[coord] = (d_pos[coord] / r_ij) * deriv;
                         dot_product += (new_normal[coord] - normal_normali[3*n+coord])*new_gradW[coord];
                     }
+                    double new_W = f_cubic_spline(r_ij, geomParams, simParams);
+                    Kappa[n] -= (R[n]*new_R) * (mass[n]/rho[n]) * dot_product;
+                    L += (R[n]*new_R) * (mass[n]/rho[n]) * new_W;
                 }
-
-                double new_W = f_cubic_spline(r_ij, geomParams, simParams);
-                Kappa[n] -= (R[n]*new_R) * (mass[n]/rho[n]) * dot_product;
-                L += (R[n]*new_R) * (mass[n]/rho[n]) * new_W;
-                
             }   
         }
 
@@ -400,7 +402,8 @@ void surfaceTensionImprove(SimulationData& simParams,
         simParams.F_st_max = sqrt(F_res);
 
     }
-
+    //printArray(imaginary_part1, imaginary_part1.size(), "im 1 ");
+    //printArray(imaginary_part2, imaginary_part2.size(), "im 2 ");
     if (simParams.PRINT) cout << "surfaceTensionImprove passed" << endl;
 
 
