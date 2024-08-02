@@ -1,14 +1,14 @@
 import json
 import os
 import sys
+import numpy as np
 
-s = 0.06
+s = 0.02
 L = 1.2
 
-nb_vtp_output = 250 # the total number of output file desired
-dt = 0.0001
+dt = 0.00001
 nsave = 100
-nstepT = 200*nsave
+nstepT = 300*nsave
 
 
 data = {
@@ -24,45 +24,45 @@ data = {
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 1.2,
-        "dimension": 2
+        "dimension": 2,
+        "schemeIntegration": {"Euler": True, "RK22": False},
     },
     
     "domain": {
         "matrix_long": [
-            [2*L, s/2, L], # fluid
-            
-            [10*L, s/2, s/2], # floor 1
-            [10*L, s/2, s/2], # floor 2
-            [10*L, s/2, s/2], # roof wall 1
-            [10*L, s/2, s/2], # roof wall 2
+
+            np.round(np.array([6*L, s/2, L]),  decimals = 4).tolist(), # fluid
+            np.round(np.array([10*L, s/2, s/2]),  decimals = 4).tolist(), # floor 1
+            np.round(np.array([10*L, s/2, s/2]),  decimals = 4).tolist(), # floor 2
+            np.round(np.array([10*L, s/2, s/2]),  decimals = 4).tolist(), # roof wall 1
+            np.round(np.array([10*L, s/2, s/2]),  decimals = 4).tolist(), # roof wall 2
 
 
         ],
         "matrix_orig": [
-            [s, 0, s], # fluid
-            
-            [-3*L, 0, 0], # floor 1
-            [-3*L+s/2, 0, s/2], # floor 2
-            [-3*L, 0, L + (3/2)*s], # roof 1 
-            [-3*L+s/2, 0, L + 2*s], # roof 2
+            np.round(np.array([L, 0, s]),  decimals = 4).tolist(), # fluid
+            np.round(np.array([0, 0, 0]),  decimals = 4).tolist(), # floor 1
+            np.round(np.array([s/2, 0, s/2]),  decimals = 4).tolist(), # floor 2
+            np.round(np.array([s/2, 0, L + (3/2)*s]),  decimals = 4).tolist(), # roof 1 
+            np.round(np.array([0, 0, L + 2*s]),  decimals= 4 ).tolist(), # roof 2
 
 
         ],
         "vector_type": [1, 0, 0, 0, 0],
-        "L_d": [3*L, 3*L, 3*L],
-        "o_d": [0.0, 0.0, 0.0]
+        "L_d": np.round(np.array([9*L, 3*L, 3*L]),  decimals = 4).tolist(),
+        "o_d": np.round(np.array([0.0, 0.0, 0.0]),  decimals = 4).tolist()
     },
     "post_process": {
-        "do": False,
-        "xyz_init": [L/2, 0, s],
-        "xyz_end": [L/2, 0, L-2*s]
+        "do": True,
+        "xyz_init": np.round(np.array([4*L, 0, s]),  decimals = 4).tolist(),
+        "xyz_end": np.round(np.array([4*L, 0, L + 2*s]),  decimals = 4).tolist()
     },
     "thermo": {
         "rho_0": 1000,
         "rho_moving": 1000,
         "rho_fixed": 1000,
         "T": 298.15,
-        "u_init": [10.0, 0.0, 0.0],
+        "u_init": [-0.5, 0.0, 0.0],
         "c_0": 30,
         "gamma": 7,
         "M": 18e-3,
@@ -75,8 +75,7 @@ data = {
         "adhesion": False
     },
     "condition": {
-        "print_debug": True,
-        "schemeIntegration": {"Euler": True, "RK22": False},
+        "print_debug": False,
         "stateEquation": {"Ideal gaz law": False, "Quasi incompresible fluid": True},
         "initialCondition": {"Hydrostatic": False, "Constant": True}
     }

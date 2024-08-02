@@ -19,19 +19,12 @@ void meshCube(GeomData &geomParams,
               int &MP_count,
               int &FP_count);
 
-void meshSphere(GeomData &geomParams,
-                SimulationData &simParams,
-                vector<double> &pos,
-                vector<double> &type,
-                int &MP_count,
-                int &FP_count);
-
 void meshPostProcess(GeomData &geomParams,
                      SimulationData &simParams,
                      vector<double> &pos, 
                      vector<double> &type,
                      int &GP_count);
 
-bool checkParticleGeneration(vector<double> pos);
+bool checkParticleGeneration(vector<double> pos, SimulationData &simParams);
 
 #endif // GENERATE_PARTICLE_H

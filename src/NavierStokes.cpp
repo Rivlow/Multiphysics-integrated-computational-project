@@ -39,8 +39,10 @@ void computeGradW(GeomData &geomParams,
                 
 
                 double r_ij = dist(pos, i, j);
-                double deriv = derive_cubic_spline(r_ij, geomParams, simParams);
-                W[i][idx] = f_cubic_spline(r_ij, geomParams, simParams);;
+                //double deriv = deriveCubicSpline(r_ij, geomParams, simParams);
+                //W[i][idx] = CubicSpline(r_ij, geomParams, simParams);
+                double deriv = deriveWendlandQuintic(r_ij, geomParams, simParams);
+                W[i][idx] = WendlandQuintic(r_ij, geomParams, simParams);                
 
                 for (int coord = 0; coord < 3; coord++)
                     gradW[i][3*idx + coord] = (d_pos[coord] / r_ij) * deriv;
@@ -164,8 +166,11 @@ void setArtificialViscosity(GeomData &geomParams,
                 double x_ij_x_ij = dotProduct(d_pos, d_pos);
                 double mu_ab = (h * u_ij_x_ij) / (x_ij_x_ij + nu_2);
 
+                //viscosity[i][idx] = (u_ij_x_ij < 0) ? 
+                //(-alpha * c_ij * mu_ab + beta * mu_ab * mu_ab) / rho_ij : 0;
+                double nu = 0.00001;
                 viscosity[i][idx] = (u_ij_x_ij < 0) ? 
-                (-alpha * c_ij * mu_ab + beta * mu_ab * mu_ab) / rho_ij : 0;
+                (- 16* nu  * mu_ab/h + beta * mu_ab * mu_ab) / rho_ij : 0;
             }
         }
     }
@@ -233,15 +238,17 @@ void momentumEquation(GeomData &geomParams,
                       vector<double> type,
                       vector<double> &colour,
                       vector<double> &R,
+                      vector<double> &L,
                       vector<double> &i,
                       vector<double> &normal,
+                      vector<double> &acc_vol,
                       vector<double> &track_particle,
                       vector<double> &Kappa,
                       vector<double> &dot_product){
 
 
     int nb_moving_part = simParams.nb_moving_part;
-    simParams.F_st_max = 0;
+    simParams.acc_st_max = 0;
 
     // Compute pressure for all particles
     setPressure(geomParams, thermoParams, simParams, p, rho); 
@@ -252,18 +259,16 @@ void momentumEquation(GeomData &geomParams,
     // Compute artificial viscosity Π_ab for all particles
     setArtificialViscosity(geomParams, thermoParams, simParams, viscosity, 
                            neighbours, nb_neighbours, c, pos, rho, u); 
-
-    vector<double> F_vol(3*simParams.nb_moving_part,0.0);
-    
     
     if (simParams.is_surface_tension){
         InterfaceTrackingMath(simParams, geomParams, thermoParams,
-                              nb_neighbours,neighbours, gradW,
-                              mass,rho,type,pos, track_particle);
+                              nb_neighbours, neighbours, gradW,
+                              mass, rho, type,pos, track_particle);
 
         surfaceTensionImprove(simParams, geomParams,thermoParams, nb_neighbours, neighbours, 
-                              gradW, W, mass, rho, pos, F_vol, type, colour, R, i, normal, track_particle, Kappa, dot_product);
+                              gradW, W, mass, rho, pos, type, colour, R, L, i, normal, acc_vol, track_particle, Kappa, dot_product);
     }
+
     
     // Iterate over each particle
     #pragma omp parallel for
@@ -299,29 +304,28 @@ void momentumEquation(GeomData &geomParams,
                 }
 
                 r_ij = sqrt(r_ij);
-                double W_ij = W_adh(r_ij, geomParams, simParams);
+                double W_ij = WAdh(r_ij, geomParams, simParams);
 
 
                 for (int coord = 0; coord < 3; coord++){
                     double boundary = 1.0 - type[j];
-                    F_vol[3*i + coord] -= beta_ad*boundary*mass[i]*m_j*W_ij*d_xyz[coord]/r_ij;
+                    acc_vol[3*i + coord] -= beta_ad*boundary*mass[i]*m_j*W_ij*d_xyz[coord]/r_ij;
                 }
             } 
         }
             
         double g = (simParams.is_gravity ? -9.81 : 0.0);
-        double F_res = 0;
+        double acc_res = 0;
+        acc_vol[3*i + 2] += g;
 
         for (int coord = 0; coord < 3; coord++){
-            if(coord == 2)
-                F_vol[3 * i + coord] += g;
             
-            dudt[3 * i + coord] += F_vol[3 * i + coord];
-            F_res += F_vol[3*i + coord]*F_vol[3*i + coord];
+            dudt[3*i + coord] += acc_vol[3*i + coord];
+            acc_res += acc_vol[3*i + coord]*acc_vol[3*i + coord];
         }
 
-        F_res = sqrt(F_res);
-        simParams.F_st_max = (simParams.F_st_max > F_res ? simParams.F_st_max : F_res );     
+        acc_res = sqrt(acc_res);
+        simParams.acc_st_max = (simParams.acc_st_max > acc_res ? simParams.acc_st_max : acc_res );     
     }
 
     if (simParams.PRINT) cout << "momentumEquation passed" << endl;

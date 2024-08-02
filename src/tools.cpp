@@ -95,7 +95,6 @@ void getKey(json data,
 
     for (auto &it : data["simulation"]["kernel"].items())
     {
-                cout << "ahahaha" << endl;
 
         if (it.value() == true)
         {
@@ -195,6 +194,7 @@ void clearAllVectors(SimulationData &simParams,
                      vector<double> &R,
                      vector<double> &N,
                      vector<double> &normal,
+                     vector<double> &acc_vol,
                      vector<double> &track_particle,
                      vector<double> &Kappa,
                      vector<double> &dot_product){
@@ -235,6 +235,7 @@ void clearAllVectors(SimulationData &simParams,
             for(int coord = 0 ; coord < 3 ; coord ++){
                 dudt[3*i + coord] = 0.0;  
                 normal[3*i + coord] = 0;
+                acc_vol[3*i + coord] = 0;
             }
         }
 
@@ -245,15 +246,30 @@ void clearAllVectors(SimulationData &simParams,
     if (PRINT) cout << "clearAllVectors passed" << endl;
 }
 
-void printParams(GeomData geomParams,    
+void printParams(json data,
+                 GeomData geomParams,    
                  ThermoData thermoParams,
                  SimulationData simParams,
                  string state_equation,
                  string state_initial_condition,
+                 string schemeIntegration,
                  int MP_count,
                  int FP_count,
                  int GP_count,
                  int nb_tot_part){
+
+
+    cout << "#========================#" << endl;
+    cout << "# Geometrical parameters #" << endl;
+    cout << "#========================#" << "\n" << endl;
+    cout << "o_d = " << data["domain"]["o_d"] << endl;
+    cout << "L_d = " << data["domain"]["L_d"]<< endl;
+    cout << "do = " << data["post_process"]["do"] << endl;
+    cout << "xyz_init = " << data["post_process"]["xyz_init"] << endl;
+    cout << "xyz_end = " << data["post_process"]["xyz_end"] << endl;
+    cout << "matrix_long = " << data["domain"]["matrix_long"] << endl;
+    cout << "matrix_orig = " << data["domain"]["matrix_orig"] << endl;
+    cout << "vector_type = " << data["domain"]["vector_type"] << "\n" << endl;
 
     cout << "#===============================#" << endl;
     cout << "# General simulation parameters #" << endl;
@@ -269,7 +285,9 @@ void printParams(GeomData geomParams,
     cout << "alpha (surface tension) = " << simParams.alpha_st << " [-]" << endl;
     cout << "beta (artificial viscosity) = " << simParams.beta << " [-]" << endl;
     cout << "state equation = " << state_equation << endl;
-    cout << "state initial condition = " << state_initial_condition << "\n" << endl;
+    cout << "state initial condition = " << state_initial_condition << endl;
+    cout << "integration scheme = " << schemeIntegration << "\n" << endl;
+
 
     cout << "#==================#" << endl;
     cout << "# Domain variables #" << endl;

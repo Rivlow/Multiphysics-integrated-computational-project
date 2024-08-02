@@ -18,6 +18,7 @@ void extractData(GeomData &geomParams,
                  vector<double> &pos,  
                  vector<double> &p, 
                  vector<double> &mass,
+                 vector<double> &u,
                  vector<int> &neighbours,
                  vector<double> &nb_neighbours,
                  vector<double> rho){
@@ -25,17 +26,26 @@ void extractData(GeomData &geomParams,
     string outputDir = "../../output";
     string outputFile_rho = outputDir + "/" + "rho" +".csv";
     string outputFile_p = outputDir + "/" + "p" +".csv";
+    string outputFile_u_x = outputDir + "/" + "u_x" +".csv";
+    string outputFile_u_y = outputDir + "/" + "u_y" +".csv";
+    string outputFile_u_z = outputDir + "/" + "u_z" +".csv";
+
+
 
     // Create folder if not existing
     if (!fs::exists(outputDir)){
         fs::create_directories(outputDir);
-        cout << "Create p.csv and rho.csv files" <<endl;
+        cout << "Create p.csv and rho.csv and u_xyz.csv files" <<endl;
     }
 
     ofstream output_rho(outputFile_rho, ios::app);
     ofstream output_p(outputFile_p, ios::app);
+    ofstream output_u_x(outputFile_u_x, ios::app);
+    ofstream output_u_y(outputFile_u_y, ios::app);
+    ofstream output_u_z(outputFile_u_z, ios::app);
 
-    if (!output_rho.is_open() || !output_p.is_open()){
+
+    if (!output_rho.is_open() || !output_p.is_open() || !output_u_x.is_open() || !output_u_y.is_open() || !output_u_z.is_open()){
         cerr << "Error while opening CSV file." << endl;
         return;
     }
@@ -43,44 +53,88 @@ void extractData(GeomData &geomParams,
     int init = simParams.nb_tot_part;
     int end = pos.size()/3;
 
-    for (int n = init; n < end; n++){
+    for (int i = init; i < end; i++){
 
-        int neighbours_size = nb_neighbours[n];
-        double rho_tot = 0, p_tot = 0;
+        int neighbours_size = nb_neighbours[i];
+        double rho_tot = 0, p_tot = 0, u_x_tot = 0, u_y_tot = 0, u_z_tot = 0;
 
         for (int idx = 0; idx < neighbours_size; idx++){
 
-            //cout << "idx : " << idx <<endl;
-            int i_neig = neighbours[100*n + idx];
-            double r_ab = 0;
-            vector<double> pos_val(3);
+            int j = neighbours[100*i + idx];
+            double r_ij = 0;
 
-            for (int coord = 0; coord < 3; coord++){
-                
-                pos_val[coord] = pos[3 * n + coord] - pos[3 * i_neig + coord];
-                r_ab += pos_val[coord]*pos_val[coord];
-            }
+            for (int coord = 0; coord < 3; coord++)
+                r_ij += (pos[3*i + coord] - pos[3*j + coord])*(pos[3*i + coord] - pos[3*j + coord]);
+        
+            r_ij = sqrt(r_ij);
+            double W_ij = CubicSpline(r_ij, geomParams, simParams);
+            double m_j = mass[j];
+            double rho_j = rho[j];
+            double p_j = p[j];
+            double u_x_j = u[3*j + 0];
+            double u_y_j = u[3*j + 1];
+            double u_z_j = u[3*j + 2];
 
-            r_ab = sqrt(r_ab);
-            double W_ab = f_cubic_spline(r_ab, geomParams, simParams);
-            double m_b = mass[i_neig];
-            double rho_b = rho[i_neig];
-            double p_b = p[i_neig];
-            rho_tot += m_b*W_ab;
-            p_tot += p_b*(m_b/rho_b)*W_ab;
+            rho_tot += m_j*W_ij;
+            p_tot += p_j*(m_j/rho_j)*W_ij;
+            u_x_tot += u_x_j*(m_j/rho_j)*W_ij;
+            u_y_tot += u_y_j*(m_j/rho_j)*W_ij;
+            u_z_tot += u_z_j*(m_j/rho_j)*W_ij;
+
         }      
         
-        if (n == end-1){
+        if (i == end-1){
             output_rho << rho_tot << "\n";
             output_p << p_tot << "\n";
+            output_u_x << u_x_tot << "\n";
+            output_u_y << u_y_tot << "\n";
+            output_u_z << u_z_tot << "\n";
+
+
         }
         else{
             output_rho << rho_tot << ",";
             output_p << p_tot << ",";
+            output_u_x << u_x_tot << ",";
+            output_u_y << u_y_tot << ",";
+            output_u_z << u_z_tot << ",";
         }
     }
 
     output_rho.close();
     output_p.close();
 
+}
+
+
+void writingTime(double sim_time){
+
+    string outputDir = "../../output";
+
+    if (!fs::exists(outputDir)){
+        fs::create_directories(outputDir);
+        cout << "Create following particle files" <<endl;
+    }
+    string outputFile_part = outputDir + "/" + "time" + ".csv";
+
+    ofstream output_name(outputFile_part, ios::app);
+
+    if (!output_name.is_open()){
+        cerr << "Error while opening CSV file." << endl;
+        return;
+    }
+
+    ostringstream oss;
+    oss << fixed << setprecision(6) << sim_time;
+    string data_part_str = oss.str();
+
+    for (char& ch : data_part_str) {
+        if (ch == '.') {
+            ch = ',';
+        }
+    }
+
+    output_name << "\"" << data_part_str << "\"" << "\n";
+
+    output_name.close();
 }

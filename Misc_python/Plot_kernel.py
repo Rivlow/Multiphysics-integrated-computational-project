@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 import os
 import sys
 
+current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
+
+
 
 SMALL_SIZE = 8
 MEDIUM_SIZE = 14
@@ -14,41 +17,64 @@ plt.rc('xtick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
 plt.rc('ytick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
 plt.rc('legend', fontsize=MEDIUM_SIZE)   # legend fontsize
 plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
-plt.rc('text', usetex=True)
-plt.rc('font', family='lmodern')
+#plt.rc('text', usetex=True)
+#plt.rc('font', family='lmodern')
+
+def Cubic(W,dW):
+
+    for idx, r in enumerate(r_span):
+        
+        if (r/h < 1.0):
+            W[idx] = alpha_cubic * (2/3 - r * r / (h * h) + 0.5 * r * r * r / (h * h * h))
+            dW[idx] = alpha_cubic / h * (1.5 * r * r / (h * h) - 2.0 * r / h)
+            
+        elif (r/h >= 1.0 and r/h <= 2.0):
+            W[idx] = alpha_cubic * 1.0/6.0 * ((2.0 - r / h) * (2.0 - r / h) * (2.0 - r / h))
+            dW[idx] =  alpha_cubic / h * (-0.5 * (2.0 - r / h) * (2.0 - r / h))
+            
+        else:
+            W[idx] = 0
+            dW[idx] = 0
 
 
-s = 0.25
+def Quintic(W, dW):
+
+    for idx, r in enumerate(r_span):
+
+        factor = (1.0 - 0.5*(r/h))
+
+        W[idx] = alpha_quintic * (factor*factor*factor*factor) * (2.0 * (r/h) + 1.0)
+        dW[idx] = -5*alpha_quintic/h * (factor*factor*factor) * (r/h) 
+    
+
+
+s = 0.001
 h = 1.2*s
 kappa = 2
-
-
 pi = np.pi
-alpha = 3.0 / (2.0 * pi * h * h * h)
+alpha_cubic = 15.0 / (7.0 * pi  * h * h)
+alpha_quintic = 7.0 /( 4.0 * pi * h * h )
+
 r_span = np.linspace(0, kappa*h, 100)
-W = np.zeros(len(r_span))
-dW = np.zeros(len(r_span))
 
-for idx, r in enumerate(r_span):
-    
-    if (r/h < 1.0):
-        W[idx] = alpha * (2/3 - r * r / (h * h) + 0.5 * r * r * r / (h * h * h))
-        dW[idx] = alpha / h * (1.5 * r * r / (h * h) - 2.0 * r / h)
-        
-    elif (r/h >= 1.0 and r/h <= 2.0):
-        W[idx] = alpha * 1.0/6.0 * ((2.0 - r / h) * (2.0 - r / h) * (2.0 - r / h))
-        dW[idx] =  alpha / h * (-0.5 * (2.0 - r / h) * (2.0 - r / h))
-        
-    else:
-        W[idx] = 0
-        dW[idx] = 0
+W_cubic = np.zeros(len(r_span))
+dW_cubic = np.zeros(len(r_span))
+Cubic(W_cubic, dW_cubic)
 
-current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-print(current_directory)
+W_quintic = np.zeros(len(r_span))
+dW_quintic = np.zeros(len(r_span))
+Quintic(W_quintic, dW_quintic)
+
 
 plt.figure(figsize=(6.9, 4))
-plt.plot(r_span, W/alpha, label=r'W(r,h)$ / \alpha$', c='b')
-plt.plot(r_span, dW/(alpha/h), ls = "--", label=r'dW(r,h)/dr/($\alpha$/h)', c='r')
+#plt.plot(r_span, W_cubic/alpha_cubic, label=r'W(r,h)$ / \alpha$', c='b')
+#plt.plot(r_span, dW_cubic/(alpha_cubic/h), ls = "--", label=r'dW(r,h)/dr/($\alpha$/h)', c='r')
+#plt.plot(r_span, W_quintic/alpha_quintic, label=r'W(r,h)$ / \alpha$', c='b')
+#plt.plot(r_span, dW_quintic/(alpha_quintic/h), ls = "--", label=r'dW(r,h)/dr/($\alpha$/h)', c='r')
+plt.plot(r_span, W_cubic, label= "W_cubic", c='b')
+plt.plot(r_span, dW_cubic, ls = "--", label= "dW_cubic", c='b')
+plt.plot(r_span, W_quintic, label="W_quintic", c='r')
+plt.plot(r_span, dW_quintic, ls = "--", label= "dW_quintic", c='r')
 plt.xlabel('r/h')
 plt.grid(True)
 plt.legend(loc = 'best')

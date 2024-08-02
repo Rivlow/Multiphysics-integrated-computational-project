@@ -92,11 +92,11 @@ void meshCube(GeomData &geomParams,
         }
                 
         // output
-        cout << "meshing cube at o=(" << o[0] << "," << o[1] << "," << o[2] << ") ";
-        cout << "of size L=(" << L[0] << "," << L[1] << "," << L[2] << ")\n";
-        cout << "\tparticle spacing s=(" << dx << "," << dy << "," << dz << ") [target was s=" << s << "]\n";
-        cout << "\t=> " << ni << "*" << nj << "*" << nk << " = " << ni * nj * nk << " particles to be generated\n";
-        cout <<"\n"<< endl;
+        //cout << "meshing cube at o=(" << o[0] << "," << o[1] << "," << o[2] << ") ";
+        //cout << "of size L=(" << L[0] << "," << L[1] << "," << L[2] << ")\n";
+        //cout << "\tparticle spacing s=(" << dx << "," << dy << "," << dz << ") [target was s=" << s << "]\n";
+        //cout << "\t=> " << ni << "*" << nj << "*" << nk << " = " << ni * nj * nk << " particles to be generated\n";
+        //cout <<"\n"<< endl;
 
         // memory allocation
         pos.reserve(pos.size() + ni * nj * nk * 3);
@@ -129,98 +129,6 @@ void meshCube(GeomData &geomParams,
     simParams.nb_tot_part = pos.size()/3;
 }
 
-void meshSphere(GeomData &geomParams,
-              SimulationData &simParams,
-              vector<double> &pos,
-              vector<double> &type,
-              int &MP_count,
-              int &FP_count){
-
-    vector<double> matrixLong = geomParams.matrix_long_sphere;
-    vector<double> matrixOrig = geomParams.matrix_orig_sphere;
-    vector<int> vectorType = geomParams.vector_type;
-    double s = geomParams.s;
-    
-    for(int n = 0 ; n < int(vectorType.size()); n++){
-
-        vector<double> &L = matrixLong;
-        vector<double> &o = matrixOrig;
-        int type_val = vectorType[n];
-        double dx = 0;
-        double dy = 0;
-        double dz = 0;
-
-        int ni = int(ceil(L[0] / s));
-        if(ni != 1){
-            dx = L[0] / ni;
-            ++ni;
-        }
-        
-        int nj = int(ceil(L[1] / s));
-        if(nj != 1){
-            dy = L[1] / nj;
-            ++nj;
-        }
-        
-        int nk = int(ceil(L[2] / s));
-        if(nk != 1){
-            dz = L[2] / nk;
-            ++nk;
-        }
-                
-        // output
-        cout << "meshing sphere at o=(" << o[0] << "," << o[1] << "," << o[2] << ") ";
-        cout << "of size L=(" << L[0] << "," << L[1] << "," << L[2] << ")\n";
-        cout << "\tparticle spacing s=(" << dx << "," << dy << "," << dz << ") [target was s=" << s << "]\n";
-        cout << "\t=> " << ni << "*" << nj << "*" << nk << " = " << ni * nj * nk << " particles to be generated\n";
-        cout <<"\n"<< endl;
-
-        // memory allocation
-        pos.reserve(pos.size() + ni * nj * nk * 3);
-
-        double x_center = ceil(L[0])/2;
-        double y_center = ceil(L[1])/2;
-        double z_center = ceil(L[2])/2;
-
-        double radius_2 = x_center*x_center + y_center*y_center * z_center*z_center;
-
-
-        // particle generation
-        for (int i = 0; i < ni; ++i)
-        {
-            double x = o[0] + i * dx;
-            for (int j = 0; j < nj; ++j)
-            {
-                double y = o[1] + j * dy;
-                for (int k = 0; k < nk; ++k)
-                {
-                    double z = o[2] + k * dz;
-
-            
-
-                    double new_dist = (x_center - x)*(x_center - x) + (y_center - y)*(y_center - y) + (z_center - z)*(z_center - z);
-
-
-                    if (new_dist <= radius_2){
-                    
-                        
-                        pos.push_back(x);
-                        pos.push_back(y);
-                        pos.push_back(z);
-                        type.push_back(type_val);
-
-                        MP_count++;
-              
-                        
-                    }
-                }
-            }
-        }
-    }
-    
-    simParams.nb_tot_part = pos.size()/3;
-}
-
 
 void meshPostProcess(GeomData &geomParams,
                      SimulationData &simParams,
@@ -240,7 +148,7 @@ void meshPostProcess(GeomData &geomParams,
         double dist = sqrt(dx * dx + dy * dy + dz * dz);
 
         // Particules created between initial and last particule
-        int nb_points = static_cast<int>(dist / s);
+        double nb_points = (dist / s);
 
         double step_x = dx / nb_points;
         double step_y = dy / nb_points;
@@ -267,26 +175,27 @@ struct TupleHash {
     }
 };
 
-bool checkParticleGeneration(vector<double> pos){
+bool checkParticleGeneration(vector<double> pos, SimulationData &simParams){
 
-    int pos_size = pos.size() / 3;
+    int nb_part = simParams.nb_tot_part; 
+    cout << "number of particle is  "<< nb_part << endl;
     unordered_set<tuple<double, double, double>, TupleHash> uniqueTriplets;
 
-    for (int i = 0; i < pos_size; i++) {
-        double x = pos[3 * i];
-        double y = pos[3 * i + 1];
-        double z = pos[3 * i + 2];
+    for (int n = 0; n < nb_part; n++) {
+        double x = pos[3 * n];
+        double y = pos[3 * n + 1];
+        double z = pos[3 * n + 2];
 
         tuple<double, double, double> triplet = make_tuple(x, y, z);
 
         if (uniqueTriplets.find(triplet) != uniqueTriplets.end()) {
-            cout << "Error : non unique position triplet at " << i << " : (" << x << ", " << y << ", " << z << ")\n";
+            cout << "Error : non unique position triplet at " << n << " : (" << x << ", " << y << ", " << z << ")\n";
             return false;
         }
 
         uniqueTriplets.insert(triplet);
     }
 
-    cout << "All position triplets are unique.\n";
+    cout << "All position triplets are unique. \n \n";
     return true;
 }

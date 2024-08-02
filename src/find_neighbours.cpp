@@ -100,7 +100,6 @@ void sortedList(GeomData &geomParams,
                             if (idx_cell != n){
 
                                 double r_ab = dist(pos, n, idx_cell);
-
                                 int kappa = geomParams.kappa;
                                 double h = geomParams.h;
 

@@ -6,7 +6,7 @@
 
 using namespace std;
 
-double W_coh(double r, GeomData &geomParams, SimulationData simParams){
+double WCoh(double r, GeomData &geomParams, SimulationData simParams){
 
     double W = 0.0;
     double coef = simParams.coh_kernel_coef;
@@ -24,7 +24,7 @@ double W_coh(double r, GeomData &geomParams, SimulationData simParams){
     return W;
 }
 
-double W_adh(double r, GeomData &geomParams, SimulationData simParams){
+double WAdh(double r, GeomData &geomParams, SimulationData simParams){
 
     double W = 0.0;
     double coef = simParams.adh_kernel_coef;
@@ -40,7 +40,7 @@ double W_adh(double r, GeomData &geomParams, SimulationData simParams){
 
 
 
-double f_cubic_spline(double r, GeomData &geomParams, SimulationData &simParams){
+double CubicSpline(double r, GeomData &geomParams, SimulationData &simParams){
 
     double alpha = simParams.cubic_kernel_coef;
     double W;
@@ -58,7 +58,7 @@ double f_cubic_spline(double r, GeomData &geomParams, SimulationData &simParams)
     return W;
 }
 
-double derive_cubic_spline(double r, GeomData &geomParams, SimulationData &simParams){
+double deriveCubicSpline(double r, GeomData &geomParams, SimulationData &simParams){
     
     double alpha = simParams.cubic_kernel_coef;
     double h = geomParams.h;
@@ -76,31 +76,29 @@ double derive_cubic_spline(double r, GeomData &geomParams, SimulationData &simPa
     return DW;
 }
 
-double f_wendland_quintic(double r, GeomData &geomParams, SimulationData &simParams){
+double WendlandQuintic(double r, GeomData &geomParams, SimulationData &simParams){
 
     double alpha = simParams.quintic_kernel_coef;
     double W = 0.0;
     double h = geomParams.h;
-    double q = r / h;
 
-    if (q < 2.0) {
-        double factor = (1.0 - 0.5 * q);
-        W = alpha * pow(factor, 4) * (2.0 * q + 1.0);
+    if (r/h < 2.0) {
+        double factor = (1.0 - 0.5 * (r/h));
+        W = alpha * (factor*factor*factor*factor) * (2.0 * (r/h) + 1.0);
     }
 
     return W;
 }
 
-double derive_wendland_quintic(double r, GeomData &geomParams, SimulationData &simParams){
+double deriveWendlandQuintic(double r, GeomData &geomParams, SimulationData &simParams){
 
     double alpha = simParams.quintic_kernel_coef;
     double DW = 0.0;
     double h = geomParams.h;
-    double q = r / h;
 
-    if (q < 2.0) {
-        double factor = (1.0 - 0.5*q);
-        DW = -(5/4)*alpha * pow(factor, 3) * q ;
+    if (r/h < 2.0) {
+        double factor = (1.0 - 0.5* (r/h));
+        DW = -5.0*alpha/h * (factor*factor*factor) * (r/h) ;
     }
 
     return DW;

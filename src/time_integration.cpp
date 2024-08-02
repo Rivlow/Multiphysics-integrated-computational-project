@@ -37,8 +37,10 @@ void updateVariables(GeomData &geomParams,
                      vector<double> type,
                      vector<double> &colour,
                      vector<double> &R,
+                     vector<double> &L,
                      vector<double> &N,
                      vector<double> &normal,
+                     vector<double> &acc_vol,
                      vector<double> &track_particle,
                      vector<double> &Kappa,
                      vector<double> &dot_product){
@@ -54,7 +56,7 @@ void updateVariables(GeomData &geomParams,
 
         // Compute D(u)/Dt for moving particles
         momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW, 
-                         W, viscosity, mass, dudt, rho, p, c, pos, u, type, colour, R, N, normal, track_particle, Kappa, dot_product); 
+                         W, viscosity, mass, dudt, rho, p, c, pos, u, type, colour, R, L, N, normal, acc_vol, track_particle, Kappa, dot_product); 
 
         checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
                       neighbours, nb_neighbours);
@@ -176,8 +178,8 @@ void checkTimeStep(GeomData &geomParams,
     int nb_moving_part = simParams.nb_moving_part;
     int t = simParams.t;
 
-    double F_st_max = simParams.F_st_max;
-    double dt_f = h / F_st_max;
+    double acc_st_max = simParams.acc_st_max;
+    double dt_f = h / acc_st_max;
     double dt_cv = 0;
     double min_a = numeric_limits<double>::max();
     double max_b = numeric_limits<double>::min();

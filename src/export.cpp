@@ -19,9 +19,11 @@
 #define uLongf size_t
 #endif
 
+using namespace std;
+
 // converts zlib status to a human-readable string
 
-std::string zlibstatus(int status)
+string zlibstatus(int status)
 {
 #ifdef USE_ZLIB
     switch (status)

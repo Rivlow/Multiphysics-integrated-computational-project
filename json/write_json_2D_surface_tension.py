@@ -2,12 +2,13 @@ import json
 import os
 import sys
 
-s = 0.001
+s = 1e-3
 L = 0.01
 
-dt = 0.0001
-nsave = 200
-nstepT = nsave*400*20
+dt = 0.000001
+nsave = 2000 
+nstepT = nsave*500
+
 
 data = {
 
@@ -15,7 +16,7 @@ data = {
     "matrix_long" : [[L, s/2, L]],
     "matrix_orig" : [[L, 0, L]],
     "vector_type" : [1],
-    "L_d": [3*L, 3*L, 3*L],
+    "L_d": [3*L, 5*s, 3*L],
     "o_d": [0.0, 0.0, 0.0]
   },
 
@@ -32,26 +33,25 @@ data = {
     "dt": dt,
     "nsave": nsave,
     "kappa": 2,
-    "alpha": 0.5,
+    "alpha": 5,
     "beta": 0,
     "alpha_st":10,
     "beta_adh": 10,
     "dimension": 2,
-    "schemeIntegration": {"Euler":True, "RK22":False},
-
+    "schemeIntegration": {"Euler":True,"RK22":False}
   },
 
   "thermo":{
     "rho_0": 1000,
     "rho_moving": 1000,
     "rho_fixed" : 1000,
-    "T": 300,
+    "T": 298.15,
     "u_init": [0.0, 0.0, 0.0],
     "c_0": 1, 
     "gamma": 7, 
     "M": 18e-3, 
     "R":8.314,
-    "sigma":0.01
+    "sigma":0.1
   },
 
 

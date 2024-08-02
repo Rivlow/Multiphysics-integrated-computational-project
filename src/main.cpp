@@ -85,18 +85,6 @@ int main(int argc, char *argv[])
     getKey(data, state_equation, state_initial_condition, 
            schemeIntegration, kernel);
 
-    cout << "kappa = " << data["simulation"]["kappa"] << endl;
-    cout << "s = " << data["simulation"]["s"] << endl;
-    cout << "o_d = " << data["domain"]["o_d"] << endl;
-    cout << "L_d = " << data["domain"]["L_d"]<< endl;
-    cout << "do = " << data["post_process"]["do"] << endl;
-    cout << "xyz_init = " << data["post_process"]["xyz_init"] << endl;
-    cout << "xyz_end = " << data["post_process"]["xyz_end"] << endl;
-    cout << "matrix_long = " << data["domain"]["matrix_long"] << endl;
-    cout << "matrix_orig = " << data["domain"]["matrix_orig"] << endl;
-    cout << "vector_type = " << data["domain"]["vector_type"] << endl;
-
-
     GeomData geomParams = {
 
         data["simulation"]["kappa"],
@@ -166,66 +154,66 @@ int main(int argc, char *argv[])
     vector<double> pos;
     vector<double> type;
     
-    meshSphere(geomParams, simParams, pos, type, MP_count, FP_count); 
     meshCube(geomParams, simParams, pos, type, MP_count, FP_count); 
     meshPostProcess(geomParams, simParams, pos, type, GP_count);
-
-    //if (!checkParticleGeneration(pos))
-    //    exit(1);
+    if (!checkParticleGeneration(pos, simParams))
+        exit(1);
     
     int nb_tot_part = pos.size()/3;
-    vector<double> mass(nb_tot_part, 0), u(3 * nb_tot_part, 0),
-                   drhodt(nb_tot_part, 0), rho(nb_tot_part, 0),
-                   dudt(3 * nb_tot_part, 0), p(nb_tot_part, 0),
-                   c(nb_tot_part, 0), grad_sum(nb_tot_part, 0),
-                   track_particle(simParams.nb_moving_part, 0),
-                   nb_neighbours(nb_tot_part, 0);
+    vector<double> mass(simParams.nb_tot_part + GP_count, 0),
+                   u(3 * (simParams.nb_tot_part + GP_count), 0),
+                   drhodt(simParams.nb_tot_part + GP_count, 0), 
+                   rho(simParams.nb_tot_part + GP_count, 0),
+                   dudt(3 * (simParams.nb_tot_part + GP_count), 0), 
+                   p(simParams.nb_tot_part + GP_count, 0),
+                   c(simParams.nb_tot_part + GP_count, 0), 
+                   grad_sum(simParams.nb_tot_part + GP_count, 0),
+                   track_particle(simParams.nb_tot_part + GP_count, 0),
+                   nb_neighbours(simParams.nb_tot_part + GP_count, 0),
+                   N(simParams.nb_tot_part + GP_count, 0),
+                   colour(simParams.nb_tot_part + GP_count, 0),
+                   normal(3*(simParams.nb_tot_part + GP_count), 0),
+                   acc_vol(3*(simParams.nb_tot_part + GP_count), 0),
+                   R(simParams.nb_tot_part + GP_count, 0),
+                   L(simParams.nb_tot_part + GP_count, 0),
+                   Kappa(simParams.nb_tot_part + GP_count, 0),
+                   dot_product(simParams.nb_tot_part + GP_count, 0);
 
     vector<vector<int>> cell_matrix(geomParams.Nx * geomParams.Ny * geomParams.Nz);
-    vector<vector<double>> gradW(nb_tot_part),
-                           W(nb_tot_part),
-                           gradW_st(nb_tot_part),
-                           W_st(nb_tot_part),
-                           viscosity(nb_tot_part);
+    vector<vector<double>> gradW(simParams.nb_tot_part + GP_count),
+                           W(simParams.nb_tot_part + GP_count),
+                           gradW_st(simParams.nb_tot_part + GP_count),
+                           W_st(simParams.nb_tot_part + GP_count),
+                           viscosity(simParams.nb_tot_part + GP_count);
 
     int nb_sector = (simParams.dimension == 3)? 32: 8;
-    vector<int> neighbours(100*nb_tot_part), 
-                free_surface(nb_sector*nb_tot_part, 0);
+    vector<int> neighbours(100*(simParams.nb_tot_part + GP_count)), 
+                free_surface(nb_sector*(simParams.nb_tot_part + GP_count), 0);
 
-    vector<double> N(simParams.nb_moving_part, 0);
-    vector<double> colour(simParams.nb_moving_part, 0);
-    vector<double> normal(3*simParams.nb_moving_part, 0);
-    vector<double> R(simParams.nb_moving_part, 0);
-    vector<double> Kappa(simParams.nb_moving_part, 0);
-    vector<double> dot_product(simParams.nb_moving_part, 0);
-  
     // Variables defined to used "export.cpp"
     map<string, vector<double> *> scalars;
     map<string, vector<double> *> vectors;
     scalars["type"] = &type;
-    //scalars["track_particle"] = &track_particle;
+    scalars["track_particle"] = &track_particle;
     scalars["nb_neighbours"] = &nb_neighbours;
     scalars["mass"] = &mass;
     scalars["rho"] = &rho;
     scalars["p"] = &p;
     scalars["drhodt"] = &drhodt;
-    scalars["grad_sum"] = &grad_sum;
     vectors["position"] = &pos;
     vectors["u"] = &u;
     vectors["dudt"] = &dudt;
     scalars["colour"] = &colour;
     scalars["R"] = &R;
+    scalars["L"] = &L;
     scalars["N"] = &N;
     scalars["track_particle"] = &track_particle;
     scalars["Kappa"] = &Kappa;
-    scalars["dot_product"] = &dot_product;
     vectors["normal"]= &normal;
+    vectors["acc_vol"]= &acc_vol;
 
-    cout << "kernel used = " << simParams.kernel << endl;
-
-
-    printParams(geomParams, thermoParams, simParams,
-                state_equation, state_initial_condition,
+    printParams(data, geomParams, thermoParams, simParams,
+                state_equation, state_initial_condition, schemeIntegration,
                 MP_count, FP_count, GP_count, nb_tot_part);
 
     /*---------------------------- SPH ALGORITHM  ----------------------------*/
@@ -240,6 +228,7 @@ int main(int argc, char *argv[])
 
     
     auto t_mid = chrono::high_resolution_clock::now();
+    double sim_time = 0;
 
     for (int t = 0; t < simParams.nstepT; t++){
 
@@ -252,29 +241,31 @@ int main(int argc, char *argv[])
         // Compute ∇_a(W_ab) for all particles
         computeGradW(geomParams, simParams, gradW, W, neighbours, nb_neighbours, pos);
 
+
         // Update density, velocity and position (Euler explicit or RK22 scheme)
         updateVariables(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
-                        viscosity, gradW, W, neighbours, nb_neighbours, type, colour, R, N, normal, track_particle, Kappa, dot_product);
+                        viscosity, gradW, W, neighbours, nb_neighbours, type, colour, R, L, N, normal, acc_vol, track_particle, Kappa, dot_product);
 
-
+        sim_time += simParams.dt;
 
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){
                 if (geomParams.post_process_do)
-                    extractData(geomParams, simParams, thermoParams, pos, p, mass, neighbours, nb_neighbours, rho);
+                    extractData(geomParams, simParams, thermoParams, pos, p, mass, u, neighbours, nb_neighbours, rho);
                 
             export_particles("../../output/sph", t, pos, scalars, vectors, false);
+            //writingTime(sim_time);
 
             auto t_act = chrono::high_resolution_clock::now();
             double elapsed_time = double(chrono::duration_cast<chrono::duration<double>>(t_act - t_mid).count());
             progressBar(double(t)/double(simParams.nstepT), elapsed_time);    
         }
         
-        respawnParticle(pos, geomParams, simParams);
+        //respawnParticle(pos, geomParams, simParams);
 
         // Clear matrices and reset arrays to 0
         clearAllVectors(simParams, viscosity, neighbours,
-                        cell_matrix, gradW, W, drhodt, dudt, colour, R, N, normal, track_particle, Kappa, dot_product);
+                        cell_matrix, gradW, W, drhodt, dudt, colour, R, N, normal, acc_vol, track_particle, Kappa, dot_product);
 
     }
 

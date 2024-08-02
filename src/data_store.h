@@ -18,11 +18,14 @@
 using namespace std;
 
 void extractData(GeomData &geomParams,  
-                 SimulationData& simParams,
-                 ThermoData& thermoParams,
+                 SimulationData &simParams,
+                 ThermoData &thermoParams,
                  vector<double> &pos,  
                  vector<double> &p, 
                  vector<double> &mass,
+                 vector<double> &u,
                  vector<int> &neighbours,
                  vector<double> &nb_neighbours,
                  vector<double> rho);
+
+void writingTime(double sim_time);

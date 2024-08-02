@@ -1,73 +1,11 @@
-import vtk
-#from vtk.util.numpy_support import vtk_to_numpy
 import os
 import sys
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import sys
 import pandas as pd
 
-'''
-file = "output/p.csv"
-ite = 800
-pressure = pd.read_csv(file, sep = ',', decimal='.', header=None)
-print(len(pressure))
 
-x = np.arange(0.0, 0.03, 0.00125)
-
-
-pressure = pressure.T
-print(len(pressure))
-plt.plot(x,pressure[ite])
-
-plt.show()
-maxp = max(pressure[ite])
-print("max", maxp)
-minp = min(pressure[ite])
-print("min", minp)
-deltaP = maxp - minp
-print(deltaP)
-
-
-
-def read_vtp(path):
-    reader = vtk.vtkXMLPolyDataReader()
-    reader.SetFileName(path)
-    reader.Update()
-    data = reader.GetOutput().GetPointData()
-    field_count = data.GetNumberOfArrays()
-    return {data.GetArrayName(i): vtk_to_numpy(data.GetArray(i)) for i in range(field_count)}
-
-def read_vtp_files_in_folder(folder_path):
-    vtp_files = {}
-    for filename in os.listdir(folder_path):
-        if filename.endswith(".vtp"):
-            file_path = os.path.join(folder_path, filename)
-            file_data = read_vtp(file_path)
-            for array_name, array_data in file_data.items():
-                if array_name not in vtp_files:
-                    vtp_files[array_name] = []
-                vtp_files[array_name].append(array_data)
-    return vtp_files
-
-folder_path = "output/cube_bcp_particles_less"
-vtp_files_data = read_vtp_files_in_folder(folder_path)
-
-
-rho = vtp_files_data["rho_array"]
-print((len(vtp_files_data)))
-
-
-val_rho = []
-
-for i, array_data in enumerate(rho):
-    val_rho.append(array_data[2])
-    print(f"Data from file {i + 1}: {array_data}")
-    
-plt.plot(val_rho)
-plt.show()
-'''
 
 def isLatex(latex):
     if latex:
@@ -130,7 +68,9 @@ def plotStateEquation(rho, p, iteration):
     
     p_val = p[iteration, :]
     rho_val = rho[iteration, :]
-    x = np.linspace(0.01, 1.2, len(p_val))
+    x = np.linspace(0.02, 1.24, len(p_val))
+
+   
     
     c_0 = 30
     rho_0 = 1000
@@ -187,30 +127,34 @@ def main():
     
     current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
     outputFile = os.path.dirname(current_directory) + "\\output"  
-    all_data = getData(outputFile)
-    
-    print(f"Data available : {all_data[1]}")
 
-    analysis_type = {"Time":False, "Spacial":True} # chose only one as "True"
-    particle = 0 # if Time plot desired, have to chose which particle to look at
-    iteration = 999-1 # if Spacial plot desired, have to chose which iteration to look at
+    #time = pd.read_csv("output/time.csv",sep = '.', decimal=',', header=None)
+    pressure = "output/p.csv" 
+    velocity_x =  "output/u_x.csv"
+    velocity_y =  "output/u_x.csv"
+    velocity_z =  "output/u_x.csv"
+
+    u_x = np.array(pd.read_csv(velocity_x, sep = ',', decimal='.', header=None))
+    z = np.linspace(0.02, 1.24, len(u_x[-1]))
+
+    u_sph= u_x[-1] + 0.5
+
+    u_max = min(u_sph)
+    h = z[-1] - z[0]
+    u_analytic = -u_max*((4/h)*z - (4/np.pow(h,2)*np.pow(z,2)))
     
-    rho = all_data[0][1]
-    p = all_data[0][0]
+
+
+    plt.figure()
+    plt.plot(z, u_sph, label = "sph", ls = "--")
+    plt.plot(z, u_analytic, label = "analytic", ls = "--")
+    plt.legend(loc = "best")
+
+    plt.show()
 
     
-    name = "Pressure"
-    #name = "Rho"
-    
-    isLatex(True)
-    #plotSingleVariable(analysis_type, rho, particle, iteration, name)
-    #plotStateEquation(rho, p, iteration)
-    plotHydrostaticPressure(p[iteration,:], current_directory)
-    
-    nstepT = 200000
-    dt = 2.5e-5
-    
-    print(nstepT*dt)
+    isLatex(False)
+
     
     
 
@@ -223,3 +167,58 @@ if __name__ == "__main__":
 
 
 
+"""import vtk
+#from vtk.util.numpy_support import vtk_to_numpy
+import os
+import sys
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+import sys
+import pandas as pd
+
+def fonction():
+    file = "output/p.csv"
+    ite = 99
+    pressure = pd.read_csv(file, sep = ',', decimal='.', header=None)
+    pressure = np.array(pressure)
+    print(pressure[ite])
+    print(len(pressure[ite]))
+    x = np.arange(0.125, 1.875, 0.025)
+    print(len(x))
+    x1 = np.arange(0.1,1.85,0.025)
+
+    plt.plot(x,pressure[ite][::-1])
+    plt.plot(x,1000*9.81*x1)
+
+    plt.show()
+
+def mrua():
+    file = "output/p.csv"
+    pos = pd.read_csv("output/50_pos_z.csv",sep = '.', decimal=',', header=None)
+    time = pd.read_csv("output/time.csv",sep = '.', decimal=',', header=None)
+    pos =  np.transpose(np.asarray(pos))
+    time =  np.transpose(np.asarray(time))
+   
+    print(time)
+    plt.scatter(time[0],pos[0], color = "red", label = "particle")
+    time = np.array(time)
+    pos= np.array(pos)
+    
+    i = 0
+    time_2 = np.zeros(len(time[0]))
+    while(i<len(time_2)):
+        time_2[i] = time[0][i] *   time[0][i]
+        i =i + 1
+    y = pos[0][0] - (9.81/2) * time_2
+
+    
+    plt.plot(time[0], y, label = "theorie")
+    plt.legend()
+    plt.xlabel("time")
+    plt.ylabel("z position")
+    plt.ylim(-0.01,1.3)
+    plt.xlim(0.01,0.5)
+    plt.show()
+
+mrua() """
