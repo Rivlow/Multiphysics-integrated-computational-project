@@ -206,9 +206,9 @@ void surfaceTensionImprove(SimulationData& simParams,
             colour[n] = 1;
             
     }
+
     vector<double> normal_normali(3*simParams.nb_moving_part,0.0);
     // Calculation of normal vector
-
 
     vector<double> imaginary_part1(simParams.nb_moving_part,0.0);
     #pragma omp parallel for
@@ -321,6 +321,7 @@ void surfaceTensionImprove(SimulationData& simParams,
             
             // case 1: part. i on free surface but not j
             if (track_particle[n] == 1 && track_particle[i_neig] == 0){ 
+
                 imaginary_part2[n] +=1;
                 vector<double> new_normal(3);
                 double norm = 0;

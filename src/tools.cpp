@@ -309,6 +309,7 @@ void printParams(json data,
     cout << "Molar mass (M) = " << thermoParams.M << " [kg/mol]" << endl;
     cout << "Heat capacity ratio (gamma) = " << thermoParams.gamma << " [-]" << endl;
     cout << "Ideal gas constant (R) = " << thermoParams.R << " [J/(mol*K)]" << endl;
+    cout << "Kinematic viscosity (nu) = " << simParams.alpha*geomParams.h*thermoParams.c_0/8.0 << " [m^2/s]" << endl;
     cout << "Surface tension stress (sigma) = " << thermoParams.sigma << " [N/m]" << "\n" << endl;            
 }
 

@@ -14,7 +14,7 @@ plt.rc('xtick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
 plt.rc('ytick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
 plt.rc('legend', fontsize=MEDIUM_SIZE)   # legend fontsize
 plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
-plt.rc('text', usetex=True)
+#plt.rc('text', usetex=True)
 plt.rc('font', family='lmodern')
 
 
@@ -28,7 +28,7 @@ print(f"B = {B}")
 M = 18e-3
 
 
-rho = np.linspace(1, 10000, 100)
+rho = np.linspace(1, 1200, 100)
 p= np.zeros_like(rho)
 c= np.zeros_like(rho)
 
@@ -44,8 +44,8 @@ if (state_equation == "Ideal_gas_law"):
         c[i] = c_0
 elif(state_equation == "Quasi_incompressible_fluid"):
     for i in range(len(rho)):
-        p[i] = B*np.power(rho[i]/rho_0, 1/gamma)
-        c[i] = c_0*np.power(rho[i]/rho_0, gamma-1)
+        p[i] = B*(np.power(rho[i]/rho_0, gamma) - 1)
+        c[i] = c_0*np.power(rho[i]/rho_0, (gamma-1)/2)
     
 fig, ax = plt.subplots(1, 2, figsize=(6.9, 4))
 ax[0].plot(rho, p, label = f"{state_equation}")

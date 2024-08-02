@@ -1,32 +1,19 @@
 import json
 import os
 import sys
+import numpy as np
 
 s = 1e-3
 L = 0.01
 
-dt = 0.000001
+dt = 0.00001
 nsave = 2000 
 nstepT = nsave*500
 
 
 data = {
-
-  "domain":{
-    "matrix_long" : [[L, s/2, L]],
-    "matrix_orig" : [[L, 0, L]],
-    "vector_type" : [1],
-    "L_d": [3*L, 5*s, 3*L],
-    "o_d": [0.0, 0.0, 0.0]
-  },
-
-  "post_process":{
-    "do": False,
-    "xyz_init": [0, 1.5*L, 1.5*L],
-    "xyz_end": [3*L, 1.5*L, 1.5*L]
-  },
-
-  "simulation":{
+    
+    "simulation":{
     "theta" :0.5,
     "s": s,
     "nstepT": nstepT,
@@ -41,12 +28,31 @@ data = {
     "schemeIntegration": {"Euler":True,"RK22":False}
   },
 
+  "domain":{
+    "matrix_long" : np.round(np.array([[L, s/2, L]]), decimals = 4).tolist(),
+    "matrix_orig" : np.round(np.array([[L, 0, L]]), decimals = 4).tolist(),
+    "sphere": {
+                "do": [0, 0, 0, 0, 0, 0, 0],
+                "radius": [0.3]
+              },
+    "vector_type" : [1],
+    "L_d": np.round(np.array([3*L, 5*s, 3*L]), decimals = 4).tolist(),
+    "o_d": np.round(np.array([0.0, 0.0, 0.0]), decimals = 4).tolist()
+  },
+
+  "post_process":{
+    "do": False,
+    "xyz_init": np.round(np.array([0, 1.5*L, 1.5*L]), decimals = 4).tolist(),
+    "xyz_end": np.round(np.array([3*L, 1.5*L, 1.5*L]), decimals = 4).tolist()
+  },
+
+
   "thermo":{
     "rho_0": 1000,
     "rho_moving": 1000,
     "rho_fixed" : 1000,
     "T": 298.15,
-    "u_init": [0.0, 0.0, 0.0],
+    "u_init": np.round(np.array([0.0, 0.0, 0.0]), decimals = 4).tolist(),
     "c_0": 1, 
     "gamma": 7, 
     "M": 18e-3, 

@@ -131,23 +131,25 @@ def main():
     #time = pd.read_csv("output/time.csv",sep = '.', decimal=',', header=None)
     pressure = "output/p.csv" 
     velocity_x =  "output/u_x.csv"
-    velocity_y =  "output/u_x.csv"
-    velocity_z =  "output/u_x.csv"
+    velocity_y =  "output/u_y.csv"
+    velocity_z =  "output/u_z.csv"
 
     u_x = np.array(pd.read_csv(velocity_x, sep = ',', decimal='.', header=None))
-    z = np.linspace(0.02, 1.24, len(u_x[-1]))
+    z = np.linspace(0.04, 1.28, len(u_x[-1]))
 
     u_sph= u_x[-1] + 0.5
+    u_sph = u_sph
 
-    u_max = min(u_sph)
+    u_max = max(u_sph)
     h = z[-1] - z[0]
-    u_analytic = -u_max*((4/h)*z - (4/np.pow(h,2)*np.pow(z,2)))
+    u_analytic = u_max*((4/h)*z - (4/np.pow(h,2)*np.pow(z,2)))
     
 
 
     plt.figure()
+    plt.scatter(z, u_sph, s = 10, label = "sph")
     plt.plot(z, u_sph, label = "sph", ls = "--")
-    plt.plot(z, u_analytic, label = "analytic", ls = "--")
+    plt.plot(z+0.04, u_analytic, label = "analytic", ls = "--") # +0.04 coz we begin at the ghost particle
     plt.legend(loc = "best")
 
     plt.show()

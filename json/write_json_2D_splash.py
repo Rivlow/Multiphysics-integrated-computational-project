@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import numpy as np
 
 s = 0.03
 L = 1.2
@@ -23,45 +24,50 @@ data = {
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 1.2,
-        "dimension": 2
+        "dimension": 2,
+        "schemeIntegration": {"Euler": True, "RK22": False}
     },
     
     "domain": {
         "matrix_long": [
-            [0.3*L, s/2, 0.3*L], # fluid
-            [L, s/2, s/2], # floor 1
-            [L, s/2, s/2], # floor 2
-            [s/2, s/2, L], # left wall 1
-            [s/2, s/2, L], # left wall 2
-            [s/2, s/2, L], # right wall 1
-            [s/2, s/2, L-s/2], # right wall 2
+            np.round(np.array([0.3*L, s/2, 0.3*L]), decimals = 4).tolist(), # fluid
+            np.round(np.array([L, s/2, s/2]), decimals = 4).tolist(), # floor 1
+            np.round(np.array([L, s/2, s/2]), decimals = 4).tolist(), # floor 2
+            np.round(np.array([s/2, s/2, L]), decimals = 4).tolist(), # left wall 1
+            np.round(np.array([s/2, s/2, L]), decimals = 4).tolist(), # left wall 2
+            np.round(np.array([s/2, s/2, L]), decimals = 4).tolist(), # right wall 1
+            np.round(np.array([s/2, s/2, L-s/2]), decimals = 4).tolist(), # right wall 2
 
         ],
         "matrix_orig": [
-            [0.35*L, 0, L], # fluid
-            [0, 0, 0], # floor 1
-            [s/2, 0, s/2], # floor 2
-            [s/2, 0, 3*s/2],# left wall 1
-            [0, 0, s], # left wall 2
-            [L, 0, s], # right wall 1
-            [L+s/2, 0, 1.5*s], # right wall 2
+            np.round(np.array([0.35*L, 0, L]), decimals = 4).tolist(), # fluid
+            np.round(np.array([0, 0, 0]), decimals = 4).tolist(), # floor 1
+            np.round(np.array([s/2, 0, s/2]), decimals = 4).tolist(), # floor 2
+            np.round(np.array([s/2, 0, 3*s/2]), decimals = 4).tolist(),# left wall 1
+            np.round(np.array([0, 0, s]), decimals = 4).tolist(), # left wall 2
+            np.round(np.array([L, 0, s]), decimals = 4).tolist(), # right wall 1
+            np.round(np.array([L+s/2, 0, 1.5*s]), decimals = 4).tolist(), # right wall 2
 
         ],
+        "sphere": {
+                "do": [0, 0, 0, 0, 0, 0, 0],
+                "radius": [0.3]
+            },
         "vector_type": [1, 0, 0, 0, 0, 0, 0],
-        "L_d": [2*L, 2*L, 2*L],
-        "o_d": [0.0, 0.0, 0.0]
+        "L_d": np.round(np.array([2*L, 2*L, 2*L]), decimals = 4).tolist(),
+        "o_d": np.round(np.array([0.0, 0.0, 0.0]), decimals = 4).tolist()
     },
     "post_process": {
         "do": False,
-        "xyz_init": [L/2, 0, s],
-        "xyz_end": [L/2, 0, L-2*s]
+        "xyz_init": np.round(np.array([L/2, 0, s]), decimals = 4).tolist(),
+        "xyz_end": np.round(np.array([L/2, 0, L-2*s]), decimals = 4).tolist()
     },
     "thermo": {
         "rho_0": 1000,
         "rho_moving": 1000,
         "rho_fixed": 1000,
         "T": 298.15,
-        "u_init": [0.0, 0.0, 0.0],
+        "u_init": np.round(np.array([0.0, 0.0, 0.0]), decimals = 4).tolist(),
         "c_0": 30,
         "gamma": 7,
         "M": 18e-3,
@@ -75,7 +81,6 @@ data = {
     },
     "condition": {
         "print_debug": False,
-        "schemeIntegration": {"Euler": True, "RK22": False},
         "stateEquation": {"Ideal gaz law": False, "Quasi incompresible fluid": True},
         "initialCondition": {"Hydrostatic": True, "Constant": False}
     }
