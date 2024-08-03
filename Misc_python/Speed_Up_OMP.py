@@ -3,18 +3,21 @@ import matplotlib.pyplot as plt
 import os
 import sys
 
-SMALL_SIZE = 8
-MEDIUM_SIZE = 14
-BIGGER_SIZE = 18
-plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
-plt.rc('axes', titlesize=MEDIUM_SIZE)    # fontsize of the axes title
-plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
-plt.rc('xtick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
-plt.rc('ytick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
-plt.rc('legend', fontsize=MEDIUM_SIZE)   # legend fontsize
-plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
-plt.rc('text', usetex=True)
-plt.rc('font', family='lmodern')
+def isLatex(latex):
+    if latex:
+        
+        SMALL_SIZE = 8
+        MEDIUM_SIZE = 14
+        BIGGER_SIZE = 18
+        plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+        plt.rc('axes', titlesize=MEDIUM_SIZE)    # fontsize of the axes title
+        plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+        plt.rc('xtick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
+        plt.rc('ytick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
+        plt.rc('legend', fontsize=MEDIUM_SIZE)   # legend fontsize
+        plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+        plt.rc('text', usetex=True)
+        plt.rc('font', family='lmodern')
 
 s =  np.array([0.1, 0.05, 0.025, 0.01, 0.005])
 nb_part = np.array([318, 1110, 4134, 24726, 97446])
@@ -61,6 +64,7 @@ current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
 
 scaling = serial_time/OMP_time
 plot_tab(PLOT_time, PLOT_scale)
+isLatex(False)
 
 
 

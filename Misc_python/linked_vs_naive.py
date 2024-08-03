@@ -2,6 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os 
 import sys
+current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
+
+
+
 
 def isLatex(latex):
     if latex:
@@ -43,9 +47,6 @@ step = 100
 nb_part = [24, 679, 2503, 14887, 23107, 30278, 58567]
 linked = [0.00019067, 0.00028684, 0.00045728, 0.00232608, 0.003866, 0.00558104, 0.01220402]
 naive = [0.00020428, 0.00052669, 0.00349627, 0.09740487, 0.26255906, 0.47741576, 2.50199889]
-
-current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-
 
 isLatex(True)
 plotComparison(nb_part, linked, naive)

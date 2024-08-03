@@ -3,12 +3,12 @@ import os
 import sys
 import numpy as np
 
-s = 0.02
+s = 0.01
 L = 1.2
 
-dt = 0.0001
-nsave = 500
-nstepT = nsave*300
+dt = 0.00005
+nsave = 150
+nstepT = nsave*400
 
 
 data = {
@@ -27,39 +27,58 @@ data = {
         "dimension": 2,
         "schemeIntegration": {"Euler": True, "RK22": False}
     },
+
+    "following_part": {
+        "part": False,
+        "min": False,
+        "max": False,
+        "particle": 50,
+        "pressure": 0,
+        "rho": 0,
+        "position": [
+            0,
+            0,
+            1
+        ],
+        "velocity": [
+            0,
+            0,
+            0
+        ]
+    },
     
     "domain": {
         
-        
         "matrix_long": [
             
-            np.round(np.array([0.9*L, s/2, 0.8*L]), decimals = 4).tolist(), # fluid
-            np.round(np.array([L, s/2, s/2]), decimals = 4).tolist(), # floor 1
+            np.round(np.array([L - 3*s, s/2, 0.7*L]), decimals = 4).tolist(), # fluid (water in tank)
+            np.round(np.array([0.9*L, s/2, 0.8*L]), decimals = 4).tolist(), # fluid (drop)
+            np.round(np.array([L + s, s/2, s/2]), decimals = 4).tolist(), # floor 1
             np.round(np.array([L, s/2, s/2]), decimals = 4).tolist(), # floor 2
             np.round(np.array([s/2, s/2, L]), decimals = 4).tolist(), # left wall 1
             np.round(np.array([s/2, s/2, L]), decimals = 4).tolist(), # left wall 2
             np.round(np.array([s/2, s/2, L]), decimals = 4).tolist(), # right wall 1
-            np.round(np.array([s/2, s/2, L-s/2]), decimals = 4).tolist(), # right wall 2
+            np.round(np.array([s/2, s/2, L]), decimals = 4).tolist(), # right wall 2
 
         ],
         
-
         "matrix_orig": [
-            np.round(np.array([2*s, 0, 2*s]), decimals = 4).tolist(), # fluid
+            np.round(np.array([2*s, 0, 2*s]), decimals = 4).tolist(), # fluid (water in tank)
+            np.round(np.array([5*s, 0, 1.5*L]), decimals = 4).tolist(), # fluid (drop)
             np.round(np.array([0, 0, 0]), decimals = 4).tolist(), # floor 1
             np.round(np.array([s/2, 0, s/2]), decimals = 4).tolist(), # floor 2
             np.round(np.array([s/2, 0, 3*s/2]), decimals = 4).tolist(),# left wall 1
             np.round(np.array([0, 0, s]), decimals = 4).tolist(), # left wall 2
-            np.round(np.array([L, 0, s]), decimals = 4).tolist(), # right wall 1
-            np.round(np.array([L+s/2, 0, 1.5*s]), decimals = 4).tolist(), # right wall 2
+            np.round(np.array([L + s, 0, s]), decimals = 4).tolist(), # right wall 1
+            np.round(np.array([L + s/2, 0, 1.5*s]), decimals = 4).tolist(), # right wall 2
 
         ],
 
         "sphere": {
-                "do": [1, 0, 0, 0, 0, 0, 0],
-                "radius": [0.3]
+                "do": [0, 1, 0, 0, 0, 0, 0, 0],
+                "radius": [0, 0.2]
             },
-        "vector_type": np.round(np.array([1, 0, 0, 0, 0, 0, 0]), decimals = 4).tolist(),
+        "vector_type": np.round(np.array([1, 1, 0, 0, 0, 0, 0, 0]), decimals = 4).tolist(),
         "L_d": np.round(np.array([2*L, 2*L, 2*L]), decimals = 4).tolist(),
         "o_d": np.round(np.array([0.0, 0.0, 0.0]), decimals = 4).tolist()
         
@@ -89,7 +108,7 @@ data = {
     "condition": {
         "print_debug": False,
         "stateEquation": {"Ideal gaz law": False, "Quasi incompresible fluid": True},
-        "initialCondition": {"Hydrostatic": True, "Constant": False}
+        "initialCondition": {"Hydrostatic": False, "Constant": True}
     }
 }
 

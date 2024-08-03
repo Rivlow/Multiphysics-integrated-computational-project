@@ -3,7 +3,7 @@ import os
 import sys
 import numpy as np
 
-s = 0.04
+s = 0.02
 L = 1.2
 
 dt = 0.00001
@@ -26,6 +26,25 @@ data = {
         "beta_adh": 1.2,
         "dimension": 2,
         "schemeIntegration": {"Euler": True, "RK22": False},
+    },
+
+    "following_part": {
+        "part": False,
+        "min": False,
+        "max": False,
+        "particle": 50,
+        "pressure": 0,
+        "rho": 0,
+        "position": [
+            0,
+            0,
+            1
+        ],
+        "velocity": [
+            0,
+            0,
+            0
+        ]
     },
     
     "domain": {

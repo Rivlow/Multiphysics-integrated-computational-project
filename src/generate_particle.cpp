@@ -64,40 +64,33 @@ void meshCube(GeomData &geomParams,
     vector<int> vectorType = geomParams.vector_type;
     double s = geomParams.s;
     
-    for(int i = 0 ; i < int(vectorType.size()); i++){
+    for(int n = 0 ; n < int(vectorType.size()); n++){
 
-        vector<double> &L = matrixLong[i];
-        vector<double> &o = matrixOrig[i];
-        int type_val = vectorType[i];
+        vector<double> &L = matrixLong[n];
+        vector<double> &o = matrixOrig[n];
+        int type_val = vectorType[n];
         double dx = 0;
         double dy = 0;
         double dz = 0;
 
-        int ni = int(ceil(L[0] / s));
+        double ni = ceil(L[0] / s);
         if(ni != 1){
             dx = L[0] / ni;
             ++ni;
         }
         
-        int nj = int(ceil(L[1] / s));
+        double nj = ceil(L[1] / s);
         if(nj != 1){
             dy = L[1] / nj;
             ++nj;
         }
         
-        int nk = int(ceil(L[2] / s));
+        double nk = ceil(L[2] / s);
         if(nk != 1){
             dz = L[2] / nk;
             ++nk;
         }
                 
-        // output
-        //cout << "meshing cube at o=(" << o[0] << "," << o[1] << "," << o[2] << ") ";
-        //cout << "of size L=(" << L[0] << "," << L[1] << "," << L[2] << ")\n";
-        //cout << "\tparticle spacing s=(" << dx << "," << dy << "," << dz << ") [target was s=" << s << "]\n";
-        //cout << "\t=> " << ni << "*" << nj << "*" << nk << " = " << ni * nj * nk << " particles to be generated\n";
-        //cout <<"\n"<< endl;
-
         // memory allocation
         pos.reserve(pos.size() + ni * nj * nk * 3);
 
@@ -112,6 +105,23 @@ void meshCube(GeomData &geomParams,
                 {
                     double z = o[2] + k * dz;
                     
+                    if(geomParams.sphere_do[n]){
+                        double r = geomParams.radius[n];
+                        vector<double> center(3);
+                        
+                        for(int coord = 0; coord <3; coord++){
+                            center[coord] = o[coord] + L[coord]/2;
+                        }
+                        double hyp_coord_x = (center[0]-x)*(center[0]-x);
+                        double hyp_coord_y = (center[1]-y)*(center[1]-y);
+                        double hyp_coord_z = (center[2]-z)*(center[2]-z);
+                        double hyp_radius = hyp_coord_x + hyp_coord_y + hyp_coord_z;
+                        
+                        if(hyp_radius>r*r){ 
+                            continue;
+                        }
+                    }
+                    
                     pos.push_back(x);
                     pos.push_back(y);
                     pos.push_back(z);
@@ -125,8 +135,9 @@ void meshCube(GeomData &geomParams,
             }
         }
     }
+    simParams.nb_moving_part = MP_count;
+    simParams.nb_tot_part = MP_count+FP_count;
     
-    simParams.nb_tot_part = pos.size()/3;
 }
 
 

@@ -39,10 +39,10 @@ void computeGradW(GeomData &geomParams,
                 
 
                 double r_ij = dist(pos, i, j);
-                //double deriv = deriveCubicSpline(r_ij, geomParams, simParams);
-                //W[i][idx] = CubicSpline(r_ij, geomParams, simParams);
-                double deriv = deriveWendlandQuintic(r_ij, geomParams, simParams);
-                W[i][idx] = WendlandQuintic(r_ij, geomParams, simParams);                
+                double deriv = deriveCubicSpline(r_ij, geomParams, simParams);
+                W[i][idx] = CubicSpline(r_ij, geomParams, simParams);
+                //double deriv = deriveWendlandQuintic(r_ij, geomParams, simParams);
+                //W[i][idx] = WendlandQuintic(r_ij, geomParams, simParams);                
 
                 for (int coord = 0; coord < 3; coord++)
                     gradW[i][3*idx + coord] = (d_pos[coord] / r_ij) * deriv;
@@ -138,8 +138,6 @@ void setArtificialViscosity(GeomData &geomParams,
     int t = simParams.t;
 
     if (t > 0){
-
-        
 
         // Iterations over each particle
         #pragma omp parallel for

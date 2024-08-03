@@ -95,12 +95,22 @@ int main(int argc, char *argv[])
         data["domain"]["matrix_long"],
         data["domain"]["matrix_orig"],
         data["domain"]["vector_type"],
+        data["domain"]["sphere"]["do"],
+        data["domain"]["sphere"]["radius"],
         data["post_process"]["xyz_init"],
         data["post_process"]["xyz_end"],
         data["post_process"]["do"],
         int(geomParams.L_d[0] / (geomParams.kappa * geomParams.h)),
         int(geomParams.L_d[1] / (geomParams.kappa * geomParams.h)),
         int(geomParams.L_d[2] / (geomParams.kappa * geomParams.h)),
+        data["following_part"]["part"],
+        data["following_part"]["min"],
+        data["following_part"]["max"],
+        data["following_part"]["particle"],
+        data["following_part"]["pressure"],
+        data["following_part"]["rho"],
+        data["following_part"]["position"],
+        data["following_part"]["velocity"],
     };
 
     cout << "GeomData initialized" << endl;
