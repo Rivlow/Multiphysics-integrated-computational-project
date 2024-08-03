@@ -44,9 +44,9 @@
     "simulation": {
         "theta": 0.5,
         "s": 1e-3,
-        "nstepT": 200000,
-        "dt": 1e-06,
-        "nsave": 500,
+        "nstepT": 2000000,
+        "dt": 5e-06,
+        "nsave": 3000,
         "kappa": 2,
         "alpha": 0.1,
         "beta": 0,
