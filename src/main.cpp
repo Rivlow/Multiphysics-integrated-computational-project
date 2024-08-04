@@ -252,10 +252,16 @@ int main(int argc, char *argv[])
         sim_time += simParams.dt;
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){
-                if (geomParams.post_process_do)
-                    extractData(geomParams, simParams, thermoParams, pos, p, mass, neighbours, nb_neighbours, rho);
-                if (geomParams.following_part_bool || geomParams.following_part_max || geomParams.following_part_min)
-                    follow_part_data(geomParams,simParams, p, rho, pos, u);
+            if(geomParams.post_process_do || geomParams.following_part_bool ||
+               geomParams.following_part_max || geomParams.following_part_min){
+
+                    if (geomParams.post_process_do)
+                        extractData(geomParams, simParams, thermoParams, pos, p, mass, neighbours, nb_neighbours, rho);
+                    if (geomParams.following_part_bool || geomParams.following_part_max || geomParams.following_part_min)
+                        follow_part_data(geomParams,simParams, p, rho, pos, u);
+                    writing_time(sim_time);
+               }
+                
                 
             export_particles("../../output/sph", t, pos, scalars, vectors, false);
             writing_time(sim_time);

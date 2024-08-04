@@ -14,16 +14,18 @@ def fonction():
     pressure = pd.read_csv(file, sep = ',', decimal='.', header=None)
     pressure = np.array(pressure)
     
-    x = np.arange(0.075, 0.75, 0.025)
+    x = np.arange(0.025, 1.025, 0.025)
     print(x)
-    x1 = np.arange(0.075,0.75,0.025)
-    x1 = np .linspace(0,0.6,27)
+    x1 = np.arange(0.0,10.25,0.025)
 
+    x1 = np .linspace(0.025,1,40)
+    print(x1)
+    print(len(pressure[-1][::-1]))
     plt.scatter(x,pressure[-1][::-1])
-    plt.plot(x,1000*9.81*x1)
+    plt.plot(x,1000*9.81*(x1-0.275))
 
     plt.show()
-
+    
     file = "output/rho.csv"
     rho = pd.read_csv(file, sep = ',', decimal='.', header=None)
     rho = np.array(rho)
@@ -32,7 +34,7 @@ def fonction():
     rho_Etat = np.linspace(0,1500,50)
     B = 30*30*1000/7
     pressure_etat = B * (( rho_Etat/1000)**7-1)
-    plt.plot(rho_Etat,pressure_etat)
+    #plt.plot(rho_Etat,pressure_etat)
     #plt.xlim(950,1050)
     plt.show()
 

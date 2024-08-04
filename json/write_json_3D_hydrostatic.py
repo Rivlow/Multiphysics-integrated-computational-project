@@ -2,13 +2,13 @@ import json
 import os
 import sys
 
-s = 0.1
+s = 0.02
 L = 0.7
 
 nb_vtp_output = 250 # the total number of output file desired
 dt = 0.0001/2
-nstepT = 25000
-nsave = nb_vtp_output/(dt*nstepT)  
+nstepT = 50000
+nsave = 500
 
 
 data = {
@@ -20,7 +20,7 @@ data = {
         "dt": dt,
         "nsave": nsave,
         "kappa": 2,
-        "alpha": 0.05,
+        "alpha": 0.5,
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 1.2,
