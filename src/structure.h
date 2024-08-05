@@ -71,6 +71,7 @@ struct SimulationData {
     bool is_surface_tension;
     bool is_adhesion;
     bool PRINT;
+    bool comparaison_algorithm;
     int nb_moving_part;
     int nb_tot_part;
     int t;

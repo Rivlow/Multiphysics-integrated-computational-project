@@ -364,7 +364,6 @@ void momentumEquation(GeomData &geomParams,
         
         for (int coord = 0; coord < 3; coord++){
             
-            
             dudt[3 * n + coord] += F_vol[3 * n + coord];
             F_res += F_vol[3*n + coord]*F_vol[3*n + coord];
         }

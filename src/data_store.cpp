@@ -347,7 +347,7 @@ void follow_part_data(GeomData &geomParams,
 
 }
 
-void writing_time(double sim_time){
+void writing_time(vector<double> vec_sim_time){
 
     string outputDir = "../../output";
 
@@ -364,13 +364,12 @@ void writing_time(double sim_time){
         return;
     }
 
-    ostringstream oss;
-    oss << fixed << setprecision(6) << sim_time;
-    string data_part_str = oss.str();
-
-    
-
-    output_name << "\"" << data_part_str << "\"" << "\n";
+    for(int i = 0 ; i< vec_sim_time.size() ; i++){
+        ostringstream oss;
+        oss << fixed << setprecision(6) << vec_sim_time[i];
+        string data_part_str = oss.str();
+        output_name << "\"" << data_part_str << "\"" << "\n";
+    }
 
     output_name.close();
 }

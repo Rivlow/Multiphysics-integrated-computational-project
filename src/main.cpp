@@ -155,6 +155,7 @@ int main(int argc, char *argv[])
         data["forces"]["surface_tension"],
         data["forces"]["adhesion"],
         data["condition"]["print_debug"],
+        data["comparaison_algorithm"],
         0,
         0,
         0,
@@ -230,16 +231,24 @@ int main(int argc, char *argv[])
     setSpeedOfSound(geomParams, thermoParams, simParams, c, rho);
     initKernelCoef(geomParams, simParams);
 
-    
+    if( simParams.comparaison_algorithm){
+        compareAlgo(geomParams, simParams, cell_matrix, neighbours, gradW,
+                    W, viscosity, nb_neighbours, type, pos);
+
+        return 0;
+    }
+
     auto t_mid = chrono::high_resolution_clock::now();
     double sim_time = 0.0;
+    int iteration = 0;
+    vector<double> vec_sim_time(simParams.nstepT/simParams.nsave, 0.0);
     for (int t = 0; t < simParams.nstepT; t++){
 
         simParams.t = t;
 
         // Apply the linked-list algorithm
         sortedList(geomParams, simParams, cell_matrix, neighbours,
-                   gradW, W, viscosity, nb_neighbours, type, pos, free_surface);
+                   gradW, W, viscosity, nb_neighbours, type, pos);
     
         // Compute ∇_a(W_ab) for all particles
         computeGradW(geomParams, simParams, gradW, W, neighbours, nb_neighbours, pos);
@@ -259,12 +268,13 @@ int main(int argc, char *argv[])
                         extractData(geomParams, simParams, thermoParams, pos, p, mass, neighbours, nb_neighbours, rho);
                     if (geomParams.following_part_bool || geomParams.following_part_max || geomParams.following_part_min)
                         follow_part_data(geomParams,simParams, p, rho, pos, u);
-                    writing_time(sim_time);
+                   
                }
-                
-                
+            
+            vec_sim_time[iteration] = sim_time; 
+            iteration ++ ;
             export_particles("../../output/sph", t, pos, scalars, vectors, false);
-            writing_time(sim_time);
+            
             
             auto t_act = chrono::high_resolution_clock::now();
             double elapsed_time = double(chrono::duration_cast<chrono::duration<double>>(t_act - t_mid).count());
@@ -277,8 +287,8 @@ int main(int argc, char *argv[])
                         cell_matrix, gradW, W, drhodt, dudt, track_particle);
 
     }
-
-
+    
+    writing_time(vec_sim_time);
     auto t1 = chrono::high_resolution_clock::now();
     auto delta_t = chrono::duration_cast<chrono::duration<double>>(t1 - t0).count();
     cout << "\nduration: " << delta_t << "s (" << int((MP_count+FP_count)/delta_t)*simParams.nstepT<<" [Particles*Updates/s]).\n";

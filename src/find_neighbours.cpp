@@ -27,8 +27,7 @@ void sortedList(GeomData &geomParams,
                 vector<vector<double>> &viscosity,
                 vector<double> &nb_neighbours,
                 vector<double> &type,
-                vector<double> &pos,
-                vector<int> &free_surface){
+                vector<double> &pos){
     
     int Nx = geomParams.Nx;
     int Ny = geomParams.Ny;
@@ -107,26 +106,7 @@ void sortedList(GeomData &geomParams,
                                 if (r_ab*r_ab <= kappa * kappa *h * h){
                                     
                                     neighbours[100*n + it++] = idx_cell;     
-
-                                    /*
-                                    if (simParams.is_surface_tension &&  type[idx_cell] == 1.0){
-                                        
-                                        double x, y, z = pos[3*idx_cell + 0], pos[3*idx_cell + 1], pos[3*idx_cell + 2];
-                                        
-                                        // Compute spherical coordinates of neighbour
-                                        double theta = atan2(y, x);
-                                        double phi = (simParams.dimension == 3)? acos(z/r2): 0;
-
-                                        theta += (theta < 0)? 2*M_PI : 0;
-                                        int theta_sector = int(theta/(2*M_PI / 8));
-                                        int phi_sector = int(phi/(M_PI / 4));
-
-                                        int sector = 8*phi_sector + theta_sector;
-
-                                        int nb_sector = (simParams.dimension == 3)? 32: 8;
-                                        free_surface[nb_sector*n + sector]++;
-                                    }    
-                                    */                 
+               
                                     
                                 }
                             }
@@ -270,4 +250,28 @@ void CompareNeighbours( vector<vector<int>> &neighbours_matrix_linked,
         }
         cout << "} (naive)\n \n";
     }
+}
+
+void compareAlgo(GeomData &geomParams,
+                SimulationData &simParams, 
+                vector<vector<int>> &cell_matrix,
+                vector<int> &neighbours,
+                vector<vector<double>> &gradW,
+                vector<vector<double>> &W,
+                vector<vector<double>> &viscosity,
+                vector<double> &nb_neighbours,
+                vector<double> &type,
+                vector<double> &pos){
+    auto t_sorted_begin = chrono::high_resolution_clock::now();
+    sortedList(geomParams, simParams, cell_matrix, neighbours,
+                gradW, W, viscosity, nb_neighbours, type, pos);
+    auto t_middle = chrono::high_resolution_clock::now();
+
+    vector<int> neighbours_naive(100*simParams.nb_tot_part);
+    naiveAlgo(geomParams,simParams,neighbours_naive, pos);
+    auto t_naiveAlgo_end = chrono::high_resolution_clock::now();
+
+    auto time_sorted = std::chrono::duration_cast<std::chrono::duration<double>>(t_middle - t_sorted_begin).count();
+    auto time_naive = std::chrono::duration_cast<std::chrono::duration<double>>(t_naiveAlgo_end - t_middle).count();
+    cout << " computation time for the sorted list algorithm " << time_sorted << " [s], computation time for the naive algorithm " << time_naive << " [s] " << endl; 
 }

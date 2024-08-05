@@ -52,4 +52,4 @@ void follow_part_data(GeomData &geomParams,
                       vector<double> pos,
                       vector<double> u);
 
-void writing_time(double sim_time);
+void writing_time(vector<double> vec_sim_time);
