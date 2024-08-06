@@ -174,8 +174,8 @@ int main(int argc, char *argv[])
     meshcube(geomParams, simParams, pos, type, MP_count, FP_count); 
     meshPostProcess(geomParams, simParams, pos, type, GP_count);
     
-    if (!checkParticleGeneration(pos, simParams))
-        exit(1);
+    //if (!checkParticleGeneration(pos, simParams))
+     //   exit(1);
     
     int nb_tot_part = pos.size()/3;
     vector<double> mass(nb_tot_part, 0), u(3 * nb_tot_part, 0),

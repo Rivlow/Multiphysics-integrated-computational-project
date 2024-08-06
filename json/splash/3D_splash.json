@@ -200,7 +200,7 @@
             0
         ]
     },
-    "comparaison_algorithm": true,
+    
     "thermo": {
         "rho_0": 1000,
         "rho_moving": 1000,

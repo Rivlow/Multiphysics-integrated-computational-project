@@ -22,7 +22,7 @@ void computeGradW(GeomData &geomParams,
 
     int nb_tot_part = simParams.nb_tot_part;
 
-    if (!simParams.is_surface_tension){
+    if (1){
 
         // Iterations over each particle
         #pragma omp parallel for
@@ -253,6 +253,7 @@ void continuityEquation(SimulationData &simParams,
                 double u_b = u[3 * i_neig + coord];
                 dot_product += (u_a - u_b) * gradW[n][3*idx + coord];
                 
+                
             }
             
             drhodt[n] += m_b * dot_product;
@@ -301,13 +302,18 @@ void momentumEquation(GeomData &geomParams,
     
     
     if (simParams.is_surface_tension){
-        cout << " tension " << endl;
-        InterfaceTrackingMath(simParams, geomParams, thermoParams,
+
+        surfaceTension(simParams, geomParams, thermoParams, nb_neighbours, neighbours,
+                       gradW, W, mass, rho, pos, F_vol, type);
+
+
+       
+        /*InterfaceTrackingMath(simParams, geomParams, thermoParams,
                               nb_neighbours,neighbours, gradW,
                               mass,rho,type,pos, track_particle);
 
         surfaceTensionImprove(simParams, geomParams,thermoParams, nb_neighbours, neighbours, 
-                              gradW, W, mass, rho, pos, F_vol, type, track_particle);
+                              gradW, W, mass, rho, pos, F_vol, type, track_particle);*/
     }
 
     //printArray(F_vol, F_vol.size(), "F_vol");
@@ -347,7 +353,7 @@ void momentumEquation(GeomData &geomParams,
                 }
 
                 r_ab = sqrt(r_ab);
-                double W_ab = W_adh(r_ab, geomParams, simParams);
+                double W_ab = WAdh(r_ab, geomParams, simParams);
 
 
                 for (int coord = 0; coord < 3; coord++){

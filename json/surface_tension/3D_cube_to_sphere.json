@@ -1,18 +1,32 @@
 {
+    "simulation": {
+        "theta": 0.5,
+        "s": 0.1,
+        "nstepT": 50000,
+        "dt": 1e-05,
+        "nsave":250,
+        "kappa": 2,
+        "alpha": 0.05,
+        "beta": 0,
+        "alpha_st": 1,
+        "beta_adh": 1.2,
+        "dimension": 3
+    },
     "domain": {
         "matrix_long": [
             [
                 1,
-                0.05,
+                1,
                 1
             ]
         ],
         "matrix_orig": [
             [
                 1,
-                0,
+                1,
                 1
             ]
+            
         ],
         "vector_type": [
             1
@@ -27,37 +41,48 @@
             0.0,
             0.0
         ],
-        "sphere":{
-            "do" : [0],
-            "radius": [0.3]
+        "sphere": {
+            "do": [
+                0
+            ],
+            "radius": [
+                0.3
+            ]
         }
     },
     "post_process": {
-        "do": true,
+        "do": false,
         "xyz_init": [
-            0,
-            1.5,
-            1.5
+            0.615,
+            0.615,
+            0.01
         ],
         "xyz_end": [
-            3,
-            1.5,
-            1.5
+            0.615,
+            0.615,
+            1.2
         ]
     },
-    "simulation": {
-        "theta": 0.5,
-        "s": 0.1,
-        "nstepT": 1,
-        "dt": 0.0001,
-        "nsave": 2500000.0,
-        "kappa": 2,
-        "alpha": 0.5,
-        "beta": 0,
-        "alpha_st": 10,
-        "beta_adh": 10,
-        "dimension": 3
+    "comparaison_algorithm" : false,
+    "following_part": {
+        "part": false,
+        "min": false,
+        "max": false,
+        "particle": 50,
+        "pressure": 0,
+        "rho": 0,
+        "position": [
+            0,
+            0,
+            1
+        ],
+        "velocity": [
+            0,
+            0,
+            0
+        ]
     },
+    
     "thermo": {
         "rho_0": 1000,
         "rho_moving": 1000,
@@ -72,7 +97,7 @@
         "gamma": 7,
         "M": 0.018,
         "R": 8.314,
-        "sigma": 0.0728
+        "sigma": 52000
     },
     "forces": {
         "gravity": false,

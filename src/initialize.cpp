@@ -25,7 +25,7 @@ void initMass(GeomData &geomParams,
     if (dim == 3)
         V = s * s * s;
     else
-        V = s*s;
+        V = s * s;
 
     int rho_size = rho.size();
 
@@ -126,10 +126,10 @@ void initKernelCoef(GeomData &geomParams,
                     SimulationData &simParams){
 
     double h = geomParams.h;
-
+    double kh = h *geomParams.kappa; 
     simParams.cubic_kernel_coef = (simParams.dimension == 2)? 15.0 /( 7.0 * M_PI * h * h ) : 3.0 / (2.0 * M_PI * h * h * h);
-    simParams.adh_kernel_coef = (simParams.dimension == 2)? 16/(4* M_PI*pow(h, 2.25)): 0.0007/pow(h,3.25);;
-    simParams.coh_kernel_coef = (simParams.dimension == 2) ? 40/(M_PI*h*h*h*h*h*h*h*h) : 32/(M_PI*h*h*h*h*h*h*h*h*h);
+    simParams.adh_kernel_coef = (simParams.dimension == 2)? 16/(4* M_PI*pow(kh, 2.25)): 0.0007/pow(kh,3.25);;
+    simParams.coh_kernel_coef = (simParams.dimension == 2) ? 40/(M_PI*kh*kh*kh*kh*kh*kh*kh*kh) : 32/(M_PI*kh*kh*kh*kh*kh*kh*kh*kh*kh);
     simParams.quintic_kernel_coef = (simParams.dimension == 2)? 7.0 /( 4.0 * M_PI * h * h ) : 0;
 
 

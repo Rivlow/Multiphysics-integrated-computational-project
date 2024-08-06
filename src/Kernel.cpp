@@ -6,32 +6,34 @@
 
 using namespace std;
 
-double W_coh(double r, GeomData &geomParams, SimulationData simParams){
+double WCoh(double r, GeomData &geomParams, SimulationData simParams){
 
     double W = 0.0;
     double coef = simParams.coh_kernel_coef;
     double h = geomParams.h;
+    double kappa = geomParams.kappa;
+ 
+    if(r/h <= kappa/2)
+        W = coef *(2.0 * (kappa*h-r) * (kappa*h-r) * (kappa*h-r) * r*r*r - kappa*h*kappa*h*kappa*h*kappa*h*kappa*h*kappa*h/64);
 
-    if(2.0*r>h && r<=h)
-        W = coef*(h-r)*(h-r)*(h-r)*r*r*r;
-    
-    else if(r>0 && 2.0*r<=h)
-        W = coef *( 2.0*(h-r)*(h-r)*(h-r)*r*r*r - h*h*h*h*h*h/64);
-    
+    else if(r/h > kappa/2 && r/h <= kappa)
+        W = coef*(kappa*h-r)*(kappa*h-r)*(kappa*h-r)*r*r*r;
+
     else
         W = 0.0;
     
     return W;
 }
 
-double W_adh(double r, GeomData &geomParams, SimulationData simParams){
+double WAdh(double r, GeomData &geomParams, SimulationData simParams){
 
     double W = 0.0;
     double coef = simParams.adh_kernel_coef;
-    double kh = geomParams.kappa*geomParams.h;;
+    double h = geomParams.h;
+    double kappa = geomParams.kappa;
 
-    if(2.0*r>kh && r<=kh)
-        W = coef*sqrt(sqrt(-4*r*r/kh+6*r-2*kh));
+    if(r/h > kappa/2 && r/h <= kappa)
+        W = coef*sqrt(sqrt(-4*r*r/(kappa*h) + 6*r - 2*(kappa*h)));
     else
         W = 0.0;
     
