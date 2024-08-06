@@ -85,7 +85,7 @@ def plotKernel(plot, save, dimension):
     if plot["Adhesion"]:
         plt.figure()
         plt.plot(r_span, W_adh/alpha_adh, label=r'W(r,h)$ / \alpha$', c='b')
-        plt.plot(r_span, dW_adh/(alpha_adh/h), ls = "--", label=r'dW(r,h)/dr/($\alpha$/h)', c='r')
+        #plt.plot(r_span, dW_adh/(alpha_adh/h), ls = "--", label=r'dW(r,h)/dr/($\alpha$/h)', c='r')
         plt.xlabel('r/h')
         plt.grid(True)
         plt.legend(loc = 'best')
@@ -95,7 +95,7 @@ def plotKernel(plot, save, dimension):
     if plot["Cohesion"]:
         plt.figure()
         plt.plot(r_span, W_coh/alpha_coh, label=r'W(r,h)$ / \alpha$', c='b')
-        plt.plot(r_span, dW_coh/(alpha_coh/h), ls = "--", label=r'dW(r,h)/dr/($\alpha$/h)', c='r')
+        #plt.plot(r_span, dW_coh/(alpha_coh/h), ls = "--", label=r'dW(r,h)/dr/($\alpha$/h)', c='r')
         plt.xlabel('r/h')
         plt.grid(True)
         plt.legend(loc = 'best')
@@ -121,7 +121,7 @@ dW_adh = np.zeros(len(r_span))
 W_coh = np.zeros(len(r_span))
 dW_coh = np.zeros(len(r_span))
 
-plot = {"Cubic":False, "Quintic":False, "Adhesion":False, "Cohesion":False}
+plot = {"Cubic":False, "Quintic":False, "Adhesion":True, "Cohesion":True}
 save = False
 isLatex(False)
 plotKernel(plot, save, dimension)

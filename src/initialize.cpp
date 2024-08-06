@@ -93,10 +93,6 @@ void initRho(ThermoData &thermoParams,
 void initVelocity(ThermoData &thermoParams,
                   SimulationData &simParams, 
                   vector<double> &u){
-
-
-    bool PRINT = simParams.PRINT;
-    int nb_moving_part = simParams.nb_moving_part;
     
     #pragma omp parallel for   
     for (int i = simParams.nb_moving_part; i < simParams.nb_tot_part; i++){
@@ -106,7 +102,7 @@ void initVelocity(ThermoData &thermoParams,
         u[3 * i + 2] = simParams.u_init[2];
     }
 
-    if (PRINT)
+    if (simParams.PRINT)
        cout << "initVelocity passed" << endl;
     
 }

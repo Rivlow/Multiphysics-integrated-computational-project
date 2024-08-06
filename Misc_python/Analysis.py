@@ -24,76 +24,75 @@ def isLatex(latex):
         plt.rc('font', family='lmodern')
 
         
-def StateEquation(plot, pressure, density):
+def StateEquation():
     
-    if plot["StateEquation"]:
 
-        # Arbitrary take last iteration (seeking steady-state)
-        p = np.array(pd.read_csv(pressure, sep = ',', decimal='.', header=None))[-1] 
-        rho = np.array(pd.read_csv(density, sep = ',', decimal='.', header=None))[-1]
+    # Arbitrary take last iteration (seeking steady-state)
+    p = np.array(pd.read_csv("output/500_pressure.csv", sep = ',', decimal='.', header=None))[-1] 
+    rho = np.array(pd.read_csv("output/500_rho.csv", sep = ',', decimal='.', header=None))[-1]
 
-        c_0 = 30
-        rho_0 = 1000
-        gamma = 7  
-        B = (c_0**2)*rho_0/gamma
-        T = 273.15+25
-        M = 18e-3
-        R = 8.314
-    
-        plt.scatter(p, rho, s = 10, label = "state_equation_sph")
+    c_0 = 30
+    rho_0 = 1000
+    gamma = 7  
+    B = (c_0**2)*rho_0/gamma
+    T = 273.15+25
+    M = 18e-3
+    R = 8.314
 
-        p_compare = np.linspace(48.7799, 12397, 100)
-        rho_compare = rho_0 * ((p_compare + 1) / B) ** (1 / gamma)
-        #plt.xscale("log")
-        #plt.plot(p_val[11:], rho_val[11:], color = 'b', label = 'SPH')
-        #plt.plot(p_compare, rho_compare, color = 'r', label = 'quasi incompressible (theorical)')
-        plt.xlabel("Pressure [Pa]")
-        plt.ylabel(r"Density [kg/$m^3$]")
-        plt.grid(True)
-        plt.legend(loc = "best")
-    
+    plt.scatter(p, rho, s = 10, label = "state_equation_sph")
+
+    p_compare = np.linspace(48.7799, 12397, 100)
+    rho_compare = rho_0 * ((p_compare + 1) / B) ** (1 / gamma)
+    #plt.xscale("log")
+    #plt.plot(p_val[11:], rho_val[11:], color = 'b', label = 'SPH')
+    #plt.plot(p_compare, rho_compare, color = 'r', label = 'quasi incompressible (theorical)')
+    plt.xlabel("Pressure [Pa]")
+    plt.ylabel(r"Density [kg/$m^3$]")
+    plt.grid(True)
+    plt.legend(loc = "best")
     
     
-def Hydrostatic(plot, p):
+    
+def Hydrostatic():
 
-    if plot["Hydrostatic"]:
-        rho_ref = 1023 # average density for ghost particles (using "plotSingleVariable")
-        g = 9.81
-        z = np.linspace(0.25, 0.9, len(p))
-        p_th = rho_ref*g*z
-        
-        print(p_th[0])
-        print(p[-1])
 
-        plt.figure()
-        plt.scatter(z, p[::-1], color = 'r', label = 'SPH pressure')
-        plt.plot(z, p_th, color = 'b', label = 'Theoretical hydrostatic pressure')
+    p = np.array(pd.read_csv("output/p.csv", sep = ',', decimal='.', header=None))[-1]
+    rho_ref = 1023 # average density for ghost particles (using "plotSingleVariable")
+    g = 9.81
+    z = np.linspace(0.25, 0.9, len(p))
+    p_th = rho_ref*g*z
+    
+    print(p_th[0])
+    print(p[-1])
 
-        plt.ylabel("Pressure [Pa]")
-        plt.xlabel(r"Height [m]")
-        plt.grid(True)
-        plt.legend(loc = "best")
-        plt.tight_layout()
-        #plt.savefig(f'{current_directory}/Pictures/hydrostatic_pressure.PDF')
+    plt.figure()
+    plt.scatter(z, p[::-1], color = 'r', label = 'SPH pressure')
+    plt.plot(z, p_th, color = 'b', label = 'Theoretical hydrostatic pressure')
 
-def PoiseuilleFlow(velocity_x, plot):
+    plt.ylabel("Pressure [Pa]")
+    plt.xlabel(r"Height [m]")
+    plt.grid(True)
+    plt.legend(loc = "best")
+    plt.tight_layout()
+    #plt.savefig(f'{current_directory}/Pictures/hydrostatic_pressure.PDF')
 
-    if plot["PoiseuilleFlow"]:
+def PoiseuilleFlow():
 
-        u_x = np.array(pd.read_csv(velocity_x, sep = ',', decimal='.', header=None))[-1]
-        z = np.linspace(0.02, 1.24, len(u_x))
 
-        u_sph= u_x + 0.5
+    u_x = np.array(pd.read_csv("output/u_x.csv", sep = ',', decimal='.', header=None))[-1]
+    z = np.linspace(0.02, 1.24, len(u_x))
 
-        u_max = max(u_sph)
-        h = z[-1] - z[0]
-        u_analytic = u_max*((4/h)*z - (4/np.pow(h,2)*np.pow(z,2)))
-        
-        plt.figure()
-        plt.scatter(z, u_sph, s = 10, label = "sph")
-        plt.plot(z, u_sph, label = "sph", ls = "--")
-        plt.plot(z+0.02, u_analytic, label = "analytic", ls = "--") # +0.04 because we begin at the ghost particle
-        plt.legend(loc = "best")
+    u_sph= u_x + 0.5
+
+    u_max = max(u_sph)
+    h = z[-1] - z[0]
+    u_analytic = u_max*((4/h)*z - (4/np.pow(h,2)*np.pow(z,2)))
+    
+    plt.figure()
+    plt.scatter(z, u_sph, s = 10, label = "sph")
+    plt.plot(z, u_sph, label = "sph", ls = "--")
+    plt.plot(z+0.02, u_analytic, label = "analytic", ls = "--") # +0.04 because we begin at the ghost particle
+    plt.legend(loc = "best")
 
         
 
@@ -102,16 +101,11 @@ def main():
     current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
     isLatex(False)
 
-    # Retrieved variables
-    pressure = "output/p.csv" 
-    density = "output/rho.csv"
-    velocity_x =  "output/u_x.csv"
+    # Put in comment what you don't want to plot
 
-    plot = {"Hydrostatic": False, "PoiseuilleFlow": False, "StateEquation": True}
-
-    PoiseuilleFlow(velocity_x, plot)
-    Hydrostatic(plot, pressure)
-    StateEquation(plot, pressure, density)
+    #PoiseuilleFlow()
+    #Hydrostatic()
+    StateEquation()
 
     plt.show()
     

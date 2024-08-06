@@ -3,12 +3,12 @@ import os
 import sys
 import numpy as np
 
-s = 0.02
+s = 0.2
 L = 1.2
 
 dt = 0.00001
 nsave = 500
-nstepT = nsave*300
+nstepT = nsave*5
 
 
 data = {
@@ -26,37 +26,27 @@ data = {
         "beta_adh": 1.2,
         "dimension": 2,
         "schemeIntegration": {"Euler": True, "RK22": False},
+        "comparison_algorithm": False,
     },
 
     "following_part": {
-        "part": False,
+        "part": True,
         "min": False,
         "max": False,
-        "particle": 50,
-        "pressure": 0,
-        "rho": 0,
-        "position": [
-            0,
-            0,
-            1
-        ],
-        "velocity": [
-            0,
-            0,
-            0
-        ]
+        "particle": 500,
+        "pressure": True,
+        "rho": True,
+        "position": [False, False, False],
+        "velocity": [False, False, False],
     },
     
     "domain": {
         "matrix_long": [
-
             np.round(np.array([6*L, s/2, L]), decimals = 4).tolist(), # fluid
-            np.round(np.array([10*L, s/2, s/2]), decimals = 4).tolist(), # floor 1
-            np.round(np.array([10*L, s/2, s/2]), decimals = 4).tolist(), # floor 2
-            np.round(np.array([10*L, s/2, s/2]), decimals = 4).tolist(), # roof wall 1
-            np.round(np.array([10*L, s/2, s/2]), decimals = 4).tolist(), # roof wall 2
-
-
+            np.round(np.array([12*L, s/2, s/2]), decimals = 4).tolist(), # floor 1
+            np.round(np.array([12*L, s/2, s/2]), decimals = 4).tolist(), # floor 2
+            np.round(np.array([12*L, s/2, s/2]), decimals = 4).tolist(), # roof wall 1
+            np.round(np.array([12*L, s/2, s/2]), decimals = 4).tolist(), # roof wall 2
         ],
         "matrix_orig": [
             np.round(np.array([L, 0, s]), decimals = 4).tolist(), # fluid
@@ -64,8 +54,6 @@ data = {
             np.round(np.array([s/2, 0, s/2]), decimals = 4).tolist(), # floor 2
             np.round(np.array([s/2, 0, L + (3/2)*s]), decimals = 4).tolist(), # roof 1 
             np.round(np.array([0, 0, L + 2*s]), decimals= 4 ).tolist(), # roof 2
-
-
         ],
         "sphere": {
                 "do": [0, 0, 0, 0, 0],

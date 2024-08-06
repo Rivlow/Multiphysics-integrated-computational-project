@@ -20,6 +20,7 @@ using namespace std;
 void extractData(GeomData &geomParams,  
                  SimulationData &simParams,
                  ThermoData &thermoParams,
+                 string schemeIntegration,
                  vector<double> &pos,  
                  vector<double> &p, 
                  vector<double> &mass,
@@ -28,4 +29,29 @@ void extractData(GeomData &geomParams,
                  vector<double> &nb_neighbours,
                  vector<double> rho);
 
-void writingTime(double sim_time);
+void writing_in_file(string name, 
+                     vector<double> data, 
+                     int particle, 
+                     int scalar_or_vector, 
+                     int xyz);
+
+void finding_max(string name,
+                 SimulationData& simParams, 
+                 vector<double> data,  
+                 int scalar_or_vector, 
+                 int xyz);
+
+void finding_min(string name, 
+                 SimulationData& simParams,  
+                 vector<double> data,  
+                 int scalar_or_vector, 
+                 int xyz);
+
+void follow_part_data(GeomData &geomParams,
+                      SimulationData& simParams,
+                      vector<double> p,
+                      vector<double> rho,
+                      vector<double> pos,
+                      vector<double> u);
+
+void writing_time(vector<double> vec_time);

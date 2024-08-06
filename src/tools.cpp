@@ -11,6 +11,7 @@
 #include "tools.h"
 #include "structure.h"
 using json = nlohmann::json;
+#include "generate_particle.h"
 using namespace std;
 namespace fs = std::filesystem;
 
@@ -118,7 +119,7 @@ void getKey(json data,
         }
     };
 
-    cout <<"getKey passed" << endl;
+    cout <<"\ngetKey passed" << endl;
 }
 
 
@@ -264,7 +265,7 @@ void printParams(json data,
     cout << "#========================#" << "\n" << endl;
     cout << "o_d = " << data["domain"]["o_d"] << endl;
     cout << "L_d = " << data["domain"]["L_d"]<< endl;
-    cout << "do = " << data["post_process"]["do"] << endl;
+    cout << "post_process = " << data["post_process"]["do"] << endl;
     cout << "xyz_init = " << data["post_process"]["xyz_init"] << endl;
     cout << "xyz_end = " << data["post_process"]["xyz_end"] << endl;
     cout << "matrix_long = " << data["domain"]["matrix_long"] << endl;

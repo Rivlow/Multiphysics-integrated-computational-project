@@ -14,24 +14,25 @@
         "schemeIntegration": {
             "Euler": true,
             "RK22": false
-        }
+        },
+        "comparison_algorithm": false
     },
     "following_part": {
-        "part": false,
+        "part": true,
         "min": false,
         "max": false,
-        "particle": 50,
-        "pressure": 0,
-        "rho": 0,
+        "particle": 500,
+        "pressure": true,
+        "rho": true,
         "position": [
-            0,
-            0,
-            1
+            false,
+            false,
+            false
         ],
         "velocity": [
-            0,
-            0,
-            0
+            false,
+            false,
+            false
         ]
     },
     "domain": {

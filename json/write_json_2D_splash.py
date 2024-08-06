@@ -20,12 +20,24 @@ data = {
         "dt": dt,
         "nsave": nsave,
         "kappa": 2,
-        "alpha": 5,
+        "alpha": 0.5,
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 1.2,
         "dimension": 2,
-        "schemeIntegration": {"Euler": True, "RK22": False}
+        "schemeIntegration": {"Euler": True, "RK22": False},
+        "comparison_algorithm": False,
+    },
+
+    "following_part": {
+        "part": True,
+        "min": False,
+        "max": False,
+        "particle": 500,
+        "pressure": True,
+        "rho": True,
+        "position": [False, False, False],
+        "velocity": [False, False, False],
     },
     
     "domain": {

@@ -15,6 +15,7 @@ namespace fs = filesystem;
 void extractData(GeomData &geomParams,  
                  SimulationData &simParams,
                  ThermoData &thermoParams,
+                 string schemeIntegration,
                  vector<double> &pos,  
                  vector<double> &p, 
                  vector<double> &mass,
@@ -23,14 +24,12 @@ void extractData(GeomData &geomParams,
                  vector<double> &nb_neighbours,
                  vector<double> rho){
 
-    string outputDir = "../../output";
-    string outputFile_rho = outputDir + "/" + "rho" +".csv";
-    string outputFile_p = outputDir + "/" + "p" +".csv";
-    string outputFile_u_x = outputDir + "/" + "u_x" +".csv";
-    string outputFile_u_y = outputDir + "/" + "u_y" +".csv";
-    string outputFile_u_z = outputDir + "/" + "u_z" +".csv";
-
-
+    string outputDir = "../../output/" + schemeIntegration + "_" ;
+    string outputFile_rho = outputDir +"rho.csv";
+    string outputFile_p = outputDir + "p.csv";
+    string outputFile_u_x = outputDir + "u_x.csv";
+    string outputFile_u_y = outputDir + "u_y.csv";
+    string outputFile_u_z = outputDir + "u_z.csv";
 
     // Create folder if not existing
     if (!fs::exists(outputDir)){
@@ -107,7 +106,269 @@ void extractData(GeomData &geomParams,
 }
 
 
-void writingTime(double sim_time){
+
+void writing_in_file(string name, 
+                     vector<double> data, 
+                     int particle, 
+                     int scalar_or_vector, 
+                     int xyz){
+
+    ofstream output_name(name, ios::app);
+
+    if (!output_name.is_open()){
+        cerr << "Error while opening CSV file." << endl;
+        return;
+    }
+
+    double data_part = 0;
+    if(scalar_or_vector ){
+        data_part = data[particle];
+    }
+    else{
+        data_part = data[3*particle + xyz];
+    }
+    
+    ostringstream oss;
+    oss << fixed << setprecision(6) << data_part;
+    string data_part_str = oss.str();
+
+    for (char& ch : data_part_str) {
+        if (ch == '.') {
+            ch = ',';
+        }
+    }
+
+    output_name << "\"" << data_part_str << "\"" << "\n";
+
+    output_name.close();
+
+}
+
+void finding_max(string name, 
+                 SimulationData& simParams,
+                 vector<double> data,  
+                 int scalar_or_vector, 
+                 int xyz){
+    ofstream output_name(name, ios::app);
+
+    if (!output_name.is_open()){
+        cerr << "Error while opening CSV file." << endl;
+        return;
+    }
+    double max = 0.0;
+    int multiple = (scalar_or_vector == 1) ? 1 : 3;
+    
+    max = data[0 + xyz];
+    for(int i = 1; i < simParams.nb_moving_part; i++){
+        max = (max < data[multiple*i+xyz])? data[multiple*i+xyz] : max;
+    }
+    ostringstream oss;
+    oss << fixed << setprecision(6) << max;
+    string data_part_str = oss.str();
+
+    for (char& ch : data_part_str) {
+        if (ch == '.') {
+            ch = ',';
+        }
+    }
+
+    output_name << "\"" << data_part_str << "\"" << "\n";
+
+    output_name.close();
+}
+
+void finding_min(string name, 
+                 SimulationData& simParams,
+                 vector<double> data,  
+                 int scalar_or_vector, 
+                 int xyz){
+    ofstream output_name(name, ios::app);
+
+    if (!output_name.is_open()){
+        cerr << "Error while opening CSV file." << endl;
+        return;
+    }
+    
+    int multiple = (scalar_or_vector == 1) ? 1 : 3;
+    
+    double min = data[0 + xyz];
+    for(int i = 1; i < simParams.nb_moving_part; i++){
+        min = (min > data[multiple*i+xyz])? data[multiple*i+xyz] : min;
+        
+    }
+    ostringstream oss;
+    oss << fixed << setprecision(6) << min;
+    string data_part_str = oss.str();
+
+    for (char& ch : data_part_str) {
+        if (ch == '.') {
+            ch = ',';
+        }
+    }
+
+    output_name << "\"" << data_part_str << "\"" << "\n";
+
+    output_name.close();
+}
+
+void follow_part_data(GeomData &geomParams,
+                      SimulationData& simParams,
+                      vector<double> p,
+                      vector<double> rho,
+                      vector<double> pos,
+                      vector<double> u){
+
+    string outputDir = "../../output";
+
+    int particle = geomParams.following_part_part;
+    if (!fs::exists(outputDir)){
+        fs::create_directories(outputDir);
+        cout << "Create following particle files" <<endl;
+    }
+    string outputFile_part = outputDir + "/";
+
+
+    if(geomParams.following_part_p){
+        if(geomParams.following_part_bool){
+            string outputFile_part_press = outputFile_part+ std::to_string(particle) +"_pressure" + ".csv";
+            writing_in_file(outputFile_part_press, p, particle,  1, 0);
+        }
+        if(geomParams.following_part_max){
+            string outputFile_part_press = outputFile_part + "max_pressure" + ".csv";
+            finding_max(outputFile_part_press,simParams, p, 1, 0);
+        }
+
+        if(geomParams.following_part_min){
+            string outputFile_part_press = outputFile_part + "min_pressure" + ".csv";
+            finding_min(outputFile_part_press,simParams, p, 1, 0);
+        }
+        
+
+    }
+
+    if(geomParams.following_part_rho){
+        if(geomParams.following_part_bool){
+            string outputFile_part_rho = outputFile_part+ std::to_string(particle) +"_rho" + ".csv";
+            writing_in_file(outputFile_part_rho, rho, particle,  1, 0);
+        }
+        if(geomParams.following_part_max){
+            string outputFile_part_rho = outputFile_part + "max_rho" + ".csv";
+            finding_max(outputFile_part_rho,simParams, rho, 1, 0);
+        }
+
+        if(geomParams.following_part_min){
+            string outputFile_part_rho = outputFile_part + "min_rho" + ".csv";
+            finding_min(outputFile_part_rho,simParams, rho, 1, 0);
+        }
+    }
+
+    if(geomParams.following_part_pos[0]){
+        
+        if(geomParams.following_part_bool){
+            string outputFile_part_pos_x = outputFile_part+ std::to_string(particle) +"_pos_x" + ".csv";
+            writing_in_file(outputFile_part_pos_x, pos, particle,  0, 0);
+        }
+        if(geomParams.following_part_max){
+            string outputFile_part_pos_x = outputFile_part + "max_pos_x" + ".csv";
+            finding_max(outputFile_part_pos_x,simParams, pos, 0, 0);
+        }
+
+        if(geomParams.following_part_min){
+            string outputFile_part_pos_x = outputFile_part + "min_pos_x" + ".csv";
+            finding_min(outputFile_part_pos_x,simParams, pos, 0, 0);
+        }
+  
+    }
+
+    if(geomParams.following_part_pos[1]){
+        
+        if(geomParams.following_part_bool){
+            string outputFile_part_pos_y = outputFile_part+ std::to_string(particle) +"_pos_y" + ".csv";
+            writing_in_file(outputFile_part_pos_y, pos, particle,  0, 1);
+        }
+        if(geomParams.following_part_max){
+            string outputFile_part_pos_y = outputFile_part + "max_pos_y" + ".csv";
+            finding_max(outputFile_part_pos_y,simParams, pos, 0, 1);
+        }
+
+        if(geomParams.following_part_min){
+            string outputFile_part_pos_y = outputFile_part + "min_pos_y" + ".csv";
+            finding_min(outputFile_part_pos_y,simParams, pos, 0, 1);
+        }
+        
+    }
+
+    if(geomParams.following_part_pos[2]){
+        if(geomParams.following_part_bool){
+            string outputFile_part_pos_z = outputFile_part+ std::to_string(particle) +"_pos_z" + ".csv";
+            writing_in_file(outputFile_part_pos_z, pos, particle,  0, 2);
+        }
+        if(geomParams.following_part_max){
+            string outputFile_part_pos_z = outputFile_part + "max_pos_z" + ".csv";
+            finding_max(outputFile_part_pos_z,simParams, pos, 0, 2);
+        }
+
+        if(geomParams.following_part_min){
+            string outputFile_part_pos_z = outputFile_part + "min_pos_z" + ".csv";
+            finding_min(outputFile_part_pos_z,simParams, pos, 0, 2);
+        }
+        
+        
+    }
+
+    if(geomParams.following_part_u[0]){
+        if(geomParams.following_part_bool){
+            string outputFile_part_u_x = outputFile_part+ std::to_string(particle) +"_u_x" + ".csv";
+            writing_in_file(outputFile_part_u_x, u, particle,  0, 0);
+        }
+        if(geomParams.following_part_max){
+            string outputFile_part_u_x = outputFile_part + "max_u_x" + ".csv";
+            finding_max(outputFile_part_u_x,simParams, u, 0, 0);
+        }
+
+        if(geomParams.following_part_min){
+            string outputFile_part_u_x = outputFile_part + "min_u_x" + ".csv";
+            finding_min(outputFile_part_u_x,simParams, u, 0, 0);
+        }
+        
+    }
+
+    if(geomParams.following_part_u[1]){
+        if(geomParams.following_part_bool){
+            string outputFile_part_u_y = outputFile_part+ std::to_string(particle) +"_u_y" + ".csv";
+            writing_in_file(outputFile_part_u_y, u, particle,  0, 1);
+        }
+        if(geomParams.following_part_max){
+            string outputFile_part_u_y = outputFile_part + "max_u_y" + ".csv";
+            finding_max(outputFile_part_u_y,simParams, u, 0, 1);
+        }
+
+        if(geomParams.following_part_min){
+            string outputFile_part_u_y = outputFile_part + "min_u_y" + ".csv";
+            finding_min(outputFile_part_u_y,simParams, u, 0, 1);
+        }
+        
+    }
+
+    if(geomParams.following_part_u[2]){
+        if(geomParams.following_part_bool){
+            string outputFile_part_u_z = outputFile_part+ std::to_string(particle) +"_u_z" + ".csv";
+            writing_in_file(outputFile_part_u_z, u, particle,  0, 2);
+        }
+        if(geomParams.following_part_max){
+            string outputFile_part_u_z = outputFile_part + "max_u_z" + ".csv";
+            finding_max(outputFile_part_u_z,simParams, u, 0, 2);
+        }
+
+        if(geomParams.following_part_min){
+            string outputFile_part_u_z = outputFile_part + "min_u_z" + ".csv";
+            finding_min(outputFile_part_u_z,simParams, u, 0, 2);
+        }
+    }
+
+}
+
+void writing_time(vector<double> vec_time){
 
     string outputDir = "../../output";
 
@@ -124,17 +385,12 @@ void writingTime(double sim_time){
         return;
     }
 
-    ostringstream oss;
-    oss << fixed << setprecision(6) << sim_time;
-    string data_part_str = oss.str();
-
-    for (char& ch : data_part_str) {
-        if (ch == '.') {
-            ch = ',';
-        }
+    for(int i = 0 ; i< int(vec_time.size()) ; i++){
+        ostringstream oss;
+        oss << fixed << setprecision(6) << vec_time[i];
+        string data_part_str = oss.str();
+        output_name << "\"" << data_part_str << "\"" << "\n";
     }
-
-    output_name << "\"" << data_part_str << "\"" << "\n";
 
     output_name.close();
 }

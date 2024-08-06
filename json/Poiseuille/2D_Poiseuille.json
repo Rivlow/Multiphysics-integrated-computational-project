@@ -1,8 +1,8 @@
 {
     "simulation": {
         "theta": 0.5,
-        "s": 0.02,
-        "nstepT": 150000,
+        "s": 0.2,
+        "nstepT": 2500,
         "dt": 1e-05,
         "nsave": 500,
         "kappa": 2,
@@ -14,59 +14,60 @@
         "schemeIntegration": {
             "Euler": true,
             "RK22": false
-        }
+        },
+        "comparison_algorithm": false
     },
     "following_part": {
-        "part": false,
+        "part": true,
         "min": false,
         "max": false,
-        "particle": 50,
-        "pressure": 0,
-        "rho": 0,
+        "particle": 500,
+        "pressure": true,
+        "rho": true,
         "position": [
-            0,
-            0,
-            1
+            false,
+            false,
+            false
         ],
         "velocity": [
-            0,
-            0,
-            0
+            false,
+            false,
+            false
         ]
     },
     "domain": {
         "matrix_long": [
             [
                 7.2,
-                0.01,
+                0.1,
                 1.2
             ],
             [
-                12.0,
-                0.01,
-                0.01
+                14.4,
+                0.1,
+                0.1
             ],
             [
-                12.0,
-                0.01,
-                0.01
+                14.4,
+                0.1,
+                0.1
             ],
             [
-                12.0,
-                0.01,
-                0.01
+                14.4,
+                0.1,
+                0.1
             ],
             [
-                12.0,
-                0.01,
-                0.01
+                14.4,
+                0.1,
+                0.1
             ]
         ],
         "matrix_orig": [
             [
                 1.2,
                 0.0,
-                0.02
+                0.2
             ],
             [
                 0,
@@ -74,19 +75,19 @@
                 0
             ],
             [
-                0.01,
+                0.1,
                 0.0,
-                0.01
+                0.1
             ],
             [
-                0.01,
+                0.1,
                 0.0,
-                1.23
+                1.5
             ],
             [
                 0.0,
                 0.0,
-                1.24
+                1.6
             ]
         ],
         "sphere": {
@@ -124,12 +125,12 @@
         "xyz_init": [
             4.8,
             0.0,
-            0.02
+            0.2
         ],
         "xyz_end": [
             4.8,
             0.0,
-            1.24
+            1.6
         ]
     },
     "thermo": {

@@ -27,7 +27,8 @@ void getKey(json data,
 void createOutputFolder();
 void clearOutputFiles();
 
-void progressBar(double ratio, double elapsed_time);
+void progressBar(double elasped_time, 
+                 double ratio);
 
 void clearAllVectors(SimulationData &simParams,
                      vector<vector<double>> &viscosity,

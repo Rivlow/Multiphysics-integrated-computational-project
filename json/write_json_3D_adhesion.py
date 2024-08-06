@@ -12,23 +12,33 @@ nstepT = nsave*300
 
 data = {
     
+    "simulation": {
+        "theta": 0.5,
+        "s": s,
+        "nstepT": nstepT,
+        "dt": dt,
+        "nsave": nsave,
+        "kappa": 2,
+        "alpha": 0.5,
+        "beta": 0,
+        "alpha_st": 10,
+        "beta_adh": 1.2,
+        "dimension": 2,
+        "schemeIntegration": {"Euler": True, "RK22": False},
+        "comparison_algorithm": False,
+    },
+
+    "following_part": {
+        "part": True,
+        "min": False,
+        "max": False,
+        "particle": 500,
+        "pressure": True,
+        "rho": True,
+        "position": [False, False, False],
+        "velocity": [False, False, False],
+    },
     
-  "simulation":{
-    "theta" :0.5,
-    "s": s,
-    "nstepT": nstepT,
-    "dt": dt,
-    "nsave": nsave,
-    "kappa": 2,
-    "alpha": 0.5,
-    "beta": 0,
-    "alpha_st":0,
-    "beta_adh": 20,
-    "dimension": 3,
-    "schemeIntegration": {"Euler":True,"RK22":False},
-
-  },
-
   "domain":{
     "matrix_long" : [np.round(np.array([L, L, L]), decimals = 4).tolist(), 
                      np.round(np.array([3*L, 3*L, s/4]), decimals = 4).tolist(),

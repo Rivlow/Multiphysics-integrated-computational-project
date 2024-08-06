@@ -22,7 +22,6 @@
 #include "time_integration.h"
 #include "data_store.h"
 #include "surface_tension.h"
-#include "PoiseuilleFlow.h"
 
 
 #include "nlohmann/json.hpp"
@@ -63,99 +62,28 @@ int main(int argc, char *argv[])
 
     /*---------------------- INPUT PARAMETERS FROM JSON FILES --------------------------*/
 
-
-
     ifstream inputf(argv[1]);
     json data = json::parse(inputf);
-
-
-
-    //cout << argv[1] << ":\n"
-    //          << data.dump(4) << endl; // print input data to screen
-
-    createOutputFolder();
-    clearOutputFiles();
-
     string state_equation;
     string state_initial_condition;
     string schemeIntegration;
     string kernel;
 
-    // Structure to store parameters
+    GeomData geomParams;
+    SimulationData simParams;
+    ThermoData thermoParams;
+
+    // Select desired simulation inputs
     getKey(data, state_equation, state_initial_condition, 
            schemeIntegration, kernel);
 
-    GeomData geomParams = {
+    // Structure to store parameters
+    initializeStruct(data, state_equation, state_initial_condition, 
+                      schemeIntegration, kernel, geomParams, simParams, thermoParams);
 
-        data["simulation"]["kappa"],
-        data["simulation"]["s"],
-        1.2 * geomParams.s,
-        data["domain"]["o_d"],
-        data["domain"]["L_d"],
-        data["domain"]["matrix_long"],
-        data["domain"]["matrix_orig"],
-        data["domain"]["vector_type"],
-        data["domain"]["sphere"]["do"],
-        data["domain"]["sphere"]["radius"],
-        data["post_process"]["xyz_init"],
-        data["post_process"]["xyz_end"],
-        data["post_process"]["do"],
-        int(geomParams.L_d[0] / (geomParams.kappa * geomParams.h)),
-        int(geomParams.L_d[1] / (geomParams.kappa * geomParams.h)),
-        int(geomParams.L_d[2] / (geomParams.kappa * geomParams.h)),
-        data["following_part"]["part"],
-        data["following_part"]["min"],
-        data["following_part"]["max"],
-        data["following_part"]["particle"],
-        data["following_part"]["pressure"],
-        data["following_part"]["rho"],
-        data["following_part"]["position"],
-        data["following_part"]["velocity"],
-    };
-
-    cout << "GeomData initialized" << endl;
-    
-    ThermoData thermoParams = {
-        data["thermo"]["c_0"],
-        data["thermo"]["rho_moving"],
-        data["thermo"]["rho_fixed"],
-        data["thermo"]["rho_0"],
-        data["thermo"]["M"],
-        data["thermo"]["T"],
-        data["thermo"]["gamma"],
-        data["thermo"]["R"],
-        data["thermo"]["sigma"],
-    };
-
-    cout << "ThermoData initialized" << endl;
-
-
-    SimulationData simParams = {
-
-        data["simulation"]["dimension"],
-        data["simulation"]["nstepT"],
-        data["simulation"]["nsave"],
-        data["simulation"]["dt"],
-        data["simulation"]["theta"],
-        data["simulation"]["alpha"],
-        data["simulation"]["beta"],
-        data["simulation"]["alpha_st"],
-        data["simulation"]["beta_adh"],
-        schemeIntegration,
-        data["thermo"]["u_init"],
-        state_equation,
-        state_initial_condition,
-        kernel,
-        data["forces"]["gravity"],
-        data["forces"]["surface_tension"],
-        data["forces"]["adhesion"],
-        data["condition"]["print_debug"],
-        evaluateNumberParticles(geomParams),
-        0,
-        0,  
-    };
-
-    cout << "SimulationData initialized" << endl;
+    // Make sure output folders are present and empty for current simulation
+    createOutputFolder();
+    clearOutputFiles();
 
     /*------------------- INITIALIZATION OF VARIABLES USED -------------------*/    
 
@@ -196,9 +124,7 @@ int main(int argc, char *argv[])
                            W_st(simParams.nb_tot_part + GP_count),
                            viscosity(simParams.nb_tot_part + GP_count);
 
-    int nb_sector = (simParams.dimension == 3)? 32: 8;
-    vector<int> neighbours(100*(simParams.nb_tot_part + GP_count)), 
-                free_surface(nb_sector*(simParams.nb_tot_part + GP_count), 0);
+    vector<int> neighbours(100*(simParams.nb_tot_part + GP_count));
 
     // Variables defined to used "export.cpp"
     map<string, vector<double> *> scalars;
@@ -236,9 +162,18 @@ int main(int argc, char *argv[])
     setSpeedOfSound(geomParams, thermoParams, simParams, c, rho);
     initKernelCoef(geomParams, simParams);
 
-    
+
+    // If needed, compare linked-list and naive searching neighbour algorithm
+    if (simParams.comparison_algorithm){
+        compareAlgo(geomParams, simParams, cell_matrix, neighbours, gradW,
+                    W, viscosity, nb_neighbours, type, pos);
+        return 0;
+    }
+
     auto t_mid = chrono::high_resolution_clock::now();
-    double sim_time = 0;
+    double sim_time = 0.0;
+    int iteration = 0;
+    vector<double> vec_time(simParams.nstepT/simParams.nsave, 0.0);
 
     for (int t = 0; t < simParams.nstepT; t++){
 
@@ -246,11 +181,10 @@ int main(int argc, char *argv[])
 
         // Apply the linked-list algorithm
         sortedList(geomParams, simParams, cell_matrix, neighbours,
-                   gradW, W, viscosity, nb_neighbours, type, pos, free_surface);
+                   gradW, W, viscosity, nb_neighbours, type, pos);
     
-        // Compute ∇_a(W_ab) for all particles
+        // Compute ∇_a(W_ab) for all particles (moving and fixed)
         computeGradW(geomParams, simParams, gradW, W, neighbours, nb_neighbours, pos);
-
 
         // Update density, velocity and position (Euler explicit or RK22 scheme)
         updateVariables(geomParams, thermoParams, simParams, pos, u, rho, drhodt, c, p, dudt, mass, 
@@ -260,18 +194,21 @@ int main(int argc, char *argv[])
 
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){
-                if (geomParams.post_process_do)
-                    extractData(geomParams, simParams, thermoParams, pos, p, mass, u, neighbours, nb_neighbours, rho);
+            if(geomParams.post_process_do || geomParams.following_part_bool ||
+               geomParams.following_part_max || geomParams.following_part_min){
+
+                    if (geomParams.post_process_do)
+                        extractData(geomParams, simParams, thermoParams, schemeIntegration, pos, p, mass, u, neighbours, nb_neighbours, rho);
+                    if (geomParams.following_part_bool || geomParams.following_part_max || geomParams.following_part_min)
+                        follow_part_data(geomParams,simParams, p, rho, pos, u);
+               }
                 
             export_particles("../../output/sph", t, pos, scalars, vectors, false);
-            //writingTime(sim_time);
-
             auto t_act = chrono::high_resolution_clock::now();
             double elapsed_time = double(chrono::duration_cast<chrono::duration<double>>(t_act - t_mid).count());
-            progressBar(double(t)/double(simParams.nstepT), elapsed_time);    
+            progressBar(double(t)/double(simParams.nstepT), elapsed_time); 
+            vec_time[iteration++] = sim_time; 
         }
-        
-        //respawnParticle(pos, geomParams, simParams);
 
         // Clear matrices and reset arrays to 0
         clearAllVectors(simParams, viscosity, neighbours,
@@ -279,10 +216,10 @@ int main(int argc, char *argv[])
 
     }
 
-
+    writing_time(vec_time);
     auto t1 = chrono::high_resolution_clock::now();
     auto delta_t = chrono::duration_cast<chrono::duration<double>>(t1 - t0).count();
-    cout << "\nduration: " << delta_t << "s (" << int((MP_count+FP_count)/delta_t)*simParams.nstepT<<" [Particles*Updates/s]).\n";
+    cout << "\nDuration: " << delta_t << "s (" << int((MP_count+FP_count)/delta_t)*simParams.nstepT<<" [Particles*Updates/s]).\n";
     cout << "Simulation done." << endl;
 
     return 0;

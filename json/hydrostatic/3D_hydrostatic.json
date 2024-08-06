@@ -1,78 +1,240 @@
 {
-
-  "domain":{
-    "matrix_long" : [[0.55,0.55,0.55],[0.7,0.7,0.025],[0.65,0.65,0.025],
-                     [0.7,0.025,0.9],[0.65,0.025,0.85],[0.7,0.025,0.9],[0.65,0.025,0.85],
-                     [0.025,0.6,0.9],[0.025,0.55,0.85],[0.025,0.6,0.9],[0.025,0.55,0.85]],
-    "matrix_orig" : [[0.075,0.075,0.075],[0.0,0.0,0],[0.025,0.025,0.025],
-                     [0.0,0.0,0.05],[0.025,0.025,0.075],[0.0,0.7,0.05],[0.025,0.675,0.075],
-                     [0.0,0.05,0.05],[0.025,0.075,0.075],[0.7,0.05,0.05],[0.675,0.075,0.075]
-                  
-                  ],
-    "vector_type" : [1,0,0,
-                     0,0,0,0,
-                     0,0,0,0],
-    "L_d": [1, 1, 1],
-    "o_d": [0.0, 0.0, 0.0]
-  },
-
-  "post_process":{
-    "do": false,
-    "xyz_init": [0.325, 0.325, 0.65],
-    "xyz_end": [0.325, 0.325, 0.05]
-  },
-
-  "simulation":{
-    "theta" :0.5,
-    "s": 0.05,
-    "nstepT": 100000,
-    "dt": 1e-5,
-    "nsave": 1000,
-    "kappa": 2,
-    "alpha": 0.05,
-    "beta": 0,
-    "alpha_st":10,
-    "beta_adh": 10,
-    "dimension": 3
-  },
-
-  "thermo":{
-      "rho_0": 1000,
-      "rho_moving": 1000,
-      "rho_fixed": 1000,
-      "T": 298.15,
-      "u_init": [
-          0.0,
-          0.0,
-          0.0
-      ],
-      "c_0": 30,
-      "gamma": 7,
-      "M": 0.018,
-      "R": 8.314,
-      "sigma": 52000
-  },
-
-  
-  "forces":{
-    "gravity":true,
-    "surface_tension":false,
-    "adhesion":false
-  },
-
-  "condition": {
-      "print_debug": false,
-      "schemeIntegration": {
-          "Euler": true,
-          "RK22": false
-      },
-      "stateEquation": {
-          "Ideal gaz law": false,
-          "Quasi incompresible fluid": true
-      },
-      "initialCondition": {
-          "Hydrostatic": false,
-          "Constant": true
-      }
-  }
+    "simulation": {
+        "theta": 0.5,
+        "s": 0.1,
+        "nstepT": 150000,
+        "dt": 0.0001,
+        "nsave": 500,
+        "kappa": 2,
+        "alpha": 0.5,
+        "beta": 0,
+        "alpha_st": 10,
+        "beta_adh": 1.2,
+        "dimension": 3,
+        "comparison_algorithm": false,
+        "schemeIntegration": {
+            "Euler": true,
+            "RK22": false
+        }
+    },
+    "following_part": {
+        "part": false,
+        "min": false,
+        "max": false,
+        "particle": 500,
+        "pressure": false,
+        "rho": false,
+        "position": [
+            false,
+            false,
+            false
+        ],
+        "velocity": [
+            false,
+            false,
+            false
+        ]
+    },
+    "domain": {
+        "matrix_long": [
+            [
+                0.7,
+                0.7,
+                0.7
+            ],
+            [
+                1.0,
+                1.0,
+                0.05
+            ],
+            [
+                0.9,
+                0.9,
+                0.05
+            ],
+            [
+                0.05,
+                1.0,
+                0.9
+            ],
+            [
+                0.05,
+                0.9,
+                0.8
+            ],
+            [
+                0.05,
+                1.0,
+                0.9
+            ],
+            [
+                0.05,
+                0.9,
+                0.8
+            ],
+            [
+                0.8,
+                0.05,
+                0.9
+            ],
+            [
+                0.7,
+                0.05,
+                0.8
+            ],
+            [
+                0.8,
+                0.05,
+                0.9
+            ],
+            [
+                0.7,
+                0.05,
+                0.8
+            ]
+        ],
+        "matrix_orig": [
+            [
+                0.15,
+                0.15,
+                0.15
+            ],
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                0.05,
+                0.05,
+                0.05
+            ],
+            [
+                0.0,
+                0.0,
+                0.1
+            ],
+            [
+                0.05,
+                0.05,
+                0.15
+            ],
+            [
+                1.0,
+                0.0,
+                0.1
+            ],
+            [
+                0.95,
+                0.05,
+                0.15
+            ],
+            [
+                0.1,
+                0.0,
+                0.1
+            ],
+            [
+                0.15,
+                0.05,
+                0.15
+            ],
+            [
+                0.1,
+                1.0,
+                0.1
+            ],
+            [
+                0.15,
+                0.95,
+                0.15
+            ]
+        ],
+        "vector_type": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        "L_d": [
+            1.4,
+            1.4,
+            1.4
+        ],
+        "o_d": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "sphere": {
+            "do": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "radius": [
+                0.3
+            ]
+        }
+    },
+    "post_process": {
+        "do": true,
+        "xyz_init": [
+            0.5,
+            0.5,
+            0.1
+        ],
+        "xyz_end": [
+            0.5,
+            0.5,
+            0.7
+        ]
+    },
+    "thermo": {
+        "rho_0": 1000,
+        "rho_moving": 1000,
+        "rho_fixed": 1000,
+        "T": 298.15,
+        "u_init": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "c_0": 30,
+        "gamma": 7,
+        "M": 0.018,
+        "R": 8.314,
+        "sigma": 52000
+    },
+    "forces": {
+        "gravity": true,
+        "surface_tension": false,
+        "adhesion": false
+    },
+    "condition": {
+        "print_debug": false,
+        "stateEquation": {
+            "Ideal gaz law": false,
+            "Quasi incompresible fluid": true
+        },
+        "initialCondition": {
+            "Hydrostatic": false,
+            "Constant": true
+        }
+    }
 }

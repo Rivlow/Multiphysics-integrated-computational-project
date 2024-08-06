@@ -6,10 +6,9 @@ import numpy as np
 s = 0.05
 L = 1.2
 
-nb_vtp_output = 250 # the total number of output file desired
-dt = 0.0001/2
-nstepT = 25000
-nsave = nb_vtp_output/(dt*nstepT)  
+dt = 0.00005
+nsave = 500
+nstepT = nsave*300
 
 
 data = {
@@ -25,9 +24,22 @@ data = {
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 1.2,
-        "dimension": 3,
-        "schemeIntegration": {"Euler": True, "RK22": False}
+        "dimension": 2,
+        "schemeIntegration": {"Euler": True, "RK22": False},
+        "comparison_algorithm": False,
     },
+
+    "following_part": {
+        "part": True,
+        "min": False,
+        "max": False,
+        "particle": 500,
+        "pressure": True,
+        "rho": True,
+        "position": [False, False, False],
+        "velocity": [False, False, False],
+    },
+    
     
     "domain": {
         "matrix_long": [

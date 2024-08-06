@@ -26,8 +26,20 @@ data = {
         "beta_adh": 1.2,
         "dimension": 2,
         "schemeIntegration": {"Euler": True, "RK22": False},
-
+        "comparison_algorithm": False,
     },
+
+    "following_part": {
+        "part": True,
+        "min": False,
+        "max": False,
+        "particle": 500,
+        "pressure": True,
+        "rho": True,
+        "position": [False, False, False],
+        "velocity": [False, False, False],
+    },
+    
     
     "domain": {
         "matrix_long": [

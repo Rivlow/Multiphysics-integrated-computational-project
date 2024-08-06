@@ -189,7 +189,6 @@ struct TupleHash {
 bool checkParticleGeneration(vector<double> pos, SimulationData &simParams){
 
     int nb_part = simParams.nb_tot_part; 
-    cout << "number of particle is  "<< nb_part << endl;
     unordered_set<tuple<double, double, double>, TupleHash> uniqueTriplets;
 
     for (int n = 0; n < nb_part; n++) {
