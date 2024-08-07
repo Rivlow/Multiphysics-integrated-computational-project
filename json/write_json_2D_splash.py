@@ -1,14 +1,15 @@
 import json
 import os
 import sys
+import numpy as np
 
-s = 0.5
+s = 0.01
 L = 1.2
 
 nb_vtp_output = 250 # the total number of output file desired
-dt = 1e-5
-nstepT = 250000
-nsave = 1000
+dt = 0.0001
+nstepT = 100000
+nsave = 500 
 
 data = {
     
@@ -23,60 +24,67 @@ data = {
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 1.2,
-        "dimension": 2
+        "dimension": 2,
+        "schemeIntegration": {"Euler": True, "RK22": False},
+        "comparison_algorithm": False,
+    },
+
+    "following_part": {
+        "part": True,
+        "min": False,
+        "max": False,
+        "particle": 500,
+        "pressure": True,
+        "rho": True,
+        "position": [False, False, False],
+        "velocity": [False, False, False],
     },
     
     "domain": {
         "matrix_long": [
-            [L/2, s/2, L/2], # fluid
-            [L+3*s, s/2, s/2], # floor 1
-            [L+2*s, s/2, s/2], # floor 2
-            [s/2, s/2, 2*L], # left wall 1
-            [s/2, s/2, 2*L+s], # left wall 2
-            [s/2, s/2, 2*L+s], # right wall 1
-            [s/2, s/2, 2*L], # right wall 2
-            [L+s,s/2,s/2],#upper roof
-            [L,s/2,s/2]# lower roof
+            np.round(np.array([L/2, s/2, L/2]), decimals = 4).tolist(), # fluid
+            np.round(np.array([L+3*s, s/2, s/2]), decimals = 4).tolist(), # floor 1
+            np.round(np.array([L+2*s, s/2, s/2]), decimals = 4).tolist(), # floor 2
+            np.round(np.array([s/2, s/2, 2*L]), decimals = 4).tolist(), # left wall 1
+            np.round(np.array([s/2, s/2, 2*L+s]), decimals = 4).tolist(), # left wall 2
+            np.round(np.array([s/2, s/2, 2*L+s]), decimals = 4).tolist(), # right wall 1
+            np.round(np.array([s/2, s/2, 2*L]), decimals = 4).tolist(), # right wall 2
+            np.round(np.array([L+s,s/2,s/2]), decimals = 4).tolist(), # upper roof
+            np.round(np.array([L,s/2,s/2]), decimals = 4).tolist(), # lower roof
+
 
         ],
         "matrix_orig": [
-            [s*3/2+L/4, 0, 1.5*s+L/2], # fluid
-            [0, 0, 0], # floor 1
-            [s/2, 0, s/2], # floor 2
-            [s/2, 0, 3*s/2],# left wall 1
-            [0, 0, s], # left wall 2
-            [L+3*s, 0, s], # right wall 1
-            [L+5*s/2, 0, 3*s/2], # right wall 2
-            [s,0,2*L+2*s],
-            [3*s/2,0,2*L+3*s/2]
+            np.round(np.array([s*3/2+L/4, 0, 1.5*s+L]), decimals = 4).tolist(), # fluid
+            np.round(np.array([0, 0, 0]), decimals = 4).tolist(), # floor 1
+            np.round(np.array([s/2, 0, s/2]), decimals = 4).tolist(), # floor 2
+            np.round(np.array([s/2, 0, 3*s/2]), decimals = 4).tolist(),# left wall 1
+            np.round(np.array([0, 0, s]), decimals = 4).tolist(), # left wall 2
+            np.round(np.array([L+3*s, 0, s]), decimals = 4).tolist(), # right wall 1
+            np.round(np.array( [L+5*s/2, 0, 3*s/2]), decimals = 4).tolist(), # right wall 2
+            np.round(np.array( [s,0,2*L+2*s]), decimals = 4).tolist(), # right wall 2
+            np.round(np.array( [3*s/2,0,2*L+3*s/2]), decimals = 4).tolist(), # right wall 2
 
         ],
-        "vector_type": [1, 0, 0, 0, 0, 0, 0, 0,0],
-        "L_d": [3*L, 4*s, 2*L],
-        "o_d": [0.0, 0.0, 0.0]
+        "sphere": {
+                "do": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                "radius": [0.3]
+            },
+        "vector_type": [1, 0, 0, 0, 0, 0, 0, 0, 0],
+        "L_d": np.round(np.array([3*L, 4*s, 2*L]), decimals = 4).tolist(),
+        "o_d": np.round(np.array([0.0, 0.0, 0.0]), decimals = 4).tolist()
     },
     "post_process": {
         "do": False,
-        "xyz_init": [L/2, 0, s],
-        "xyz_end": [L/2, 0, L-2*s]
+        "xyz_init": np.round(np.array([L/2, 0, s]), decimals = 4).tolist(),
+        "xyz_end": np.round(np.array([L/2, 0, L-2*s]), decimals = 4).tolist()
     },
-    "following_part": {
-        "part": False,
-        "min": False,
-        "max": False,
-        "particle" : 50,
-        "pressure" : 0,
-        "rho" : 0,
-        "position" :[0, 0, 1],
-        "velocity" :[0, 0, 0]
-    },
-
     "thermo": {
         "rho_0": 1000,
         "rho_moving": 1000,
         "rho_fixed": 1000,
         "T": 298.15,
-        "u_init": [0.0, 0.0, 0.0],
+        "u_init": np.round(np.array([0.0, 0.0, 0.0]), decimals = 4).tolist(),
         "c_0": 30,
         "gamma": 7,
         "M": 18e-3,
@@ -90,7 +98,6 @@ data = {
     },
     "condition": {
         "print_debug": False,
-        "schemeIntegration": {"Euler": True, "RK22": False},
         "stateEquation": {"Ideal gaz law": False, "Quasi incompresible fluid": True},
         "initialCondition": {"Hydrostatic": False, "Constant": True}
     }

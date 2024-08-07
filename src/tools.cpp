@@ -11,6 +11,7 @@
 #include "tools.h"
 #include "structure.h"
 using json = nlohmann::json;
+#include "generate_particle.h"
 using namespace std;
 namespace fs = std::filesystem;
 
@@ -81,7 +82,8 @@ template void printArray<double>(vector<double> &, int, string);
 void getKey(json data,
             string &state_equation,
             string &state_initial_condition,
-            string &schemeIntegration){
+            string &schemeIntegration,
+            string &kernel){
 
     
     for (auto &it : data["condition"]["stateEquation"].items())
@@ -92,7 +94,16 @@ void getKey(json data,
         }
     };
 
-    for (auto &it : data["condition"]["schemeIntegration"].items())
+    for (auto &it : data["simulation"]["kernel"].items())
+    {
+
+        if (it.value() == true)
+        {
+            kernel = it.key();
+        }
+    };
+
+    for (auto &it : data["simulation"]["schemeIntegration"].items())
     {
         if (it.value() == true)
         {
@@ -108,7 +119,7 @@ void getKey(json data,
         }
     };
 
-    cout <<"getKey passed" << endl;
+    cout <<"\ngetKey passed" << endl;
 }
 
 
@@ -180,7 +191,14 @@ void clearAllVectors(SimulationData &simParams,
                      vector<vector<double>>&W,
                      vector<double> &drhodt,
                      vector<double> &dudt,
-                     vector<double> &track_particle){
+                     vector<double> &colour,
+                     vector<double> &R,
+                     vector<double> &N,
+                     vector<double> &normal,
+                     vector<double> &acc_vol,
+                     vector<double> &track_particle,
+                     vector<double> &Kappa,
+                     vector<double> &dot_product){
 
     bool PRINT = simParams.PRINT;
     int nb_tot_part = simParams.nb_tot_part;
@@ -197,7 +215,7 @@ void clearAllVectors(SimulationData &simParams,
         
         neighbours[idx] = 0;
     }
-    
+
 
     #pragma omp parallel for
     for (int i = 0; i < nb_tot_part; i++){
@@ -207,28 +225,52 @@ void clearAllVectors(SimulationData &simParams,
         viscosity[i].clear();
 
 
-        if (i <simParams.nb_moving_part)
+        if (i <simParams.nb_moving_part){
             track_particle[i] = 0;
+            colour[i] = 0;
+            R[i] = 0;
+            N[i] = 0;
+            Kappa[i]= 0;
+            dot_product[i]= 0;
+
+            for(int coord = 0 ; coord < 3 ; coord ++){
+                dudt[3*i + coord] = 0.0;  
+                normal[3*i + coord] = 0;
+                acc_vol[3*i + coord] = 0;
+            }
+        }
 
         drhodt[i] = 0.0;
 
-        for(int coord = 0 ; coord < 3 ; coord ++)
-            dudt[3*i+coord] = 0.0;  
-        
     }    
-    
+
     if (PRINT) cout << "clearAllVectors passed" << endl;
 }
 
-void printParams(GeomData geomParams,    
+void printParams(json data,
+                 GeomData geomParams,    
                  ThermoData thermoParams,
                  SimulationData simParams,
                  string state_equation,
                  string state_initial_condition,
+                 string schemeIntegration,
                  int MP_count,
                  int FP_count,
                  int GP_count,
                  int nb_tot_part){
+
+
+    cout << "#========================#" << endl;
+    cout << "# Geometrical parameters #" << endl;
+    cout << "#========================#" << "\n" << endl;
+    cout << "o_d = " << data["domain"]["o_d"] << endl;
+    cout << "L_d = " << data["domain"]["L_d"]<< endl;
+    cout << "post_process = " << data["post_process"]["do"] << endl;
+    cout << "xyz_init = " << data["post_process"]["xyz_init"] << endl;
+    cout << "xyz_end = " << data["post_process"]["xyz_end"] << endl;
+    cout << "matrix_long = " << data["domain"]["matrix_long"] << endl;
+    cout << "matrix_orig = " << data["domain"]["matrix_orig"] << endl;
+    cout << "vector_type = " << data["domain"]["vector_type"] << "\n" << endl;
 
     cout << "#===============================#" << endl;
     cout << "# General simulation parameters #" << endl;
@@ -244,7 +286,9 @@ void printParams(GeomData geomParams,
     cout << "alpha (surface tension) = " << simParams.alpha_st << " [-]" << endl;
     cout << "beta (artificial viscosity) = " << simParams.beta << " [-]" << endl;
     cout << "state equation = " << state_equation << endl;
-    cout << "state initial condition = " << state_initial_condition << "\n" << endl;
+    cout << "state initial condition = " << state_initial_condition << endl;
+    cout << "integration scheme = " << schemeIntegration << "\n" << endl;
+
 
     cout << "#==================#" << endl;
     cout << "# Domain variables #" << endl;
@@ -266,6 +310,7 @@ void printParams(GeomData geomParams,
     cout << "Molar mass (M) = " << thermoParams.M << " [kg/mol]" << endl;
     cout << "Heat capacity ratio (gamma) = " << thermoParams.gamma << " [-]" << endl;
     cout << "Ideal gas constant (R) = " << thermoParams.R << " [J/(mol*K)]" << endl;
+    cout << "Kinematic viscosity (nu) = " << simParams.alpha*geomParams.h*thermoParams.c_0/8.0 << " [m^2/s]" << endl;
     cout << "Surface tension stress (sigma) = " << thermoParams.sigma << " [N/m]" << "\n" << endl;            
 }
 
@@ -292,6 +337,4 @@ double dist(vector<double> &pos, int n_1, int n_2){
 
     return r_ab;
 }
-
-
 

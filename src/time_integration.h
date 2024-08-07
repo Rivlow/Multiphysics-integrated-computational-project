@@ -21,7 +21,15 @@ void updateVariables(GeomData &geomParams,
                      vector<int> &neighbours,
                      vector<double> &nb_neighbours,
                      vector<double> type,
-                     vector<double> &track_particle);
+                     vector<double> &colour,
+                     vector<double> &R,
+                     vector<double> &L,
+                     vector<double> &N,
+                     vector<double> &normal,
+                     vector<double> &acc_vol,
+                     vector<double> &track_particle,
+                     vector<double> &Kappa,
+                     vector<double> &dot_product);
 
 void checkTimeStep(GeomData &geomParams,    
                    ThermoData &thermoParams,

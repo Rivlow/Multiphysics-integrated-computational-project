@@ -39,7 +39,7 @@ void setArtificialViscosity(GeomData &geomParams,
                             vector<double> &rho,
                             vector<double> &u);
 
-void continuityEquation(SimulationData& simParams,
+void continuityEquation(SimulationData &simParams, 
                         vector<int> &neighbours,
                         vector<double> &nb_neighbours,
                         vector<vector<double>> &gradW,
@@ -65,6 +65,14 @@ void momentumEquation(GeomData &geomParams,
                       vector<double> &pos,
                       vector<double> &u,
                       vector<double> type,
-                      vector<double> &track_particle);
+                      vector<double> &colour,
+                      vector<double> &R,
+                      vector<double> &L,
+                      vector<double> &N,
+                      vector<double> &normal,
+                      vector<double> &F_vol,
+                      vector<double> &track_particle,
+                      vector<double> &Kappa,
+                      vector<double> &dot_product);
 
 #endif // GRADIENT_H

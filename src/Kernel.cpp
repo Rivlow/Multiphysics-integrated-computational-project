@@ -42,16 +42,17 @@ double WAdh(double r, GeomData &geomParams, SimulationData simParams){
 
 
 
-double f_cubic_spline(double r, GeomData &geomParams, SimulationData &simParams){
+double CubicSpline(double r, GeomData &geomParams, SimulationData &simParams){
 
     double alpha = simParams.cubic_kernel_coef;
     double W;
     double h = geomParams.h;
+    double kappa = geomParams.kappa;
 
-    if (r / h < 1.0)
+    if (r/h < kappa/2)
         W = alpha * (2.0/3.0 - r * r / (h * h) + 0.5 * r * r * r / (h * h * h));      
     
-    else if (1.0 <= r / h && r / h < 2.0)
+    else if (r/h >= kappa/2 && r/h < kappa)
         W = alpha * 1.0/6.0 * ((2.0 - r / h) * (2.0 - r / h) * (2.0 - r / h));
     
     else
@@ -60,16 +61,17 @@ double f_cubic_spline(double r, GeomData &geomParams, SimulationData &simParams)
     return W;
 }
 
-double derive_cubic_spline(double r, GeomData &geomParams, SimulationData &simParams){
+double deriveCubicSpline(double r, GeomData &geomParams, SimulationData &simParams){
     
     double alpha = simParams.cubic_kernel_coef;
     double h = geomParams.h;
     double DW = 0;
+    double kappa = geomParams.kappa;
 
-    if (1.0 <= r / h && r / h < 2.0) 
+    if (kappa/2 <= r / h && r / h < kappa) 
         DW = alpha / h * (-0.5 * (2.0 - r / h) * (2.0 - r / h));
     
-    else if (r / h < 1.0) 
+    else if (r / h < kappa/2) 
         DW = alpha / h * (1.5 * r * r / (h * h) - 2.0 * r / h);
 
     else 
@@ -78,31 +80,31 @@ double derive_cubic_spline(double r, GeomData &geomParams, SimulationData &simPa
     return DW;
 }
 
-double f_wendland_quintic(double r, GeomData &geomParams, SimulationData &simParams){
+double WendlandQuintic(double r, GeomData &geomParams, SimulationData &simParams){
 
     double alpha = simParams.quintic_kernel_coef;
     double W = 0.0;
     double h = geomParams.h;
-    double q = r / h;
+    double kappa = geomParams.kappa;
 
-    if (q < 2.0) {
-        double factor = (1.0 - 0.5 * q);
-        W = alpha * pow(factor, 4) * (2.0 * q + 1.0);
+    if (r/h < kappa) {
+        double factor = (1.0 - 0.5 * (r/h));
+        W = alpha * (factor*factor*factor*factor) * (2.0 * (r/h) + 1.0);
     }
 
     return W;
 }
 
-double derive_wendland_quintic(double r, GeomData &geomParams, SimulationData &simParams){
+double deriveWendlandQuintic(double r, GeomData &geomParams, SimulationData &simParams){
 
     double alpha = simParams.quintic_kernel_coef;
     double DW = 0.0;
     double h = geomParams.h;
-    double q = r / h;
+    double kappa = geomParams.kappa;
 
-    if (q < 2.0) {
-        double factor = (1.0 - 0.5*q);
-        DW = -(5/4)*alpha * pow(factor, 3) * q ;
+    if (r/h < kappa) {
+        double factor = (1.0 - 0.5* (r/h));
+        DW = -5.0*alpha/h * (factor*factor*factor) * (r/h) ;
     }
 
     return DW;

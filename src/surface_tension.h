@@ -22,7 +22,8 @@ void surfaceTension(SimulationData& simParams,
                     vector<double> rho,
                     vector<double> pos,
                     vector<double> &F_vol,
-                    vector<double> type);
+                    vector<double> type,
+                    vector<double> normal_grad);
 
 void InterfaceTrackingMath(SimulationData simParams,
                            GeomData geomParams,
@@ -46,6 +47,14 @@ void surfaceTensionImprove(SimulationData& simParams,
                            vector<double> &mass,
                            vector<double> &rho,
                            vector<double> &pos,
-                           vector<double> &F_vol,
                            vector<double> type,
-                           vector<double> &track_particle);
+                           vector<double> &colour,
+                           vector<double> &R,
+                           vector<double> &L,
+                           vector<double> &N,
+                           vector<double> &normal,
+                           vector<double> &acc_vol,
+                           vector<double> &track_particle,
+                           vector<double> &Kappa,
+                           vector<double> &dot_product);
+

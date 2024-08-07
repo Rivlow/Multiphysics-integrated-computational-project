@@ -6,9 +6,9 @@
         "dt": 1e-05,
         "nsave":1000,
         "kappa": 2,
-        "alpha": 0.1,
+        "alpha": 0.5,
         "beta": 0,
-        "alpha_st": 5,
+        "alpha_st": 1,
         "beta_adh": 1.2,
         "dimension": 3
     },
@@ -16,7 +16,7 @@
         "matrix_long": [
             [
                 1,
-                0.05,
+                0.005,
                 1
             ]
         ],

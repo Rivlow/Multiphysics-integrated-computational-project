@@ -35,7 +35,16 @@ void updateVariables(GeomData &geomParams,
                      vector<int> &neighbours,
                      vector<double> &nb_neighbours,
                      vector<double> type,
-                     vector<double> &track_particle){
+                     vector<double> &colour,
+                     vector<double> &R,
+                     vector<double> &L,
+                     vector<double> &N,
+                     vector<double> &normal,
+                     vector<double> &acc_vol,
+                     vector<double> &track_particle,
+                     vector<double> &Kappa,
+                     vector<double> &dot_product){
+
 
     bool PRINT = simParams.PRINT;
     string schemeIntegration = simParams.schemeIntegration;
@@ -45,31 +54,31 @@ void updateVariables(GeomData &geomParams,
 
         // Compute D(rho)/Dt for all particles
         continuityEquation(simParams, neighbours, nb_neighbours, gradW, 
-                           pos, u, drhodt, rho, mass);
+                           pos, u, drhodt, rho, mass); 
 
         // Compute D(u)/Dt for moving particles
         momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW, 
-                         W, viscosity, mass, dudt, rho, p, c, pos, u, type, track_particle); 
+                         W, viscosity, mass, dudt, rho, p, c, pos, u, type, colour, R, L, N, normal, acc_vol, track_particle, Kappa, dot_product); 
 
         checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
-                    neighbours, nb_neighbours);
+                      neighbours, nb_neighbours);
 
         double dt = simParams.dt;
 
         #pragma omp parallel for   
-        for (int n = 0; n < simParams.nb_tot_part; n++){
+        for (int i = 0; i < simParams.nb_tot_part; i++){
 
-            rho[n] += dt * drhodt[n];
+            rho[i] += dt * drhodt[i];
 
-            if (rho[n] < 0){
-                cerr << "Rho negative (" << rho[n] << ") at t:" << simParams.t << endl;
+            if (rho[i] < 0){
+                cerr << "Rho negative (" << rho[i] << ") at t:" << simParams.t << endl;
                 exit(EXIT_FAILURE);
             }
 
             for (int coord = 0; coord < 3; coord++){
 
-                pos[3 * n + coord] += dt * u[3 * n + coord];
-                u[3 * n + coord] += dt * dudt[3 * n + coord];
+                pos[3*i + coord] += dt * u[3*i + coord];
+                u[3*i + coord] += dt * dudt[3*i + coord];
             }
         }
     }
@@ -88,7 +97,7 @@ void updateVariables(GeomData &geomParams,
                            pos, u, drhodt, rho, mass);
         //printArray(drhodt,drhodt.size(), "drhodt");
         momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW, 
-                         W, viscosity, mass, dudt, rho, p, c, pos, u, type, track_particle); 
+                         W, viscosity, mass, dudt, rho, p, c, pos, u, type, colour, R, L, N, normal, acc_vol, track_particle, Kappa, dot_product); 
                         
         //checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
         //              neighbours, nb_neighbours);
@@ -118,9 +127,9 @@ void updateVariables(GeomData &geomParams,
     
         continuityEquation(simParams, neighbours, nb_neighbours, gradW, 
                            pos_half, u_half, drhodt_half, rho_half, mass);
-
+                           
         momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW, 
-                        W, viscosity, mass, dudt_half, rho_half, p, c, pos_half, u_half, type, track_particle); 
+                         W, viscosity, mass, dudt_half, rho_half, p, c, pos_half, u, type, colour, R, L, N, normal, acc_vol, track_particle, Kappa, dot_product); 
 
 
         checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
@@ -169,8 +178,8 @@ void checkTimeStep(GeomData &geomParams,
     int nb_moving_part = simParams.nb_moving_part;
     int t = simParams.t;
 
-    double F_st_max = simParams.F_st_max;
-    double dt_f = h / F_st_max;
+    double acc_st_max = simParams.acc_st_max;
+    double dt_f = h / acc_st_max;
     double dt_cv = 0;
     double min_a = numeric_limits<double>::max();
     double max_b = numeric_limits<double>::min();
@@ -189,9 +198,9 @@ void checkTimeStep(GeomData &geomParams,
     else{
 
         #pragma omp parallel for   
-        for (int n = 0; n < nb_moving_part; n++){
+        for (int i = 0; i < nb_moving_part; i++){
 
-            int size_neighbours = nb_neighbours[n];
+            int size_neighbours = nb_neighbours[i];
 
             
 
@@ -199,12 +208,12 @@ void checkTimeStep(GeomData &geomParams,
                 // Iteration over each associated neighbours
                 for (int idx = 0; idx < size_neighbours; idx++){
 
-                    int i_neig = neighbours[100*n + idx];
+                    int i_neig = neighbours[100*i + idx];
                     vector<double> rel_displ(3), rel_vel(3);
 
                     for (int coord = 0; coord < 3; coord++){
-                        rel_displ[coord] = (pos[3 * n + coord] - pos[3 * i_neig + coord]);
-                        rel_vel[coord] = (u[3 * n + coord] - u[3 * i_neig + coord]);
+                        rel_displ[coord] = (pos[3 * i + coord] - pos[3 * i_neig + coord]);
+                        rel_vel[coord] = (u[3 * i + coord] - u[3 * i_neig + coord]);
                     }
 
                     double u_ab_x_ab = 0, x_ab_2 = 0;
@@ -224,7 +233,7 @@ void checkTimeStep(GeomData &geomParams,
             else
                 max_b = 0;
         
-            double c_a = c[n];
+            double c_a = c[i];
             double val = geomParams.h/(c_a + 0.6*(alpha*c_a + beta*max_b));
             min_a = (val < min_a) ? val : min_a;
         }

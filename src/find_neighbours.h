@@ -39,14 +39,14 @@ void CompareNeighbours( std::vector<std::vector<int>> &neighbours_matrix_linked,
                         std::vector<std::vector<int>> &neighbours_matrix_naive);
 
 void compareAlgo(GeomData &geomParams,
-                 SimulationData &simParams, 
-                 vector<vector<int>> &cell_matrix,
-                 vector<int> &neighbours,
-                 vector<vector<double>> &gradW,
-                 vector<vector<double>> &W,
-                 vector<vector<double>> &viscosity,
-                 vector<double> &nb_neighbours,
-                 vector<double> &type,
-                 vector<double> &pos);
+                SimulationData &simParams, 
+                vector<vector<int>> &cell_matrix,
+                vector<int> &neighbours,
+                vector<vector<double>> &gradW,
+                vector<vector<double>> &W,
+                vector<vector<double>> &viscosity,
+                vector<double> &nb_neighbours,
+                vector<double> &type,
+                vector<double> &pos);
 
 #endif // FIND_NEIGHBOURS_H

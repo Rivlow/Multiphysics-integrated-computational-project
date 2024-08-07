@@ -8,6 +8,7 @@
 #include <fstream>
 #include "nlohmann/json.hpp"
 
+using json = nlohmann::json; 
 using namespace std;
 
 struct GeomData {
@@ -32,12 +33,13 @@ struct GeomData {
     bool following_part_min;
     bool following_part_max;
     int following_part_part;
-    int following_part_p;
-    int following_part_rho;
-    vector<int> following_part_pos;
-    vector<int> following_part_u;
+    bool following_part_p;
+    bool following_part_rho;
+    vector<bool> following_part_pos;
+    vector<bool> following_part_u;
 
 };
+
 
 
 struct ThermoData {
@@ -67,20 +69,31 @@ struct SimulationData {
     vector<double> u_init;
     string state_equation; 
     string state_initial_condition;
+    string kernel;
     bool is_gravity;
     bool is_surface_tension;
     bool is_adhesion;
     bool PRINT;
-    bool comparaison_algorithm;
+    bool comparison_algorithm;
     int nb_moving_part;
     int nb_tot_part;
     int t;
-    double F_st_max;
+    double acc_st_max;
     double cubic_kernel_coef;
     double adh_kernel_coef;
     double coh_kernel_coef;
     double quintic_kernel_coef;
 
 };
+
+void initializeStruct(json data,
+                      string state_equation, 
+                      string state_initial_condition, 
+                      string schemeIntegration,
+                      string kernel,
+                      GeomData &geomParams,
+                      SimulationData &simParams,
+                      ThermoData &thermoParams);
+
 
 #endif // STRUCTURE_H

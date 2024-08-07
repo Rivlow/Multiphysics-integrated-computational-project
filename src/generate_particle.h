@@ -12,7 +12,7 @@ using namespace std;
 
 int evaluateNumberParticles(GeomData &geomParams);
 
-void meshcube(GeomData &geomParams,
+void meshCube(GeomData &geomParams,
               SimulationData &simParams,
               vector<double> &pos,
               vector<double> &type,
@@ -25,6 +25,6 @@ void meshPostProcess(GeomData &geomParams,
                      vector<double> &type,
                      int &GP_count);
 
-bool checkParticleGeneration(vector<double> pos,SimulationData &simParams);
+bool checkParticleGeneration(vector<double> pos, SimulationData &simParams);
 
 #endif // GENERATE_PARTICLE_H

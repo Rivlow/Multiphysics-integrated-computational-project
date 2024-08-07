@@ -99,16 +99,11 @@ void sortedList(GeomData &geomParams,
                             if (idx_cell != n){
 
                                 double r_ab = dist(pos, n, idx_cell);
-
                                 int kappa = geomParams.kappa;
                                 double h = geomParams.h;
 
-                                if (r_ab*r_ab <= kappa * kappa *h * h){
-                                    
-                                    neighbours[100*n + it++] = idx_cell;     
-               
-                                    
-                                }
+                                if (r_ab*r_ab <= kappa * kappa *h * h)
+                                    neighbours[100*n + it++] = idx_cell;         
                             }
                         }
                     }
@@ -262,6 +257,7 @@ void compareAlgo(GeomData &geomParams,
                 vector<double> &nb_neighbours,
                 vector<double> &type,
                 vector<double> &pos){
+
     auto t_sorted_begin = chrono::high_resolution_clock::now();
     sortedList(geomParams, simParams, cell_matrix, neighbours,
                 gradW, W, viscosity, nb_neighbours, type, pos);

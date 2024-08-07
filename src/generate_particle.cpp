@@ -27,9 +27,9 @@ int evaluateNumberParticles(GeomData &geomParams){
     double s = geomParams.s;
     int nbpart = 0;
 
-    for(int n = 0; n < int(vectorType.size()); n++){
-        if(vectorType[n]){
-            vector<double> &L = matrixLong[n];    
+    for(int i = 0; i < int(vectorType.size()); i++){
+        if(vectorType[i]){
+            vector<double> &L = matrixLong[i];    
             int ni = int(ceil(L[0] / s));
             if(ni != 1){
                 ++ni;
@@ -52,7 +52,7 @@ int evaluateNumberParticles(GeomData &geomParams){
     return nbpart;
 }
 
-void meshcube(GeomData &geomParams,
+void meshCube(GeomData &geomParams,
               SimulationData &simParams,
               vector<double> &pos,
               vector<double> &type,
@@ -91,13 +91,6 @@ void meshcube(GeomData &geomParams,
             ++nk;
         }
                 
-        // output
-        cout << "meshing cube at o=(" << o[0] << "," << o[1] << "," << o[2] << ") ";
-        cout << "of size L=(" << L[0] << "," << L[1] << "," << L[2] << ")\n";
-        cout << "\tparticle spacing s=(" << dx << "," << dy << "," << dz << ") [target was s=" << s << "]\n";
-        cout << "\t=> " << ni << "*" << nj << "*" << nk << " = " << ni * nj * nk << " particles to be generated\n";
-        cout <<"\n"<< endl;
-
         // memory allocation
         pos.reserve(pos.size() + ni * nj * nk * 3);
 
@@ -167,7 +160,6 @@ void meshPostProcess(GeomData &geomParams,
 
         // Particules created between initial and last particule
         double nb_points = (dist / s);
-        nb_points += 1;
 
         double step_x = dx / nb_points;
         double step_y = dy / nb_points;
@@ -197,7 +189,6 @@ struct TupleHash {
 bool checkParticleGeneration(vector<double> pos, SimulationData &simParams){
 
     int nb_part = simParams.nb_tot_part; 
-    cout << "number of particle is  "<< nb_part << endl;
     unordered_set<tuple<double, double, double>, TupleHash> uniqueTriplets;
 
     for (int n = 0; n < nb_part; n++) {
@@ -215,6 +206,6 @@ bool checkParticleGeneration(vector<double> pos, SimulationData &simParams){
         uniqueTriplets.insert(triplet);
     }
 
-    cout << "All position triplets are unique.\n";
+    cout << "All position triplets are unique. \n \n";
     return true;
 }

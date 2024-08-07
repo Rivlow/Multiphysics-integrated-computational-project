@@ -3,12 +3,12 @@ import os
 import sys
 import numpy as np
 
-s = 0.05
+s = 0.2
 L = 1.2
 
-dt = 0.0001
+dt = 0.00001
 nsave = 500
-nstepT = nsave*300
+nstepT = nsave*5
 
 
 data = {
@@ -40,47 +40,40 @@ data = {
         "velocity": [False, False, False],
     },
     
-    
     "domain": {
         "matrix_long": [
-            np.round(np.array([L-3*s, s/2, 0.9*L]), decimals = 4).tolist(), # fluid
-            np.round(np.array([L, s/2, s/2]), decimals = 4).tolist(), # floor 1
-            np.round(np.array([L, s/2, s/2]), decimals = 4).tolist(), # floor 2
-            np.round(np.array([s/2, s/2, L]), decimals = 4).tolist(), # left wall 1
-            np.round(np.array([s/2, s/2, L]), decimals = 4).tolist(), # left wall 2
-            np.round(np.array([s/2, s/2, L]), decimals = 4).tolist(), # right wall 1
-            np.round(np.array([s/2, s/2, L-s/2]), decimals = 4).tolist(), # right wall 2
-
+            np.round(np.array([6*L, s/2, L]), decimals = 4).tolist(), # fluid
+            np.round(np.array([12*L, s/2, s/2]), decimals = 4).tolist(), # floor 1
+            np.round(np.array([12*L, s/2, s/2]), decimals = 4).tolist(), # floor 2
+            np.round(np.array([12*L, s/2, s/2]), decimals = 4).tolist(), # roof wall 1
+            np.round(np.array([12*L, s/2, s/2]), decimals = 4).tolist(), # roof wall 2
         ],
         "matrix_orig": [
-            np.round(np.array([2*s, 0, 2*s]), decimals = 4).tolist(), # fluid
+            np.round(np.array([L, 0, s]), decimals = 4).tolist(), # fluid
             np.round(np.array([0, 0, 0]), decimals = 4).tolist(), # floor 1
             np.round(np.array([s/2, 0, s/2]), decimals = 4).tolist(), # floor 2
-            np.round(np.array([s/2, 0, 3*s/2]), decimals = 4).tolist(),# left wall 1
-            np.round(np.array([0, 0, s]), decimals = 4).tolist(), # left wall 2
-            np.round(np.array([L, 0, s]), decimals = 4).tolist(), # right wall 1
-            np.round(np.array([L+s/2, 0, 1.5*s]), decimals = 4).tolist(), # right wall 2
-
+            np.round(np.array([s/2, 0, L + (3/2)*s]), decimals = 4).tolist(), # roof 1 
+            np.round(np.array([0, 0, L + 2*s]), decimals= 4 ).tolist(), # roof 2
         ],
         "sphere": {
-                "do": [0, 0, 0, 0, 0, 0, 0],
-                "radius": np.round(np.array([0.3]), decimals = 4).tolist()
+                "do": [0, 0, 0, 0, 0],
+                "radius": [0.3]
             },
-        "vector_type": [1, 0, 0, 0, 0, 0, 0],
-        "L_d": np.round(np.array([2*L, 2*L, 2*L]), decimals = 4).tolist(),
-        "o_d": [0.0, 0.0, 0.0]
+        "vector_type": [1, 0, 0, 0, 0],
+        "L_d": np.round(np.array([9*L, 3*L, 3*L]), decimals = 4).tolist(),
+        "o_d": np.round(np.array([0.0, 0.0, 0.0]), decimals = 4).tolist()
     },
     "post_process": {
         "do": True,
-        "xyz_init": np.round(np.array([L/2, 0, 5*s]), decimals = 4).tolist(),
-        "xyz_end": np.round(np.array([L/2, 0, L-6*s]), decimals = 4).tolist()
+        "xyz_init": np.round(np.array([4*L, 0, s]), decimals = 4).tolist(),
+        "xyz_end": np.round(np.array([4*L, 0, L + 2*s]), decimals = 4).tolist()
     },
     "thermo": {
         "rho_0": 1000,
         "rho_moving": 1000,
         "rho_fixed": 1000,
         "T": 298.15,
-        "u_init": np.round(np.array([0.0, 0.0, 0.0]), decimals = 4).tolist(),
+        "u_init": np.round(np.array([-0.5, 0.0, 0.0]), decimals = 4).tolist(),
         "c_0": 30,
         "gamma": 7,
         "M": 18e-3,
@@ -88,7 +81,7 @@ data = {
         "sigma": 52000
     },
     "forces": {
-        "gravity": True,
+        "gravity": False,
         "surface_tension": False,
         "adhesion": False
     },
@@ -100,13 +93,12 @@ data = {
 }
 
 
-# Do not modify what is below    
+# Do not modify what is below
 current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-json_src = f"hydrostatic/2D_hydrostatic.json"
+json_src = f"Poiseuille/2D_Poiseuille.json"
 
 with open(f'{current_directory}/{json_src}', 'w') as json_file:
     json.dump(data, json_file, indent=4)
 
 
 print(f"Data written in '{json_src}'")
-

@@ -20,13 +20,15 @@ void printArray(vector<T> &array, int size, string name);
 void getKey(json data,
             string &state_equation,
             string &state_initial_condition,
-            string &schemeIntegration);
+            string &schemeIntegration,
+            string &kernel);
     
 
 void createOutputFolder();
 void clearOutputFiles();
 
-void progressBar(double ratio, double elapsed_time);
+void progressBar(double elasped_time, 
+                 double ratio);
 
 void clearAllVectors(SimulationData &simParams,
                      vector<vector<double>> &viscosity,
@@ -36,13 +38,22 @@ void clearAllVectors(SimulationData &simParams,
                      vector<vector<double>>&W,
                      vector<double> &drhodt,
                      vector<double> &dudt,
-                     vector<double> &track_particle);
+                     vector<double> &colour,
+                     vector<double> &R,
+                     vector<double> &N,
+                     vector<double> &normal,
+                     vector<double> &acc_vol,
+                     vector<double> &track_particle,
+                     vector<double> &Kappa,
+                     vector<double> &dot_product);
 
-void printParams(GeomData geomParams,    
+void printParams(json data,
+                 GeomData geomParams,    
                  ThermoData thermoParams,
                  SimulationData simParams,
                  string state_equation,
                  string state_initial_condition,
+                 string schemeIntegration,
                  int MP_count,
                  int FP_count,
                  int GP_count,

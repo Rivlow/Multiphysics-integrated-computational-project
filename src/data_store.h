@@ -18,11 +18,13 @@
 using namespace std;
 
 void extractData(GeomData &geomParams,  
-                 SimulationData& simParams,
-                 ThermoData& thermoParams,
+                 SimulationData &simParams,
+                 ThermoData &thermoParams,
+                 string schemeIntegration,
                  vector<double> &pos,  
                  vector<double> &p, 
                  vector<double> &mass,
+                 vector<double> &u,
                  vector<int> &neighbours,
                  vector<double> &nb_neighbours,
                  vector<double> rho);
@@ -52,4 +54,5 @@ void follow_part_data(GeomData &geomParams,
                       vector<double> pos,
                       vector<double> u);
 
-void writing_time(vector<double> vec_sim_time);
+void writing_time(vector<double> vec_time);
+

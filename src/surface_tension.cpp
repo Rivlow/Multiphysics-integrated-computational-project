@@ -2,6 +2,7 @@
 #include <vector>
 #include <cmath>
 #include <omp.h>
+#include "export.h"
 
 #include "NavierStokes.h"
 #include "find_neighbours.h"
@@ -13,7 +14,7 @@
 
 using namespace std;
 
-
+/*
 void surfaceTension(SimulationData& simParams,
                     GeomData &geomParams,
                     ThermoData &thermoParams,
@@ -25,63 +26,64 @@ void surfaceTension(SimulationData& simParams,
                     vector<double> rho,
                     vector<double> pos,
                     vector<double> &F_vol,
-                    vector<double> type){
+                    vector<double> type,
+                    vector<double> normal_grad){
 
     vector<double> normal(3*simParams.nb_moving_part,0.0);
-    #pragma omp parallel for 
-    for(int n = 0; n<simParams.nb_moving_part; n++){
+    //#pragma omp parallel for 
+    for(int i = 0; i<simParams.nb_moving_part; i++){
 
-        vector<double> &gradW = gradW_matrix[n];
-        int size_neighbours = nb_neighbours[n];
+        vector<double> &gradW = gradW_matrix[i];
+        int size_neighbours = nb_neighbours[i];
         
         for(int idx = 0; idx<size_neighbours; idx++){ 
 
-            int i_neig = neighbours[100*n + idx]; 
-            double m_j = mass[i_neig];
-            double rho_j = rho[i_neig];
+            int j = neighbours[100*i + idx]; 
+            double m_j = mass[j];
+            double rho_j = rho[j];
             
             for( int coord = 0; coord <3; coord ++){
 
                 double grad = gradW[3*idx+coord];
-                normal[3*n+coord] += geomParams.h*m_j*grad/rho_j;
+                normal[3*i+coord] += geomParams.h*m_j*grad/rho_j;
             }
         }
     }
     double alpha = simParams.alpha_st;
 
-    #pragma omp parallel for 
-    for(int n = 0; n<simParams.nb_moving_part; n++){
+    //#pragma omp parallel for 
+    for(int i = 0; i<simParams.nb_moving_part; i++){
     
-        int size_neighbours = nb_neighbours[n];
+        int size_neighbours = nb_neighbours[i];
         
         for(int idx = 0; idx<size_neighbours; idx++){
             
-            if(type[neighbours[100*n + idx]] == 1){
-                int i_neig = neighbours[100*n + idx];
-                double K_ij = 2*thermoParams.rho_0/(rho[n]+rho[i_neig]);
+            if(type[neighbours[100*i + idx]] == 1){
+                int j = neighbours[100*i + idx];
+                double K_ij = 2*thermoParams.rho_0/(rho[i]+rho[j]);
                 double r_ab = 0;
                 vector<double> d_xyz(3);
                 
                 for (int coord = 0; coord < 3; coord++){
                     
-                    d_xyz[coord] = pos[3 * n + coord] - pos[3 * i_neig + coord];
+                    d_xyz[coord] = pos[3 * i + coord] - pos[3 * j + coord];
                     r_ab += d_xyz[coord]*d_xyz[coord];
                 }
                 
                 r_ab = sqrt(r_ab);
-                double W_ab = WCoh(r_ab, geomParams, simParams);
+                double W_ab = W_coh(r_ab,geomParams.kappa*geomParams.h, simParams);
                 
-                double m_a = mass[n];
-                double m_b = mass[i_neig];
+                double m_a = mass[i];
+                double m_b = mass[j];
                 double F_res = 0;
                 
                // cout << "alpha*W_ab = " << alpha * W_ab << endl;
                 for (int coord = 0; coord < 3; coord++){
                     
-                    F_vol[3*n + coord] += -K_ij*(alpha * m_a * m_b * d_xyz[coord]*W_ab/r_ab 
-                                    + alpha*(normal[3*n+coord]-normal[3*i_neig+coord]));
+                    F_vol[3*i + coord] += -K_ij*(alpha * m_a * m_b * d_xyz[coord]*W_ab/r_ab 
+                                    + alpha*(normal[3*i+coord]-normal[3*j+coord]));
                 
-                    F_res += F_vol[3*n + coord]*F_vol[3*n + coord];
+                    F_res += F_vol[3*i + coord]*F_vol[3*i + coord];
                 }
                 
                 simParams.F_st_max = sqrt(F_res);
@@ -89,9 +91,9 @@ void surfaceTension(SimulationData& simParams,
         }     
     }  
 }
+*/
 
 
-/*
 void InterfaceTrackingMath(SimulationData simParams,
                            GeomData geomParams,
                            ThermoData thermoParams,
@@ -105,33 +107,36 @@ void InterfaceTrackingMath(SimulationData simParams,
                            vector<double> &track_particle){
     
 
-    #pragma omp parallel for 
-    for (int n = 0; n < simParams.nb_moving_part; n++){
 
     
-        if (type[n] == 1){ // if moving particle
+    #pragma omp parallel for 
+    for (int i = 0; i < simParams.nb_moving_part; i++){
+    
+        if (type[i] == 1){ // if moving particle
 
-            int size_neighbours = nb_neighbours[n];
+            int size_neighbours = nb_neighbours[i];
             double div_normal = 0;
             
             for (int idx = 0; idx < size_neighbours; idx++){
 
-                int i_neig = neighbours[100*n + idx];
-                if (type[i_neig] == 1){ // if moving neighbour
+                int j = neighbours[100*i + idx];
+                if (type[j] == 1){ // if moving neighbour
 
                     double dot_product = 0;
                     
                     for (int coord = 0; coord < 3; coord++)
-                        dot_product += (pos[3 * n + coord] - pos[3 * i_neig + coord])*gradW[n][3*idx+coord];
+                        dot_product += (pos[3*i + coord] - pos[3*j + coord])*gradW[i][3*idx + coord];
 
-                    double m_j = mass[i_neig];
-                    double rho_j = rho[i_neig];   
+                    double m_j = mass[j];
+                    double rho_j = rho[j]; 
                     div_normal += (m_j/rho_j)*dot_product;
                 }
             }  
 
+            //cout << "part " << i << ", div_normal = " << div_normal << endl;
+
             if (abs(div_normal) <= 1.7)
-                track_particle[n] = 1;
+                track_particle[i] = 1;
         
         }  
     }
@@ -139,7 +144,6 @@ void InterfaceTrackingMath(SimulationData simParams,
     if (simParams.PRINT) cout << "InterfaceTrackingMath passed" << endl;
 
 }
-
 
 
 
@@ -153,16 +157,16 @@ void surfaceTensionImprove(SimulationData& simParams,
                            vector<double> &mass,
                            vector<double> &rho,
                            vector<double> &pos,
-                           vector<double> &F_vol,
                            vector<double> type,
-                           vector<double> &track_particle){
-
-
-
-    vector<int> N(simParams.nb_moving_part, 0);
-    vector<double> color(simParams.nb_moving_part, 0);
-    vector<double> normal(3*simParams.nb_moving_part, 0);
-    vector<double> R(simParams.nb_moving_part, 0);
+                           vector<double> &colour,
+                           vector<double> &R,
+                           vector<double> &L,
+                           vector<double> &N,
+                           vector<double> &normal,
+                           vector<double> &acc_vol,
+                           vector<double> &track_particle,
+                           vector<double> &Kappa,
+                           vector<double> &dot_product){
 
 
     // Calculation of N 
@@ -182,34 +186,32 @@ void surfaceTensionImprove(SimulationData& simParams,
         }
     }
 
-    //printArray(N, N.size(), "N");
 
-
-
-    // Calculation of color function
+    // Calculation of colour function
     #pragma omp parallel for
     for (int n = 0; n < simParams.nb_moving_part; n++){
 
         int size_neighbours = nb_neighbours[n];
         if (N[n]){ // free surface particule in support domain
 
-            
             for(int idx = 0; idx < size_neighbours; idx++){
 
                 int i_neig = neighbours[100*n + idx];
-                color[n] += (mass[i_neig]/rho[i_neig])*W[n][idx]; // c_j^0 = 1 for fluid (to be checked)
+                colour[n] += (mass[i_neig]/rho[i_neig])*W[n][idx]; // c_j^0 = 1 for fluid (to be checked)
                 
             }
         }
             
         else 
-            color[n] = 1;
+            colour[n] = 1;
             
     }
 
-
+    vector<double> normal_normali(3*simParams.nb_moving_part,0.0);
     // Calculation of normal vector
-    //#pragma omp parallel for
+
+    vector<double> imaginary_part1(simParams.nb_moving_part,0.0);
+    #pragma omp parallel for
     for (int n = 0; n < simParams.nb_moving_part; n++){
 
         int size_neighbours = nb_neighbours[n];
@@ -218,156 +220,119 @@ void surfaceTensionImprove(SimulationData& simParams,
 
             int i_neig = neighbours[100*n + idx];
 
-            // classic normal calculation 
+            /*----------------------------*/
+            /* classic normal calculation */
+            /*----------------------------*/
+
             for (int coord = 0; coord < 3; coord++)
-                normal[3*n+coord] -= (color[i_neig] - color[n]) * (mass[i_neig] / rho[i_neig]) * gradW[n][3*idx+coord];
+                normal[3*n+coord] -= (colour[i_neig] - colour[n]) * (mass[i_neig] / rho[i_neig]) * gradW[n][3*idx+coord];
+
             
-            // imaginary particle contribution
-            if (track_particle[n] == 1 && track_particle[i_neig] == 0){ // particle on free surface but not neighbour 
+            /*---------------------------------*/
+            /* imaginary particle contribution */
+            /*---------------------------------*/
 
-
-                for (int coord = 0; coord < 3; coord++){
-                    normal[3*n+coord] -= (0 - color[n])*(mass[n]/rho[n])*(-1*gradW[n][3*idx+coord]);
-
-                }
-                                   
+            
+            // case 1: part. i on free surface but not j
+            if (track_particle[n] == 1 && track_particle[i_neig] == 0){  
+                imaginary_part1[n] +=1;
+                for (int coord = 0; coord < 3; coord++)
+                    normal[3*n+coord] -= (0 - colour[n])*(mass[n]/rho[n])*(-1*gradW[n][3*idx+coord]);
             }
 
-            if (N[n]){ // at least one free surface neighbour in support domain
-                if (track_particle[n] == 0 && track_particle[i_neig] == 1){ // some neighbours on free surface but not particle i 
 
-                    // new gradient kernel has to be computed
-                    vector<double> d_xyz(3);
-                    double r_ij = 0;
+              // case 2 : part. j on free surface but not i
+            if (track_particle[n] == 0 && track_particle[i_neig] == 1){
+                
+                //new gradient kernel has to be computed
+                vector<double> d_pos(3);
+                double r_ij = 0;
 
-                    for (int coord = 0; coord < 3; coord++){
-                        
-                        d_xyz[coord] = 2*(pos[3 * n + coord] - pos[3 * i_neig + coord]); // vector ij' twice the lenght of classical ij vector
-                        r_ij += d_xyz[coord]*d_xyz[coord];
-                    }
-
-                    r_ij = sqrt(r_ij);
-
-                    if (r_ij < geomParams.kappa*geomParams.h){ // if new imaginary j' particle in support domain of i
-
-                        vector<double> new_gradW(3);
-                        double deriv = derive_wendland_quintic(r_ij, geomParams, simParams);
+                for (int coord = 0; coord < 3; coord++){
                     
-                        for (int coord = 0; coord < 3; coord++){
-                            new_gradW[coord] = (d_xyz[coord] / r_ij) * deriv;
-                            normal[3*n+coord] -= (0 - color[n])*(mass[n]/rho[n])*(new_gradW[coord]);
-                            //normal[3*n+coord] -= (0 - color[n])*(mass[i_neig]/rho[i_neig])*(1);
+                    d_pos[coord] = 2*(pos[3*n + coord] - pos[3*i_neig + coord]); // vector ij' twice the lenght of classical ij vector
+                    r_ij += d_pos[coord]*d_pos[coord];
+                }
 
-                        }
+                r_ij = sqrt(r_ij);
+
+                if (r_ij < geomParams.kappa*geomParams.h){ // if new imaginary j' particle in support domain of i
+                    imaginary_part1[n] +=1;
+                    vector<double> new_gradW(3);
+                    double deriv = deriveWendlandQuintic(r_ij, geomParams, simParams);
+                
+                    for (int coord = 0; coord < 3; coord++){
+                        new_gradW[coord] = (d_pos[coord] / r_ij) * deriv;
+                        normal[3*n+coord] -= (0 - colour[n])*(mass[n]/rho[n])*(new_gradW[coord]);
+
                     }
                 }
-            }     
-            
-                    
+            }         
         }
 
-        
-        double norm = 0;
-       // cout << "n = " << n << endl;
-        for (int coord = 0; coord < 3; coord++){
-            norm += normal[3*n+coord]*normal[3*n+coord];
-        }
-
-        norm = sqrt(norm);
-        
-
-        R[n] = (norm <= 0.01/geomParams.h)? 0: 1;
-        cout << "norm = " << norm << endl;
 
         // normalize normal 
 
-        //cout << "n : "<< n << endl;
-        //cout << "norm= " << norm << endl;
+        double norm = 0;
 
+        for (int coord = 0; coord < 3; coord++)
+            norm += normal[3*n+coord]*normal[3*n+coord];
+        
+        norm = sqrt(norm);
+        
+        R[n] = (norm <= 0.01/geomParams.h)? 0: 1;
+        //cout << "norm " << norm << endl;
+        
         for (int coord = 0; coord < 3; coord++){
-                  
-            //cout << "before normalize" << endl;
-            //cout << "normal[3*n + " << coord << "]= " << normal[3*n+coord] << endl;
-
-
-            normal[3*n+coord] /= norm;
-            //cout << "after normalize" << endl;
-            //cout << "normal[3*n + " << coord << "]= " << normal[3*n+coord] << endl;
-            //cout << "\n";
-
+            normal_normali[3*n+coord] = (norm > 0)? normal[3*n+coord]/norm : normal[3*n+coord];
+            //normal_normali[3*n+coord] = normal[3*n+coord];
         }
+            
         
     }
 
-    //printMatrix(gradW_matrix, gradW_matrix.size(), "gradW_matrix");
-    //printArray(normal, normal.size(), "normal"); 
-    //printArray(R, R.size(), "R"); 
-
-  
-    double Kappa = 0, L = 0;
-
+    vector<double> imaginary_part2(simParams.nb_moving_part,0.0);
     // Calculation of curvature
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (int n = 0; n < simParams.nb_moving_part; n++){
-    //for (int n = 0; n < 40; n++){
 
+        double L = 0;
         int size_neighbours = nb_neighbours[n];
-        //cout << "---------------------"<< endl;
-        //cout << "n : "<< n << endl;
 
         for(int idx = 0; idx < size_neighbours; idx++){
 
             int i_neig = neighbours[100*n + idx];
-          //  cout << "i_neig : "<< i_neig << endl;
 
-            // classic curvature calculation  
-            double dot_product = 0;
-            for (int coord = 0; coord < 3; coord++){
+            /*----------------------------*/
+            /* classic normal calculation */
+            /*----------------------------*/
+            dot_product[n] = 0;
 
-             //   cout << "coord = " << coord << endl;
-             //cout << "normal[3*i_neig+coord] - normal[3*n+coord] = " << normal[3*i_neig+coord] - normal[3*n+coord] << endl;
-            // cout << "gradW[n][3*idx+coord] = " << gradW[n][3*idx+coord] << endl;
-                
-                dot_product += (normal[3*i_neig + coord] - normal[3*n + coord])*gradW[n][3*idx + coord];
-            }
+            for (int coord = 0; coord < 3; coord++)
+                dot_product[n] += (normal_normali[3*i_neig + coord] - normal_normali[3*n + coord]) * gradW[n][3*idx + coord];
 
-            //cout << "i_neig : "<< i_neig  << " (" << idx << "/"  << size_neighbours << ")" << endl;
-
-            //cout << "dot_product = " << dot_product << endl;
-            //cout << "R[n] :" << R[n] << endl;
-            //cout << "R[i_neig] :" << R[i_neig] << endl;
-            //cout << "mass[i_neig] :" << mass[i_neig] << endl;
-            //cout << "rho[i_neig] :" << rho[i_neig] << endl;
-
-            double a = R[n]*R[i_neig];
-            double b = mass[i_neig]/rho[i_neig];
-            double c = W[n][idx];
-
-            //cout << "a : " << R[n]*R[i_neig] << endl;
-            //cout << "b : " << mass[i_neig]/rho[i_neig] << endl;
-            //cout << "c : " << dot_product << endl;
-            //cout << "c : " << W[n][idx] << endl;
-            //cout << "a*b*c : " << a*b*c << endl;
+            Kappa[n] -= (R[n]*R[i_neig]) * (mass[i_neig]/rho[i_neig]) * dot_product[n];
+            L += (R[n]*R[i_neig]) * (mass[i_neig]/rho[i_neig]) * W[n][idx];
 
 
-            Kappa += (R[n]*R[i_neig])*(mass[i_neig]/rho[i_neig])*dot_product;
-            //cout << "Kappa  = " << Kappa << endl;
-            //cout << "\n";
-
-            L += (R[n]*R[i_neig])*(mass[i_neig]/rho[i_neig])*W[n][idx];
-            //cout << "L = " << L << endl;
-
+            /*---------------------------------*/
+            /* imaginary particle contribution */
+            /*---------------------------------*/
             
-            // imaginary particle contribution
-            if (track_particle[n] == 1 && track_particle[i_neig] == 0){ // particle on free surface but not neighbour 
+            // case 1: part. i on free surface but not j
+            if (track_particle[n] == 1 && track_particle[i_neig] == 0){ 
 
+                imaginary_part2[n] +=1;
                 vector<double> new_normal(3);
                 double norm = 0;
 
                 for (int coord = 0; coord < 3; coord++){
-                    new_normal[coord] = 2*normal[3*n+coord] - normal[3*i_neig+coord]; 
-                    norm += new_normal[coord]*new_normal[coord];
+                    new_normal[coord] = 2 * normal_normali[3*n+coord] - normal_normali[3*i_neig+coord]; 
+                    norm += new_normal[coord] * new_normal[coord];
                 }
+
+                norm = sqrt(norm);
+                double new_R = (norm <= 0.01/geomParams.h)? 0: 1;
 
                 // normalize new vector
                 for (int coord = 0; coord < 3; coord++)
@@ -377,76 +342,73 @@ void surfaceTensionImprove(SimulationData& simParams,
                 double dot_product = 0;
 
                 for (int coord = 0; coord < 3; coord++)
-                    dot_product += (new_normal[coord] - normal[3*n+coord])*gradW[n][3*idx+coord];
+                    dot_product += (new_normal[coord] - normal_normali[3*n+coord]) * (-1*gradW[n][3*idx+coord]);
 
-                Kappa += (R[n]*R[i_neig])*(mass[i_neig]/rho[i_neig])*dot_product;
-                cout << "Second operation on kappa :" << Kappa << endl;
-
-
+                Kappa[n] -= (R[n]*new_R) * (mass[n]/rho[n]) * dot_product;
+                L += (R[n]*new_R) * (mass[n]/rho[n]) * W[n][idx];
                 
-
-                L += (R[n]*R[i_neig])*(mass[i_neig]/rho[i_neig])*W[n][idx];
                 
                 continue;   
             }
 
-            if (N[n]){ // at least one free surface neighbour in support domain
-                if (track_particle[n] == 0 && track_particle[i_neig] == 1){ // neighbour on free surface but not particle 
+            // case 2: part. j on free surface but not i
+            if (track_particle[n] == 0 && track_particle[i_neig] == 1){ 
+                
+                
+                //new normal and gradient kernel have to be computed
+                vector<double> new_normal(3), d_pos(3);
+                double norm = 0, r_ij = 0;
+                
+                for (int coord = 0; coord < 3; coord++){
+                    new_normal[coord] = 2 * normal_normali[3*i_neig+coord] - normal_normali[3*n+coord]; 
+                   
+                    norm += new_normal[coord] * new_normal[coord];
+                    d_pos[coord] = 2*(pos[3*n + coord] - pos[3*i_neig + coord]); // vector ij' twice the lenght of classical ij vector
+                    r_ij += d_pos[coord] * d_pos[coord];
+                } 
 
-                    vector<double> new_normal(3);
-                    double norm = 0;
+                norm = sqrt(norm);
+                double new_R = (norm <= 0.01/geomParams.h)? 0: 1;
 
+                // normalize new vector
+                for (int coord = 0; coord < 3; coord++)
+                    new_normal[coord] = new_normal[coord]/norm;
+
+                // contribution of normal ij'
+                double dot_product = 0;
+                r_ij = sqrt(r_ij);
+
+                if (r_ij < geomParams.kappa*geomParams.h){ // if part. j'  in support domain of i
+                    imaginary_part2[n] +=1;
+                    vector<double> new_gradW(3);
+                    double deriv = deriveWendlandQuintic(r_ij, geomParams, simParams);
+                
                     for (int coord = 0; coord < 3; coord++){
-                        new_normal[coord] = 2*normal[3*i_neig+coord] - normal[3*n+coord]; 
-                        norm += new_normal[coord]*new_normal[coord];
+                        new_gradW[coord] = (d_pos[coord] / r_ij) * deriv;
+                        dot_product += (new_normal[coord] - normal_normali[3*n+coord])*new_gradW[coord];
                     }
-
-                    // normalize new vector
-                    for (int coord = 0; coord < 3; coord++)
-                        new_normal[coord] = new_normal[coord]/norm;
-
-                    // contribution of normal ij'
-                    double dot_product = 0;
-
-                    for (int coord = 0; coord < 3; coord++)
-                        dot_product += (new_normal[coord] - normal[3*n+coord])*gradW[n][3*idx+coord];
-
-                    Kappa += (R[n]*R[i_neig])*(mass[i_neig]/rho[i_neig])*dot_product;
-                    cout << "Third operation on kappa :" << Kappa << endl;
-
-
-                    L += (R[n]*R[i_neig])*(mass[i_neig]/rho[i_neig])*W[n][idx];
-
+                    double new_W = WendlandQuintic(r_ij, geomParams, simParams);
+                    Kappa[n] -= (R[n]*new_R) * (mass[n]/rho[n]) * dot_product;
+                    L += (R[n]*new_R) * (mass[n]/rho[n]) * new_W;
                 }
-            }              
+            }   
         }
 
-       
-
-        //cout << "n = " << n << endl;
-        //cout << "Kappa (fin) = " << Kappa << endl;
-        //cout << "L = " << L << endl;
-        //cout << "\n";
-
-        Kappa *= -1;
-        Kappa /= (L > 0)? L : 1; // correction of the truncated kernel support domain
-
-        double F_res = 0;
+        Kappa[n] /= (L > 0)? L : 1; // correction of the truncated kernel support domain
+        
+        double acc_res = 0;
 
         for (int coord = 0; coord < 3; coord++){
 
-            F_vol[3*n+coord] += (thermoParams.sigma/rho[n])*Kappa*normal[3*n+coord];
-            F_res += F_vol[3*n + coord]*F_vol[3*n + coord];
+            acc_vol[3*n+coord] += (thermoParams.sigma/rho[n])*Kappa[n]*normal_normali[3*n+coord];
+            acc_res += acc_vol[3*n + coord]*acc_vol[3*n + coord];
         }
 
-        simParams.F_st_max = sqrt(F_res);
+        simParams.acc_st_max = sqrt(acc_res);
 
     }
-
+    //printArray(imaginary_part1, imaginary_part1.size(), "im 1 ");
+    //printArray(imaginary_part2, imaginary_part2.size(), "im 2 ");
     if (simParams.PRINT) cout << "surfaceTensionImprove passed" << endl;
 
-
-}*/
-
-
-
+}
