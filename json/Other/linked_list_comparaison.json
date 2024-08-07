@@ -18,7 +18,7 @@
         "comparison_algorithm": true
     },
     "following_part": {
-        "part": true,
+        "part": false,
         "min": false,
         "max": false,
         "particle": 500,

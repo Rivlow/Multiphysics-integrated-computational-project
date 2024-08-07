@@ -29,7 +29,7 @@ data = {
     },
 
     "following_part": {
-        "part": True,
+        "part": False,
         "min": False,
         "max": False,
         "particle": 500,
