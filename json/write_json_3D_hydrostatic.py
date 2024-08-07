@@ -3,12 +3,12 @@ import os
 import sys
 import numpy as np
 
-s = 0.1
+s = 0.025
 L = 0.7
 
 dt = 0.0001
 nsave = 500
-nstepT = nsave*300
+nstepT = nsave*150
 
 
 data = {
@@ -88,8 +88,8 @@ data = {
     },
     "post_process": {
         "do": True,
-        "xyz_init": np.round(np.array([L/2 +3*s/2, L/2 +3*s/2, s]), decimals = 4).tolist(),
-        "xyz_end": np.round(np.array([L/2 +3*s/2, L/2 +3*s/2, L]), decimals = 4).tolist()
+        "xyz_init": np.round(np.array([L/2 +3*s/2, L/2 +3*s/2, 2*s]), decimals = 4).tolist(),
+        "xyz_end": np.round(np.array([L/2 +3*s/2, L/2 +3*s/2, L+6*s]), decimals = 4).tolist()
     },
 
     "thermo": {

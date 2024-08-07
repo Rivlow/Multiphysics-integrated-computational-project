@@ -55,7 +55,7 @@ data = {
 
         ],
         "matrix_orig": [
-            np.round(np.array([s*3/2+L/4, 0, 1.5*s+L]), decimals = 4).tolist(), # fluid
+            np.round(np.array([s*3/2+L/4, 0, 1.5*s+L/2]), decimals = 4).tolist(), # fluid
             np.round(np.array([0, 0, 0]), decimals = 4).tolist(), # floor 1
             np.round(np.array([s/2, 0, s/2]), decimals = 4).tolist(), # floor 2
             np.round(np.array([s/2, 0, 3*s/2]), decimals = 4).tolist(),# left wall 1

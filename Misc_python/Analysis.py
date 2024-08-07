@@ -1,111 +1,11 @@
-import vtk
-#from vtk.util.numpy_support import vtk_to_numpy
 import os
 import sys
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import sys
 import pandas as pd
 
-def fonction():
-    file = "output/p.csv"
-    
-    pressure = pd.read_csv(file, sep = ',', decimal='.', header=None)
-    pressure = np.array(pressure)
-    
-    x = np.arange(0.025, 1.025, 0.025)
-    print(x)
-    x1 = np.arange(0.0,10.25,0.025)
-
-    x1 = np .linspace(0.025,1,40)
-    print(x1)
-    print(len(pressure[-1][::-1]))
-    plt.scatter(x,pressure[-1][::-1])
-    plt.plot(x,1000*9.81*(x1-0.275))
-
-    plt.show()
-    
-    file = "output/rho.csv"
-    rho = pd.read_csv(file, sep = ',', decimal='.', header=None)
-    rho = np.array(rho)
-    print(rho[-1][::-1])
-    plt.scatter(rho[-1][::-1], pressure[-1][::-1])
-    rho_Etat = np.linspace(0,1500,50)
-    B = 30*30*1000/7
-    pressure_etat = B * (( rho_Etat/1000)**7-1)
-    #plt.plot(rho_Etat,pressure_etat)
-    #plt.xlim(950,1050)
-    plt.show()
-
-def mrua():
-    file = "output/p.csv"
-    pos = pd.read_csv("output/50_pos_z.csv",sep = '.', decimal=',', header=None)
-    time = pd.read_csv("output/time.csv",sep = '.', decimal=',', header=None)
-    pos =  np.transpose(np.asarray(pos))
-    time =  np.transpose(np.asarray(time))
-   
-    print(time)
-    plt.scatter(time[0],pos[0], color = "red", label = "particle")
-    time = np.array(time)
-    pos= np.array(pos)
-    
-    i = 0
-    time_2 = np.zeros(len(time[0]))
-    while(i<len(time_2)):
-        time_2[i] = time[0][i] *   time[0][i]
-        i =i + 1
-    y = pos[0][0] - (9.81/2) * time_2
-
-    
-    plt.plot(time[0], y, label = "theorie")
-    plt.legend()
-    plt.xlabel("time")
-    plt.ylabel("z position")
-    plt.ylim(-0.01,1.3)
-    plt.xlim(0.01,0.5)
-    plt.show()
-
-#mrua()    
-fonction()
-'''
-def read_vtp(path):
-    reader = vtk.vtkXMLPolyDataReader()
-    reader.SetFileName(path)
-    reader.Update()
-    data = reader.GetOutput().GetPointData()
-    field_count = data.GetNumberOfArrays()
-    return {data.GetArrayName(i): vtk_to_numpy(data.GetArray(i)) for i in range(field_count)}
-
-def read_vtp_files_in_folder(folder_path):
-    vtp_files = {}
-    for filename in os.listdir(folder_path):
-        if filename.endswith(".vtp"):
-            file_path = os.path.join(folder_path, filename)
-            file_data = read_vtp(file_path)
-            for array_name, array_data in file_data.items():
-                if array_name not in vtp_files:
-                    vtp_files[array_name] = []
-                vtp_files[array_name].append(array_data)
-    return vtp_files
-
-folder_path = "output/cube_bcp_particles_less"
-vtp_files_data = read_vtp_files_in_folder(folder_path)
-
-
-rho = vtp_files_data["rho_array"]
-print((len(vtp_files_data)))
-
-
-val_rho = []
-
-for i, array_data in enumerate(rho):
-    val_rho.append(array_data[2])
-    print(f"Data from file {i + 1}: {array_data}")
-    
-plt.plot(val_rho)
-plt.show()
-
+save = False
 
 def isLatex(latex):
     if latex:
@@ -122,142 +22,107 @@ def isLatex(latex):
         plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
         plt.rc('text', usetex=True)
         plt.rc('font', family='lmodern')
-    
-def getData(directory):
-    
-    df, name = [], []
-    
-    # Search all csv. files
-    if os.path.exists(directory) and os.path.isdir(directory):
-        for filename in os.listdir(directory):
-            if filename.endswith('.csv'):
-                name.append(filename)
-                csv_file = os.path.join(directory, filename)  
-                if csv_file is not None:
-                    df.append(np.loadtxt(csv_file, delimiter=",", dtype=float))
-        
-        return df, name
-    else:
-        print(f"No csv files in folder : {directory}.")
 
-def plotSingleVariable(analysis_type, data, particle, iteration, name):
+        
+def StateEquation():
     
-    if (analysis_type["Time"]):
-        
-        plt.plot(range(data.shape[0]), data[:, particle], label=f'test') 
-        plt.legend(loc='best')
-        plt.xlabel('Iterations')
-        plt.ylabel('Values')
-        plt.grid(True)
-        plt.show()
-        
-    elif (analysis_type["Spacial"]):
-        
-        x = np.linspace(0.075, 1.15, len(data[iteration, :]))
-        plt.plot(x, data[iteration, :])
-        #plt.scatter(x, data[iteration, :],)
-        plt.xlabel('Height [m]')
-        plt.ylabel(f'{name}')
-        plt.grid(True)
-        plt.show()
-        
-    else:
-        print("Error, choose one type of plot.")
-        
-def plotStateEquation(rho, p, iteration):
-    
-    p_val = p[iteration, :]
-    rho_val = rho[iteration, :]
-    x = np.linspace(0.01, 1.2, len(p_val))
-    
+
+    # Arbitrary take last iteration (seeking steady-state)
+    p = np.array(pd.read_csv("output/500_pressure.csv", sep = ',', decimal='.', header=None))[-1] 
+    rho = np.array(pd.read_csv("output/500_rho.csv", sep = ',', decimal='.', header=None))[-1]
+
     c_0 = 30
     rho_0 = 1000
-    gamma = 7  # Exemple de valeur pour gamma
+    gamma = 7  
     B = (c_0**2)*rho_0/gamma
     T = 273.15+25
     M = 18e-3
     R = 8.314
-  
-    #plt.scatter(x[11:], p_val[11:])
-    #plt.scatter(x[11:], rho_val[11:])
+
+    plt.scatter(p, rho, s = 10, label = "state_equation_sph")
+
     p_compare = np.linspace(48.7799, 12397, 100)
     rho_compare = rho_0 * ((p_compare + 1) / B) ** (1 / gamma)
-    plt.xscale("log")
-    plt.plot(p_val[11:], rho_val[11:], color = 'b', label = 'SPH')
+    #plt.xscale("log")
+    #plt.plot(p_val[11:], rho_val[11:], color = 'b', label = 'SPH')
     #plt.plot(p_compare, rho_compare, color = 'r', label = 'quasi incompressible (theorical)')
     plt.xlabel("Pressure [Pa]")
     plt.ylabel(r"Density [kg/$m^3$]")
     plt.grid(True)
     plt.legend(loc = "best")
+    if(save):
+        current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
+        plt.savefig(f'{current_directory}/Pictures/state_equation.PDF')
     plt.show()
     
     
     
-def plotHydrostaticPressure(p, current_directory):
+def Hydrostatic():
 
-    rho_ref = 1023 # average density for ghost particles (using "plotSingleVariable")
+
+    p = np.array(pd.read_csv("output/Euler_p.csv", sep = ',', decimal='.', header=None))[-1]
+    rho_ref = 1000 # average density for ghost particles (using "plotSingleVariable")
     g = 9.81
-    z = np.linspace(0.25, 0.9, len(p))
-    p_th = rho_ref*g*z
+    z = np.linspace(0.05, 0.85, len(p))
+    z_th = np.linspace(0,0.8,len(p))
+    p_th = rho_ref*g*z_th
     
     print(p_th[0])
-    print(p[-1])
-    
-    print(((p[-1]-p[0])/(z[-1]-z[0]))/9.81)
+    print(p[::-1])
 
     plt.figure()
     plt.scatter(z, p[::-1], color = 'r', label = 'SPH pressure')
-    plt.plot(z, p_th, color = 'b', label = 'Theoretical hydrostatic pressure')
+    plt.plot(z_th+0.28, p_th, color = 'b', label = 'Theoretical hydrostatic pressure')
 
     plt.ylabel("Pressure [Pa]")
     plt.xlabel(r"Height [m]")
     plt.grid(True)
     plt.legend(loc = "best")
     plt.tight_layout()
-    plt.savefig(f'{current_directory}/Pictures/hydrostatic_pressure.PDF')
+    if(save):
+        current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
+        plt.savefig(f'{current_directory}/Pictures/hydrostatic.PDF')
     plt.show()
 
+def PoiseuilleFlow():
 
+
+    u_x = np.array(pd.read_csv("Euler_output/u_x.csv", sep = ',', decimal='.', header=None))[-1]
+    z = np.linspace(0.02, 1.24, len(u_x))
+
+    u_sph= u_x + 0.5
+
+    u_max = max(u_sph)
+    h = z[-1] - z[0]
+    u_analytic = u_max*((4/h)*z - (4/np.pow(h,2)*np.pow(z,2)))
+    
+    plt.figure()
+    plt.scatter(z, u_sph, s = 10, label = "sph")
+    plt.plot(z, u_sph, label = "sph", ls = "--")
+    plt.plot(z+0.02, u_analytic, label = "analytic", ls = "--") # +0.04 because we begin at the ghost particle
+    plt.legend(loc = "best")
+    if(save):
+        current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
+        plt.savefig(f'{current_directory}/Pictures/Poiseuille.PDF')
+    plt.show()
 
         
 
 def main():
     
     current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-    outputFile = os.path.dirname(current_directory) + "\\output"  
-    all_data = getData(outputFile)
-    
-    print(f"Data available : {all_data[1]}")
+    isLatex(False)
 
-    analysis_type = {"Time":False, "Spacial":True} # chose only one as "True"
-    particle = 0 # if Time plot desired, have to chose which particle to look at
-    iteration = 999-1 # if Spacial plot desired, have to chose which iteration to look at
-    
-    rho = all_data[0][1]
-    p = all_data[0][0]
+    # Put in comment what you don't want to plot
 
-    
-    name = "Pressure"
-    #name = "Rho"
-    
-    isLatex(True)
-    #plotSingleVariable(analysis_type, rho, particle, iteration, name)
-    #plotStateEquation(rho, p, iteration)
-    plotHydrostaticPressure(p[iteration,:], current_directory)
-    
-    nstepT = 200000
-    dt = 2.5e-5
-    
-    print(nstepT*dt)
+    #PoiseuilleFlow()
+    Hydrostatic()
+    #StateEquation()
+
     
     
 
- 
-
     
+
 if __name__ == "__main__":
     main()
-
-
-'''
-

@@ -66,23 +66,26 @@ void setSpeedOfSound(GeomData &geomParams,
     double gamma = thermoParams.gamma;
     int nb_part = simParams.nb_tot_part;
 
-    #pragma omp parallel for
-    for (int i = 0; i < nb_part; i++){
 
-        if (state_equation == "Ideal gaz law") c[i] = c_0;        
-        else if (state_equation == "Quasi incompresible fluid") c[i] = c_0 * pow(rho[i] / rho_0, 0.5 * (gamma - 1));
-        else {
-            cout << "Error : no state equation chosen" << endl;
-            exit(1);
-        } 
-
-        if (c[i] < 0){
-            cout << "Error, c ="<< c[i]<< " at timestep : " <<simParams.t << endl;
-            exit(1);
+    if (state_equation == "Quasi incompresible fluid") {
+        #pragma omp parallel for
+        for (int i = 0; i < nb_part; i++){
+             c[i] = c_0 * pow(rho[i] / rho_0, 0.5 * (gamma - 1));
         }
-    
     }
 
+    else if (state_equation == "Ideal gaz law"){; 
+        #pragma omp parallel for
+        for (int i = 0; i < nb_part; i++){
+             c[i] = c_0;
+        }
+    }
+
+    else {
+        cout << "Error : no state equation chosen" << endl;
+        exit(1);
+    } 
+    
         if (simParams.PRINT) cout << "setSpeedOfSound passed" << endl;
 }
 
@@ -101,24 +104,32 @@ void setPressure(GeomData &geomParams,
     int nb_moving_part = simParams.nb_moving_part;
     string state_equation = simParams.state_equation;
 
-    #pragma omp parallel for
-    for (int i = 0; i < nb_moving_part; i++){
 
-        if (state_equation == "Ideal gaz law") p[i] =  (R * T / M) * (rho[i] / rho_0 - 1);
-
-        else if (state_equation == "Quasi incompresible fluid"){
-            double B = c_0 * c_0 * rho_0 / gamma;
+    if (state_equation == "Quasi incompresible fluid"){
+        double B = c_0 * c_0 * rho_0 / gamma;
+        #pragma omp parallel for
+        for (int i = 0; i < nb_moving_part; i++){
             p[i] = B * (pow(rho[i] / rho_0, gamma) - 1);
-        }
-        else {
-            cout << "Error : no state equation chosen" << endl;
-            exit(1);
         }
     }
 
-    if (simParams.PRINT) cout << "setPressure passed" << endl;
+   else if (state_equation == "Ideal gaz law"){
+        #pragma omp parallel for
+        for (int i = 0; i < nb_moving_part; i++){
+
+         p[i] =  (R * T / M) * (rho[i] / rho_0 - 1);
+        }
+
+    }
     
+    else {
+        cout << "Error : no state equation chosen" << endl;
+        exit(1);
+    }
+
+     if (simParams.PRINT) cout << "setPressure passed" << endl;
 }
+
 
 void setArtificialViscosity(GeomData &geomParams,    
                             ThermoData &thermoParams,
