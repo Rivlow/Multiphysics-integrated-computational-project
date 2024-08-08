@@ -295,7 +295,7 @@ void momentumEquation(GeomData &geomParams,
             double rho_j = rho[j];
             double m_j = mass[j];
             double p_j = p[j];
-
+            
             for (int coord = 0; coord < 3; coord++)
                 dudt[3*i + coord] -= m_j * (p_j / (rho_j * rho_j) +
                                     p_i / (rho_i * rho_i) + pi_ij)* gradW[i][3*idx + coord];
@@ -332,7 +332,7 @@ void momentumEquation(GeomData &geomParams,
             dudt[3*i + coord] += acc_vol[3*i + coord];
             acc_res += acc_vol[3*i + coord]*acc_vol[3*i + coord];
         }
-
+        
         acc_res = sqrt(acc_res);
         simParams.acc_st_max = (simParams.acc_st_max > acc_res ? simParams.acc_st_max : acc_res );     
     }

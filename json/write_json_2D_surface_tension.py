@@ -30,7 +30,7 @@ data = {
     },
 
     "following_part": {
-        "part": True,
+        "part": False,
         "min": False,
         "max": False,
         "particle": 500,
@@ -45,8 +45,8 @@ data = {
     "matrix_long" : np.round(np.array([[L, s/2, L]]), decimals = 4).tolist(),
     "matrix_orig" : np.round(np.array([[L, 0, L]]), decimals = 4).tolist(),
     "sphere": {
-                "do": [0, 0, 0, 0, 0, 0, 0],
-                "radius": [0.3]
+                "do": [0],
+                "radius": [L/2]
               },
     "vector_type" : [1],
     "L_d": np.round(np.array([3*L, 5*s, 3*L]), decimals = 4).tolist(),

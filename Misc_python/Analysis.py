@@ -5,6 +5,8 @@ import numpy as np
 import sys
 import pandas as pd
 
+#fig1, (ax1, ax2) = plt.subplots(1, 2, figsize=(19, 7))
+# plt.figure(figsize=(8.5, 5))
 save = False
 
 def isLatex(latex):
@@ -61,10 +63,11 @@ def Hydrostatic():
 
 
     p = np.array(pd.read_csv("output/Euler_p.csv", sep = ',', decimal='.', header=None))[-1]
+    time = np.array(pd.read_csv("output/time.csv", sep = ',', decimal='.', header=None))[100]
     rho_ref = 1000 # average density for ghost particles (using "plotSingleVariable")
     g = 9.81
-    z = np.linspace(0.05, 0.85, len(p))
-    z_th = np.linspace(0,0.8,len(p))
+    z = np.linspace(0.05, 1.15, len(p))
+    z_th = np.linspace(0,1.1,len(p))
     p_th = rho_ref*g*z_th
     
     print(p_th[0])
@@ -87,26 +90,44 @@ def Hydrostatic():
 def PoiseuilleFlow():
 
 
-    u_x = np.array(pd.read_csv("Euler_output/u_x.csv", sep = ',', decimal='.', header=None))[-1]
-    z = np.linspace(0.02, 1.24, len(u_x))
+    u_x = np.array(pd.read_csv("output/Euler_u_x.csv", sep = ',', decimal='.', header=None))[300]
+    z = np.linspace(0.05, 1.3, len(u_x))
 
     u_sph= u_x + 0.5
 
     u_max = max(u_sph)
     h = z[-1] - z[0]
-    u_analytic = u_max*((4/h)*z - (4/np.pow(h,2)*np.pow(z,2)))
+    print(z)
+    u_analytic = u_max*((4/h)*z - (4/np.power(h,2)*np.power(z,2)))
     
     plt.figure()
-    plt.scatter(z, u_sph, s = 10, label = "sph")
-    plt.plot(z, u_sph, label = "sph", ls = "--")
-    plt.plot(z+0.02, u_analytic, label = "analytic", ls = "--") # +0.04 because we begin at the ghost particle
+    plt.scatter(z[1:-1], u_sph[1:-1], s = 10, label = "sph")
+    plt.plot(z[1:-1], u_sph[1:-1], label = "sph", ls = "--")
+    plt.plot(z[0:-2]+0.05, u_analytic[0:-2], label = "analytic", ls = "--") # +0.04 because we begin at the ghost particle
     plt.legend(loc = "best")
     if(save):
         current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
         plt.savefig(f'{current_directory}/Pictures/Poiseuille.PDF')
     plt.show()
 
-        
+def dam_break(): 
+
+    pos_x = np.array(pd.read_csv("output/max_pos_x.csv", sep=',', decimal='.', header=None).astype(float))     
+    time = np.array(pd.read_csv("output/time.csv", sep=',', decimal='.', header=None).astype(float))
+
+    L = 0.2
+    s= 0.05
+    time_ad = time * np.sqrt(2 * 9.81 / L)
+    pos_ad = (pos_x -3*s/2)/ L
+
+    plt.scatter(time_ad, pos_ad )
+    plt.xlim(0,4)
+    plt.xlabel("Position (adimensionnée)")
+    plt.ylabel("Temps (adimensionné)")
+    plt.title("Graphique de la position en fonction du temps")
+    plt.show()
+
+
 
 def main():
     
@@ -116,9 +137,9 @@ def main():
     # Put in comment what you don't want to plot
 
     #PoiseuilleFlow()
-    Hydrostatic()
+    #Hydrostatic()
     #StateEquation()
-
+    dam_break()
     
     
 

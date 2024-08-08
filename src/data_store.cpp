@@ -164,15 +164,9 @@ void finding_max(string name,
     }
     ostringstream oss;
     oss << fixed << setprecision(6) << max;
-    string data_part_str = oss.str();
+    
 
-    for (char& ch : data_part_str) {
-        if (ch == '.') {
-            ch = ',';
-        }
-    }
-
-    output_name << "\"" << data_part_str << "\"" << "\n";
+    output_name << "\"" << max << "\"" << "\n";
 
     output_name.close();
 }

@@ -57,6 +57,7 @@ void updateVariables(GeomData &geomParams,
                            pos, u, drhodt, rho, mass); 
 
         // Compute D(u)/Dt for moving particles
+        
         momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW, 
                          W, viscosity, mass, dudt, rho, p, c, pos, u, type, colour, R, L, N, normal, acc_vol, track_particle, Kappa, dot_product); 
 

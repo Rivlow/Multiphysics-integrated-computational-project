@@ -1,60 +1,83 @@
 {
     "simulation": {
         "theta": 0.5,
-        "s": 0.1,
-        "nstepT": 25000,
+        "s": 0.01,
+        "nstepT": 250000,
         "dt": 0.0001,
-        "nsave": 100.0,
+        "nsave": 250,
         "kappa": 2,
-        "alpha": 1,
+        "alpha": 0.5,
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 1.2,
-        "dimension": 3
+        "dimension": 2,
+        "schemeIntegration": {
+            "Euler": true,
+            "RK22": false
+        },
+        "comparison_algorithm": false
+    },
+    "following_part": {
+        "part": false,
+        "min": false,
+        "max": true,
+        "particle": 1,
+        "pressure": false,
+        "rho": false,
+        "position": [
+            true,
+            false,
+            false
+        ],
+        "velocity": [
+            false,
+            false,
+            false
+        ]
     },
     "domain": {
         "matrix_long": [
             [
-                0.48,
-                0.05,
-                0.96
+                0.25,
+                0.005,
+                0.5
             ],
             [
-                1.2,
-                0.05,
-                0.05
+                1.03,
+                0.005,
+                0.005
             ],
             [
-                1.2,
-                0.05,
-                0.05
+                1.02,
+                0.005,
+                0.005
             ],
             [
-                0.05,
-                0.05,
-                1.2
+                0.005,
+                0.005,
+                1.0
             ],
             [
-                0.05,
-                0.05,
-                1.2
+                0.005,
+                0.005,
+                1.01
             ],
             [
-                0.05,
-                0.05,
-                1.2
+                0.005,
+                0.005,
+                1.01
             ],
             [
-                0.05,
-                0.05,
-                1.15
+                0.005,
+                0.005,
+                1.0
             ]
         ],
         "matrix_orig": [
             [
-                0.2,
-                0,
-                0.2
+                0.015,
+                0.0,
+                0.02
             ],
             [
                 0,
@@ -62,31 +85,50 @@
                 0
             ],
             [
-                0.05,
-                0,
-                0.05
+                0.005,
+                0.0,
+                0.005
             ],
             [
-                0.05,
-                0,
-                0.15000000000000002
+                0.005,
+                0.0,
+                0.015
             ],
             [
-                0,
-                0,
-                0.1
+                0.0,
+                0.0,
+                0.01
             ],
             [
-                1,
-                0,
-                0.1
+                1.03,
+                0.0,
+                0.01
             ],
             [
-                1.25,
-                0,
-                0.15000000000000002
+                1.025,
+                0.0,
+                0.015
+            ],
+            [
+                1.005,
+                0.0,
+                0.015
             ]
         ],
+        "sphere": {
+            "do": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "radius": [
+                0.3
+            ]
+        },
         "vector_type": [
             1,
             0,
@@ -97,9 +139,9 @@
             0
         ],
         "L_d": [
-            2,
-            2,
-            2
+            1.25,
+            0.04,
+            1.25
         ],
         "o_d": [
             0.0,
@@ -110,14 +152,14 @@
     "post_process": {
         "do": false,
         "xyz_init": [
-            0.5,
-            0,
-            0.1
+            0.125,
+            0.0,
+            0.01
         ],
         "xyz_end": [
-            0.5,
-            0,
-            1.0
+            0.125,
+            0.0,
+            0.23
         ]
     },
     "thermo": {
@@ -143,10 +185,6 @@
     },
     "condition": {
         "print_debug": false,
-        "schemeIntegration": {
-            "Euler": true,
-            "RK22": false
-        },
         "stateEquation": {
             "Ideal gaz law": false,
             "Quasi incompresible fluid": true

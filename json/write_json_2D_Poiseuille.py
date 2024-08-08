@@ -3,12 +3,12 @@ import os
 import sys
 import numpy as np
 
-s = 0.2
+s = 0.05
 L = 1.2
 
 dt = 0.00001
 nsave = 500
-nstepT = nsave*5
+nstepT = nsave*300
 
 
 data = {
@@ -43,10 +43,10 @@ data = {
     "domain": {
         "matrix_long": [
             np.round(np.array([6*L, s/2, L]), decimals = 4).tolist(), # fluid
-            np.round(np.array([12*L, s/2, s/2]), decimals = 4).tolist(), # floor 1
-            np.round(np.array([12*L, s/2, s/2]), decimals = 4).tolist(), # floor 2
-            np.round(np.array([12*L, s/2, s/2]), decimals = 4).tolist(), # roof wall 1
-            np.round(np.array([12*L, s/2, s/2]), decimals = 4).tolist(), # roof wall 2
+            np.round(np.array([9*L, s/2, s/2]), decimals = 4).tolist(), # floor 1
+            np.round(np.array([9*L, s/2, s/2]), decimals = 4).tolist(), # floor 2
+            np.round(np.array([9*L, s/2, s/2]), decimals = 4).tolist(), # roof wall 1
+            np.round(np.array([9*L, s/2, s/2]), decimals = 4).tolist(), # roof wall 2
         ],
         "matrix_orig": [
             np.round(np.array([L, 0, s]), decimals = 4).tolist(), # fluid
@@ -60,7 +60,7 @@ data = {
                 "radius": [0.3]
             },
         "vector_type": [1, 0, 0, 0, 0],
-        "L_d": np.round(np.array([9*L, 3*L, 3*L]), decimals = 4).tolist(),
+        "L_d": np.round(np.array([9*L, 4*s, 1.5*L]), decimals = 4).tolist(),
         "o_d": np.round(np.array([0.0, 0.0, 0.0]), decimals = 4).tolist()
     },
     "post_process": {
