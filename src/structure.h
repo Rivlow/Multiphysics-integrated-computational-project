@@ -71,7 +71,8 @@ struct SimulationData {
     string state_initial_condition;
     string kernel;
     bool is_gravity;
-    bool is_surface_tension;
+    bool is_surface_tension_1;
+    bool is_surface_tension_2;
     bool is_adhesion;
     bool PRINT;
     bool comparison_algorithm;

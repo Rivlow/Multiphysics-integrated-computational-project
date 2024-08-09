@@ -199,8 +199,9 @@
     },
     "forces": {
         "gravity": true,
-        "surface_tension": false,
-        "adhesion": false
+        "surface_tension_1": false,
+        "surface_tension_2": false,
+        "adhesion": true
     },
     "condition": {
         "print_debug": false,

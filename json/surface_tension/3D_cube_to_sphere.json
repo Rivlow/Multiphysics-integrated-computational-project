@@ -1,88 +1,90 @@
 {
     "simulation": {
         "theta": 0.5,
-        "s": 0.1,
-        "nstepT": 50000,
-        "dt": 1e-05,
-        "nsave":250,
+        "s": 0.0005,
+        "nstepT": 100000,
+        "dt": 1e-06,
+        "nsave": 250,
         "kappa": 2,
-        "alpha": 0.05,
+        "alpha": 0.5,
         "beta": 0,
         "alpha_st": 1,
         "beta_adh": 1.2,
-        "dimension": 3
+        "dimension": 2,
+        "schemeIntegration": {
+            "Euler": true,
+            "RK22": false
+        },
+        "comparison_algorithm": false
+    },
+    "following_part": {
+        "part": false,
+        "min": false,
+        "max": false,
+        "particle": 500,
+        "pressure": true,
+        "rho": true,
+        "position": [
+            false,
+            false,
+            false
+        ],
+        "velocity": [
+            false,
+            false,
+            false
+        ]
     },
     "domain": {
         "matrix_long": [
             [
-                1,
-                1,
-                1
+                0.01,
+                0.01,
+                0.01
             ]
         ],
         "matrix_orig": [
             [
-                1,
-                1,
-                1
+                0.01,
+                0.01,
+                0.01
             ]
-            
-        ],
-        "vector_type": [
-            1
-        ],
-        "L_d": [
-            3,
-            3,
-            3
-        ],
-        "o_d": [
-            0.0,
-            0.0,
-            0.0
         ],
         "sphere": {
             "do": [
                 0
             ],
             "radius": [
-                0.3
+                0.005
             ]
-        }
+        },
+        "vector_type": [
+            1
+        ],
+        "L_d": [
+            0.03,
+            0.03,
+            0.03
+        ],
+        "o_d": [
+            0.0,
+            0.0,
+            0.0
+        ]
     },
     "post_process": {
         "do": false,
         "xyz_init": [
-            0.615,
-            0.615,
-            0.01
+            0.0,
+            0.015,
+            0.015
         ],
         "xyz_end": [
-            0.615,
-            0.615,
-            1.2
+            0.03,
+            0.015,
+            0.015
         ]
     },
-    "comparaison_algorithm" : false,
-    "following_part": {
-        "part": false,
-        "min": false,
-        "max": false,
-        "particle": 50,
-        "pressure": 0,
-        "rho": 0,
-        "position": [
-            0,
-            0,
-            1
-        ],
-        "velocity": [
-            0,
-            0,
-            0
-        ]
-    },
-    
     "thermo": {
         "rho_0": 1000,
         "rho_moving": 1000,
@@ -93,23 +95,20 @@
             0.0,
             0.0
         ],
-        "c_0": 30,
+        "c_0": 1,
         "gamma": 7,
         "M": 0.018,
         "R": 8.314,
-        "sigma": 52000
+        "sigma": 0.1
     },
     "forces": {
         "gravity": false,
-        "surface_tension": true,
+        "surface_tension_1": true,
+        "surface_tension_2": false,
         "adhesion": false
     },
     "condition": {
         "print_debug": false,
-        "schemeIntegration": {
-            "Euler": true,
-            "RK22": false
-        },
         "stateEquation": {
             "Ideal gaz law": false,
             "Quasi incompresible fluid": true

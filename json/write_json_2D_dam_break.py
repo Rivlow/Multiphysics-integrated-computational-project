@@ -89,7 +89,8 @@ data = {
     },
     "forces": {
         "gravity": True,
-        "surface_tension": False,
+        "surface_tension_1": False,
+        "surface_tension_2": False,
         "adhesion": False
     },
     "condition": {

@@ -6,9 +6,9 @@ import numpy as np
 s = 5e-4
 L = 0.01
 
-dt = 0.00001
-nsave = 500 
-nstepT = nsave*500
+dt = 1e-6
+nsave = 250 
+nstepT = nsave*400
 
 
 data = {
@@ -20,9 +20,9 @@ data = {
         "dt": dt,
         "nsave": nsave,
         "kappa": 2,
-        "alpha": 1,
+        "alpha": 0.5,
         "beta": 0,
-        "alpha_st": 10,
+        "alpha_st": 1,
         "beta_adh": 1.2,
         "dimension": 2,
         "schemeIntegration": {"Euler": True, "RK22": False},
@@ -42,14 +42,14 @@ data = {
     
 
   "domain":{
-    "matrix_long" : np.round(np.array([[L, s/2, L]]), decimals = 7).tolist(),
-    "matrix_orig" : np.round(np.array([[L, 0, L]]), decimals = 7).tolist(),
+    "matrix_long" : np.round(np.array([[L, L, L]]), decimals = 7).tolist(),
+    "matrix_orig" : np.round(np.array([[L, L, L]]), decimals = 7).tolist(),
     "sphere": {
                 "do": [0],
                 "radius": [L/2]
               },
     "vector_type" : [1],
-    "L_d": np.round(np.array([3*L, 5*s, 3*L]), decimals = 7).tolist(),
+    "L_d": np.round(np.array([3*L, 3*L, 3*L]), decimals = 7).tolist(),
     "o_d": np.round(np.array([0.0, 0.0, 0.0]), decimals = 7).tolist()
   },
 
@@ -90,7 +90,7 @@ data = {
 
 # Do not modify what is below
 current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-json_src = f"surface_tension/2D_cube_to_sphere.json"
+json_src = f"surface_tension/3D_cube_to_sphere.json"
 
 with open(f'{current_directory}/{json_src}', 'w') as json_file:
     json.dump(data, json_file, indent=4)

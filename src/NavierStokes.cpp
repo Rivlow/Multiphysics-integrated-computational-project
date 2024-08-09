@@ -19,7 +19,6 @@ void computeGradW(GeomData &geomParams,
                   vector<double> nb_neighbours,
                   vector<double> pos){
 
-
     int nb_tot_part = simParams.nb_tot_part;
 
         // Iterations over each particle
@@ -221,8 +220,6 @@ void continuityEquation(SimulationData &simParams,
             }
             
             drhodt[i] += mass[j] * dot_product;
-     
-      
         }
     }
 
@@ -268,8 +265,12 @@ void momentumEquation(GeomData &geomParams,
     // Compute artificial viscosity Π_ab for all particles
     setArtificialViscosity(geomParams, thermoParams, simParams, viscosity, 
                            neighbours, nb_neighbours, c, pos, rho, u); 
-    
-    if (simParams.is_surface_tension){
+    if(simParams.is_surface_tension_1){
+
+        surfaceTension( simParams, geomParams, thermoParams, nb_neighbours, neighbours, gradW, W,
+                             mass, rho, pos, acc_vol, type, normal);
+    }
+    else if (simParams.is_surface_tension_2){
         InterfaceTrackingMath(simParams, geomParams, thermoParams,
                               nb_neighbours, neighbours, gradW,
                               mass, rho, type,pos, track_particle);
@@ -278,7 +279,6 @@ void momentumEquation(GeomData &geomParams,
                               gradW, W, mass, rho, pos, type, colour, R, L, i, normal, acc_vol, track_particle, Kappa, dot_product);
     }
 
-    
     // Iterate over each particle
     #pragma omp parallel for
     for (int i = 0; i < nb_moving_part; i++){

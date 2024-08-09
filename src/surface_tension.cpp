@@ -14,7 +14,7 @@
 
 using namespace std;
 
-/*
+
 void surfaceTension(SimulationData& simParams,
                     GeomData &geomParams,
                     ThermoData &thermoParams,
@@ -27,9 +27,9 @@ void surfaceTension(SimulationData& simParams,
                     vector<double> pos,
                     vector<double> &F_vol,
                     vector<double> type,
-                    vector<double> normal_grad){
+                    vector<double> normal){
 
-    vector<double> normal(3*simParams.nb_moving_part,0.0);
+   
     //#pragma omp parallel for 
     for(int i = 0; i<simParams.nb_moving_part; i++){
 
@@ -71,7 +71,7 @@ void surfaceTension(SimulationData& simParams,
                 }
                 
                 r_ab = sqrt(r_ab);
-                double W_ab = W_coh(r_ab,geomParams.kappa*geomParams.h, simParams);
+                double W_ab = WCoh(r_ab, geomParams, simParams);
                 
                 double m_a = mass[i];
                 double m_b = mass[j];
@@ -86,12 +86,12 @@ void surfaceTension(SimulationData& simParams,
                     F_res += F_vol[3*i + coord]*F_vol[3*i + coord];
                 }
                 
-                simParams.F_st_max = sqrt(F_res);
+                simParams.acc_st_max = sqrt(F_res);
             }
         }     
     }  
 }
-*/
+
 
 
 void InterfaceTrackingMath(SimulationData simParams,
@@ -407,8 +407,7 @@ void surfaceTensionImprove(SimulationData& simParams,
         simParams.acc_st_max = sqrt(acc_res);
 
     }
-    //printArray(imaginary_part1, imaginary_part1.size(), "im 1 ");
-    //printArray(imaginary_part2, imaginary_part2.size(), "im 2 ");
+    
     if (simParams.PRINT) cout << "surfaceTensionImprove passed" << endl;
 
 }

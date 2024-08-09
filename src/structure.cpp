@@ -81,7 +81,8 @@ void initializeStruct(json data,
     simParams.state_initial_condition = state_initial_condition;
     simParams.kernel = kernel;
     simParams.is_gravity = data["forces"]["gravity"];
-    simParams.is_surface_tension = data["forces"]["surface_tension"];
+    simParams.is_surface_tension_1 = data["forces"]["surface_tension_1"];
+    simParams.is_surface_tension_2 = data["forces"]["surface_tension_2"];
     simParams.is_adhesion = data["forces"]["adhesion"];
     simParams.PRINT = data["condition"]["print_debug"];
     simParams.comparison_algorithm  = data["simulation"]["comparison_algorithm"];
