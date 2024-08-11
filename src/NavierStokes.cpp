@@ -176,9 +176,7 @@ void setArtificialViscosity(GeomData &geomParams,
 
                 viscosity[i][idx] = (u_ij_x_ij < 0) ? 
                 (-alpha * c_ij * mu_ab + beta * mu_ab * mu_ab) / rho_ij : 0;
-                //double nu = 0.00001;
-                //viscosity[i][idx] = (u_ij_x_ij < 0) ? 
-                //(- 16* nu  * mu_ab/h + beta * mu_ab * mu_ab) / rho_ij : 0;
+                
             }
         }
     }
@@ -265,12 +263,14 @@ void momentumEquation(GeomData &geomParams,
     // Compute artificial viscosity Π_ab for all particles
     setArtificialViscosity(geomParams, thermoParams, simParams, viscosity, 
                            neighbours, nb_neighbours, c, pos, rho, u); 
+   
     if(simParams.is_surface_tension_1){
-
+        cout << "surface tension 1 " << endl;
         surfaceTension( simParams, geomParams, thermoParams, nb_neighbours, neighbours, gradW, W,
                              mass, rho, pos, acc_vol, type, normal);
     }
     else if (simParams.is_surface_tension_2){
+        cout << "surface tension 2 " << endl;
         InterfaceTrackingMath(simParams, geomParams, thermoParams,
                               nb_neighbours, neighbours, gradW,
                               mass, rho, type,pos, track_particle);
@@ -296,10 +296,11 @@ void momentumEquation(GeomData &geomParams,
             double m_j = mass[j];
             double p_j = p[j];
             
-            for (int coord = 0; coord < 3; coord++)
+            for (int coord = 0; coord < 3; coord++){
                 dudt[3*i + coord] -= m_j * (p_j / (rho_j * rho_j) +
                                     p_i / (rho_i * rho_i) + pi_ij)* gradW[i][3*idx + coord];
-            
+            }
+                
             if (simParams.is_adhesion){
                 
                 double beta_ad = simParams.beta_adh;
@@ -315,10 +316,11 @@ void momentumEquation(GeomData &geomParams,
                 r_ij = sqrt(r_ij);
                 double W_ij = WAdh(r_ij, geomParams, simParams);
 
-
+                double boundary = 1.0 - type[j];
                 for (int coord = 0; coord < 3; coord++){
-                    double boundary = 1.0 - type[j];
+                    
                     acc_vol[3*i + coord] -= beta_ad*boundary*mass[i]*m_j*W_ij*d_xyz[coord]/r_ij;
+                    
                 }
             } 
         }

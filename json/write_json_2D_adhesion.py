@@ -6,7 +6,7 @@ import numpy as np
 s = 1e-3
 L = 1e-2
 
-dt =  1e-6
+dt = 0.5e-6
 nsave = 1000
 nstepT = nsave*500
 
@@ -19,10 +19,10 @@ data = {
         "dt": dt,
         "nsave": nsave,
         "kappa": 2,
-        "alpha": 0.01,
+        "alpha": 0.05,
         "beta": 0,
         "alpha_st": 10,
-        "beta_adh": 10,
+        "beta_adh": 1.2,
         "dimension": 2,
         "schemeIntegration": {"Euler": True, "RK22": False},
         "comparison_algorithm": False,
@@ -40,13 +40,13 @@ data = {
     },
     
   "domain":{
-    "matrix_long" : [np.round(np.array([L, L, L]), decimals = 4).tolist(), 
-                     np.round(np.array([3*L/2, 3*L/2, s/4]), decimals = 4).tolist(),
-                     np.round(np.array([3*L/2-s, 3*L/2-s, s/4]), decimals = 4).tolist()
+    "matrix_long" : [np.round(np.array([L, s/2, L]), decimals = 4).tolist(), 
+                     np.round(np.array([3*L, s/2, s/4]), decimals = 4).tolist(),
+                     np.round(np.array([3*L-s,s/2, s/4]), decimals = 4).tolist()
                     ],
-    "matrix_orig" : [np.round(np.array([L, L, L + s/2]), decimals = 4).tolist(), 
-                     np.round(np.array([3*L/4, 3*L/4, 2*L+s+s/4]), decimals = 4).tolist(),
-                     np.round(np.array([3*L/4+s/2, 3*L/4+s/2, 2*L+0.75*s]), decimals = 4).tolist()
+    "matrix_orig" : [np.round(np.array([L, 0, L + s/2]), decimals = 4).tolist(), 
+                     np.round(np.array([0, 0, 2*L+s+s/4]), decimals = 4).tolist(),
+                     np.round(np.array([s/2,0, 2*L+0.75*s]), decimals = 4).tolist()
                     ],
 
     "sphere": {
@@ -55,7 +55,7 @@ data = {
       },
 
     "vector_type" : [1, 0, 0],
-    "L_d": np.round(np.array([3*L, 3*L, 3*L]), decimals = 4).tolist(),
+    "L_d": np.round(np.array([3*L, 4*s, 3*L]), decimals = 4).tolist(),
     "o_d": [0.0, 0.0, 0.0],
 
   },
@@ -85,7 +85,7 @@ data = {
     "gravity":True,
     "surface_tension_1": False,
     "surface_tension_2": False,
-    "adhesion":False
+    "adhesion":True
   },
 
   "condition":{
@@ -97,7 +97,7 @@ data = {
 
 # Do not modify what is below
 current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-json_src = f"adhesion/3D_adhesion.json"
+json_src = f"adhesion/2D_adhesion.json"
 
 with open(f'{current_directory}/{json_src}', 'w') as json_file:
     json.dump(data, json_file, indent=4)

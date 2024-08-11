@@ -1,12 +1,12 @@
 {
     "simulation": {
         "theta": 0.5,
-        "s": 0.0005,
-        "nstepT": 375000,
-        "dt": 1e-06,
-        "nsave": 500,
+        "s": 0.001,
+        "nstepT": 500000,
+        "dt": 5e-07,
+        "nsave": 1000,
         "kappa": 2,
-        "alpha": 0.5,
+        "alpha": 0.05,
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 1.2,
@@ -39,31 +39,55 @@
         "matrix_long": [
             [
                 0.01,
-                0.00025,
+                0.0005,
                 0.01
+            ],
+            [
+                0.03,
+                0.0005,
+                0.0002
+            ],
+            [
+                0.029,
+                0.0005,
+                0.0002
             ]
         ],
         "matrix_orig": [
             [
                 0.01,
                 0.0,
-                0.01
+                0.0105
+            ],
+            [
+                0.0,
+                0.0,
+                0.0213
+            ],
+            [
+                0.0005,
+                0.0,
+                0.0208
             ]
         ],
         "sphere": {
             "do": [
+                0,
+                0,
                 0
             ],
             "radius": [
-                0.005
+                0.3
             ]
         },
         "vector_type": [
-            1
+            1,
+            0,
+            0
         ],
         "L_d": [
             0.03,
-            0.0025,
+            0.004,
             0.03
         ],
         "o_d": [
@@ -76,12 +100,12 @@
         "do": false,
         "xyz_init": [
             0.0,
-            0.015,
+            0.0,
             0.015
         ],
         "xyz_end": [
             0.03,
-            0.015,
+            0.0,
             0.015
         ]
     },
@@ -95,17 +119,17 @@
             0.0,
             0.0
         ],
-        "c_0": 15,
+        "c_0": 30,
         "gamma": 7,
         "M": 0.018,
         "R": 8.314,
-        "sigma": 0.1
+        "sigma": 0.0728
     },
     "forces": {
-        "gravity": false,
+        "gravity": true,
         "surface_tension_1": false,
-        "surface_tension_2": true,
-        "adhesion": false
+        "surface_tension_2": false,
+        "adhesion": true
     },
     "condition": {
         "print_debug": false,

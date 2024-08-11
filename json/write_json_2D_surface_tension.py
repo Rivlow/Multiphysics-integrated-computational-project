@@ -6,9 +6,9 @@ import numpy as np
 s = 5e-4
 L = 0.01
 
-dt = 0.00001
+dt = 1e-6
 nsave = 500 
-nstepT = nsave*500
+nstepT = nsave*750
 
 
 data = {
@@ -20,7 +20,7 @@ data = {
         "dt": dt,
         "nsave": nsave,
         "kappa": 2,
-        "alpha": 1,
+        "alpha": 0.1,
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 1.2,
@@ -66,7 +66,7 @@ data = {
     "rho_fixed" : 1000,
     "T": 298.15,
     "u_init": np.round(np.array([0.0, 0.0, 0.0]), decimals = 7).tolist(),
-    "c_0": 1, 
+    "c_0": 15, 
     "gamma": 7, 
     "M": 18e-3, 
     "R":8.314,
@@ -76,8 +76,8 @@ data = {
 
   "forces":{
     "gravity":False,
-    "surface_tension_1": True,
-    "surface_tension_2": False,
+    "surface_tension_1": False,
+    "surface_tension_2": True,
     "adhesion":False
   },
 
