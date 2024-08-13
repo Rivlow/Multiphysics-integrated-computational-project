@@ -13,6 +13,8 @@ nstepT = nsave*750
 
 data = {
     
+    "name_file" : "2D_surface_tension",
+
     "simulation": {
         "theta": 0.5,
         "s": s,

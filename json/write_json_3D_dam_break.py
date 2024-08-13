@@ -12,6 +12,8 @@ nstepT = nsave*300
 
 
 data = {
+
+    "name_file" : "3D_dam_break",
     
     "simulation": {
         "theta": 0.5,

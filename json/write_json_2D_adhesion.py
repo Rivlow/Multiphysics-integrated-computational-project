@@ -12,6 +12,8 @@ nstepT = nsave*250
 
 data = {
     
+    "name_file" : "2D_adhesion",
+
     "simulation": {
         "theta": 0.5,
         "s": s,

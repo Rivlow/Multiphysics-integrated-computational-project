@@ -13,6 +13,8 @@ nstepT = nsave*300
 
 data = {
     
+    "name_file" : "2D_hydrostatic",
+
     "simulation": {
         "theta": 0.5,
         "s": s,

@@ -12,6 +12,8 @@ nstepT = nsave*400
 
 
 data = {
+
+    "name_file" : "2D_drop_fall",
     
     "simulation": {
         "theta": 0.5,

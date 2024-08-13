@@ -21,6 +21,7 @@ void extractData(GeomData &geomParams,
                  SimulationData &simParams,
                  ThermoData &thermoParams,
                  string schemeIntegration,
+                 string name_file,
                  vector<double> &pos,  
                  vector<double> &p, 
                  vector<double> &mass,
@@ -49,10 +50,11 @@ void finding_min(string name,
 
 void follow_part_data(GeomData &geomParams,
                       SimulationData& simParams,
+                      string name_file,
                       vector<double> p,
                       vector<double> rho,
                       vector<double> pos,
                       vector<double> u);
 
-void writing_time(vector<double> vec_time);
+void writing_time(vector<double> vec_time, string name_file);
 

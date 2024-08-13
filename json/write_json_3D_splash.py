@@ -6,11 +6,13 @@ import numpy as np
 s = 0.05
 L = 1.2
 
-dt = 0.00005
-nsave = 500
-nstepT = nsave*300
+dt = 0.0001
+nsave = 250
+nstepT = nsave*50
 
 data = {
+
+    "name_file" : "3D_splash",
     
     "simulation": {
         "theta": 0.5,
@@ -33,9 +35,9 @@ data = {
         "min": False,
         "max": False,
         "particle": 500,
-        "pressure": True,
-        "rho": True,
-        "position": [False, False, False],
+        "pressure": False,
+        "rho": False,
+        "position": [False, False, True],
         "velocity": [False, False, False],
     },
     

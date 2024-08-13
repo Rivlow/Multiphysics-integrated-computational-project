@@ -16,6 +16,7 @@ void extractData(GeomData &geomParams,
                  SimulationData &simParams,
                  ThermoData &thermoParams,
                  string schemeIntegration,
+                 string name_file,
                  vector<double> &pos,  
                  vector<double> &p, 
                  vector<double> &mass,
@@ -24,7 +25,7 @@ void extractData(GeomData &geomParams,
                  vector<double> &nb_neighbours,
                  vector<double> rho){
 
-    string outputDir = "../../output/" + schemeIntegration + "_" ;
+    string outputDir = "../../output/" + schemeIntegration + "_" + name_file + "_";
     string outputFile_rho = outputDir +"rho.csv";
     string outputFile_p = outputDir + "p.csv";
     string outputFile_u_x = outputDir + "u_x.csv";
@@ -130,15 +131,9 @@ void writing_in_file(string name,
     
     ostringstream oss;
     oss << fixed << setprecision(6) << data_part;
-    string data_part_str = oss.str();
+    
 
-    for (char& ch : data_part_str) {
-        if (ch == '.') {
-            ch = ',';
-        }
-    }
-
-    output_name << "\"" << data_part_str << "\"" << "\n";
+    output_name <<  data_part << "\n";
 
     output_name.close();
 
@@ -166,7 +161,7 @@ void finding_max(string name,
     oss << fixed << setprecision(6) << max;
     
 
-    output_name << "\"" << max << "\"" << "\n";
+    output_name << max << "\n";
 
     output_name.close();
 }
@@ -192,21 +187,16 @@ void finding_min(string name,
     }
     ostringstream oss;
     oss << fixed << setprecision(6) << min;
-    string data_part_str = oss.str();
+    
 
-    for (char& ch : data_part_str) {
-        if (ch == '.') {
-            ch = ',';
-        }
-    }
-
-    output_name << "\"" << data_part_str << "\"" << "\n";
+    output_name <<  min << "\n";
 
     output_name.close();
 }
 
 void follow_part_data(GeomData &geomParams,
                       SimulationData& simParams,
+                      string name_file,
                       vector<double> p,
                       vector<double> rho,
                       vector<double> pos,
@@ -219,12 +209,18 @@ void follow_part_data(GeomData &geomParams,
         fs::create_directories(outputDir);
         cout << "Create following particle files" <<endl;
     }
-    string outputFile_part = outputDir + "/";
+
+    outputDir = outputDir + "/csv";
+    if (!fs::exists(outputDir)){
+        fs::create_directories(outputDir);
+        cout << "Create following particle files" <<endl;
+    }
+    string outputFile_part = outputDir + "/" + name_file + "_";
 
 
     if(geomParams.following_part_p){
         if(geomParams.following_part_bool){
-            string outputFile_part_press = outputFile_part+ std::to_string(particle) +"_pressure" + ".csv";
+            string outputFile_part_press = outputFile_part + std::to_string(particle) +"_pressure" + ".csv";
             writing_in_file(outputFile_part_press, p, particle,  1, 0);
         }
         if(geomParams.following_part_max){
@@ -362,7 +358,7 @@ void follow_part_data(GeomData &geomParams,
 
 }
 
-void writing_time(vector<double> vec_time){
+void writing_time(vector<double> vec_time, string name_file){
 
     string outputDir = "../../output";
 
@@ -370,7 +366,13 @@ void writing_time(vector<double> vec_time){
         fs::create_directories(outputDir);
         cout << "Create following particle files" <<endl;
     }
-    string outputFile_part = outputDir + "/" + "time" + ".csv";
+
+    outputDir = outputDir + "/csv";
+    if (!fs::exists(outputDir)){
+        fs::create_directories(outputDir);
+        cout << "Create following particle files" <<endl;
+    }
+    string outputFile_part = outputDir + "/" + name_file + "_time" + ".csv";
 
     ofstream output_name(outputFile_part, ios::app);
 
@@ -383,7 +385,7 @@ void writing_time(vector<double> vec_time){
         ostringstream oss;
         oss << fixed << setprecision(6) << vec_time[i];
         string data_part_str = oss.str();
-        output_name << "\"" << data_part_str << "\"" << "\n";
+        output_name  << data_part_str << "\n";
     }
 
     output_name.close();

@@ -12,6 +12,8 @@ nstepT = nsave*300
 
 data = {
     
+    "name_file" : "comprarison",
+
     "simulation": {
         "theta": 0.5,
         "s": s,

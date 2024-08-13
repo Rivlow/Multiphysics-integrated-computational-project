@@ -68,6 +68,7 @@ int main(int argc, char *argv[])
     string state_initial_condition;
     string schemeIntegration;
     string kernel;
+    string name_file = data["name_file"];
 
     GeomData geomParams;
     SimulationData simParams;
@@ -194,14 +195,12 @@ int main(int argc, char *argv[])
 
         // Save data each "nsave" iterations
         if(t % simParams.nsave == 0){
-            if(geomParams.post_process_do || geomParams.following_part_bool ||
-               geomParams.following_part_max || geomParams.following_part_min){
-
-                    if (geomParams.post_process_do)
-                        extractData(geomParams, simParams, thermoParams, schemeIntegration, pos, p, mass, u, neighbours, nb_neighbours, rho);
-                    if (geomParams.following_part_bool || geomParams.following_part_max || geomParams.following_part_min)
-                        follow_part_data(geomParams,simParams, p, rho, pos, u);
-               }
+    
+            if (geomParams.post_process_do)
+                extractData(geomParams, simParams, thermoParams, schemeIntegration, name_file, pos, p, mass, u, neighbours, nb_neighbours, rho);
+            if (geomParams.following_part_bool || geomParams.following_part_max || geomParams.following_part_min)
+                follow_part_data(geomParams,simParams, name_file, p, rho, pos, u);
+               
                 
             export_particles("../../output/sph", t, pos, scalars, vectors, false);
             auto t_act = chrono::high_resolution_clock::now();
@@ -216,7 +215,7 @@ int main(int argc, char *argv[])
 
     }
 
-    writing_time(vec_time);
+    writing_time(vec_time, name_file);
     auto t1 = chrono::high_resolution_clock::now();
     auto delta_t = chrono::duration_cast<chrono::duration<double>>(t1 - t0).count();
     cout << "\nDuration: " << delta_t << "s (" << int((MP_count+FP_count)/delta_t)*simParams.nstepT<<" [Particles*Updates/s]).\n";

@@ -12,6 +12,8 @@ nstepT = 100000
 nsave = 500 
 
 data = {
+
+    "name_file" : "2D_splash",
     
     "simulation": {
         "theta": 0.5,
