@@ -7,7 +7,7 @@ s = 1e-3
 L = 1e-2
 
 dt =  1e-6
-nsave = 3000
+nsave = 5000
 nstepT = nsave*500
 
 data = {
