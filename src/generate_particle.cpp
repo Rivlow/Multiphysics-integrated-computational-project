@@ -117,7 +117,7 @@ void meshCube(GeomData &geomParams,
                         double hyp_coord_z = (center[2]-z)*(center[2]-z);
                         double hyp_radius = hyp_coord_x + hyp_coord_y + hyp_coord_z;
                         
-                        if(hyp_radius>r*r){ 
+                        if(hyp_radius>=r*r){ 
                             continue;
                         }
                     }

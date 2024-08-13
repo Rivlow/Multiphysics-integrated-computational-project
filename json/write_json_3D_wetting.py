@@ -6,9 +6,9 @@ import numpy as np
 s = 1e-3
 L = 1e-2
 
-dt = 0.25e-6
-nsave = 2000
-nstepT = nsave*250
+dt =  1e-6
+nsave = 3000
+nstepT = nsave*500
 
 data = {
     
@@ -19,10 +19,10 @@ data = {
         "dt": dt,
         "nsave": nsave,
         "kappa": 2,
-        "alpha": 0.1,
+        "alpha": 0.5,
         "beta": 0,
-        "alpha_st": 10,
-        "beta_adh": 50,
+        "alpha_st": 1,
+        "beta_adh": 0.1,
         "dimension": 2,
         "schemeIntegration": {"Euler": True, "RK22": False},
         "comparison_algorithm": False,
@@ -40,22 +40,22 @@ data = {
     },
     
   "domain":{
-    "matrix_long" : [np.round(np.array([L, s/2, L]), decimals = 4).tolist(), 
-                     np.round(np.array([3*L, s/2, s/4]), decimals = 4).tolist(),
-                     np.round(np.array([3*L-s,s/2, s/4]), decimals = 4).tolist()
+    "matrix_long" : [np.round(np.array([L, L, L]), decimals = 4).tolist(), 
+                     np.round(np.array([3*L, 3*L, s/4]), decimals = 4).tolist(),
+                     np.round(np.array([3*L-s, 3*L-s, s/4]), decimals = 4).tolist()
                     ],
-    "matrix_orig" : [np.round(np.array([L, 0, L + s/4]), decimals = 4).tolist(), 
-                     np.round(np.array([0, 0, 2*L+s+s/4]), decimals = 4).tolist(),
-                     np.round(np.array([s/2,0, 2*L+0.75*s]), decimals = 4).tolist()
+    "matrix_orig" : [np.round(np.array([L, L,  s]), decimals = 4).tolist(), 
+                     np.round(np.array([0, 0, 0]), decimals = 4).tolist(),
+                     np.round(np.array([s/2, s/2, s/2]), decimals = 4).tolist()
                     ],
 
     "sphere": {
-          "do": [0, 0, 0],
-          "radius": [0.3]
+          "do": [1, 0, 0],
+          "radius": [0.45e-2]
       },
 
     "vector_type" : [1, 0, 0],
-    "L_d": np.round(np.array([3*L, 4*s, 3*L]), decimals = 4).tolist(),
+    "L_d": np.round(np.array([3*L, 3*L, 3*L]), decimals = 4).tolist(),
     "o_d": [0.0, 0.0, 0.0],
 
   },
@@ -82,8 +82,8 @@ data = {
 
 
   "forces":{
-    "gravity":True,
-    "surface_tension_1": False,
+    "gravity":False,
+    "surface_tension_1": True,
     "surface_tension_2": False,
     "adhesion":True
   },
@@ -97,7 +97,7 @@ data = {
 
 # Do not modify what is below
 current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-json_src = f"adhesion/2D_adhesion.json"
+json_src = f"wetting/3D_wetting.json"
 
 with open(f'{current_directory}/{json_src}', 'w') as json_file:
     json.dump(data, json_file, indent=4)

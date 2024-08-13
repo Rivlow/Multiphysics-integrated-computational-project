@@ -7,7 +7,7 @@ s = 1e-3
 L = 1e-2
 
 dt =  1e-6
-nsave = 1000
+nsave = 3000
 nstepT = nsave*500
 
 data = {
@@ -19,7 +19,7 @@ data = {
         "dt": dt,
         "nsave": nsave,
         "kappa": 2,
-        "alpha": 0.01,
+        "alpha": 0.5,
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 10,
@@ -44,7 +44,7 @@ data = {
                      np.round(np.array([3*L/2, 3*L/2, s/4]), decimals = 4).tolist(),
                      np.round(np.array([3*L/2-s, 3*L/2-s, s/4]), decimals = 4).tolist()
                     ],
-    "matrix_orig" : [np.round(np.array([L, L, L + s/2]), decimals = 4).tolist(), 
+    "matrix_orig" : [np.round(np.array([L, L, L + s/4]), decimals = 4).tolist(), 
                      np.round(np.array([3*L/4, 3*L/4, 2*L+s+s/4]), decimals = 4).tolist(),
                      np.round(np.array([3*L/4+s/2, 3*L/4+s/2, 2*L+0.75*s]), decimals = 4).tolist()
                     ],
@@ -85,7 +85,7 @@ data = {
     "gravity":True,
     "surface_tension_1": False,
     "surface_tension_2": False,
-    "adhesion":False
+    "adhesion":True
   },
 
   "condition":{

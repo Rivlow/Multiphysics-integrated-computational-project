@@ -265,12 +265,12 @@ void momentumEquation(GeomData &geomParams,
                            neighbours, nb_neighbours, c, pos, rho, u); 
    
     if(simParams.is_surface_tension_1){
-        cout << "surface tension 1 " << endl;
+       
         surfaceTension( simParams, geomParams, thermoParams, nb_neighbours, neighbours, gradW, W,
                              mass, rho, pos, acc_vol, type, normal);
     }
     else if (simParams.is_surface_tension_2){
-        cout << "surface tension 2 " << endl;
+        
         InterfaceTrackingMath(simParams, geomParams, thermoParams,
                               nb_neighbours, neighbours, gradW,
                               mass, rho, type,pos, track_particle);

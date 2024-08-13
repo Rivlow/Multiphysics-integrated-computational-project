@@ -8,8 +8,8 @@
         "kappa": 2,
         "alpha": 0.5,
         "beta": 0,
-        "alpha_st": 10,
-        "beta_adh": 10,
+        "alpha_st": 1,
+        "beta_adh": 0.1,
         "dimension": 2,
         "schemeIntegration": {
             "Euler": true,
@@ -43,13 +43,13 @@
                 0.01
             ],
             [
-                0.015,
-                0.015,
+                0.03,
+                0.03,
                 0.0002
             ],
             [
-                0.014,
-                0.014,
+                0.029,
+                0.029,
                 0.0002
             ]
         ],
@@ -57,17 +57,17 @@
             [
                 0.01,
                 0.01,
-                0.0102
+                0.001
             ],
             [
-                0.0075,
-                0.0075,
-                0.0213
+                0,
+                0,
+                0
             ],
             [
-                0.008,
-                0.008,
-                0.0208
+                0.0005,
+                0.0005,
+                0.0005
             ]
         ],
         "sphere": {
@@ -77,7 +77,7 @@
                 0
             ],
             "radius": [
-                0.5
+                0.0045
             ]
         },
         "vector_type": [
@@ -126,8 +126,8 @@
         "sigma": 0.0728
     },
     "forces": {
-        "gravity": true,
-        "surface_tension_1": false,
+        "gravity": false,
+        "surface_tension_1": true,
         "surface_tension_2": false,
         "adhesion": true
     },
