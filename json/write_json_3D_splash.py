@@ -34,7 +34,7 @@ data = {
         "part": True,
         "min": False,
         "max": False,
-        "particle": 500,
+        "particle": 1105,
         "pressure": False,
         "rho": False,
         "position": [False, False, True],
@@ -59,7 +59,7 @@ data = {
 
         ],
         "matrix_orig": [
-            np.round(np.array([L/4+s*3/2, L/4+s*3/2, L]), decimals = 4).tolist(), # fluid
+            np.round(np.array([L/4+s*3/2, L/4+s*3/2, L/2]), decimals = 4).tolist(), # fluid
             np.round(np.array([0, 0, 0]), decimals = 4).tolist(), # floor 1
             np.round(np.array([s/2, s/2, s/2]), decimals = 4).tolist(), # floor 2
             

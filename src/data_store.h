@@ -56,5 +56,7 @@ void follow_part_data(GeomData &geomParams,
                       vector<double> pos,
                       vector<double> u);
 
-void writing_time(vector<double> vec_time, string name_file);
+void delete_csvfile(string outputFile_part, SimulationData& simParams);
+
+void writing_time(vector<double> vec_time, string name_file, SimulationData& simParams);
 

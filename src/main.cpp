@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
 
     }
 
-    writing_time(vec_time, name_file);
+    writing_time(vec_time, name_file,simParams);
     auto t1 = chrono::high_resolution_clock::now();
     auto delta_t = chrono::duration_cast<chrono::duration<double>>(t1 - t0).count();
     cout << "\nDuration: " << delta_t << "s (" << int((MP_count+FP_count)/delta_t)*simParams.nstepT<<" [Particles*Updates/s]).\n";

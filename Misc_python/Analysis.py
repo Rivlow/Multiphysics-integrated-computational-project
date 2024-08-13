@@ -7,8 +7,8 @@ import pandas as pd
 
 #fig1, (ax1, ax2) = plt.subplots(1, 2, figsize=(19, 7))
 # plt.figure(figsize=(8.5, 5))
-save = False
-
+save = True
+Lat = True
 def isLatex(latex):
     if latex:
         
@@ -120,26 +120,55 @@ def dam_break():
     time_ad = time * np.sqrt(2 * 9.81 / L)
     pos_ad = (pos_x -3*s/2)/ L
 
-    plt.scatter(time_ad, pos_ad )
+    plt.scatter(time_ad, pos_ad , color = "red")
     plt.xlim(0,4)
     plt.xlabel("Position (adimensionnée)")
     plt.ylabel("Temps (adimensionné)")
     plt.title("Graphique de la position en fonction du temps")
     plt.show()
 
-
+def MRUA():
+    pos_z = np.array(pd.read_csv("output/csv/3D_splash_1105_pos_z.csv", sep=',', decimal='.', header=None).astype(float)).T
+    time =  np.array(pd.read_csv("output/csv/3D_splash_time.csv", decimal='.', header=None).astype(float)).T
+    
+    print(len(pos_z[0]))
+    print(len(time[0]))
+    Z_th = pos_z[0][0] - 0.5*9.81*time[0]**2
+    
+    print(Z_th)
+    plt.figure(figsize=(8.5, 5))
+    
+    plt.plot(time[0], Z_th, "b", label = "Analytical solution", zorder = 1)
+    plt.scatter(time[0], pos_z[0] , color = "red", marker = "o", label = "SPH simulation" , zorder = 2)
+    plt.ylim(0,0.7)
+    plt.xlim(0,0.5)
+    plt.ylabel(r"Postion $z(t)$ [m]")
+    plt.xlabel(r"Time $t$ [s]")
+    plt.grid(True, alpha = 0.5)
+    plt.legend(loc = "best")
+    plt.tight_layout()
+    if(save):
+        current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
+        plt.savefig(f'{current_directory}/Pictures/MRUA.PDF')
+    plt.show()
+    
+    error = np.abs((pos_z[0] - Z_th)/Z_th)
+    plt.plot(time[0], error)
+    plt.yscale("log")
+    plt.show()
 
 def main():
     
     current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-    isLatex(False)
+    isLatex(Lat)
 
     # Put in comment what you don't want to plot
 
     #PoiseuilleFlow()
     #Hydrostatic()
     #StateEquation()
-    dam_break()
+    #dam_break()
+    MRUA()
     
     
 

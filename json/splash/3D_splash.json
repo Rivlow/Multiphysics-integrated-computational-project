@@ -22,7 +22,7 @@
         "part": true,
         "min": false,
         "max": false,
-        "particle": 500,
+        "particle": 1105,
         "pressure": false,
         "rho": false,
         "position": [
@@ -98,7 +98,7 @@
             [
                 0.375,
                 0.375,
-                1.2
+                0.6
             ],
             [
                 0,
