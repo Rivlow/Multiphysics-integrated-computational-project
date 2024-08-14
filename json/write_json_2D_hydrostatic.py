@@ -34,7 +34,7 @@ data = {
     "following_part": {
         "part": False,
         "min": False,
-        "max": False,
+        "max": True,
         "particle": 500,
         "pressure": False,
         "rho": False,
