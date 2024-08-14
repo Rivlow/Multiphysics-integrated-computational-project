@@ -90,7 +90,8 @@ void updateVariables(GeomData &geomParams,
                        rho_half = rho,
                        pos_half = pos,
                        drhodt_half(nb_tot_part, 0.0),
-                       dudt_half(3*nb_tot_part, 0.0);
+                       dudt_half(3*nb_tot_part, 0.0),
+                       acc_vol_half(3*nb_tot_part, 0.0);
 
         // First time step of RK22
        
@@ -132,7 +133,7 @@ void updateVariables(GeomData &geomParams,
                            pos_half, u_half, drhodt_half, rho_half, mass);
                            
         momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW, 
-                         W, viscosity, mass, dudt_half, rho_half, p, c, pos_half, u_half, type, colour, R, L, N, normal, acc_vol, track_particle, Kappa, dot_product); 
+                         W, viscosity, mass, dudt_half, rho_half, p, c, pos_half, u_half, type, colour, R, L, N, normal, acc_vol_half, track_particle, Kappa, dot_product); 
 
 
         checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
@@ -143,11 +144,9 @@ void updateVariables(GeomData &geomParams,
         for (int n = 0; n < simParams.nb_tot_part; n++){
             
             rho[n] += dt * ((1-theta)*drhodt[n] + theta*drhodt_half[n]);
-            //cout << "for part " << n << " drhodt is " << drhodt[n]  << " and drhodt_half " << drhodt_half[n] <<" and rho " << rho[n]<< endl;
+            
             for (int coord = 0; coord < 3; coord++){
-                
-                //double u_temp = u[3 * n + coord] + dt*dudt_half[3 * n + coord];
-                
+                                
                 pos[3 * n + coord] += dt * ((1-theta)*u[3 * n + coord] + theta*u_half[3 * n + coord]);
                 u[3 * n + coord] += dt *  ((1-theta)*dudt[3 * n + coord] + theta*dudt_half[3 * n + coord]);
 

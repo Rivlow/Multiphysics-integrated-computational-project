@@ -3,7 +3,7 @@ import os
 import sys
 import numpy as np
 
-s = 0.02
+s = 0.01
 L = 0.7
 
 dt = 0.00001
@@ -34,7 +34,7 @@ data = {
     "following_part": {
         "part": False,
         "min": False,
-        "max": True,
+        "max": False,
         "particle": 500,
         "pressure": False,
         "rho": False,

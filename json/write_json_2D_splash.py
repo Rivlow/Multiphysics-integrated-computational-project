@@ -3,17 +3,16 @@ import os
 import sys
 import numpy as np
 
-s = 0.01
+s = 0.05
 L = 1.2
 
-nb_vtp_output = 250 # the total number of output file desired
-dt = 0.0001
-nstepT = 100000
-nsave = 500 
+dt = 0.00005
+nsave = 500
+nstepT = nsave*100
 
 data = {
 
-    "name_file" : "2D_splash",
+    "name_file" : "2D_RK2_splash",
     
     "simulation": {
         "theta": 0.5,
@@ -27,7 +26,7 @@ data = {
         "alpha_st": 10,
         "beta_adh": 1.2,
         "dimension": 2,
-        "schemeIntegration": {"Euler": True, "RK22": False},
+        "schemeIntegration": {"Euler": False, "RK22": True},
         "comparison_algorithm": False,
     },
 
@@ -35,10 +34,10 @@ data = {
         "part": True,
         "min": False,
         "max": False,
-        "particle": 500,
-        "pressure": True,
-        "rho": True,
-        "position": [False, False, False],
+        "particle": 78,
+        "pressure": False,
+        "rho": False,
+        "position": [False, False, True],
         "velocity": [False, False, False],
     },
     
