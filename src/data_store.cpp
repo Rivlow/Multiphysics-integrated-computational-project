@@ -11,6 +11,14 @@
 using namespace std;
 namespace fs = filesystem;
 
+void delete_csvfile(string outputFile_part, SimulationData& simParams){
+
+    if (fs::exists(outputFile_part) && simParams.t==0) {
+        // Supprime le répertoire et tout son contenu
+        fs::remove_all(outputFile_part);
+    }
+}
+
 
 void extractData(GeomData &geomParams,  
                  SimulationData &simParams,
@@ -206,15 +214,7 @@ void finding_min(string name,
     output_name.close();
 }
 
-void delete_csvfile(string outputFile_part, SimulationData& simParams){
 
-    if (fs::exists(outputFile_part) && simParams.t==0) {
-        // Supprime le répertoire et tout son contenu
-        fs::remove_all(outputFile_part);
-        
-    }
-
-}
 
 void follow_part_data(GeomData &geomParams,
                       SimulationData& simParams,

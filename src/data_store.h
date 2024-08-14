@@ -17,6 +17,8 @@
 
 using namespace std;
 
+void delete_csvfile(string outputFile_part, SimulationData& simParams);
+
 void extractData(GeomData &geomParams,  
                  SimulationData &simParams,
                  ThermoData &thermoParams,
@@ -55,8 +57,6 @@ void follow_part_data(GeomData &geomParams,
                       vector<double> rho,
                       vector<double> pos,
                       vector<double> u);
-
-void delete_csvfile(string outputFile_part, SimulationData& simParams);
 
 void writing_time(vector<double> vec_time, string name_file, SimulationData& simParams);
 
