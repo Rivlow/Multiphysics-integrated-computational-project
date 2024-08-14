@@ -159,13 +159,13 @@ void meshPostProcess(GeomData &geomParams,
         double dist = sqrt(dx * dx + dy * dy + dz * dz);
 
         // Particules created between initial and last particule
-        double nb_points = (dist / s) + 1;
+        double nb_points = (dist / s);
 
         double step_x = dx / nb_points;
         double step_y = dy / nb_points;
         double step_z = dz / nb_points;
 
-        for (int i = 0; i < nb_points; i++) {
+        for (int i = 0; i < nb_points + 1; i++) {
             GP_count++;
             pos.push_back(post_process_in[0] + i * step_x);
             pos.push_back(post_process_in[1] + i * step_y);
