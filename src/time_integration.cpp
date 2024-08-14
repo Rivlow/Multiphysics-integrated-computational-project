@@ -89,8 +89,8 @@ void updateVariables(GeomData &geomParams,
         vector<double> u_half = u,
                        rho_half = rho,
                        pos_half = pos,
-                       drhodt_half(nb_tot_part,0.0),
-                       dudt_half(3*nb_tot_part,0.0);
+                       drhodt_half(nb_tot_part, 0.0),
+                       dudt_half(3*nb_tot_part, 0.0);
 
         // First time step of RK22
        

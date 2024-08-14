@@ -7,7 +7,7 @@ s = 0.05
 L = 1.2
 
 dt = 0.00001
-nsave = 500
+nsave = 1000
 nstepT = nsave*300
 
 
@@ -44,7 +44,7 @@ data = {
     
     "domain": {
         "matrix_long": [
-            np.round(np.array([6*L, s/2, L]), decimals = 4).tolist(), # fluid
+            np.round(np.array([8*L, s/2, L]), decimals = 4).tolist(), # fluid
             np.round(np.array([9*L, s/2, s/2]), decimals = 4).tolist(), # floor 1
             np.round(np.array([9*L, s/2, s/2]), decimals = 4).tolist(), # floor 2
             np.round(np.array([9*L, s/2, s/2]), decimals = 4).tolist(), # roof wall 1
@@ -68,14 +68,14 @@ data = {
     "post_process": {
         "do": True,
         "xyz_init": np.round(np.array([4*L, 0, s]), decimals = 4).tolist(),
-        "xyz_end": np.round(np.array([4*L, 0, L + 2*s]), decimals = 4).tolist()
+        "xyz_end": np.round(np.array([4*L, 0, L + s]), decimals = 4).tolist()
     },
     "thermo": {
         "rho_0": 1000,
         "rho_moving": 1000,
         "rho_fixed": 1000,
         "T": 298.15,
-        "u_init": np.round(np.array([-0.5, 0.0, 0.0]), decimals = 4).tolist(),
+        "u_init": np.round(np.array([-0.3, 0.0, 0.0]), decimals = 4).tolist(),
         "c_0": 30,
         "gamma": 7,
         "M": 18e-3,

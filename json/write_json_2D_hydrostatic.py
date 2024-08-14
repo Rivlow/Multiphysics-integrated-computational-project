@@ -3,11 +3,11 @@ import os
 import sys
 import numpy as np
 
-s = 0.025
-L = 1
+s = 0.02
+L = 0.7
 
-dt = 0.0001
-nsave = 500
+dt = 0.00001
+nsave = 1500
 nstepT = nsave*300
 
 
@@ -36,22 +36,22 @@ data = {
         "min": False,
         "max": False,
         "particle": 500,
-        "pressure": True,
-        "rho": True,
-        "position": [False, False, False],
+        "pressure": False,
+        "rho": False,
+        "position": [False, False, True],
         "velocity": [False, False, False],
     },
     
     
     "domain": {
         "matrix_long": [
-            np.round(np.array([L, s/2, 6*L/7]), decimals = 4).tolist(), # fluid
+            np.round(np.array([L, s/2, L]), decimals = 4).tolist(), # fluid
             np.round(np.array([L+3*s, s/2, s/2]), decimals = 4).tolist(), # floor 1
             np.round(np.array([L+2*s, s/2, s/2]), decimals = 4).tolist(), # floor 2
-            np.round(np.array([s/2, s/2, L]), decimals = 4).tolist(), # left wall 1
-            np.round(np.array([s/2, s/2, L+s]), decimals = 4).tolist(), # left wall 2
-            np.round(np.array([s/2, s/2, L+s]), decimals = 4).tolist(), # right wall 1
-            np.round(np.array([s/2, s/2, L]), decimals = 4).tolist(), # right wall 2
+            np.round(np.array([s/2, s/2, L+2*s]), decimals = 4).tolist(), # left wall 1
+            np.round(np.array([s/2, s/2, L+3*s]), decimals = 4).tolist(), # left wall 2
+            np.round(np.array([s/2, s/2, L+3*s]), decimals = 4).tolist(), # right wall 1
+            np.round(np.array([s/2, s/2, L+2*s]), decimals = 4).tolist(), # right wall 2
 
         ],
         "matrix_orig": [

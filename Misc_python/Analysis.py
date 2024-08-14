@@ -50,7 +50,7 @@ def StateEquation():
     #plt.plot(p_compare, rho_compare, color = 'r', label = 'quasi incompressible (theorical)')
     plt.xlabel("Pressure [Pa]")
     plt.ylabel(r"Density [kg/$m^3$]")
-    plt.grid(True)
+    plt.grid(True, alpha = 0.5)
     plt.legend(loc = "best")
     if(save):
         current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -62,7 +62,7 @@ def StateEquation():
 def Hydrostatic():
 
 
-    p = np.array(pd.read_csv("output/csv/Euler_3D_hydrostatic_p.csv", sep = ',', decimal='.', header=None))[-1]
+    '''p = np.array(pd.read_csv("output/csv/Euler_3D_hydrostatic_p.csv", sep = ',', decimal='.', header=None))[-1]
     
     time =  np.array(pd.read_csv("output/csv/3D_hydrostatic_time.csv", decimal='.', header=None).astype(float)).T
     rho_ref = 1000 # average density for ghost particles (using "plotSingleVariable")
@@ -74,29 +74,66 @@ def Hydrostatic():
     print(p_th[0])
     print(p[::-1])
 
-    plt.figure()
+    plt.figure(figsize=(8.5, 5))
     plt.scatter(z, p[::-1], color = 'r', label = 'SPH pressure')
     plt.plot(z_th+0.28, p_th, color = 'b', label = 'Theoretical hydrostatic pressure')
 
     plt.ylabel("Pressure [Pa]")
     plt.xlabel(r"Height [m]")
-    plt.grid(True)
+    plt.grid(True, alpha = 0.5)
     plt.legend(loc = "best")
     plt.tight_layout()
     if(save):
         current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
         plt.savefig(f'{current_directory}/Pictures/hydrostatic.PDF')
+    plt.show()'''
+    p = np.array(pd.read_csv("output/csv/Euler_2D_hydrostatic_p.csv", sep = ',', decimal='.', header=None))[-1]
+    
+    time =  np.array(pd.read_csv("output/csv/2D_hydrostatic_time.csv", decimal='.', header=None).astype(float)).T
+    rho_ref = 1000 # average density for ghost particles (using "plotSingleVariable")
+    g = 9.81
+    z = np.linspace(0.04, 0.82, len(p))
+    z_th = np.linspace(0,0.8,len(p))
+    p_th = rho_ref*g*z_th
+   
+
+    plt.figure(figsize=(8.5, 5))
+    plt.scatter(z, p[::-1], color = 'r', label = 'SPH pressure')
+    plt.plot(z_th+0.215, p_th, color = 'b', label = 'Theoretical hydrostatic pressure')
+
+    plt.ylabel(r"Pressure $p(z)$ [Pa]")
+    plt.xlabel(r"Depth $z$ [m]")
+    plt.grid(True, alpha = 0.5)
+    plt.legend(loc = "best")
+    plt.tight_layout()
+    if(save):
+        current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
+        plt.savefig(f'{current_directory}/Pictures/3D_hydrostatic.PDF')
     plt.show()
 
-    p_part = np.array(pd.read_csv("output/csv/Euler_3D_hydrostatic_p.csv", sep = ',', decimal='.', header=None)).T[5]
-    plt.plot(time[0],p_part)
+    s = 0.02
+    print((z_th[-5]-0.215))
+    plt.figure(figsize=(8.5, 5))
+    p_part = np.array(pd.read_csv("output/csv/Euler_2D_hydrostatic_p.csv", sep = ',', decimal='.', header=None)).T[5]
+    plt.axhline(y=1000*9.81*(z_th[-5]-0.215), color='r', linestyle='--')
+    plt.plot(time[0], p_part, color = 'b', label = 'Theoretical hydrostatic pressure')
+
+    plt.ylabel(r"Pressure $p(z)$ [Pa]")
+    plt.xlabel(r"Depth $z$ [m]")
+    plt.grid(True, alpha = 0.5)
+    plt.legend(loc = "best")
+    plt.tight_layout()
+    if(save):
+        current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
+        plt.savefig(f'{current_directory}/Pictures/2D_hydrostatic.PDF')
     plt.show()
 
+    
 
 def PoiseuilleFlow():
 
 
-    u_x = np.array(pd.read_csv("output/Euler_u_x.csv", sep = ',', decimal='.', header=None))[300]
+    u_x = np.array(pd.read_csv("output/csv/Euler_2D_Poiseuille_u_x.csv", sep = ',', decimal='.', header=None))[200]
     z = np.linspace(0.05, 1.3, len(u_x))
 
     u_sph= u_x + 0.5
@@ -118,19 +155,44 @@ def PoiseuilleFlow():
 
 def dam_break(): 
 
-    pos_x = np.array(pd.read_csv("output/max_pos_x.csv", sep=',', decimal='.', header=None).astype(float))     
-    time = np.array(pd.read_csv("output/time.csv", sep=',', decimal='.', header=None).astype(float))
+    pos_x = np.array(pd.read_csv("output/csv/3D_dam_break_max_pos_x.csv", sep=',', decimal='.', header=None).astype(float))     
+    time = np.array(pd.read_csv("output/csv/3D_dam_break_time.csv", sep=',', decimal='.', header=None).astype(float))
 
     L = 0.2
     s= 0.05
     time_ad = time * np.sqrt(2 * 9.81 / L)
     pos_ad = (pos_x -3*s/2)/ L
 
-    plt.scatter(time_ad, pos_ad , color = "red")
+    plt.plot(time_ad, pos_ad , color = "red")
     plt.xlim(0,4)
-    plt.xlabel("Position (adimensionnée)")
-    plt.ylabel("Temps (adimensionné)")
-    plt.title("Graphique de la position en fonction du temps")
+    plt.ylabel(r"x/L [-]")
+    plt.xlabel(r"t$\sqrt{2\,g/L}$ [-]")
+    plt.grid(True, alpha = 0.5)
+    plt.legend(loc = "best")
+    plt.tight_layout()
+    if(save):
+        current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
+        plt.savefig(f'{current_directory}/Pictures/3D_dam_break.PDF')
+    plt.show()
+
+    pos_x = np.array(pd.read_csv("output/csv/2D_dam_break_max_pos_x.csv", sep=',', decimal='.', header=None).astype(float))     
+    time = np.array(pd.read_csv("output/csv/2D_dam_break_time.csv", sep=',', decimal='.', header=None).astype(float))
+
+    L = 0.2
+    s= 0.05
+    time_ad = time * np.sqrt(2 * 9.81 / L)
+    pos_ad = (pos_x -3*s/2)/ L
+
+    plt.plot(time_ad, pos_ad , color = "red")
+    plt.xlim(0,4)
+    plt.ylabel(r"x/L [-]")
+    plt.xlabel(r"t$\sqrt{2\,g/L}$ [-]")
+    plt.grid(True, alpha = 0.5)
+    plt.legend(loc = "best")
+    plt.tight_layout()
+    if(save):
+        current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
+        plt.savefig(f'{current_directory}/Pictures/2D_dam_break.PDF')
     plt.show()
 
 def MRUA():
