@@ -101,19 +101,20 @@ void updateVariables(GeomData &geomParams,
                          W, viscosity, mass, dudt, rho, p, c, pos, u, type, colour, R, L, N, normal, acc_vol, track_particle, Kappa, dot_product); 
                         
         //checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
-        //              neighbours, nb_neighbours);
+                     //neighbours, nb_neighbours);
 
         double theta = simParams.theta;
         double dt_half = simParams.dt/(2*theta);
-
+        
+        
+                
         #pragma omp parallel for
         for (int n = 0; n < simParams.nb_tot_part; n++){
 
             rho_half[n] += dt_half * drhodt[n];
-            
-                
+               
             if (rho_half[n] < 0){
-                cout << "Rho negative (" << rho[n] << ") at t:" << simParams.t << endl;
+                
                 exit(1);
             }
 
@@ -121,6 +122,7 @@ void updateVariables(GeomData &geomParams,
                 
                 pos_half[3 * n + coord] += dt_half * u[3 * n + coord];
                 u_half[3 * n + coord] += dt_half * dudt[3 * n + coord];
+                
             }
         }
         
@@ -130,7 +132,7 @@ void updateVariables(GeomData &geomParams,
                            pos_half, u_half, drhodt_half, rho_half, mass);
                            
         momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW, 
-                         W, viscosity, mass, dudt_half, rho_half, p, c, pos_half, u, type, colour, R, L, N, normal, acc_vol, track_particle, Kappa, dot_product); 
+                         W, viscosity, mass, dudt_half, rho_half, p, c, pos_half, u_half, type, colour, R, L, N, normal, acc_vol, track_particle, Kappa, dot_product); 
 
 
         checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
@@ -144,10 +146,9 @@ void updateVariables(GeomData &geomParams,
             //cout << "for part " << n << " drhodt is " << drhodt[n]  << " and drhodt_half " << drhodt_half[n] <<" and rho " << rho[n]<< endl;
             for (int coord = 0; coord < 3; coord++){
                 
-                double u_temp = u[3 * n + coord] + dt*dudt_half[3 * n + coord];
+                //double u_temp = u[3 * n + coord] + dt*dudt_half[3 * n + coord];
                 
-                
-                pos[3 * n + coord] += dt * ((1-theta)*u[3 * n + coord] + theta*u_temp);
+                pos[3 * n + coord] += dt * ((1-theta)*u[3 * n + coord] + theta*u_half[3 * n + coord]);
                 u[3 * n + coord] += dt *  ((1-theta)*dudt[3 * n + coord] + theta*dudt_half[3 * n + coord]);
 
             }

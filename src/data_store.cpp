@@ -25,7 +25,17 @@ void extractData(GeomData &geomParams,
                  vector<double> &nb_neighbours,
                  vector<double> rho){
 
-    string outputDir = "../../output/" + schemeIntegration + "_" + name_file + "_";
+    string outputDir = "../../output/";
+    if (!fs::exists(outputDir)){
+        fs::create_directories(outputDir);
+        cout << "Create p.csv and rho.csv and u_xyz.csv files" <<endl;
+    }
+    outputDir = outputDir + "/csv";
+    if (!fs::exists(outputDir)){
+        fs::create_directories(outputDir);
+        cout << "Create following particle files" <<endl;
+    }
+    outputDir = outputDir +"/" + schemeIntegration + "_" + name_file + "_";
     string outputFile_rho = outputDir +"rho.csv";
     string outputFile_p = outputDir + "p.csv";
     string outputFile_u_x = outputDir + "u_x.csv";
@@ -33,10 +43,12 @@ void extractData(GeomData &geomParams,
     string outputFile_u_z = outputDir + "u_z.csv";
 
     // Create folder if not existing
-    if (!fs::exists(outputDir)){
-        fs::create_directories(outputDir);
-        cout << "Create p.csv and rho.csv and u_xyz.csv files" <<endl;
-    }
+    delete_csvfile(outputFile_rho, simParams);
+    delete_csvfile(outputFile_p, simParams);
+    delete_csvfile(outputFile_u_x, simParams);
+    delete_csvfile(outputFile_u_y, simParams);
+    delete_csvfile(outputFile_u_z, simParams);
+    
 
     ofstream output_rho(outputFile_rho, ios::app);
     ofstream output_p(outputFile_p, ios::app);
@@ -400,12 +412,15 @@ void writing_time(vector<double> vec_time, string name_file, SimulationData& sim
         fs::create_directories(outputDir);
         cout << "Create following particle files" <<endl;
     }
+    
 
     outputDir = outputDir + "/csv";
     
     string outputFile_part = outputDir + "/" + name_file + "_time" + ".csv";
 
-    delete_csvfile(outputFile_part, simParams);
+    if(fs::exists(outputFile_part)){
+        fs::remove_all(outputFile_part);
+    }
 
     ofstream output_name(outputFile_part, ios::app);
 

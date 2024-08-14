@@ -6,7 +6,7 @@ import numpy as np
 s = 0.05
 L = 1.2
 
-dt = 0.0001
+dt = 0.00005
 nsave = 250
 nstepT = nsave*50
 

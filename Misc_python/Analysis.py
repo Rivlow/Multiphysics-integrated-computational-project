@@ -62,14 +62,15 @@ def StateEquation():
 def Hydrostatic():
 
 
-    p = np.array(pd.read_csv("output/Euler_p.csv", sep = ',', decimal='.', header=None))[-1]
-    time = np.array(pd.read_csv("output/time.csv", sep = ',', decimal='.', header=None))[100]
+    p = np.array(pd.read_csv("output/csv/Euler_3D_hydrostatic_p.csv", sep = ',', decimal='.', header=None))[-1]
+    
+    time =  np.array(pd.read_csv("output/csv/3D_hydrostatic_time.csv", decimal='.', header=None).astype(float)).T
     rho_ref = 1000 # average density for ghost particles (using "plotSingleVariable")
     g = 9.81
     z = np.linspace(0.05, 1.15, len(p))
     z_th = np.linspace(0,1.1,len(p))
     p_th = rho_ref*g*z_th
-    
+    print(time)
     print(p_th[0])
     print(p[::-1])
 
@@ -86,6 +87,11 @@ def Hydrostatic():
         current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
         plt.savefig(f'{current_directory}/Pictures/hydrostatic.PDF')
     plt.show()
+
+    p_part = np.array(pd.read_csv("output/csv/Euler_3D_hydrostatic_p.csv", sep = ',', decimal='.', header=None)).T[5]
+    plt.plot(time[0],p_part)
+    plt.show()
+
 
 def PoiseuilleFlow():
 
@@ -130,16 +136,21 @@ def dam_break():
 def MRUA():
     pos_z = np.array(pd.read_csv("output/csv/3D_splash_1105_pos_z.csv", sep=',', decimal='.', header=None).astype(float)).T
     time =  np.array(pd.read_csv("output/csv/3D_splash_time.csv", decimal='.', header=None).astype(float)).T
-    
+    pos_z_RK2 = np.array(pd.read_csv("output/csv/3D_RK2_splash_1105_pos_z.csv", sep=',', decimal='.', header=None).astype(float)).T
+    time_RK2 =  np.array(pd.read_csv("output/csv/3D_RK2_splash_time.csv", decimal='.', header=None).astype(float)).T
+
+
     print(len(pos_z[0]))
     print(len(time[0]))
     Z_th = pos_z[0][0] - 0.5*9.81*time[0]**2
+    Z_th_RK2 = pos_z_RK2[0][0] - 0.5*9.81*time_RK2[0]**2
     
     print(Z_th)
     plt.figure(figsize=(8.5, 5))
     
     plt.plot(time[0], Z_th, "b", label = "Analytical solution", zorder = 1)
     plt.scatter(time[0], pos_z[0] , color = "red", marker = "o", label = "SPH simulation" , zorder = 2)
+    plt.scatter(time_RK2[0], pos_z_RK2[0] , color = "green", marker = "o", label = "SPH simulation" , zorder = 2)
     plt.ylim(0,0.7)
     plt.xlim(0,0.5)
     plt.ylabel(r"Postion $z(t)$ [m]")
@@ -152,8 +163,11 @@ def MRUA():
         plt.savefig(f'{current_directory}/Pictures/MRUA.PDF')
     plt.show()
     
+    
+    error_RK2= np.abs((pos_z_RK2[0] - Z_th_RK2)/Z_th_RK2)
     error = np.abs((pos_z[0] - Z_th)/Z_th)
     plt.plot(time[0], error)
+    plt.plot(time_RK2[0],error_RK2)
     plt.yscale("log")
     plt.show()
 
@@ -165,10 +179,10 @@ def main():
     # Put in comment what you don't want to plot
 
     #PoiseuilleFlow()
-    #Hydrostatic()
+    Hydrostatic()
     #StateEquation()
     #dam_break()
-    MRUA()
+    #MRUA()
     
     
 
