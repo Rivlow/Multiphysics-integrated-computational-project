@@ -4,11 +4,11 @@ import sys
 import numpy as np
 
 s = 0.01
-L = 0.25
+L = 0.2
 
-dt = 0.0001
-nsave = 250
-nstepT = nsave*1000
+dt = 0.00001
+nsave = 2000
+nstepT = nsave*250
 
 
 data = {
@@ -54,7 +54,7 @@ data = {
 
         ],
         "matrix_orig": [
-            np.round(np.array([3*s/2, 0, 2*s]), decimals = 4).tolist(), # fluid
+            np.round(np.array([3*s/2, 0, 1.5*s]), decimals = 4).tolist(), # fluid
             np.round(np.array([0, 0, 0]), decimals = 4).tolist(), # floor 1
             np.round(np.array([s/2, 0, s/2]), decimals = 4).tolist(), # floor 2
             np.round(np.array([s/2, 0, 3*s/2]), decimals = 4).tolist(),# left wall 1

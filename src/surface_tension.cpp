@@ -30,7 +30,7 @@ void surfaceTension(SimulationData& simParams,
                     vector<double> normal){
 
    
-    //#pragma omp parallel for 
+    #pragma omp parallel for 
     for(int i = 0; i<simParams.nb_moving_part; i++){
 
         vector<double> &gradW = gradW_matrix[i];
@@ -51,7 +51,7 @@ void surfaceTension(SimulationData& simParams,
     }
     double alpha = simParams.alpha_st;
 
-    //#pragma omp parallel for 
+    #pragma omp parallel for 
     for(int i = 0; i<simParams.nb_moving_part; i++){
     
         int size_neighbours = nb_neighbours[i];

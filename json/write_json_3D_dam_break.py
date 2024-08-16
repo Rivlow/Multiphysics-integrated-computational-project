@@ -22,7 +22,7 @@ data = {
         "dt": dt,
         "nsave": nsave,
         "kappa": 2,
-        "alpha": 0.05,
+        "alpha": 0.5,
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 1.2,

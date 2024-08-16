@@ -3,8 +3,8 @@ import os
 import sys
 import numpy as np
 
-s = 0.3
-L = 1.2
+s = 0.01
+L = 1
 
 dt = 0.00005
 nsave = 500
@@ -56,7 +56,7 @@ data = {
             "do": [0],
             "radius": np.round(np.array([0.3]), decimals = 4).tolist()
             },
-        "vector_type": [1, 0, 0],
+        "vector_type": [1],
         "L_d": np.round(np.array([L, L, L]), decimals = 4).tolist(),
         "o_d": np.round(np.array([0.0, 0.0, 0.0]), decimals = 4).tolist()
     },
@@ -84,7 +84,7 @@ data = {
         "adhesion": False
     },
     "condition": {
-        "print_debug": False,
+        "print_debug": True,
         "stateEquation": {"Ideal gaz law": False, "Quasi incompresible fluid": True},
         "initialCondition": {"Hydrostatic": False, "Constant": True}
     }

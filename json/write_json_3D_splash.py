@@ -7,8 +7,8 @@ s = 0.05
 L = 1.2
 
 dt = 0.00005
-nsave = 250
-nstepT = nsave*50
+nsave = 200
+nstepT = nsave*100
 
 data = {
 
@@ -25,7 +25,7 @@ data = {
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 1.2,
-        "dimension": 2,
+        "dimension": 3,
         "schemeIntegration": {"Euler": True, "RK22": False},
         "comparison_algorithm": False,
     },

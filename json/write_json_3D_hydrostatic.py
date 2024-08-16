@@ -6,9 +6,9 @@ import numpy as np
 s = 0.025
 L = 0.7
 
-dt = 0.000025
-nsave = 500
-nstepT = nsave*200
+dt = 0.00001
+nsave = 1500
+nstepT = nsave*300
 
 
 data = {

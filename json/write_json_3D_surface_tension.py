@@ -3,12 +3,12 @@ import os
 import sys
 import numpy as np
 
-s = 5e-4
+s = 1e-3
 L = 0.01
 
 dt = 1e-6
-nsave = 250 
-nstepT = nsave*400
+nsave = 2000 
+nstepT = nsave*800
 
 
 data = {
@@ -22,7 +22,7 @@ data = {
         "dt": dt,
         "nsave": nsave,
         "kappa": 2,
-        "alpha": 0.5,
+        "alpha": 0.1,
         "beta": 0,
         "alpha_st": 1,
         "beta_adh": 1.2,
@@ -33,12 +33,12 @@ data = {
 
     "following_part": {
         "part": False,
-        "min": False,
-        "max": False,
+        "min": True,
+        "max": True,
         "particle": 500,
         "pressure": True,
         "rho": True,
-        "position": [False, False, False],
+        "position": [True, True, True],
         "velocity": [False, False, False],
     },
     
@@ -56,7 +56,7 @@ data = {
   },
 
   "post_process":{
-    "do": False,
+    "do": True,
     "xyz_init": np.round(np.array([0, 1.5*L, 1.5*L]), decimals = 7).tolist(),
     "xyz_end": np.round(np.array([3*L, 1.5*L, 1.5*L]), decimals = 7).tolist()
   },

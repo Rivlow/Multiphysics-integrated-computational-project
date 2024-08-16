@@ -3,7 +3,7 @@ import os
 import sys
 import numpy as np
 
-s = 0.01
+s = 0.02
 L = 0.7
 
 dt = 0.00001
@@ -38,7 +38,7 @@ data = {
         "particle": 500,
         "pressure": False,
         "rho": False,
-        "position": [False, False, True],
+        "position": [False, False, False],
         "velocity": [False, False, False],
     },
     

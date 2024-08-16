@@ -7,12 +7,12 @@ s = 0.05
 L = 1.2
 
 dt = 0.00005
-nsave = 500
+nsave = 200
 nstepT = nsave*100
 
 data = {
 
-    "name_file" : "2D_RK2_splash",
+    "name_file" : "2D_splash",
     
     "simulation": {
         "theta": 0.5,
@@ -26,7 +26,7 @@ data = {
         "alpha_st": 10,
         "beta_adh": 1.2,
         "dimension": 2,
-        "schemeIntegration": {"Euler": False, "RK22": True},
+        "schemeIntegration": {"Euler": True, "RK22": False},
         "comparison_algorithm": False,
     },
 
@@ -46,32 +46,32 @@ data = {
             np.round(np.array([L/2, s/2, L/2]), decimals = 4).tolist(), # fluid
             np.round(np.array([L+3*s, s/2, s/2]), decimals = 4).tolist(), # floor 1
             np.round(np.array([L+2*s, s/2, s/2]), decimals = 4).tolist(), # floor 2
-            np.round(np.array([s/2, s/2, 2*L]), decimals = 4).tolist(), # left wall 1
-            np.round(np.array([s/2, s/2, 2*L+s]), decimals = 4).tolist(), # left wall 2
-            np.round(np.array([s/2, s/2, 2*L+s]), decimals = 4).tolist(), # right wall 1
-            np.round(np.array([s/2, s/2, 2*L]), decimals = 4).tolist(), # right wall 2
-            np.round(np.array([L+s,s/2,s/2]), decimals = 4).tolist(), # upper roof
-            np.round(np.array([L,s/2,s/2]), decimals = 4).tolist(), # lower roof
+            np.round(np.array([s/2, s/2, L]), decimals = 4).tolist(), # left wall 1
+            np.round(np.array([s/2, s/2, L+s]), decimals = 4).tolist(), # left wall 2
+            np.round(np.array([s/2, s/2, L+s]), decimals = 4).tolist(), # right wall 1
+            np.round(np.array([s/2, s/2, L]), decimals = 4).tolist(), # right wall 2
+            #np.round(np.array([L+s,s/2,s/2]), decimals = 4).tolist(), # upper roof
+            #np.round(np.array([L,s/2,s/2]), decimals = 4).tolist(), # lower roof
 
 
         ],
         "matrix_orig": [
-            np.round(np.array([s*3/2+L/4, 0, 1.5*s+L/2]), decimals = 4).tolist(), # fluid
+            np.round(np.array([s*3/2+L/4, 0, L/2]), decimals = 4).tolist(), # fluid
             np.round(np.array([0, 0, 0]), decimals = 4).tolist(), # floor 1
             np.round(np.array([s/2, 0, s/2]), decimals = 4).tolist(), # floor 2
             np.round(np.array([s/2, 0, 3*s/2]), decimals = 4).tolist(),# left wall 1
             np.round(np.array([0, 0, s]), decimals = 4).tolist(), # left wall 2
             np.round(np.array([L+3*s, 0, s]), decimals = 4).tolist(), # right wall 1
             np.round(np.array( [L+5*s/2, 0, 3*s/2]), decimals = 4).tolist(), # right wall 2
-            np.round(np.array( [s,0,2*L+2*s]), decimals = 4).tolist(), # right wall 2
-            np.round(np.array( [3*s/2,0,2*L+3*s/2]), decimals = 4).tolist(), # right wall 2
+            #np.round(np.array( [s,0,2*L+2*s]), decimals = 4).tolist(), # right wall 2
+            #np.round(np.array( [3*s/2,0,2*L+3*s/2]), decimals = 4).tolist(), # right wall 2
 
         ],
         "sphere": {
                 "do": [0, 0, 0, 0, 0, 0, 0, 0, 0],
                 "radius": [0.3]
             },
-        "vector_type": [1, 0, 0, 0, 0, 0, 0, 0, 0],
+        "vector_type": [1, 0, 0, 0, 0, 0, 0],
         "L_d": np.round(np.array([3*L, 4*s, 2*L]), decimals = 4).tolist(),
         "o_d": np.round(np.array([0.0, 0.0, 0.0]), decimals = 4).tolist()
     },

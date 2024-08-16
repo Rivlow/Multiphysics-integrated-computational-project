@@ -257,7 +257,7 @@ void compareAlgo(GeomData &geomParams,
                 vector<double> &nb_neighbours,
                 vector<double> &type,
                 vector<double> &pos){
-
+    
     auto t_sorted_begin = chrono::high_resolution_clock::now();
     sortedList(geomParams, simParams, cell_matrix, neighbours,
                 gradW, W, viscosity, nb_neighbours, type, pos);
@@ -269,5 +269,5 @@ void compareAlgo(GeomData &geomParams,
 
     auto time_sorted = std::chrono::duration_cast<std::chrono::duration<double>>(t_middle - t_sorted_begin).count();
     auto time_naive = std::chrono::duration_cast<std::chrono::duration<double>>(t_naiveAlgo_end - t_middle).count();
-    cout << " computation time for the sorted list algorithm " << time_sorted << " [s], computation time for the naive algorithm " << time_naive << " [s] " << endl; 
+    cout << " spacing " << geomParams.s << " number of particle " << simParams.nb_moving_part << " computation time for the sorted list algorithm " << time_sorted << " [s], computation time for the naive algorithm " << time_naive << " [s] " << endl; 
 }
