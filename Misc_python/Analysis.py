@@ -88,11 +88,13 @@ def Hydrostatic():
         current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
         plt.savefig(f'{current_directory}/Pictures/3D_hydrostatic.PDF')
     plt.show()
+
     
     plt.figure(figsize=(7, 5))
 
     plt.axhline(y=1000*9.81*(z_th[-part+1]-dist), color='blue', label = 'Theoretical hydrostatic pressure', zorder = 1)
     plt.plot(time[0], p_part, color = 'red', zorder = 2, label = "SPH pressure")
+    
     plt.ylabel(r"Pressure $p(t)$ [Pa]")
     plt.xlabel(r"Time $t$ [s]")
     plt.grid(True, alpha = 0.5)
@@ -152,97 +154,6 @@ def Hydrostatic():
 
     
 
-    plt.figure(figsize=(7, 5))
-    plt.axhline(y=1000*9.81*(z_th[-part+1]-dist), color='blue', zorder = 1)
-    plt.plot(time[0], p_part, color = 'red', label = 'Theoretical hydrostatic pressure', zorder = 2)
-    plt.ylabel(r"Pressure $p(t)$ [Pa]")
-    plt.xlabel(r"Time $t$ [s]")
-    plt.grid(True, alpha = 0.5)
-    plt.legend(loc = "best")
-    plt.tight_layout()
-    if(save):
-        current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-        plt.savefig(f'{current_directory}/Pictures/2D_hydrostatic_convergence.PDF')
-    plt.show()
-
-
-    #2D hydrostatic RK22
-
-    p_RK2 = np.array(pd.read_csv("output/csv/RK22_2D_RK2_hydrostatic_p.csv", sep = ',', decimal='.', header=None))[-1]
-    time_RK2 =  np.array(pd.read_csv("output/csv/2D_RK2_hydrostatic_time.csv", decimal='.', header=None).astype(float)).T
-    
-    z_RK2 = np.linspace(0.04, 0.82, len(p_RK2))
-    
-    z_th_RK2 = np.linspace(0,0.78,len(p_RK2))
-    
-    p_th_RK2 = rho_ref*g*z_th_RK2
-    dist = 0.116
-    part = 10
-
-    plt.figure(figsize=(7, 5))
-    plt.scatter(z_RK2-dist, p_RK2[::-1], color = 'r', label = 'SPH pressure', marker="o")
-    plt.plot(z_th_RK2, p_th_RK2, color = 'b', label = 'Theoretical hydrostatic pressure')
-    plt.ylabel(r"Pressure $p(z)$ [Pa]")
-    plt.xlabel(r"Depth $z$ [m]")
-    plt.grid(True, alpha = 0.5)
-    plt.legend(loc = "best")
-    plt.tight_layout()
-    if(save):
-        current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-        plt.savefig(f'{current_directory}/Pictures/2D_RK22_hydrostatic.PDF')
-    plt.show()
-
-    p_part_RK2 = np.array(pd.read_csv("output/csv/RK22_2D_RK2_hydrostatic_p.csv", sep = ',', decimal='.', header=None)).T[part]
-    
-
-    plt.figure(figsize=(7, 5))
-    plt.axhline(y=1000*9.81*(z_th_RK2[-part+1]-dist), color='blue', zorder = 1)
-    plt.plot(time_RK2[0], p_part_RK2, color = 'red', label = 'Theoretical hydrostatic pressure', zorder = 2)
-    plt.ylabel(r"Pressure $p(t)$ [Pa]")
-    plt.xlabel(r"Time $t$ [s]")
-    plt.grid(True, alpha = 0.5)
-    plt.legend(loc = "best")
-    plt.tight_layout()
-    if(save):
-        current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-        plt.savefig(f'{current_directory}/Pictures/2D_RK22_hydrostatic_convergence.PDF')
-    plt.show()
-
-    p = p[::-1]
-    p = p[4:-2]
-    z_th=z_th[4:-2]
-    p_th = rho_ref*g*z_th
-    p_th = p_th-p_th[0]
-    z_th = z_th - z_th[0]
-    error = np.abs((p[1:]-p_th[1:])/p_th[1:])
-
-    p_RK2 = p_RK2[::-1]
-    p_RK2 = p_RK2[4:-2]
-    z_th_RK2=z_th_RK2[4:-2]
-    p_th_RK2 = rho_ref*g*z_th_RK2
-    p_th_RK2 = p_th_RK2 - p_th_RK2[0]
-    z_th_RK2= z_th_RK2 - z_th_RK2[0]
-
-    error_RK2 = np.abs((p_RK2[1:]-p_th_RK2[1:])/p_th_RK2[1:])
-    plt.plot(z_RK2[4:-2]-dist, p_RK2 ,label ="SPH RK22", linestyle="--")
-    plt.plot(z_th_RK2,p_th_RK2,label ="theo RK22")
-    plt.plot(z[4:-2]-dist, p,label ="SPH Euler", linestyle="--")
-    plt.plot(z_th,p_th,label ="theo Euler")
-    plt.legend()
-    plt.show()
-    plt.yscale("log")
-    plt.plot(z_th[1:],error, color = "red",label="Error Euler"  )
-    plt.plot(z_th_RK2[1:],error_RK2, color = "blue",linestyle = "--",label="Error RK22"  )
-    plt.ylabel(r"Relative error [-]")
-    plt.xlabel(r"Depth $z$ [m]")
-    plt.grid(True, alpha = 0.5)
-    plt.legend(loc = "best")
-    plt.tight_layout()
-    if(save):
-        current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-        plt.savefig(f'{current_directory}/Pictures/2D_Error_euler_RK22.PDF')
-    plt.show()
-    plt.show()
 
     
 
@@ -297,7 +208,7 @@ def dam_break():
 
     
     L = 0.2
-    s= 0.05
+    s= 0.025
     time_ad = time * np.sqrt(2 * 9.81 / L)
     pos_ad = (pos_x -3*s/2)/ L
 
@@ -320,7 +231,7 @@ def dam_break():
     
 
 
-    L = 0.2
+    L = 0.5
     s= 0.01
     time_ad = time * np.sqrt(2 * 9.81 / L)
     pos_ad = (pos_x -3*s/2)/ L
@@ -341,16 +252,19 @@ def dam_break():
 
 
 def MRUA():
-    pos_z = np.array(pd.read_csv("output/csv/2D_splash_78_pos_z.csv", sep=',', decimal='.', header=None).astype(float)).T
+    pos_z = np.array(pd.read_csv("output/csv/2D_splash_0_pos_z.csv", sep=',', decimal='.', header=None).astype(float)).T
     time =  np.array(pd.read_csv("output/csv/2D_splash_time.csv", decimal='.', header=None).astype(float)).T
+    pos_z_RK2 = np.array(pd.read_csv("output/csv/2D_splash_RK_0_pos_z.csv", sep=',', decimal='.', header=None).astype(float)).T
+    time_RK2 =  np.array(pd.read_csv("output/csv/2D_splash_RK_time.csv", decimal='.', header=None).astype(float)).T
     
-    
-    Z_th = pos_z[0][0] - 0.5*9.81*time[0]**2
-    
+    Z_th =  np.round(0.6 - 0.5*9.81*time[0]**2, decimals = 15)
+    Z_th_RK2 =  np.round(0.6 - 0.5*9.81*time_RK2[0]**2, decimals = 15)
+    print(Z_th_RK2-pos_z)
     
     plt.figure(figsize=(7, 5))
     plt.plot(time[0], Z_th, "b", label = "Analytical solution", zorder = 1)
-    plt.scatter(time[0][::2], pos_z[0][::2] , color = "red", marker = "o", label = "SPH simulation" , zorder = 2)
+    plt.scatter(time[0][::2], pos_z[0][::2] , color = "red", marker = "o", label = "SPH simulation Euler" , zorder = 2)
+    plt.scatter(time_RK2[0][::2], pos_z_RK2[0][::2] , color = "green", marker = "+", label = "SPH simulation RK22" , zorder = 2)
     
     plt.ylim(0,0.8)
     plt.xlim(0,0.5)
@@ -366,7 +280,9 @@ def MRUA():
 
 
     error = np.abs((pos_z-Z_th)/Z_th)
-    plt.plot(time[0], error[0], color = "orange", label = "Relative error")
+    error_RK2 = np.abs((pos_z_RK2-Z_th_RK2)/Z_th_RK2)
+    plt.plot(time[0], error[0], color = "orange", label = "Relative error Euler")
+    plt.plot(time_RK2[0], error_RK2[0], color = "green", label = "Relative error RK22")
     plt.legend(loc = "best")
     plt.ylabel(r"Relative error [-]")
     plt.xlabel(r"Time $t$ [s]")
@@ -464,7 +380,7 @@ def surface_tension():
     plt.plot(x, p)
     plt.show()    
 
-
+    p = np.array(pd.read_csv("output/csv/Euler_3D_surface_tension_p.csv", sep = ',', decimal='.', header=None))[-1]
     max_pos_x = np.array(pd.read_csv("output/csv/3D_surface_tension_max_pos_x.csv", sep = ',', decimal='.', header=None)).T[0]
     max_pos_y = np.array(pd.read_csv("output/csv/3D_surface_tension_max_pos_y.csv", sep = ',', decimal='.', header=None)).T[0]
     max_pos_z = np.array(pd.read_csv("output/csv/3D_surface_tension_max_pos_z.csv", sep = ',', decimal='.', header=None)).T[0]
@@ -474,18 +390,21 @@ def surface_tension():
     time =  np.array(pd.read_csv("output/csv/3D_surface_tension_time.csv", decimal='.', header=None).astype(float)).T[0]
 
     x = np.linspace(0,0.03,len(p))
-
+    
     print(p)
     radius_x = max_pos_x - min_pos_x
     radius_x = max_pos_y - min_pos_y
     radius_z = max_pos_z - min_pos_z
-
-    
+    L = 1e-2
+    R_th = L/((4*np.pi/3)**(1/3))
+    print(R_th)
     plt.plot(time, radius_x/2)
     plt.plot(time, radius_z/2)
-    plt.axhline(y=0.005641895835, color='r', linestyle='--')
+    plt.axhline(y=R_th, color='r', linestyle='--')
     plt.show()
-
+    plt.plot(x,p)
+    plt.show()
+    print(2*0.078/radius_x[-1])
 def main():
     
     current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -496,8 +415,8 @@ def main():
     #PoiseuilleFlow()
     #Hydrostatic()
     #StateEquation()
-    dam_break()
-    #MRUA()
+    #dam_break()
+    MRUA()
     #linked_compa()
     #surface_tension()
 

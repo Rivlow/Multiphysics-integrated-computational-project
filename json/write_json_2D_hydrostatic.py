@@ -8,7 +8,7 @@ L = 0.7
 
 dt = 0.00001
 nsave = 1500
-nstepT = nsave*300
+nstepT = nsave*500
 
 
 data = {

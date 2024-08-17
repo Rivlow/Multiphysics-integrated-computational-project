@@ -150,7 +150,7 @@ void writing_in_file(string name,
     }
     
     ostringstream oss;
-    oss << fixed << setprecision(6) << data_part;
+    oss << fixed << setprecision(8) << data_part;
     
 
     output_name <<  data_part << "\n";
@@ -178,7 +178,7 @@ void finding_max(string name,
         max = (max < data[multiple*i+xyz])? data[multiple*i+xyz] : max;
     }
     ostringstream oss;
-    oss << fixed << setprecision(6) << max;
+    oss << fixed << setprecision(8) << max;
     
 
     output_name << max << "\n";
@@ -206,7 +206,7 @@ void finding_min(string name,
         
     }
     ostringstream oss;
-    oss << fixed << setprecision(6) << min;
+    oss << fixed << setprecision(8) << min;
     
 
     output_name <<  min << "\n";
@@ -431,7 +431,7 @@ void writing_time(vector<double> vec_time, string name_file, SimulationData& sim
 
     for(int i = 0 ; i< int(vec_time.size()) ; i++){
         ostringstream oss;
-        oss << fixed << setprecision(6) << vec_time[i];
+        oss << fixed << setprecision(8) << vec_time[i];
         string data_part_str = oss.str();
         output_name  << data_part_str << "\n";
     }

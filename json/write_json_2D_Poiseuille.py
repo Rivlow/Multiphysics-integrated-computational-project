@@ -4,11 +4,11 @@ import sys
 import numpy as np
 
 s = 0.05
-L = 1.2
+L = 1
 
 dt = 0.00001
-nsave = 1000
-nstepT = nsave*200
+nsave = 2000
+nstepT = nsave*300
 
 
 data = {
@@ -75,7 +75,7 @@ data = {
         "rho_moving": 1000,
         "rho_fixed": 1000,
         "T": 298.15,
-        "u_init": np.round(np.array([-0.5, 0.0, 0.0]), decimals = 4).tolist(),
+        "u_init": np.round(np.array([-0.1, 0.0, 0.0]), decimals = 4).tolist(),
         "c_0": 30,
         "gamma": 7,
         "M": 18e-3,
