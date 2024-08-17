@@ -25,7 +25,7 @@ data = {
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 1.2,
-        "dimension": 2,
+        "dimension": 3,
         "schemeIntegration": {"Euler": True, "RK22": False},
         "comparison_algorithm": True,
     },
