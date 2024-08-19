@@ -3,12 +3,12 @@ import os
 import sys
 import numpy as np
 
-s = 1e-3
-L = 1e-2
+s = 1e-2
+L = 1e-1
 
-dt = 0.25e-6
-nsave = 2000
-nstepT = nsave*250
+dt = 1e-5
+nsave = 500
+nstepT = nsave*100
 
 data = {
     
@@ -21,10 +21,10 @@ data = {
         "dt": dt,
         "nsave": nsave,
         "kappa": 2,
-        "alpha": 0.1,
+        "alpha": 0.05,
         "beta": 0,
-        "alpha_st": 10,
-        "beta_adh": 50,
+        "alpha_st": 1000,
+        "beta_adh": 0.5,
         "dimension": 2,
         "schemeIntegration": {"Euler": True, "RK22": False},
         "comparison_algorithm": False,
@@ -75,7 +75,7 @@ data = {
     "rho_fixed" : 1000,
     "T": 298.15,
     "u_init": np.round(np.array([0.0, 0.0, 0.0]), decimals = 4).tolist(),
-    "c_0": 30, 
+    "c_0": 15, 
     "gamma": 7, 
     "M": 18e-3, 
     "R":8.314,

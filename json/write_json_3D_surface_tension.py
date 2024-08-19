@@ -3,8 +3,8 @@ import os
 import sys
 import numpy as np
 
-s = 1.25e-2
-L = 1e-1
+s = 0.015
+L = 0.1
 dt = 1e-5
 nsave = 1000 
 nstepT = nsave*200
@@ -67,7 +67,7 @@ data = {
     "rho_fixed" : 1000,
     "T": 298.15,
     "u_init": np.round(np.array([0.0, 0.0, 0.0]), decimals = 7).tolist(),
-    "c_0": 5, 
+    "c_0": 10, 
     "gamma": 7, 
     "M": 18e-3, 
     "R":8.314,

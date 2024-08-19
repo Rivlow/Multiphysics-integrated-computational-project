@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
             if (geomParams.following_part_bool || geomParams.following_part_max || geomParams.following_part_min)
                 follow_part_data(geomParams,simParams, name_file, p, rho, pos, u);
                
-                
+            
             export_particles("../../output/sph", t, pos, scalars, vectors, false);
             auto t_act = chrono::high_resolution_clock::now();
             double elapsed_time = double(chrono::duration_cast<chrono::duration<double>>(t_act - t_mid).count());

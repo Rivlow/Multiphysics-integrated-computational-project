@@ -373,7 +373,7 @@ def linked_compa():
     plt.show()
 
 def surface_tension():
-    p = np.array(pd.read_csv("output/csv/Euler_2D_surface_tension_p.csv", sep = ',', decimal='.', header=None))[-1]
+    '''p = np.array(pd.read_csv("output/csv/Euler_2D_surface_tension_p.csv", sep = ',', decimal='.', header=None))[-1]
     max_pos_x = np.array(pd.read_csv("output/csv/2D_surface_tension_max_pos_x.csv", sep = ',', decimal='.', header=None)).T[0]
     max_pos_z = np.array(pd.read_csv("output/csv/2D_surface_tension_max_pos_z.csv", sep = ',', decimal='.', header=None)).T[0]
     min_pos_x = np.array(pd.read_csv("output/csv/2D_surface_tension_min_pos_x.csv", sep = ',', decimal='.', header=None)).T[0]
@@ -393,9 +393,9 @@ def surface_tension():
     
     plt.plot(x, p)
     plt.axhline(y=0.072/R_th, color='r', linestyle='--')
-    plt.show()    
+    plt.show()    '''
 
-    p = np.array(pd.read_csv("output/csv/Euler_3D_surface_tension_p.csv", sep = ',', decimal='.', header=None))[-1]
+    p = np.array(pd.read_csv("output/csv/Euler_3D_surface_tension_p.csv", sep = ',', decimal='.', header=None))[50]
     max_pos_x = np.array(pd.read_csv("output/csv/3D_surface_tension_max_pos_x.csv", sep = ',', decimal='.', header=None)).T[0]
     max_pos_y = np.array(pd.read_csv("output/csv/3D_surface_tension_max_pos_y.csv", sep = ',', decimal='.', header=None)).T[0]
     max_pos_z = np.array(pd.read_csv("output/csv/3D_surface_tension_max_pos_z.csv", sep = ',', decimal='.', header=None)).T[0]
@@ -407,12 +407,13 @@ def surface_tension():
     x = np.linspace(0,0.03,len(p))
     
     radius_x = max_pos_x - min_pos_x
-    radius_x = max_pos_y - min_pos_y
+    radius_y = max_pos_y - min_pos_y
     radius_z = max_pos_z - min_pos_z
     L = 1e-1
     R_th = L/((4*np.pi/3)**(1/3))
     
     plt.plot(time, radius_x/2)
+    plt.plot(time, radius_y/2)
     plt.plot(time, radius_z/2)
     plt.axhline(y=R_th, color='r', linestyle='--')
     plt.show()

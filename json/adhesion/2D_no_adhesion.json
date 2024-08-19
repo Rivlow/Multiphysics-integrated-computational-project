@@ -1,17 +1,17 @@
 {
-    "name_file": "3D_surface_tension",
+    "name_file": "2D_adhesion",
     "simulation": {
         "theta": 0.5,
-        "s": 0.015,
-        "nstepT": 200000,
+        "s": 0.01,
+        "nstepT": 50000,
         "dt": 1e-05,
-        "nsave": 1000,
+        "nsave": 500,
         "kappa": 2,
-        "alpha": 0.5,
+        "alpha": 0.05,
         "beta": 0,
-        "alpha_st": 1,
-        "beta_adh": 1.2,
-        "dimension": 3,
+        "alpha_st": 1000,
+        "beta_adh": 0.5,
+        "dimension": 2,
         "schemeIntegration": {
             "Euler": true,
             "RK22": false
@@ -20,15 +20,15 @@
     },
     "following_part": {
         "part": false,
-        "min": true,
-        "max": true,
+        "min": false,
+        "max": false,
         "particle": 500,
-        "pressure": false,
-        "rho": false,
+        "pressure": true,
+        "rho": true,
         "position": [
-            true,
-            true,
-            true
+            false,
+            false,
+            false
         ],
         "velocity": [
             false,
@@ -40,31 +40,55 @@
         "matrix_long": [
             [
                 0.1,
-                0.1,
+                0.005,
                 0.1
+            ],
+            [
+                0.3,
+                0.005,
+                0.0025
+            ],
+            [
+                0.29,
+                0.005,
+                0.0025
             ]
         ],
         "matrix_orig": [
             [
                 0.1,
-                0.1,
-                0.1
+                0.0,
+                0.1025
+            ],
+            [
+                0.0,
+                0.0,
+                0.2125
+            ],
+            [
+                0.005,
+                0.0,
+                0.2075
             ]
         ],
         "sphere": {
             "do": [
+                0,
+                0,
                 0
             ],
             "radius": [
-                0.05
+                0.3
             ]
         },
         "vector_type": [
-            1
+            1,
+            0,
+            0
         ],
         "L_d": [
             0.3,
-            0.3,
+            0.04,
             0.3
         ],
         "o_d": [
@@ -74,15 +98,15 @@
         ]
     },
     "post_process": {
-        "do": true,
+        "do": false,
         "xyz_init": [
             0.0,
-            0.15,
+            0.0,
             0.15
         ],
         "xyz_end": [
             0.3,
-            0.15,
+            0.0,
             0.15
         ]
     },
@@ -96,15 +120,15 @@
             0.0,
             0.0
         ],
-        "c_0": 10,
+        "c_0": 15,
         "gamma": 7,
         "M": 0.018,
         "R": 8.314,
-        "sigma": 0.1
+        "sigma": 0.0728
     },
     "forces": {
-        "gravity": false,
-        "surface_tension_1": true,
+        "gravity": true,
+        "surface_tension_1": false,
         "surface_tension_2": false,
         "adhesion": false
     },
