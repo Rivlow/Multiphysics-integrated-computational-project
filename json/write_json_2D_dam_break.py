@@ -4,11 +4,11 @@ import sys
 import numpy as np
 
 s = 0.01
-L = 0.2
+L = 0.5
 
 dt = 0.00001
-nsave = 2000
-nstepT = nsave*250
+nsave = 1000
+nstepT = nsave*100
 
 
 data = {
@@ -22,7 +22,7 @@ data = {
         "dt": dt,
         "nsave": nsave,
         "kappa": 2,
-        "alpha": 0.5,
+        "alpha": 0.1,
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 1.2,

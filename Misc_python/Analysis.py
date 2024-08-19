@@ -118,6 +118,11 @@ def Hydrostatic():
     p = np.array(pd.read_csv("output/csv/Euler_2D_hydrostatic_p.csv", sep = ',', decimal='.', header=None))[-1]
     time =  np.array(pd.read_csv("output/csv/2D_hydrostatic_time.csv", decimal='.', header=None).astype(float)).T
     p_part = np.array(pd.read_csv("output/csv/Euler_2D_hydrostatic_p.csv", sep = ',', decimal='.', header=None)).T[part]
+
+    p_RK2 = np.array(pd.read_csv("output/csv/RK22_2D_RK2_hydrostatic_p.csv", sep = ',', decimal='.', header=None))[-1]
+    time_RK2 =  np.array(pd.read_csv("output/csv/2D_RK2_hydrostatic_time.csv", decimal='.', header=None).astype(float)).T
+    p_part_RK2 = np.array(pd.read_csv("output/csv/RK22_2D_RK2_hydrostatic_p.csv", sep = ',', decimal='.', header=None)).T[part]
+
     z = np.linspace(0.04, 0.82, len(p))
     
     z_th = np.linspace(0,0.78,len(p))
@@ -126,7 +131,8 @@ def Hydrostatic():
     
     plt.figure(figsize=(7, 5))
     
-    plt.scatter(z-dist, p[::-1], color = 'r', label = 'SPH pressure')
+    plt.scatter(z-dist, p[::-1], color = 'r',marker="o", label = 'SPH pressure Euler')
+    plt.scatter(z-dist, p_RK2[::-1], color = 'g',marker = "+", label = 'SPH pressure RK22')
     plt.plot(z_th, p_th, color = 'b', label = 'Theoretical hydrostatic pressure')
     plt.ylabel(r"Pressure $p(z)$ [Pa]")
     plt.xlabel(r"Depth $z$ [m]")
@@ -135,12 +141,13 @@ def Hydrostatic():
     plt.tight_layout()
     if(save):
         current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-        plt.savefig(f'{current_directory}/Pictures/2D_hydrostatic.PDF')
+        plt.savefig(f'{current_directory}/Pictures/2D_hydrostatic_and_RK2.PDF')
     plt.show()
     
     plt.figure(figsize=(7, 5))
     plt.axhline(y=1000*9.81*(z_th[-part+1]-dist), color='blue', label = 'Theoretical hydrostatic pressure', zorder = 1)
-    plt.plot(time[0], p_part, color = 'red', zorder = 2, label = "SPH pressure")
+    plt.plot(time[0], p_part, color = 'red', zorder = 2, label = "SPH pressure Euler")
+    plt.plot(time_RK2[0], p_part_RK2, color = 'g', linestyle="--", zorder = 2, label = "SPH pressure RK22")
     plt.ylabel(r"Pressure $p(t)$ [Pa]")
     plt.xlabel(r"Time $t$ [s]")
     
@@ -149,7 +156,7 @@ def Hydrostatic():
     plt.tight_layout()
     if(save):
         current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-        plt.savefig(f'{current_directory}/Pictures/2D_hydrostatic_convergence.PDF')
+        plt.savefig(f'{current_directory}/Pictures/2D_hydrostatic_convergence_and_RK2.PDF')
     plt.show()
 
     
@@ -207,14 +214,14 @@ def dam_break():
     
 
     
-    L = 0.2
-    s= 0.025
+    L = 0.5
+    s= 0.01
     time_ad = time * np.sqrt(2 * 9.81 / L)
     pos_ad = (pos_x -3*s/2)/ L
 
     plt.plot(time_ad, pos_ad , color = "red", label= "SPH simulation", zorder = 1)
     plt.scatter(coord_x, coord_y+1, color = 'b', marker = "o", label = "Koshizuka and Oka 1996", zorder = 2)
-    plt.xlim(0,3.5)
+    plt.xlim(0,3.3)
     plt.ylabel(r"x/L [-]")
     plt.xlabel(r"t$\sqrt{2\,g/L}$ [-]")
     plt.grid(True, alpha = 0.5)
@@ -228,7 +235,8 @@ def dam_break():
     pos_x = np.array(pd.read_csv("output/csv/2D_dam_break_max_pos_x.csv", sep=',', decimal='.', header=None).astype(float))     
     time = np.array(pd.read_csv("output/csv/2D_dam_break_time.csv", sep=',', decimal='.', header=None).astype(float))
 
-    
+    pos_x_05 = np.array(pd.read_csv("output/csv/2D_dam_05_break_max_pos_x.csv", sep=',', decimal='.', header=None).astype(float))     
+    time_05 = np.array(pd.read_csv("output/csv/2D_dam_05_break_time.csv", sep=',', decimal='.', header=None).astype(float))
 
 
     L = 0.5
@@ -236,9 +244,15 @@ def dam_break():
     time_ad = time * np.sqrt(2 * 9.81 / L)
     pos_ad = (pos_x -3*s/2)/ L
 
-    plt.plot(time_ad, pos_ad , color = "red", label= "SPH simulation", zorder = 1)
+    time_ad_05 = time_05 * np.sqrt(2 * 9.81 / L)
+    pos_ad_05 = (pos_x_05 -3*s/2)/ L
+
+
+    plt.plot(time_ad, pos_ad , color = "red", label= r"SPH simulation $\alpha = 0.1$", zorder = 1)
+    plt.plot(time_ad_05, pos_ad_05 , color = "green", label= r"SPH simulation $\alpha = 0.5$", zorder = 1)
+    
     plt.scatter(coord_x, coord_y+1, color = 'b', marker = "o", label = "Koshizuka and Oka 1996", zorder = 2)
-    plt.xlim(0,4)
+    plt.xlim(0,3.3)
     plt.ylabel(r"x/L [-]")
     plt.xlabel(r"t$\sqrt{2\,g/L}$ [-]")
     plt.grid(True, alpha = 0.5)
@@ -246,7 +260,8 @@ def dam_break():
     plt.tight_layout()
     if(save):
         current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-        plt.savefig(f'{current_directory}/Pictures/2D_dam_break.PDF')
+        plt.savefig(f'{current_directory}/Pictures/2D_dam_break_alpha.PDF')
+
     plt.show()
 
 
@@ -367,17 +382,17 @@ def surface_tension():
 
     x = np.linspace(0,0.03,len(p))
 
-    print(p)
     radius_x = max_pos_x - min_pos_x
     radius_z = max_pos_z - min_pos_z
-
-    
+    L=0.01
+    R_th = L/((np.pi)**0.5)
     plt.plot(time, radius_x/2)
     plt.plot(time, radius_z/2)
-    plt.axhline(y=0.005641895835, color='r', linestyle='--')
+    plt.axhline(y=R_th, color='r', linestyle='--')
     plt.show()
     
     plt.plot(x, p)
+    plt.axhline(y=0.072/R_th, color='r', linestyle='--')
     plt.show()    
 
     p = np.array(pd.read_csv("output/csv/Euler_3D_surface_tension_p.csv", sep = ',', decimal='.', header=None))[-1]
@@ -391,20 +406,25 @@ def surface_tension():
 
     x = np.linspace(0,0.03,len(p))
     
-    print(p)
     radius_x = max_pos_x - min_pos_x
     radius_x = max_pos_y - min_pos_y
     radius_z = max_pos_z - min_pos_z
-    L = 1e-2
+    L = 1e-1
     R_th = L/((4*np.pi/3)**(1/3))
-    print(R_th)
+    
     plt.plot(time, radius_x/2)
     plt.plot(time, radius_z/2)
     plt.axhline(y=R_th, color='r', linestyle='--')
     plt.show()
     plt.plot(x,p)
+    plt.axhline(y=2*0.072/R_th, color='r', linestyle='--')
     plt.show()
-    print(2*0.078/radius_x[-1])
+    
+    p_part = np.array(pd.read_csv("output/csv/Euler_3D_surface_tension_p.csv", sep = ',', decimal='.', header=None)).T[12]
+    print(p_part)
+    plt.plot(time,p_part)
+    plt.show()
+    
 def main():
     
     current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -416,9 +436,9 @@ def main():
     #Hydrostatic()
     #StateEquation()
     #dam_break()
-    MRUA()
+    #MRUA()
     #linked_compa()
-    #surface_tension()
+    surface_tension()
 
     
 

@@ -1,16 +1,17 @@
 {
+    "name_file": "3D_surface_tension",
     "simulation": {
         "theta": 0.5,
-        "s": 0.0005,
-        "nstepT": 100000,
-        "dt": 1e-06,
-        "nsave": 250,
+        "s": 0.0125,
+        "nstepT": 200000,
+        "dt": 1e-05,
+        "nsave": 1000,
         "kappa": 2,
         "alpha": 0.5,
         "beta": 0,
         "alpha_st": 1,
         "beta_adh": 1.2,
-        "dimension": 2,
+        "dimension": 3,
         "schemeIntegration": {
             "Euler": true,
             "RK22": false
@@ -19,15 +20,15 @@
     },
     "following_part": {
         "part": false,
-        "min": false,
-        "max": false,
+        "min": true,
+        "max": true,
         "particle": 500,
-        "pressure": true,
-        "rho": true,
+        "pressure": false,
+        "rho": false,
         "position": [
-            false,
-            false,
-            false
+            true,
+            true,
+            true
         ],
         "velocity": [
             false,
@@ -38,16 +39,16 @@
     "domain": {
         "matrix_long": [
             [
-                0.01,
-                0.01,
-                0.01
+                0.1,
+                0.1,
+                0.1
             ]
         ],
         "matrix_orig": [
             [
-                0.01,
-                0.01,
-                0.01
+                0.1,
+                0.1,
+                0.1
             ]
         ],
         "sphere": {
@@ -55,16 +56,16 @@
                 0
             ],
             "radius": [
-                0.005
+                0.05
             ]
         },
         "vector_type": [
             1
         ],
         "L_d": [
-            0.03,
-            0.03,
-            0.03
+            0.3,
+            0.3,
+            0.3
         ],
         "o_d": [
             0.0,
@@ -73,16 +74,16 @@
         ]
     },
     "post_process": {
-        "do": false,
+        "do": true,
         "xyz_init": [
             0.0,
-            0.015,
-            0.015
+            0.15,
+            0.15
         ],
         "xyz_end": [
-            0.03,
-            0.015,
-            0.015
+            0.3,
+            0.15,
+            0.15
         ]
     },
     "thermo": {
@@ -95,7 +96,7 @@
             0.0,
             0.0
         ],
-        "c_0": 1,
+        "c_0": 5,
         "gamma": 7,
         "M": 0.018,
         "R": 8.314,

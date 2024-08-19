@@ -1,14 +1,15 @@
 {
+    "name_file": "2D_surface_tension",
     "simulation": {
         "theta": 0.5,
         "s": 0.0005,
-        "nstepT": 375000,
+        "nstepT": 16000000,
         "dt": 1e-06,
-        "nsave": 500,
+        "nsave": 32000,
         "kappa": 2,
-        "alpha": 0.5,
+        "alpha": 0.1,
         "beta": 0,
-        "alpha_st": 10,
+        "alpha_st": 1,
         "beta_adh": 1.2,
         "dimension": 2,
         "schemeIntegration": {
@@ -19,15 +20,15 @@
     },
     "following_part": {
         "part": false,
-        "min": false,
-        "max": false,
+        "min": true,
+        "max": true,
         "particle": 500,
         "pressure": true,
         "rho": true,
         "position": [
+            true,
             false,
-            false,
-            false
+            true
         ],
         "velocity": [
             false,
@@ -73,15 +74,15 @@
         ]
     },
     "post_process": {
-        "do": false,
+        "do": true,
         "xyz_init": [
             0.0,
-            0.015,
+            0.0,
             0.015
         ],
         "xyz_end": [
             0.03,
-            0.015,
+            0.0,
             0.015
         ]
     },
@@ -103,8 +104,8 @@
     },
     "forces": {
         "gravity": false,
-        "surface_tension_1": false,
-        "surface_tension_2": true,
+        "surface_tension_1": true,
+        "surface_tension_2": false,
         "adhesion": false
     },
     "condition": {

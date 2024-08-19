@@ -113,7 +113,7 @@ void initKernelCoef(GeomData &geomParams,
                     SimulationData &simParams){
 
     double h = geomParams.h;
-    double kh = geomParams.kappa * h;
+    double kh = 1* h;
     simParams.cubic_kernel_coef = (simParams.dimension == 2)? 15.0 /( 7.0 * M_PI * h * h ) : 3.0 / (2.0 * M_PI * h * h * h);
     simParams.adh_kernel_coef = (simParams.dimension == 2)? 16/(4* M_PI*pow(kh, 2.25)): 0.0007/pow(kh,3.25);
     simParams.coh_kernel_coef = (simParams.dimension == 2)? 40/(M_PI*kh*kh*kh*kh*kh*kh*kh*kh) : 32/(M_PI*kh*kh*kh*kh*kh*kh*kh*kh*kh);

@@ -3,12 +3,11 @@ import os
 import sys
 import numpy as np
 
-s = 1e-3
-L = 0.01
-
-dt = 1e-6
-nsave = 2000 
-nstepT = nsave*800
+s = 1.25e-2
+L = 1e-1
+dt = 1e-5
+nsave = 1000 
+nstepT = nsave*200
 
 
 data = {
@@ -22,7 +21,7 @@ data = {
         "dt": dt,
         "nsave": nsave,
         "kappa": 2,
-        "alpha": 0.1,
+        "alpha": 0.5,
         "beta": 0,
         "alpha_st": 1,
         "beta_adh": 1.2,
@@ -36,8 +35,8 @@ data = {
         "min": True,
         "max": True,
         "particle": 500,
-        "pressure": True,
-        "rho": True,
+        "pressure": False,
+        "rho": False,
         "position": [True, True, True],
         "velocity": [False, False, False],
     },
@@ -68,7 +67,7 @@ data = {
     "rho_fixed" : 1000,
     "T": 298.15,
     "u_init": np.round(np.array([0.0, 0.0, 0.0]), decimals = 7).tolist(),
-    "c_0": 30, 
+    "c_0": 5, 
     "gamma": 7, 
     "M": 18e-3, 
     "R":8.314,

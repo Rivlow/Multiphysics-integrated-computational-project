@@ -1,19 +1,20 @@
 {
+    "name_file": "2D_RK2_hydrostatic",
     "simulation": {
         "theta": 0.5,
-        "s": 0.001,
-        "nstepT": 1500000,
-        "dt": 1e-06,
-        "nsave": 3000,
+        "s": 0.02,
+        "nstepT": 750000,
+        "dt": 1e-05,
+        "nsave": 1500,
         "kappa": 2,
         "alpha": 0.5,
         "beta": 0,
-        "alpha_st": 1,
-        "beta_adh": 0.1,
+        "alpha_st": 10,
+        "beta_adh": 1.2,
         "dimension": 2,
         "schemeIntegration": {
-            "Euler": true,
-            "RK22": false
+            "Euler": false,
+            "RK22": true
         },
         "comparison_algorithm": false
     },
@@ -22,8 +23,8 @@
         "min": false,
         "max": false,
         "particle": 500,
-        "pressure": true,
-        "rho": true,
+        "pressure": false,
+        "rho": false,
         "position": [
             false,
             false,
@@ -38,26 +39,46 @@
     "domain": {
         "matrix_long": [
             [
+                0.7,
                 0.01,
+                0.7
+            ],
+            [
+                0.76,
                 0.01,
                 0.01
             ],
             [
-                0.03,
-                0.03,
-                0.0002
+                0.74,
+                0.01,
+                0.01
             ],
             [
-                0.029,
-                0.029,
-                0.0002
+                0.01,
+                0.01,
+                0.74
+            ],
+            [
+                0.01,
+                0.01,
+                0.76
+            ],
+            [
+                0.01,
+                0.01,
+                0.76
+            ],
+            [
+                0.01,
+                0.01,
+                0.74
             ]
         ],
         "matrix_orig": [
             [
-                0.01,
-                0.01,
-                0.001
+                0.03,
+                0.0,
+                0.04
             ],
             [
                 0,
@@ -65,30 +86,63 @@
                 0
             ],
             [
-                0.0005,
-                0.0005,
-                0.0005
+                0.01,
+                0.0,
+                0.01
+            ],
+            [
+                0.01,
+                0.0,
+                0.03
+            ],
+            [
+                0.0,
+                0.0,
+                0.02
+            ],
+            [
+                0.76,
+                0.0,
+                0.02
+            ],
+            [
+                0.75,
+                0.0,
+                0.03
+            ],
+            [
+                0.71,
+                0.0,
+                0.03
             ]
         ],
         "sphere": {
             "do": [
-                1,
+                0,
+                0,
+                0,
+                0,
+                0,
                 0,
                 0
             ],
             "radius": [
-                0.0045
+                0.3
             ]
         },
         "vector_type": [
             1,
             0,
+            0,
+            0,
+            0,
+            0,
             0
         ],
         "L_d": [
-            0.03,
-            0.03,
-            0.03
+            1.4,
+            0.08,
+            1.4
         ],
         "o_d": [
             0.0,
@@ -97,16 +151,16 @@
         ]
     },
     "post_process": {
-        "do": false,
+        "do": true,
         "xyz_init": [
+            0.38,
             0.0,
-            0.0,
-            0.015
+            0.04
         ],
         "xyz_end": [
-            0.03,
+            0.38,
             0.0,
-            0.015
+            0.82
         ]
     },
     "thermo": {
@@ -123,13 +177,13 @@
         "gamma": 7,
         "M": 0.018,
         "R": 8.314,
-        "sigma": 0.0728
+        "sigma": 52000
     },
     "forces": {
-        "gravity": false,
-        "surface_tension_1": true,
+        "gravity": true,
+        "surface_tension_1": false,
         "surface_tension_2": false,
-        "adhesion": true
+        "adhesion": false
     },
     "condition": {
         "print_debug": false,

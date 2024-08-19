@@ -3,15 +3,15 @@
     "simulation": {
         "theta": 0.5,
         "s": 0.05,
-        "nstepT": 12500,
+        "nstepT": 20000,
         "dt": 5e-05,
-        "nsave": 250,
+        "nsave": 200,
         "kappa": 2,
         "alpha": 0.5,
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 1.2,
-        "dimension": 2,
+        "dimension": 3,
         "schemeIntegration": {
             "Euler": true,
             "RK22": false

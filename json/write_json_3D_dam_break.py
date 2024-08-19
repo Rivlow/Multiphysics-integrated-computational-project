@@ -3,7 +3,7 @@ import os
 import sys
 import numpy as np
 
-s = 0.05
+s = 0.01
 L = 0.5
 
 dt = 0.00001
