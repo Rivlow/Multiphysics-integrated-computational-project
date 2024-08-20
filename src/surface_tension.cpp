@@ -25,11 +25,12 @@ void surfaceTension(SimulationData& simParams,
                     vector<double> mass,
                     vector<double> rho,
                     vector<double> pos,
-                    vector<double> &F_vol,
+                    vector<double> &acc_vol,
                     vector<double> type,
                     vector<double> normal){
 
    
+    // compute normal
     #pragma omp parallel for 
     for(int i = 0; i<simParams.nb_moving_part; i++){
 
@@ -41,16 +42,18 @@ void surfaceTension(SimulationData& simParams,
             int j = neighbours[100*i + idx]; 
             double m_j = mass[j];
             double rho_j = rho[j];
-            
-            for( int coord = 0; coord <3; coord ++){
+
+            for(int coord = 0; coord <3; coord ++){
 
                 double grad = gradW[3*idx+coord];
                 normal[3*i+coord] += geomParams.h*m_j*grad/rho_j;
-            }
+            } 
         }
     }
+
     double alpha = simParams.alpha_st;
 
+    // Compute surface tension forces
     #pragma omp parallel for 
     for(int i = 0; i<simParams.nb_moving_part; i++){
     
@@ -59,34 +62,32 @@ void surfaceTension(SimulationData& simParams,
         for(int idx = 0; idx<size_neighbours; idx++){
             
             if(type[neighbours[100*i + idx]] == 1){
+
                 int j = neighbours[100*i + idx];
                 double K_ij = 2*thermoParams.rho_0/(rho[i]+rho[j]);
-                double r_ab = 0;
+                double r_ij = 0;
                 vector<double> d_xyz(3);
                 
                 for (int coord = 0; coord < 3; coord++){
                     
-                    d_xyz[coord] = pos[3 * i + coord] - pos[3 * j + coord];
-                    r_ab += d_xyz[coord]*d_xyz[coord];
+                    d_xyz[coord] = pos[3*i + coord] - pos[3*j + coord];
+                    r_ij += d_xyz[coord]*d_xyz[coord];
                 }
                 
-                r_ab = sqrt(r_ab);
-                double W_ab = WCoh(r_ab, geomParams, simParams);
+                r_ij = sqrt(r_ij);
+                double W_ij = WCoh(r_ij, geomParams, simParams);
+                double m_i = mass[i];
+                double m_j = mass[j];
+                double acc_res = 0;
                 
-                double m_a = mass[i];
-                double m_b = mass[j];
-                double F_res = 0;
-                
-               // cout << "alpha*W_ab = " << alpha * W_ab << endl;
                 for (int coord = 0; coord < 3; coord++){
                     
-                    F_vol[3*i + coord] += -K_ij*(alpha * m_a * m_b * d_xyz[coord]*W_ab/r_ab 
-                                    + alpha*(normal[3*i+coord]-normal[3*j+coord]));
-                
-                    F_res += F_vol[3*i + coord]*F_vol[3*i + coord];
+                    acc_vol[3*i + coord] += -K_ij*(alpha * m_i*m_j * (d_xyz[coord]/r_ij)*W_ij 
+                                    + alpha * m_i * (normal[3*i+coord]-normal[3*j+coord]));
+                    acc_res += acc_vol[3*i + coord]*acc_vol[3*i + coord];
                 }
                 
-                simParams.acc_st_max = sqrt(F_res);
+                simParams.acc_st_max = sqrt(acc_res);
             }
         }     
     }  
@@ -132,8 +133,6 @@ void InterfaceTrackingMath(SimulationData simParams,
                     div_normal += (m_j/rho_j)*dot_product;
                 }
             }  
-
-            //cout << "part " << i << ", div_normal = " << div_normal << endl;
 
             if (abs(div_normal) <= 1.7)
                 track_particle[i] = 1;
@@ -208,8 +207,8 @@ void surfaceTensionImprove(SimulationData& simParams,
     }
 
     vector<double> normal_normali(3*simParams.nb_moving_part,0.0);
-    // Calculation of normal vector
 
+    // Calculation of normal vector
     vector<double> imaginary_part1(simParams.nb_moving_part,0.0);
     #pragma omp parallel for
     for (int n = 0; n < simParams.nb_moving_part; n++){
@@ -271,27 +270,22 @@ void surfaceTensionImprove(SimulationData& simParams,
         }
 
 
-        // normalize normal 
-
+        // Normalize normal 
         double norm = 0;
 
         for (int coord = 0; coord < 3; coord++)
             norm += normal[3*n+coord]*normal[3*n+coord];
         
         norm = sqrt(norm);
-        
         R[n] = (norm <= 0.01/geomParams.h)? 0: 1;
-        //cout << "norm " << norm << endl;
         
-        for (int coord = 0; coord < 3; coord++){
+        for (int coord = 0; coord < 3; coord++)
             normal_normali[3*n+coord] = (norm > 0)? normal[3*n+coord]/norm : normal[3*n+coord];
-            //normal_normali[3*n+coord] = normal[3*n+coord];
-        }
-            
         
     }
 
     vector<double> imaginary_part2(simParams.nb_moving_part,0.0);
+
     // Calculation of curvature
     #pragma omp parallel for
     for (int n = 0; n < simParams.nb_moving_part; n++){
@@ -354,7 +348,6 @@ void surfaceTensionImprove(SimulationData& simParams,
             // case 2: part. j on free surface but not i
             if (track_particle[n] == 0 && track_particle[i_neig] == 1){ 
                 
-                
                 //new normal and gradient kernel have to be computed
                 vector<double> new_normal(3), d_pos(3);
                 double norm = 0, r_ij = 0;
@@ -395,7 +388,6 @@ void surfaceTensionImprove(SimulationData& simParams,
         }
 
         Kappa[n] /= (L > 0)? L : 1; // correction of the truncated kernel support domain
-        
         double acc_res = 0;
 
         for (int coord = 0; coord < 3; coord++){

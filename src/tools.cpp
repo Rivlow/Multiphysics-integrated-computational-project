@@ -32,7 +32,7 @@ void printMatrix(vector<vector<T>> &matrix, int size, string name)
         cout << "For lign " << i << " : (";
         for (int j = 0; j < int(matrix[i].size()); ++j)
         {
-            cout << setprecision(8);
+            std::cout << setprecision(15);
             cout << matrix[i][j];
             if (j != int(matrix[i].size() - 1))
             {
@@ -61,7 +61,7 @@ void printArray(vector<T> &array, int size, string name)
 
     for (int i = 0; i < size; ++i)
     {
-        std::cout << setprecision(8);
+        std::cout << setprecision(15);
         std::cout << array[i];
         if (i != int(array.size() - 1))
         {
@@ -82,11 +82,11 @@ template void printArray<double>(vector<double> &, int, string);
 void getKey(json data,
             string &state_equation,
             string &state_initial_condition,
-            string &schemeIntegration,
+            string &scheme_integration,
             string &kernel){
 
     
-    for (auto &it : data["condition"]["stateEquation"].items())
+    for (auto &it : data["condition"]["state_equation"].items())
     {
         if (it.value() == true)
         {
@@ -103,15 +103,15 @@ void getKey(json data,
         }
     };
 
-    for (auto &it : data["simulation"]["schemeIntegration"].items())
+    for (auto &it : data["simulation"]["scheme_integration"].items())
     {
         if (it.value() == true)
         {
-            schemeIntegration = it.key();
+            scheme_integration = it.key();
         }
     };
 
-    for (auto &it : data["condition"]["initialCondition"].items())
+    for (auto &it : data["condition"]["initial_condition"].items())
     {
         if (it.value() == true)
         {

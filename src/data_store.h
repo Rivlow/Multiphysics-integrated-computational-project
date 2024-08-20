@@ -22,7 +22,7 @@ void delete_csvfile(string outputFile_part, SimulationData& simParams);
 void extractData(GeomData &geomParams,  
                  SimulationData &simParams,
                  ThermoData &thermoParams,
-                 string schemeIntegration,
+                 string scheme_integration,
                  string name_file,
                  vector<double> &pos,  
                  vector<double> &p, 

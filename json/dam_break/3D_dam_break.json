@@ -1,5 +1,9 @@
 {
     "name_file": "3D_dam_break",
+    "omp": {
+        "chose_nb_of_threads": false,
+        "nb_of_threads": 1
+    },
     "simulation": {
         "theta": 0.5,
         "s": 0.01,
@@ -12,7 +16,7 @@
         "alpha_st": 10,
         "beta_adh": 1.2,
         "dimension": 3,
-        "schemeIntegration": {
+        "scheme_integration": {
             "Euler": true,
             "RK22": false
         },
@@ -230,11 +234,11 @@
     },
     "condition": {
         "print_debug": false,
-        "stateEquation": {
+        "state_equation": {
             "Ideal gaz law": false,
             "Quasi incompresible fluid": true
         },
-        "initialCondition": {
+        "initial_condition": {
             "Hydrostatic": true,
             "Constant": false
         }

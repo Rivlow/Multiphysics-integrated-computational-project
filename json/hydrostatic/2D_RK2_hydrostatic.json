@@ -1,5 +1,9 @@
 {
     "name_file": "2D_RK2_hydrostatic",
+    "omp": {
+        "chose_nb_of_threads": false,
+        "nb_of_threads": 1
+    },
     "simulation": {
         "theta": 0.5,
         "s": 0.02,
@@ -7,12 +11,12 @@
         "dt": 1e-05,
         "nsave": 1500,
         "kappa": 2,
-        "alpha": 0.5,
+        "alpha": 0.1,
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 1.2,
         "dimension": 2,
-        "schemeIntegration": {
+        "scheme_integration": {
             "Euler": false,
             "RK22": true
         },
@@ -187,11 +191,11 @@
     },
     "condition": {
         "print_debug": false,
-        "stateEquation": {
+        "state_equation": {
             "Ideal gaz law": false,
             "Quasi incompresible fluid": true
         },
-        "initialCondition": {
+        "initial_condition": {
             "Hydrostatic": false,
             "Constant": true
         }

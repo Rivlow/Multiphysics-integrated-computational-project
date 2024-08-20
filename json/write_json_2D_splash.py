@@ -13,6 +13,12 @@ nstepT = nsave*100
 data = {
 
     "name_file" : "2D_splash",
+
+    "omp": {
+        "chose_nb_of_threads":False,
+        "nb_of_threads":1
+    },
+    
     
     "simulation": {
         "theta": 0.5,
@@ -26,7 +32,7 @@ data = {
         "alpha_st": 10,
         "beta_adh": 1.2,
         "dimension": 2,
-        "schemeIntegration": {"Euler": True, "RK22": False},
+        "scheme_integration": {"Euler": True, "RK22": False},
         "comparison_algorithm": False,
     },
 
@@ -100,8 +106,8 @@ data = {
     },
     "condition": {
         "print_debug": False,
-        "stateEquation": {"Ideal gaz law": False, "Quasi incompresible fluid": True},
-        "initialCondition": {"Hydrostatic": False, "Constant": True}
+        "state_equation": {"Ideal gaz law": False, "Quasi incompresible fluid": True},
+        "initial_condition": {"Hydrostatic": False, "Constant": True}
     }
 }
 

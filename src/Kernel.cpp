@@ -13,7 +13,7 @@ double WCoh(double r, GeomData &geomParams, SimulationData simParams){
     double h = geomParams.h;
     
     if(r <= h/2)
-        W = coef *(2.0 * (h-r) * (h-r) * (h-r) * r*r*r - h*h*h*h*h*h/64.0);
+        W = coef *(2.0 * (h-r)*(h-r)*(h-r) * r*r*r - (h*h*h*h*h*h)/64.0);
 
     else if(r > h/2 && r<= h)
         W = coef*(h-r)*(h-r)*(h-r)*r*r*r;
@@ -68,10 +68,10 @@ double deriveCubicSpline(double r, GeomData &geomParams, SimulationData &simPara
     double kappa = geomParams.kappa;
 
     if (kappa/2 <= r / h && r / h < kappa) 
-        DW = alpha / h * (-0.5 * (2.0 - r / h) * (2.0 - r / h));
+        DW = (alpha / h) * (-0.5 * (2.0 - r / h) * (2.0 - r / h));
     
     else if (r / h < kappa/2) 
-        DW = alpha / h * (1.5 * r * r / (h * h) - 2.0 * r / h);
+        DW = (alpha / h) * (1.5 * r * r / (h * h) - 2.0 * r / h);
 
     else 
         DW = 0;

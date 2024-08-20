@@ -1,18 +1,22 @@
 {
     "name_file": "2D_surface_tension",
+    "omp": {
+        "chose_nb_of_threads": false,
+        "nb_of_threads": 1
+    },
     "simulation": {
         "theta": 0.5,
         "s": 0.0005,
-        "nstepT": 16000000,
-        "dt": 1e-06,
-        "nsave": 32000,
+        "nstepT": 375000,
+        "dt": 1e-05,
+        "nsave": 1500,
         "kappa": 2,
-        "alpha": 0.1,
+        "alpha": 1.5,
         "beta": 0,
         "alpha_st": 1,
         "beta_adh": 1.2,
         "dimension": 2,
-        "schemeIntegration": {
+        "scheme_integration": {
             "Euler": true,
             "RK22": false
         },
@@ -53,7 +57,7 @@
         ],
         "sphere": {
             "do": [
-                0
+                1
             ],
             "radius": [
                 0.005
@@ -100,21 +104,21 @@
         "gamma": 7,
         "M": 0.018,
         "R": 8.314,
-        "sigma": 0.1
+        "sigma": 0.072
     },
     "forces": {
         "gravity": false,
-        "surface_tension_1": true,
-        "surface_tension_2": false,
+        "surface_tension_1": false,
+        "surface_tension_2": true,
         "adhesion": false
     },
     "condition": {
         "print_debug": false,
-        "stateEquation": {
+        "state_equation": {
             "Ideal gaz law": false,
             "Quasi incompresible fluid": true
         },
-        "initialCondition": {
+        "initial_condition": {
             "Hydrostatic": false,
             "Constant": true
         }

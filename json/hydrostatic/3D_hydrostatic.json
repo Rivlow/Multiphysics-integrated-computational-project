@@ -1,5 +1,11 @@
 {
     "name_file": "3D_hydrostatic",
+
+    "omp": {
+        "chose_nb_of_threads": false,
+        "nb_of_threads": 22
+    },
+    
     "simulation": {
         "theta": 0.5,
         "s": 0.025,

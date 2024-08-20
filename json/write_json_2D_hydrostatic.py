@@ -13,7 +13,13 @@ nstepT = nsave*500
 
 data = {
     
-    "name_file" : "2D_hydrostatic",
+    "name_file" : "2D_RK2_hydrostatic",
+
+    "omp": {
+        "chose_nb_of_threads":False,
+        "nb_of_threads":1
+    },
+    
 
     "simulation": {
         "theta": 0.5,
@@ -27,7 +33,7 @@ data = {
         "alpha_st": 10,
         "beta_adh": 1.2,
         "dimension": 2,
-        "schemeIntegration": {"Euler": True, "RK22": False},
+        "scheme_integration": {"Euler": False, "RK22": True},
         "comparison_algorithm": False,
     },
 
@@ -98,15 +104,15 @@ data = {
     },
     "condition": {
         "print_debug": False,
-        "stateEquation": {"Ideal gaz law": False, "Quasi incompresible fluid": True},
-        "initialCondition": {"Hydrostatic": False, "Constant": True}
+        "state_equation": {"Ideal gaz law": False, "Quasi incompresible fluid": True},
+        "initial_condition": {"Hydrostatic": False, "Constant": True}
     }
 }
 
 
 # Do not modify what is below    
 current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-json_src = f"hydrostatic/2D_hydrostatic.json"
+json_src = f"hydrostatic/2D_RK2_hydrostatic.json"
 
 with open(f'{current_directory}/{json_src}', 'w') as json_file:
     json.dump(data, json_file, indent=4)

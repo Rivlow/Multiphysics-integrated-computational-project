@@ -23,7 +23,7 @@ void delete_csvfile(string outputFile_part, SimulationData& simParams){
 void extractData(GeomData &geomParams,  
                  SimulationData &simParams,
                  ThermoData &thermoParams,
-                 string schemeIntegration,
+                 string scheme_integration,
                  string name_file,
                  vector<double> &pos,  
                  vector<double> &p, 
@@ -43,7 +43,7 @@ void extractData(GeomData &geomParams,
         fs::create_directories(outputDir);
         cout << "Create following particle files" <<endl;
     }
-    outputDir = outputDir +"/" + schemeIntegration + "_" + name_file + "_";
+    outputDir = outputDir +"/" + scheme_integration + "_" + name_file + "_";
     string outputFile_rho = outputDir +"rho.csv";
     string outputFile_p = outputDir + "p.csv";
     string outputFile_u_x = outputDir + "u_x.csv";

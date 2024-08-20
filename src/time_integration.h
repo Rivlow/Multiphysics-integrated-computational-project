@@ -31,11 +31,11 @@ void updateVariables(GeomData &geomParams,
                      vector<double> &Kappa,
                      vector<double> &dot_product);
 
-void checkTimeStep(GeomData &geomParams,    
-                   ThermoData &thermoParams,
+void checkTimeStep(GeomData geomParams,
                    SimulationData &simParams, 
                    vector<double> &pos,
                    vector<double> &u,
                    vector<double> &c,
                    vector<int> &neighbours,
-                   vector<double> &nb_neighbours);
+                   vector<double> &nb_neighbours,
+                   vector<double> &acc_vol);

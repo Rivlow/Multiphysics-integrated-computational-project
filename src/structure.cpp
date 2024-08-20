@@ -21,7 +21,7 @@ using namespace std;
 void initializeStruct(json data,
                       string state_equation, 
                       string state_initial_condition, 
-                      string schemeIntegration,
+                      string scheme_integration,
                       string kernel,
                       GeomData &geomParams,
                       SimulationData &simParams,
@@ -75,7 +75,7 @@ void initializeStruct(json data,
     simParams.beta = data["simulation"]["beta"];
     simParams.alpha_st = data["simulation"]["alpha_st"];
     simParams.beta_adh = data["simulation"]["beta_adh"];
-    simParams.schemeIntegration = schemeIntegration;
+    simParams.scheme_integration = scheme_integration;
     simParams.u_init = data["thermo"]["u_init"].get<vector<double>>();
     simParams.state_equation = state_equation;
     simParams.state_initial_condition = state_initial_condition;

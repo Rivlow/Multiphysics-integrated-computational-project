@@ -1,4 +1,9 @@
 {
+    "name_file": "3D_adhesion",
+    "omp": {
+        "chose_nb_of_threads": false,
+        "nb_of_threads": 1
+    },
     "simulation": {
         "theta": 0.5,
         "s": 0.001,
@@ -10,8 +15,8 @@
         "beta": 0,
         "alpha_st": 10,
         "beta_adh": 10,
-        "dimension": 2,
-        "schemeIntegration": {
+        "dimension": 3,
+        "scheme_integration": {
             "Euler": true,
             "RK22": false
         },
@@ -72,12 +77,12 @@
         ],
         "sphere": {
             "do": [
-                1,
+                0,
                 0,
                 0
             ],
             "radius": [
-                0.5
+                0.3
             ]
         },
         "vector_type": [
@@ -133,11 +138,11 @@
     },
     "condition": {
         "print_debug": false,
-        "stateEquation": {
+        "state_equation": {
             "Ideal gaz law": false,
             "Quasi incompresible fluid": true
         },
-        "initialCondition": {
+        "initial_condition": {
             "Hydrostatic": false,
             "Constant": true
         }

@@ -6,14 +6,20 @@ import numpy as np
 s = 5e-4
 L = 0.01
 
-dt = 1e-6
-nsave = 32000 
-nstepT = nsave*500
+dt = 1e-5
+nsave = 1500
+nstepT = nsave*250
 
 
 data = {
     
     "name_file" : "2D_surface_tension",
+
+    "omp": {
+        "chose_nb_of_threads":False,
+        "nb_of_threads":1
+    },
+    
 
     "simulation": {
         "theta": 0.5,
@@ -22,12 +28,12 @@ data = {
         "dt": dt,
         "nsave": nsave,
         "kappa": 2,
-        "alpha": 0.1,
+        "alpha": 1.5,
         "beta": 0,
         "alpha_st": 1,
         "beta_adh": 1.2,
         "dimension": 2,
-        "schemeIntegration": {"Euler": True, "RK22": False},
+        "scheme_integration": {"Euler": True, "RK22": False},
         "comparison_algorithm": False,
     },
 
@@ -47,7 +53,7 @@ data = {
     "matrix_long" : np.round(np.array([[L, s/2, L]]), decimals = 7).tolist(),
     "matrix_orig" : np.round(np.array([[L, 0, L]]), decimals = 7).tolist(),
     "sphere": {
-                "do": [0],
+                "do": [1],
                 "radius": [L/2]
               },
     "vector_type" : [1],
@@ -72,21 +78,21 @@ data = {
     "gamma": 7, 
     "M": 18e-3, 
     "R":8.314,
-    "sigma":0.1
+    "sigma":0.072
   },
 
 
   "forces":{
     "gravity":False,
-    "surface_tension_1": True,
-    "surface_tension_2": False,
+    "surface_tension_1": False,
+    "surface_tension_2": True,
     "adhesion":False
   },
 
   "condition":{
     "print_debug":False,
-    "stateEquation" : {"Ideal gaz law":False, "Quasi incompresible fluid":True},
-    "initialCondition" : {"Hydrostatic":False, "Constant":True}
+    "state_equation" : {"Ideal gaz law":False, "Quasi incompresible fluid":True},
+    "initial_condition" : {"Hydrostatic":False, "Constant":True}
   }
 }
 

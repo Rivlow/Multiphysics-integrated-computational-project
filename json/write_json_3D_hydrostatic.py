@@ -15,6 +15,12 @@ data = {
     
     "name_file" : "3D_hydrostatic",
 
+    "omp": {
+        "chose_nb_of_threads":False,
+        "nb_of_threads":1
+    },
+    
+
     "simulation": {
         "theta": 0.5,
         "s": s,
@@ -28,7 +34,7 @@ data = {
         "beta_adh": 1.2,
         "dimension": 3,
         "comparison_algorithm": False,
-        "schemeIntegration": {"Euler": True, "RK22": False}
+        "scheme_integration": {"Euler": True, "RK22": False}
 
     },
 
@@ -114,8 +120,8 @@ data = {
     },
     "condition": {
         "print_debug": False,
-        "stateEquation": {"Ideal gaz law": False, "Quasi incompresible fluid": True},
-        "initialCondition": {"Hydrostatic": False, "Constant": True}
+        "state_equation": {"Ideal gaz law": False, "Quasi incompresible fluid": True},
+        "initial_condition": {"Hydrostatic": False, "Constant": True}
     }
 }
 

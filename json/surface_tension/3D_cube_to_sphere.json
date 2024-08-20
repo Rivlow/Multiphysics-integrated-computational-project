@@ -1,18 +1,22 @@
 {
     "name_file": "3D_surface_tension",
+    "omp": {
+        "chose_nb_of_threads": false,
+        "nb_of_threads": 1
+    },
     "simulation": {
         "theta": 0.5,
         "s": 0.015,
-        "nstepT": 200000,
+        "nstepT": 750000,
         "dt": 1e-05,
-        "nsave": 1000,
+        "nsave": 2500,
         "kappa": 2,
-        "alpha": 0.5,
+        "alpha": 0.1,
         "beta": 0,
         "alpha_st": 1,
         "beta_adh": 1.2,
         "dimension": 3,
-        "schemeIntegration": {
+        "scheme_integration": {
             "Euler": true,
             "RK22": false
         },
@@ -96,7 +100,7 @@
             0.0,
             0.0
         ],
-        "c_0": 10,
+        "c_0": 30,
         "gamma": 7,
         "M": 0.018,
         "R": 8.314,
@@ -110,11 +114,11 @@
     },
     "condition": {
         "print_debug": false,
-        "stateEquation": {
+        "state_equation": {
             "Ideal gaz law": false,
             "Quasi incompresible fluid": true
         },
-        "initialCondition": {
+        "initial_condition": {
             "Hydrostatic": false,
             "Constant": true
         }

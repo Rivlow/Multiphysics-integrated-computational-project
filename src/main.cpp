@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     json data = json::parse(inputf);
     string state_equation;
     string state_initial_condition;
-    string schemeIntegration;
+    string scheme_integration;
     string kernel;
     string name_file = data["name_file"];
 
@@ -74,13 +74,16 @@ int main(int argc, char *argv[])
     SimulationData simParams;
     ThermoData thermoParams;
 
+    if (data["omp"]["chose_nb_of_threads"])
+        omp_set_num_threads(data["omp"]["nb_of_threads"]);
+
     // Select desired simulation inputs
     getKey(data, state_equation, state_initial_condition, 
-           schemeIntegration, kernel);
+           scheme_integration, kernel);
 
     // Structure to store parameters
     initializeStruct(data, state_equation, state_initial_condition, 
-                      schemeIntegration, kernel, geomParams, simParams, thermoParams);
+                      scheme_integration, kernel, geomParams, simParams, thermoParams);
 
     // Make sure output folders are present and empty for current simulation
     createOutputFolder();
@@ -150,7 +153,7 @@ int main(int argc, char *argv[])
     vectors["acc_vol"]= &acc_vol;
 
     printParams(data, geomParams, thermoParams, simParams,
-                state_equation, state_initial_condition, schemeIntegration,
+                state_equation, state_initial_condition, scheme_integration,
                 MP_count, FP_count, GP_count, nb_tot_part);
 
     /*---------------------------- SPH ALGORITHM  ----------------------------*/
@@ -197,7 +200,7 @@ int main(int argc, char *argv[])
         if(t % simParams.nsave == 0){
     
             if (geomParams.post_process_do)
-                extractData(geomParams, simParams, thermoParams, schemeIntegration, name_file, pos, p, mass, u, neighbours, nb_neighbours, rho);
+                extractData(geomParams, simParams, thermoParams, scheme_integration, name_file, pos, p, mass, u, neighbours, nb_neighbours, rho);
             if (geomParams.following_part_bool || geomParams.following_part_max || geomParams.following_part_min)
                 follow_part_data(geomParams,simParams, name_file, p, rho, pos, u);
                

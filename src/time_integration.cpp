@@ -47,22 +47,21 @@ void updateVariables(GeomData &geomParams,
 
 
     bool PRINT = simParams.PRINT;
-    string schemeIntegration = simParams.schemeIntegration;
+    string scheme_integration = simParams.scheme_integration;
     int nb_tot_part = pos.size()/3;
 
-    if (schemeIntegration == "Euler"){
+    if (scheme_integration == "Euler"){
 
         // Compute D(rho)/Dt for all particles
         continuityEquation(simParams, neighbours, nb_neighbours, gradW, 
                            pos, u, drhodt, rho, mass); 
 
         // Compute D(u)/Dt for moving particles
-        
         momentumEquation(geomParams, thermoParams, simParams, neighbours, nb_neighbours, gradW, 
                          W, viscosity, mass, dudt, rho, p, c, pos, u, type, colour, R, L, N, normal, acc_vol, track_particle, Kappa, dot_product); 
 
-        checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
-                      neighbours, nb_neighbours);
+        checkTimeStep(geomParams, simParams, pos, u, c,
+                      neighbours, nb_neighbours, acc_vol);
 
         double dt = simParams.dt;
 
@@ -78,13 +77,13 @@ void updateVariables(GeomData &geomParams,
 
             for (int coord = 0; coord < 3; coord++){
 
-                pos[3*i + coord] += dt * u[3*i + coord];
                 u[3*i + coord] += dt * dudt[3*i + coord];
+                pos[3*i + coord] += dt * u[3*i + coord];
             }
         }
     }
 
-    else if (schemeIntegration == "RK22"){
+    else if (scheme_integration == "RK22"){
     
         vector<double> u_half = u,
                        rho_half = rho,
@@ -136,8 +135,8 @@ void updateVariables(GeomData &geomParams,
                          W, viscosity, mass, dudt_half, rho_half, p, c, pos_half, u_half, type, colour, R, L, N, normal, acc_vol_half, track_particle, Kappa, dot_product); 
 
 
-        checkTimeStep(geomParams, thermoParams, simParams, pos, u, c,
-                      neighbours, nb_neighbours);
+        checkTimeStep(geomParams, simParams, pos, u, c,
+                      neighbours, nb_neighbours, acc_vol);
 
         double dt = simParams.dt;
         #pragma omp parallel for
@@ -163,25 +162,26 @@ void updateVariables(GeomData &geomParams,
     
 }
 
-void checkTimeStep(GeomData &geomParams,    
-                   ThermoData &thermoParams,
+void checkTimeStep(GeomData geomParams,
                    SimulationData &simParams, 
                    vector<double> &pos,
                    vector<double> &u,
                    vector<double> &c,
                    vector<int> &neighbours,
-                   vector<double> &nb_neighbours){
+                   vector<double> &nb_neighbours,
+                   vector<double> &acc_vol){
 
     double alpha = simParams.alpha;
     double beta = simParams.beta;
     double h = geomParams.h;
-    
     int nb_moving_part = simParams.nb_moving_part;
     int t = simParams.t;
 
-    double acc_st_max = simParams.acc_st_max;
-    double dt_f = h / acc_st_max;
+    // Compute dt_f
+    double dt_f = sqrt(h / simParams.acc_st_max);
     double dt_cv = 0;
+
+    // Compute dt_cv
     double min_a = numeric_limits<double>::max();
     double max_b = numeric_limits<double>::min();
 
@@ -193,48 +193,15 @@ void checkTimeStep(GeomData &geomParams,
 
         if (abs(prev_dt - next_dt) != 0)
             cout << "dt has to be modified (timestep :" << t <<")"<<", was : "
-             << prev_dt << " and is now : " << next_dt << endl;
-        
+             << prev_dt << " and is now : " << next_dt << endl;  
     }
     else{
 
         #pragma omp parallel for   
         for (int i = 0; i < nb_moving_part; i++){
 
-            int size_neighbours = nb_neighbours[i];
-
-            
-
-            if (beta != 0.0){
-                // Iteration over each associated neighbours
-                for (int idx = 0; idx < size_neighbours; idx++){
-
-                    int i_neig = neighbours[100*i + idx];
-                    vector<double> rel_displ(3), rel_vel(3);
-
-                    for (int coord = 0; coord < 3; coord++){
-                        rel_displ[coord] = (pos[3 * i + coord] - pos[3 * i_neig + coord]);
-                        rel_vel[coord] = (u[3 * i + coord] - u[3 * i_neig + coord]);
-                    }
-
-                    double u_ab_x_ab = 0, x_ab_2 = 0;
-
-                    // Dot product
-                    for (int coord = 0; coord < 3; coord++){
-                        u_ab_x_ab += rel_vel[coord] * rel_displ[coord];
-                        x_ab_2 += rel_displ[coord] * rel_displ[coord];
-                    }
-
-                    double nu_2 = 0.01 * h * h;
-                    double mu_ab = (h * u_ab_x_ab) / (x_ab_2 + nu_2);
-                    max_b = (mu_ab > max_b)? mu_ab : max_b;
-                }
-            }
-
-            else
-                max_b = 0;
-        
             double c_a = c[i];
+            max_b = 0; // always set to 0 in simulations
             double val = geomParams.h/(c_a + 0.6*(alpha*c_a + beta*max_b));
             min_a = (val < min_a) ? val : min_a;
         }
@@ -243,35 +210,17 @@ void checkTimeStep(GeomData &geomParams,
         double dt_final = min(0.4*dt_f, 0.25*dt_cv);
         string state_equation = simParams.state_equation;
 
-        if (state_equation == "Ideal gaz law"){
-
-            double prev_dt = simParams.dt;
-            simParams.dt = (dt_final < simParams.dt) ? dt_final : simParams.dt;
-            double next_dt = simParams.dt;
-            
-            if (simParams.PRINT){
-                if (abs(prev_dt - next_dt) != 0){
-                    cout << setprecision(15);
-                    cout << "dt modified (t :" << t <<")"<<", was : " << prev_dt
-                        << " and is now : " << next_dt << endl;
-                }
+        double prev_dt = simParams.dt;
+        simParams.dt = (dt_final < simParams.dt) ? dt_final : simParams.dt;
+        double next_dt = simParams.dt;
+        
+        if (simParams.PRINT){
+            if (abs(prev_dt - next_dt) != 0){
+                cout << setprecision(15);
+                cout << "dt modified (t :" << t <<")"<<", was : " << prev_dt
+                    << " and is now : " << next_dt << endl;
             }
         }
         
-        else{
-
-            double prev_dt = simParams.dt;
-            simParams.dt = (dt_final < simParams.dt) ? dt_final : simParams.dt;
-            double next_dt = simParams.dt;
-
-            if (simParams.PRINT){
-                if (abs(prev_dt - next_dt) != 0){
-                    cout << setprecision(15);
-                    cout << "dt modified (t :" << t <<")"<<", was : " << prev_dt
-                        << " and is now : " << next_dt << endl;
-                }
-            }
-            
-        }
     }
 }

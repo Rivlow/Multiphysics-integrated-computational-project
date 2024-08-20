@@ -6,13 +6,18 @@ import numpy as np
 s = 0.015
 L = 0.1
 dt = 1e-5
-nsave = 1000 
-nstepT = nsave*200
+nsave = 2500 
+nstepT = nsave*300
 
 
 data = {
     
     "name_file" : "3D_surface_tension",
+
+    "omp": {
+        "chose_nb_of_threads":False,
+        "nb_of_threads":1
+    },
     
     "simulation": {
         "theta": 0.5,
@@ -21,12 +26,12 @@ data = {
         "dt": dt,
         "nsave": nsave,
         "kappa": 2,
-        "alpha": 0.5,
+        "alpha": 0.1,
         "beta": 0,
         "alpha_st": 1,
         "beta_adh": 1.2,
         "dimension": 3,
-        "schemeIntegration": {"Euler": True, "RK22": False},
+        "scheme_integration": {"Euler": True, "RK22": False},
         "comparison_algorithm": False,
     },
 
@@ -67,7 +72,7 @@ data = {
     "rho_fixed" : 1000,
     "T": 298.15,
     "u_init": np.round(np.array([0.0, 0.0, 0.0]), decimals = 7).tolist(),
-    "c_0": 10, 
+    "c_0": 30, 
     "gamma": 7, 
     "M": 18e-3, 
     "R":8.314,
@@ -84,8 +89,8 @@ data = {
 
   "condition":{
     "print_debug":False,
-    "stateEquation" : {"Ideal gaz law":False, "Quasi incompresible fluid":True},
-    "initialCondition" : {"Hydrostatic":False, "Constant":True}
+    "state_equation" : {"Ideal gaz law":False, "Quasi incompresible fluid":True},
+    "initial_condition" : {"Hydrostatic":False, "Constant":True}
   }
 }
 

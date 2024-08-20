@@ -147,39 +147,36 @@ void setArtificialViscosity(GeomData &geomParams,
     int nb_moving_part = simParams.nb_moving_part;
     int t = simParams.t;
 
-    if (t > 0){
+    // Iterations over each particle
+    #pragma omp parallel for
+    for (int i = 0; i < nb_moving_part; i++){
 
-        // Iterations over each particle
-        #pragma omp parallel for
-        for (int i = 0; i < nb_moving_part; i++){
+        int size_neighbours = nb_neighbours[i];
 
-            int size_neighbours = nb_neighbours[i];
+        // Iteration over each associated neighbours
+        for (int idx = 0; idx < size_neighbours; idx++){
 
-            // Iteration over each associated neighbours
-            for (int idx = 0; idx < size_neighbours; idx++){
+            vector<double> d_pos(3), d_u(3);
+            int j = neighbours[100*i + idx];
 
-                vector<double> d_pos(3), d_u(3);
-                int j = neighbours[100*i + idx];
-
-                for (int coord = 0; coord < 3; coord++){
-                    d_pos[coord] = (pos[3*i + coord] - pos[3*j + coord]);
-                    d_u[coord] = (u[3*i + coord] - u[3*j + coord]);
-                }
-
-                double c_ij = 0.5 * (c[i] + c[j]);
-                double rho_ij = 0.5 * (rho[i] + rho[j]);
-                double nu_2 = 0.01 * h * h;
-                
-                double u_ij_x_ij = dotProduct(d_u, d_pos);
-                double x_ij_x_ij = dotProduct(d_pos, d_pos);
-                double mu_ab = (h * u_ij_x_ij) / (x_ij_x_ij + nu_2);
-
-                viscosity[i][idx] = (u_ij_x_ij < 0) ? 
-                (-alpha * c_ij * mu_ab + beta * mu_ab * mu_ab) / rho_ij : 0;
-                
+            for (int coord = 0; coord < 3; coord++){
+                d_pos[coord] = (pos[3*i + coord] - pos[3*j + coord]);
+                d_u[coord] = (u[3*i + coord] - u[3*j + coord]);
             }
+
+            double c_ij = 0.5 * (c[i] + c[j]);
+            double rho_ij = 0.5 * (rho[i] + rho[j]);
+            double nu_2 = 0.01 * h * h;
+            
+            double u_ij_x_ij = dotProduct(d_u, d_pos);
+            double x_ij_x_ij = dotProduct(d_pos, d_pos);
+            double mu_ab = (h * u_ij_x_ij) / (x_ij_x_ij + nu_2);
+
+            viscosity[i][idx] = (u_ij_x_ij < 0) ? 
+            (-alpha * c_ij * mu_ab + beta * mu_ab * mu_ab) / rho_ij : 0;
         }
     }
+    
     
     if (simParams.PRINT) cout << "setArtificialViscosity passed" << endl;
     
@@ -260,6 +257,7 @@ void momentumEquation(GeomData &geomParams,
     // Compute speed of sound for all particles
     setSpeedOfSound(geomParams, thermoParams, simParams, c, rho);
 
+
     // Compute artificial viscosity Π_ab for all particles
     setArtificialViscosity(geomParams, thermoParams, simParams, viscosity, 
                            neighbours, nb_neighbours, c, pos, rho, u); 
@@ -297,8 +295,10 @@ void momentumEquation(GeomData &geomParams,
             double p_j = p[j];
             
             for (int coord = 0; coord < 3; coord++){
-                dudt[3*i + coord] -= m_j * (p_j / (rho_j * rho_j) +
-                                    p_i / (rho_i * rho_i) + pi_ij)* gradW[i][3*idx + coord];
+                dudt[3*i + coord] -= m_j * (p_j/(rho_j*rho_j) +
+                                   p_i/(rho_i*rho_i) + pi_ij)* gradW[i][3*idx + coord];
+  
+                
             }
                 
             if (simParams.is_adhesion){
@@ -334,7 +334,7 @@ void momentumEquation(GeomData &geomParams,
             dudt[3*i + coord] += acc_vol[3*i + coord];
             acc_res += acc_vol[3*i + coord]*acc_vol[3*i + coord];
         }
-        
+
         acc_res = sqrt(acc_res);
         simParams.acc_st_max = (simParams.acc_st_max > acc_res ? simParams.acc_st_max : acc_res );     
     }

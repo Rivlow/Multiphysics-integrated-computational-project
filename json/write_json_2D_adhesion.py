@@ -12,7 +12,13 @@ nstepT = nsave*100
 
 data = {
     
-    "name_file" : "2D_adhesion",
+    "name_file" : "2D_no_adhesion",
+
+    "omp": {
+        "chose_nb_of_threads":False,
+        "nb_of_threads":1
+    },
+    
 
     "simulation": {
         "theta": 0.5,
@@ -26,7 +32,7 @@ data = {
         "alpha_st": 1000,
         "beta_adh": 0.5,
         "dimension": 2,
-        "schemeIntegration": {"Euler": True, "RK22": False},
+        "scheme_integration": {"Euler": True, "RK22": False},
         "comparison_algorithm": False,
     },
 
@@ -87,19 +93,19 @@ data = {
     "gravity":True,
     "surface_tension_1": False,
     "surface_tension_2": False,
-    "adhesion":True
+    "adhesion":False
   },
 
   "condition":{
     "print_debug":False,
-    "stateEquation" : {"Ideal gaz law":False, "Quasi incompresible fluid":True},
-    "initialCondition" : {"Hydrostatic":False, "Constant":True}
+    "state_equation" : {"Ideal gaz law":False, "Quasi incompresible fluid":True},
+    "initial_condition" : {"Hydrostatic":False, "Constant":True}
   }
 }
 
 # Do not modify what is below
 current_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-json_src = f"adhesion/2D_adhesion.json"
+json_src = f"adhesion/2D_no_adhesion.json"
 
 with open(f'{current_directory}/{json_src}', 'w') as json_file:
     json.dump(data, json_file, indent=4)
